@@ -1,0 +1,31 @@
+{
+    "configurations": [
+        {
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3fycalc.exe", "args": [ ],
+            "name": "windows_debug",
+            "type": "cppvsdbg",
+            "preLaunchTask": "windows_debug_build",
+            "console": "integratedTerminal",
+        },
+        {
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3fycalc.exe", "args": [ ],
+            "name": "windows_release",
+            "type": "cppvsdbg",
+            "preLaunchTask": "windows_release_build",
+            "console": "integratedTerminal",
+        },
+        {
+            "request": "launch", "program": "${workspaceFolder}/bin/jx3fycalc.app/Contents/MacOS/jx3fycalc", "args": [ ],
+            "name": "macos_debug",
+            "type": "lldb",
+            "preLaunchTask": "macos_debug_build",
+        },
+        {
+            "request": "launch", "program": "${workspaceFolder}/bin/jx3fycalc.app/Contents/MacOS/jx3fycalc", "args": [ ],
+            "name": "macos_release",
+            "type": "lldb",
+            "preLaunchTask": "macos_release_build",
+        },
+    ],
+    "version": "2.0.0"
+}

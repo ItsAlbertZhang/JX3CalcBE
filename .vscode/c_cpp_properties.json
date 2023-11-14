@@ -1,0 +1,33 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/external/include",
+                "${workspaceFolder}/source/include",
+                "${workspaceFolder}/source/lib",
+                "${workspaceFolder}/JX3CalcBEgdi/include"
+            ],
+            "defines": [ ],
+            "compilerPath": "cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "windows-msvc-x64"
+        },
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/external/include",
+                "${workspaceFolder}/source/include",
+                "${workspaceFolder}/source/lib",
+                "${workspaceFolder}/JX3CalcBEgdi/include"
+            ],
+            "defines": [ ],
+            "compilerPath": "clang++",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "macos-clang-arm64"
+        }
+    ],
+    "version": 4
+}
