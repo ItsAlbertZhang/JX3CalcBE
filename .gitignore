@@ -1,0 +1,10 @@
+!*.gitkeep
+
+private/
+build/
+
+# external tools
+.DS_Store
+.vscode/
+.cache/
+env/
