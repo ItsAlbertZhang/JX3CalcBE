@@ -78,6 +78,11 @@ public:
     static bool initLuaPreprocess(bool (*func)(sol::state &lua));
 
     /**
+     * @brief 初始化当前线程的接口实例指针
+     */
+    static bool initPtrInterface(InterfaceInstance *&ptrInterface);
+
+    /**
      * @brief 执行游戏内 lua 脚本
      * @param filename 脚本路径
      * @return 执行结果
@@ -117,8 +122,12 @@ public:
     int tabSelect(Tab tab, TabSelectType &arg);
 
 private:
-    InterfaceInstanceResource *resource;
+    InterfaceInstanceResource *resource = nullptr;
+    static thread_local bool initedGameData;
+    static thread_local bool initedLuaPreprocess;
 };
+
+extern thread_local InterfaceInstance *ptrInterface; // 当前线程的接口实例指针
 
 } // namespace gdi
 

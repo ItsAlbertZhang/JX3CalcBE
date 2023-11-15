@@ -2,7 +2,7 @@
 
 using namespace ns_interface;
 
-Skill *InterfaceSkill::current_skill = nullptr;
+ns_frame::Skill *InterfaceSkill::current_skill = nullptr;
 
 void InterfaceSkill::AddAttribute_iiii(int a, int b, int c, int d) {
     std::cout << "iiii"

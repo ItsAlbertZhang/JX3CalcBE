@@ -15,7 +15,7 @@ void Character::setTarget(int targetID) {
 
 void Character::LearnSkill(int skillID, int skillLevel) {
     skillLearned[skillID] = skillLevel;
-    // CacheSkill::init(skillID, skillLevel);
+    SkillManager::get(skillID, skillLevel);
 }
 
 void Character::CastSkill(int skillID, int skillLevel) {
