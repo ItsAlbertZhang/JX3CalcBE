@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 
-namespace frame {
+namespace ns_frame {
 
 class Skill; // 前置声明
 
@@ -70,6 +70,6 @@ class Skill {
 public:
 };
 
-} // namespace frame
+} // namespace ns_frame
 
 #endif // MAIN_FRAME_SKILL_H_

@@ -1,6 +1,6 @@
 #include "interface/skill.h"
 
-using namespace interface;
+using namespace ns_interface;
 
 Skill *InterfaceSkill::current_skill = nullptr;
 

@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 
-namespace frame {
+namespace ns_frame {
 
 /**
  * Character 类
@@ -29,7 +29,7 @@ public:
 
     void setTarget(int targetID); // 设置目标 ID
 
-    // 一些比较确定的实现. 此处不做多态的实现, lua 调用中的多态在 interface 模块中实现.
+    // 一些比较确定的实现. 此处不做多态的实现, lua 调用中的多态在 ns_interface 模块中实现.
 
     void LearnSkill(int skillID, int skillLevel);
     void CastSkill(int skillID, int skillLevel);
@@ -45,6 +45,6 @@ class Player : public Character {
 class NPC : public Character {
 };
 
-} // namespace frame
+} // namespace ns_frame
 
 #endif // MAIN_FRAME_CHARACTER_H_

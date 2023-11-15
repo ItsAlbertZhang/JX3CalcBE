@@ -8,7 +8,6 @@
 #include <iostream>
 #include <sol2/sol.hpp>
 #include <time.h>
-namespace myinterface = interface;
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -24,11 +23,11 @@ int main(int argc, char *argv[]) {
     bool ret;
 
     // 初始化程序
-    program::Init::init(argc, argv);
+    ns_program::Init::init(argc, argv);
     // 初始化接口
-    ret = gdi::InterfaceInstance::initGameData(program::Config::pJX3, program::Config::pUnpack);
+    ret = gdi::InterfaceInstance::initGameData(ns_program::Config::pJX3, ns_program::Config::pUnpack);
     std::cout << "initGameData = " << ret << std::endl;
-    ret = gdi::InterfaceInstance::initLuaPreprocess(myinterface::Init::init());
+    ret = gdi::InterfaceInstance::initLuaPreprocess(ns_interface::Init::init());
     std::cout << "initLuaPreprocess  = " << ret << std::endl;
 
     // 如果成功加载 GameDataFetcher, current_path 会发生改变.
@@ -39,10 +38,10 @@ int main(int argc, char *argv[]) {
 
     // // 测试用例 1
     // gdiInstance.luaExecuteFile("scripts\\skill\\明教\\明教_烈日斩.lua");
-    // interface::Skill skill;
+    // ns_interface::Skill skill;
     // printf("in main, skill is %p\n", &skill);
-    // interface::InterfaceSkill interfaceskill;
-    // interface::InterfaceSkill::current_skill = &skill;
+    // ns_interface::InterfaceSkill interfaceskill;
+    // ns_interface::InterfaceSkill::current_skill = &skill;
     // sol::protected_function GetSkillLevelData = gdiInstance.luaGetFunction("GetSkillLevelData");
     // sol::protected_function_result result = GetSkillLevelData(interfaceskill);
     // if (!result.valid()) {
@@ -60,8 +59,8 @@ int main(int argc, char *argv[]) {
     // }
 
     // // 测试用例 2
-    // frame::Player player;
-    // frame::NPC npc;
+    // ns_frame::Player player;
+    // ns_frame::NPC npc;
     // player.LearnSkill(10242, 13); // 焚影圣诀
 
     // 测试用例 3

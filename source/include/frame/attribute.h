@@ -1,7 +1,7 @@
 #ifndef MAIN_FRAME_ATTRIBUTE_H_
 #define MAIN_FRAME_ATTRIBUTE_H_
 
-namespace frame {
+namespace ns_frame {
 
 /**
  * Attribute 类
@@ -218,6 +218,6 @@ private:
     int get_damage_add_percent(int attribute_type);
 };
 
-} // namespace frame
+} // namespace ns_frame
 
 #endif // MAIN_FRAME_ATTRIBUTE_H_

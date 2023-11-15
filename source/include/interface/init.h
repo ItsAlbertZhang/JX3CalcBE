@@ -3,7 +3,7 @@
 
 #include <sol2/sol.hpp>
 
-namespace interface {
+namespace ns_interface {
 
 bool luaPreprocess(sol::state &lua);
 
@@ -20,6 +20,6 @@ public:
     static bool (*init())(sol::state &lua);
 };
 
-} // namespace interface
+} // namespace ns_interface
 
 #endif // MAIN_INTERFACE_INIT_H_

@@ -1,7 +1,7 @@
 #include "program/init.h"
 #include <fstream>
 
-using namespace program;
+using namespace ns_program;
 
 // 静态成员变量初始化
 fs::path Config::pExeDir; // 可执行文件所在目录的路径

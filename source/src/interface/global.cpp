@@ -1,6 +1,6 @@
 #include "interface/global.h"
 
-using namespace interface;
+using namespace ns_interface;
 
 void GlobalFunction::Include(const std::string &filename) {
     return;

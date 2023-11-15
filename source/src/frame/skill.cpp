@@ -1,6 +1,6 @@
 #include "frame/skill.h"
 
-using namespace frame;
+using namespace ns_frame;
 
 // 静态成员变量初始化
 std::unordered_map<int, std::unordered_map<int, Skill>> CacheSkill::data;

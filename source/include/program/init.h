@@ -5,7 +5,7 @@
 
 namespace fs = std::filesystem;
 
-namespace program {
+namespace ns_program {
 
 // 初始化环境. 注意, 这是一个静态类, 无法创建实例.
 class Init {
@@ -32,6 +32,6 @@ public:
     static bool save();
 };
 
-}; // namespace program
+}; // namespace ns_program
 
 #endif // MAIN_PROGRAM_INIT_H_

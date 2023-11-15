@@ -2,9 +2,9 @@
 #include "interface/global.h"
 #include "interface/skill.h"
 
-using namespace interface;
+using namespace ns_interface;
 
-bool interface::luaPreprocess(sol::state &lua) {
+bool ns_interface::luaPreprocess(sol::state &lua) {
     lua.new_usertype<InterfaceSkill>("InterfaceSkill",
                                      "AddAttribute", sol::overload(&InterfaceSkill::AddAttribute_iiii, &InterfaceSkill::AddAttribute_iisi, &InterfaceSkill::AddAttribute_iidi),
                                      "AddSlowCheckSelfBuff", &InterfaceSkill::AddSlowCheckSelfBuff,
@@ -44,6 +44,6 @@ bool interface::luaPreprocess(sol::state &lua) {
     return true;
 }
 
-bool (*interface::Init::init())(sol::state &lua) {
-    return interface::luaPreprocess;
+bool (*ns_interface::Init::init())(sol::state &lua) {
+    return ns_interface::luaPreprocess;
 }

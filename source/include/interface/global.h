@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace interface {
+namespace ns_interface {
 
 // lua 中的全局函数. 注意, 这是一个静态类, 无法创建实例.
 class GlobalFunction {
@@ -619,6 +619,6 @@ public:
 
 // 定义 lua 中的表.
 
-} // namespace interface
+} // namespace ns_interface
 
 #endif // MAIN_INTERFACE_FUNC_H_

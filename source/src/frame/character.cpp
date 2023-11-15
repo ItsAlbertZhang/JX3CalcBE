@@ -1,7 +1,7 @@
 #include "frame/character.h"
 #include "frame/skill.h"
 
-using namespace frame;
+using namespace ns_frame;
 
 int Character::nextCharacterID = 0;
 
