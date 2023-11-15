@@ -67,7 +67,8 @@ int main(int argc, char *argv[]) {
     ns_frame::Player player;
     ns_frame::NPC npc;
     // player.LearnSkill(10242, 13); // 焚影圣诀
-    player.LearnSkill(3963, 10); // 焚影圣诀
+    player.LearnSkill(3963, 10); // 烈日斩
+    player.CastSkill(3963, 10);
 
     // // 测试用例 3
     // clock_t start, end;

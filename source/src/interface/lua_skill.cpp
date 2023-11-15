@@ -1,22 +1,21 @@
 #include "interface/lua_skill.h"
+#include <iostream>
 
 using namespace ns_interface;
 
-ns_frame::Skill *InterfaceSkill::current_skill = nullptr;
+thread_local ns_frame::Skill *InterfaceSkill::current_skill = nullptr;
 
 void InterfaceSkill::AddAttribute_iiii(int a, int b, int c, int d) {
-    std::cout << "iiii"
-              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << std::endl;
-}
-
-void InterfaceSkill::AddAttribute_iisi(int a, int b, std::string c, int d) {
-    std::cout << "iisi"
-              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << std::endl;
+    InterfaceSkill::current_skill->attributes.emplace_back(a, b, c, d);
 }
 
 void InterfaceSkill::AddAttribute_iidi(int a, int b, double c, int d) {
-    std::cout << "iidi"
-              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << std::endl;
+    AddAttribute_iiii(a, b, (int)c, d);
+}
+
+void InterfaceSkill::AddAttribute_iisi(int a, int b, std::string c, int d) {
+    InterfaceSkill::current_skill->attributes.emplace_back(-1, -1, -1, -1); // 占位
+    InterfaceSkill::current_skill->attributesString.emplace_back(a, b, c, d);
 }
 
 void InterfaceSkill::AddSlowCheckSelfBuff(int a, int b, int c, int d, int e) {
@@ -69,6 +68,5 @@ void InterfaceSkill::SetCheckCoolDown(int a, int b) {
 }
 
 void InterfaceSkill::SetSubsectionSkill(int a, int b, int c, int d) {
-    std::cout << "SetSubsectionSkill"
-              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << std::endl;
+    std::cerr << "SetSubsectionSkill 未实现!" << std::endl;
 }

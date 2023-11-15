@@ -31,8 +31,8 @@ public:
 
     // 一些比较确定的实现. 此处不做多态的实现, lua 调用中的多态在 ns_interface 模块中实现.
 
-    void LearnSkill(int skillID, int skillLevel);
-    void CastSkill(int skillID, int skillLevel);
+    void LearnSkill(int skillID, int skillLevel); // 实现在 skill.cpp 中
+    void CastSkill(int skillID, int skillLevel);  // 实现在 skill.cpp 中
     void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
 
 private:

@@ -1,11 +1,13 @@
 #include "frame/skill.h"
+#include "frame/character.h"
 #include "gdi.h"
+#include "interface/lua.h"
 #include "interface/lua_skill.h"
 
 using namespace ns_frame;
 
 // 静态成员变量初始化
-std::unordered_map<int, std::unordered_map<int, Skill>> SkillManager::data;
+thread_local std::unordered_map<int, std::unordered_map<int, Skill>> SkillManager::data;
 
 Skill &SkillManager::get(int skillID, int skillLevel) {
     // 若技能 ID 不存在, 则添加
@@ -35,12 +37,12 @@ void SkillManager::add(int skillID, int skillLevel) {
         std::cout << skill.tab["ScriptFile"] << std::endl;
         // 获取 GetSkillLevelData 函数
         res = gdi::ptrInterface->luaExecuteFile("scripts\\skill\\" + skill.tab["ScriptFile"]);
-        if (res.valid()) {
+        if (!res.valid()) {
+            sol::error err = res;
+            std::cout << "luaExecuteFile failed:\n"
+                      << err.what() << std::endl;
+        } else {
             skill.GetSkillLevelData = gdi::ptrInterface->luaGetFunction("GetSkillLevelData");
-            // } else {
-            //     sol::error err = res;
-            //     std::cout << "luaExecuteFile failed:\n"
-            //               << err.what() << std::endl;
         }
     } else {
         auto it = data[skillID].begin();
@@ -56,17 +58,40 @@ void SkillManager::add(int skillID, int skillLevel) {
         sol::error err = res;
         std::cout << "GetSkillLevelData failed:\n"
                   << err.what() << std::endl;
-        // } else {
-        //     std::cout << "skill.nCostSprintPower = " << interfaceskill.nCostSprintPower << std::endl;
-        //     std::cout << "skill.nMinRadius = " << interfaceskill.nMinRadius << std::endl;
-        //     std::cout << "skill.nMaxRadius = " << interfaceskill.nMaxRadius << std::endl;
-        //     std::cout << "skill.nAngleRange = " << interfaceskill.nAngleRange << std::endl;
-        //     std::cout << "skill.bFullAngleInAir = " << interfaceskill.bFullAngleInAir << std::endl;
-        //     std::cout << "skill.nChannelInterval = " << interfaceskill.nChannelInterval << std::endl;
-        //     std::cout << "skill.nWeaponDamagePercent = " << interfaceskill.nWeaponDamagePercent << std::endl;
     }
+    // 将技能存入缓存
+    data[skillID][skillLevel] = std::move(skill);
 }
 
-void Skill::cast() {
-    std::cout << "Skill::cast()" << std::endl;
+void Character::LearnSkill(int skillID, int skillLevel) {
+    skillLearned[skillID] = skillLevel;
+    SkillManager::get(skillID, skillLevel);
+}
+
+void Character::CastSkill(int skillID, int skillLevel) {
+    // 获取技能
+    Skill &skill = SkillManager::get(skillID, skillLevel);
+    // test, 遍历 Attribute
+    int current_attribute_string_index = 0;
+    for (auto &it : skill.attributes) {
+        if (it.type >= 0) {
+            std::cout << ns_interface::LuaGlobalTable::AttributeEffectMode[it.mode] << "\n"
+                      << ns_interface::LuaGlobalTable::AttributeType[it.type] << "\n"
+                      << it.param1 << "\t" << it.param2 << "\n"
+                      << std::endl;
+        } else {
+            auto &it_string = skill.attributesString[current_attribute_string_index++];
+            std::cout << ns_interface::LuaGlobalTable::AttributeEffectMode[it_string.mode] << "\n"
+                      << ns_interface::LuaGlobalTable::AttributeType[it_string.type] << "\n"
+                      << it_string.param1 << "\t" << it_string.param2 << "\n"
+                      << std::endl;
+        }
+    }
+
+    // switch (type) {
+    // case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):
+    //     std::cout << "CAST_SKILL_TARGET_DST" << std::endl;
+    // default:
+    //     std::cerr << "位置类型:\t" << type << "\t" << LuaGlobalTable::AttributeType[type] << std::endl;
+    // }
 }

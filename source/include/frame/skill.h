@@ -4,10 +4,41 @@
 #include <sol2/sol.hpp>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace ns_frame {
 
-class Skill; // 前置声明
+class SkillAttribute {
+public:
+    SkillAttribute(int mode, int type, int param1, int param2)
+        : mode(mode), type(type), param1(param1), param2(param2) {}
+    int mode;
+    int type;
+    int param1;
+    int param2;
+};
+
+class SkillAttributeString {
+public:
+    SkillAttributeString(int mode, int type, std::string param1, int param2)
+        : mode(mode), type(type), param1(param1), param2(param2) {}
+    int mode;
+    int type;
+    std::string param1;
+    int param2;
+};
+
+/**
+ * 技能类
+ * 注意: 技能是公共资源, 不属于某个角色. 应当使用技能管理类对其统一进行管理.
+ */
+class Skill {
+public:
+    std::unordered_map<std::string, std::string> tab;   // skills.tab 中的数据
+    sol::protected_function GetSkillLevelData;          // GetSkillLevelData 函数
+    std::vector<SkillAttribute> attributes;             // GetSkillLevelData 函数中添加的属性
+    std::vector<SkillAttributeString> attributesString; // GetSkillLevelData 函数中添加的属性
+};
 
 /**
  * 技能管理类
@@ -21,7 +52,7 @@ public:
      * 技能缓存数据
      * 同一 ID, 不同 Level 的技能拥有不同的 Skill 实例.
      */
-    static std::unordered_map<int, std::unordered_map<int, Skill>> data;
+    static thread_local std::unordered_map<int, std::unordered_map<int, Skill>> data;
 
     /**
      * @brief 获取技能. 若技能存在, 则命中缓存并返回技能数据; 若技能不存在, 则对其进行初始化并返回技能数据.
@@ -38,21 +69,6 @@ private:
      * @param skillLevel
      */
     static void add(int skillID, int skillLevel);
-};
-
-/**
- * 技能类
- * 注意: 技能是公共资源, 不属于某个角色. 应当使用技能管理类对其统一进行管理.
- */
-class Skill {
-    friend class SkillManager;
-
-public:
-    void cast();
-
-private:
-    std::unordered_map<std::string, std::string> tab;
-    sol::protected_function GetSkillLevelData;
 };
 
 } // namespace ns_frame
