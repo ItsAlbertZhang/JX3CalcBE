@@ -5,19 +5,73 @@ using namespace ns_interface;
 
 bool ns_interface::lua_init(sol::state &lua) {
     lua.new_usertype<InterfaceSkill>("InterfaceSkill",
+                                     "dwLevel", &InterfaceSkill::dwLevel,
+                                     "nChannelInterval", &InterfaceSkill::nChannelInterval,
+
                                      "AddAttribute", sol::overload(&InterfaceSkill::AddAttribute_iiii, &InterfaceSkill::AddAttribute_iisi, &InterfaceSkill::AddAttribute_iidi),
+
                                      "AddSlowCheckSelfBuff", &InterfaceSkill::AddSlowCheckSelfBuff,
+                                     "AddSlowCheckDestBuff", &InterfaceSkill::AddSlowCheckDestBuff,
+                                     "AddSlowCheckSelfOwnBuff", &InterfaceSkill::AddSlowCheckSelfOwnBuff,
+                                     "AddSlowCheckDestOwnBuff", &InterfaceSkill::AddSlowCheckDestOwnBuff,
+
+                                     "AddCheckSelfLearntSkill", &InterfaceSkill::AddCheckSelfLearntSkill,
+
                                      "BindBuff", &InterfaceSkill::BindBuff,
+
                                      "SetPublicCoolDown", &InterfaceSkill::SetPublicCoolDown,
                                      "SetNormalCoolDown", &InterfaceSkill::SetNormalCoolDown,
                                      "SetCheckCoolDown", &InterfaceSkill::SetCheckCoolDown,
-                                     "dwLevel", &InterfaceSkill::dwLevel,
+
+                                     "dwLevelUpExp", &InterfaceSkill::dwLevelUpExp,
+                                     "nExpAddOdds", &InterfaceSkill::nExpAddOdds,
+                                     "nPlayerLevelLimit", &InterfaceSkill::nPlayerLevelLimit,
+
+                                     "nBaseThreat", &InterfaceSkill::nBaseThreat,
+
+                                     "nCostLife", &InterfaceSkill::nCostLife,
+                                     "nCostMana", &InterfaceSkill::nCostMana,
+                                     "nCostStamina", &InterfaceSkill::nCostStamina,
+                                     "nCostItemType", &InterfaceSkill::nCostItemType,
+                                     "nCostItemIndex", &InterfaceSkill::nCostItemIndex,
                                      "nCostSprintPower", &InterfaceSkill::nCostSprintPower,
+
+                                     "bIsAccumulate", &InterfaceSkill::bIsAccumulate,
+
+                                     "SetSubsectionSkill", &InterfaceSkill::SetSubsectionSkill,
+                                     "nChainBranch", &InterfaceSkill::nChainBranch,
+                                     "nChainDepth", &InterfaceSkill::nChainDepth,
+
                                      "nMinRadius", &InterfaceSkill::nMinRadius,
                                      "nMaxRadius", &InterfaceSkill::nMaxRadius,
+
+                                     "nProtectRadius", &InterfaceSkill::nProtectRadius,
+                                     "nHeight", &InterfaceSkill::nHeight,
+                                     "nRectWidth", &InterfaceSkill::nRectWidth,
                                      "nAngleRange", &InterfaceSkill::nAngleRange,
                                      "bFullAngleInAir", &InterfaceSkill::bFullAngleInAir,
-                                     "nChannelInterval", &InterfaceSkill::nChannelInterval,
+                                     "nAreaRadius", &InterfaceSkill::nAreaRadius,
+                                     "nTargetCountLimit", &InterfaceSkill::nTargetCountLimit,
+
+                                     "nPrepareFrames", &InterfaceSkill::nPrepareFrames,
+                                     "nChannelFrame", &InterfaceSkill::nChannelFrame,
+                                     "nBulletVelocity", &InterfaceSkill::nBulletVelocity,
+
+                                     "bIsFormationSkill", &InterfaceSkill::bIsFormationSkill,
+                                     "nFormationRange", &InterfaceSkill::nFormationRange,
+                                     "nLeastFormationPopulation", &InterfaceSkill::nLeastFormationPopulation,
+
+                                     "nTargetLifePercentMin", &InterfaceSkill::nTargetLifePercentMin,
+                                     "nTargetLifePercentMax", &InterfaceSkill::nTargetLifePercentMax,
+
+                                     "nSelfLifePercentMin", &InterfaceSkill::nSelfLifePercentMin,
+                                     "nSelfLifePercentMax", &InterfaceSkill::nSelfLifePercentMax,
+
+                                     "nBeatBackRate", &InterfaceSkill::nBeatBackRate,
+                                     "nBrokenRate", &InterfaceSkill::nBrokenRate,
+                                     "nBreakRate", &InterfaceSkill::nBreakRate,
+                                     "nDismountingRate", &InterfaceSkill::nDismountingRate,
+
                                      "nWeaponDamagePercent", &InterfaceSkill::nWeaponDamagePercent);
     lua.set_function("Include", LuaGlobalFunction::Include);
 

@@ -25,6 +25,29 @@ void InterfaceSkill::AddSlowCheckSelfBuff(int a, int b, int c, int d, int e) {
               << std::endl;
 }
 
+void InterfaceSkill::AddSlowCheckDestBuff(int a, int b, int c, int d, int e) {
+    std::cout << "AddSlowCheckDestBuff"
+              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << "\t# " << e
+              << std::endl;
+}
+
+void InterfaceSkill::AddSlowCheckSelfOwnBuff(int a, int b, int c, int d, int e) {
+    std::cout << "AddSlowCheckSelfOwnBuff"
+              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << "\t# " << e
+              << std::endl;
+}
+
+void InterfaceSkill::AddSlowCheckDestOwnBuff(int a, int b, int c, int d, int e) {
+    std::cout << "AddSlowCheckDestOwnBuff"
+              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << "\t# " << e
+              << std::endl;
+}
+
+void InterfaceSkill::AddCheckSelfLearntSkill(int a, int b, int c) {
+    std::cout << "AddCheckSelfLearntSkill"
+              << "\t# " << a << "\t# " << b << "\t# " << c << std::endl;
+}
+
 void InterfaceSkill::BindBuff(int a, int b, int c) {
     std::cout << "BindBuff"
               << "\t# " << a << "\t# " << b << "\t# " << c << std::endl;
@@ -43,4 +66,9 @@ void InterfaceSkill::SetNormalCoolDown(int a, int b) {
 void InterfaceSkill::SetCheckCoolDown(int a, int b) {
     std::cout << "SetCheckCoolDown"
               << "\t# " << a << "\t# " << b << std::endl;
+}
+
+void InterfaceSkill::SetSubsectionSkill(int a, int b, int c, int d) {
+    std::cout << "SetSubsectionSkill"
+              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << std::endl;
 }
