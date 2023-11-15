@@ -1,19 +1,19 @@
-#include "interface/global.h"
+#include "interface/lua.h"
 
 using namespace ns_interface;
 
-void GlobalFunction::Include(const std::string &filename) {
+void LuaGlobalFunction::Include(const std::string &filename) {
     return;
 }
 
-const char *GlobalEnum::AttributeEffectMode[] = {
+const char *LuaGlobalTable::AttributeEffectMode[] = {
     "EFFECT_TO_SELF_NOT_ROLLBACK",
     "EFFECT_TO_SELF_AND_ROLLBACK",
     "EFFECT_TO_DEST_NOT_ROLLBACK",
     "EFFECT_TO_DEST_AND_ROLLBACK",
 };
 
-const char *GlobalEnum::AttributeType[] = {
+const char *LuaGlobalTable::AttributeType[] = {
     "RUN_SPEED_BASE",
     "MOVE_SPEED_PERCENT",
     "MIN_RUN_SPEED",
@@ -599,7 +599,7 @@ const char *GlobalEnum::AttributeType[] = {
     "STOP_XYZ",
 };
 
-const char *GlobalEnum::BuffCompareFlag[] = {
+const char *LuaGlobalTable::BuffCompareFlag[] = {
     "EQUAL",
     "GREATER",
     "GREATER_EQUAL",

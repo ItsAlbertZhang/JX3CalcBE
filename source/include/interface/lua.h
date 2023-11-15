@@ -1,17 +1,23 @@
-#ifndef MAIN_INTERFACE_FUNC_H_
-#define MAIN_INTERFACE_FUNC_H_
+#ifndef MAIN_INTERFACE_LUA_H_
+#define MAIN_INTERFACE_LUA_H_
 
+#include <sol2/sol.hpp>
 #include <string>
 
 namespace ns_interface {
 
+// lua 的初始化函数.
+bool lua_init(sol::state &lua);
+
 // lua 中的全局函数. 注意, 这是一个静态类, 无法创建实例.
-class GlobalFunction {
+class LuaGlobalFunction {
 public:
+    LuaGlobalFunction() = delete;
     static void Include(const std::string &filename);
 };
 
-class GlobalEnum {
+// lua 中的表.
+class LuaGlobalTable {
 public:
     static const char *AttributeEffectMode[];
     static const char *AttributeType[];
@@ -617,8 +623,6 @@ public:
     };
 };
 
-// 定义 lua 中的表.
-
 } // namespace ns_interface
 
-#endif // MAIN_INTERFACE_FUNC_H_
+#endif // MAIN_INTERFACE_LUA_H_

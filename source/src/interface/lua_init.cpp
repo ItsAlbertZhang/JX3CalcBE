@@ -1,10 +1,9 @@
-#include "interface/init.h"
-#include "interface/global.h"
+#include "interface/lua.h"
 #include "interface/skill.h"
 
 using namespace ns_interface;
 
-bool ns_interface::luaPreprocess(sol::state &lua) {
+bool ns_interface::lua_init(sol::state &lua) {
     lua.new_usertype<InterfaceSkill>("InterfaceSkill",
                                      "AddAttribute", sol::overload(&InterfaceSkill::AddAttribute_iiii, &InterfaceSkill::AddAttribute_iisi, &InterfaceSkill::AddAttribute_iidi),
                                      "AddSlowCheckSelfBuff", &InterfaceSkill::AddSlowCheckSelfBuff,
@@ -20,21 +19,21 @@ bool ns_interface::luaPreprocess(sol::state &lua) {
                                      "bFullAngleInAir", &InterfaceSkill::bFullAngleInAir,
                                      "nChannelInterval", &InterfaceSkill::nChannelInterval,
                                      "nWeaponDamagePercent", &InterfaceSkill::nWeaponDamagePercent);
-    lua.set_function("Include", GlobalFunction::Include);
+    lua.set_function("Include", LuaGlobalFunction::Include);
 
     sol::table AttributeEffectMode = lua.create_table();
-    for (int i = 0; i < static_cast<int>(GlobalEnum::ATTRIBUTE_EFFECT_MODE::COUNT); i++) {
-        AttributeEffectMode[GlobalEnum::AttributeEffectMode[i]] = i;
+    for (int i = 0; i < static_cast<int>(LuaGlobalTable::ATTRIBUTE_EFFECT_MODE::COUNT); i++) {
+        AttributeEffectMode[LuaGlobalTable::AttributeEffectMode[i]] = i;
     }
     lua["ATTRIBUTE_EFFECT_MODE"] = AttributeEffectMode;
     sol::table AttributeType = lua.create_table();
-    for (int i = 0; i < static_cast<int>(GlobalEnum::ATTRIBUTE_TYPE::COUNT); i++) {
-        AttributeType[GlobalEnum::AttributeType[i]] = i;
+    for (int i = 0; i < static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::COUNT); i++) {
+        AttributeType[LuaGlobalTable::AttributeType[i]] = i;
     }
     lua["ATTRIBUTE_TYPE"] = AttributeType;
     sol::table BuffCompareFlag = lua.create_table();
-    for (int i = 0; i < static_cast<int>(GlobalEnum::BUFF_COMPARE_FLAG::COUNT); i++) {
-        BuffCompareFlag[GlobalEnum::BuffCompareFlag[i]] = i;
+    for (int i = 0; i < static_cast<int>(LuaGlobalTable::BUFF_COMPARE_FLAG::COUNT); i++) {
+        BuffCompareFlag[LuaGlobalTable::BuffCompareFlag[i]] = i;
     }
     lua["BUFF_COMPARE_FLAG"] = BuffCompareFlag;
 
@@ -42,8 +41,4 @@ bool ns_interface::luaPreprocess(sol::state &lua) {
     lua["LENGTH_BASE"] = 64;
 
     return true;
-}
-
-bool (*ns_interface::Init::init())(sol::state &lua) {
-    return ns_interface::luaPreprocess;
 }

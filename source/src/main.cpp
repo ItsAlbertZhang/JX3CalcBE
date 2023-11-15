@@ -1,6 +1,6 @@
 #include "frame/character.h"
 #include "gdi.h"
-#include "interface/init.h"
+#include "interface/lua.h"
 #include "interface/skill.h"
 #include "program/init.h"
 #include <cstdlib>
@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     // 初始化接口
     ret = gdi::InterfaceInstance::initGameData(ns_program::Config::pJX3, ns_program::Config::pUnpack);
     std::cout << "initGameData = " << ret << std::endl;
-    ret = gdi::InterfaceInstance::initLuaPreprocess(ns_interface::Init::init());
+    ret = gdi::InterfaceInstance::initLuaPreprocess(ns_interface::lua_init);
     std::cout << "initLuaPreprocess  = " << ret << std::endl;
 
     // 如果成功加载 GameDataFetcher, current_path 会发生改变.
