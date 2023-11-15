@@ -1,6 +1,6 @@
 #include "frame/skill.h"
 #include "gdi.h"
-#include "interface/skill.h"
+#include "interface/lua_skill.h"
 
 using namespace ns_frame;
 

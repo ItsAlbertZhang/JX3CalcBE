@@ -1,7 +1,7 @@
 #include "frame/character.h"
 #include "gdi.h"
 #include "interface/lua.h"
-#include "interface/skill.h"
+#include "interface/lua_skill.h"
 #include "program/init.h"
 #include <cstdlib>
 #include <filesystem>

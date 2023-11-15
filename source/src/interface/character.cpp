@@ -1,1 +1,1 @@
-#include "interface/character.h"
+#include "interface/lua_character.h"
