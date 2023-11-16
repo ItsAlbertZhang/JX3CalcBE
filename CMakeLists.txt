@@ -44,6 +44,7 @@ elseif(WIN32)
   set(FLAGS "${FLAGS} /EHsc") # 启用 C++ 异常处理
   set(FLAGS "${FLAGS} /D_CRT_SECURE_NO_WARNINGS") # 禁用 strcpy 等不安全的函数的警告
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON) # Windows 下导出所有符号
+  add_compile_options(/MP) # 启用多核编译
   add_link_options("/NODEFAULTLIB:LIBCMT") # 禁用 libcmt.lib, 一个会导致 MSVC 警告的 C
                                            # 运行时库
 

@@ -12,11 +12,11 @@
         { "label": "windows_release_build", "dependsOrder": "sequence", "dependsOn": [ "windows_release_cmake", "windows_release_make" ], },
 
         { "label": "macos_debug_cmake", "command": "cmake", "args": [ "..", "-DBUILD_MODE=Debug" ], },
-        { "label": "macos_debug_make", "command": "cmake", "args": [ "--build", ".", ], },
+        { "label": "macos_debug_make", "command": "cmake", "args": [ "--build", ".", "--", "-j8", ], },
         { "label": "macos_debug_build", "dependsOrder": "sequence", "dependsOn": [ "macos_debug_cmake", "macos_debug_make" ], },
 
         { "label": "macos_release_cmake", "command": "cmake", "args": [ "..", "-DBUILD_MODE=Release" ], },
-        { "label": "macos_release_make", "command": "cmake", "args": [ "--build", ".", ], },
+        { "label": "macos_release_make", "command": "cmake", "args": [ "--build", ".", "--", "-j8", ], },
         { "label": "macos_release_build", "dependsOrder": "sequence", "dependsOn": [ "macos_release_cmake", "macos_release_make" ], },
     ],
     "version": "2.0.0"
