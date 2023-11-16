@@ -1,7 +1,6 @@
 #include "frame/character.h"
+#include "frame/lua.h"
 #include "gdi.h"
-#include "interface/lua.h"
-#include "interface/lua_skill.h"
 #include "program/init.h"
 #include <cstdlib>
 #include <filesystem>
@@ -30,7 +29,7 @@ int main(int argc, char *argv[]) {
     // 初始化接口
     ret = gdi::InterfaceInstance::initGameData(ns_program::Config::pJX3, ns_program::Config::pUnpack);
     std::cout << "initGameData = " << ret << std::endl;
-    ret = gdi::InterfaceInstance::initLuaPreprocess(ns_interface::lua_init);
+    ret = gdi::InterfaceInstance::initLuaPreprocess(ns_frame::lua_init);
     std::cout << "initLuaPreprocess  = " << ret << std::endl;
     ret = gdi::InterfaceInstance::initPtrInterface(gdi::ptrInterface);
     std::cout << "initPtrInterface = " << ret << std::endl;
@@ -106,3 +105,39 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+// ---------- 测试代码 ----------
+
+// class Character {
+// public:
+//     int id;
+//     void CastSkill(int targetID) {
+//         std::cout << "id: " << id << std::endl;
+//         std::cout << "CastSkill: " << targetID << std::endl;
+//     }
+// };
+
+// int main() {
+//     sol::state lua;
+//     lua.open_libraries(sol::lib::base);
+
+//     // 注册 Character 类
+//     lua.new_usertype<Character>("Character",
+//                                 "id", &Character::id,
+//                                 "CastSkill", &Character::CastSkill);
+
+//     Character c;
+
+//     // 在 lua 中定义一个函数, 该函数接受一个 Character 类的实例, 修改其 id, 并调用 CastSkill
+//     lua.script(R"(
+//         function f(c)
+//             c.id = 123
+//             c:CastSkill(456)
+//         end
+//     )");
+
+//     // 调用 lua 中的函数
+//     lua["f"](c);
+
+//     return 0;
+// }

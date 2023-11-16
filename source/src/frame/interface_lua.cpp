@@ -1,19 +1,13 @@
-#include "interface/lua.h"
+#include "frame/interface.h"
 
-using namespace ns_interface;
-
-void LuaGlobalFunction::Include(const std::string &filename) {
-    return;
-}
-
-const char *LuaGlobalTable::AttributeEffectMode[] = {
+const char *ns_interface::luaAttributeEffectMode[] = {
     "EFFECT_TO_SELF_NOT_ROLLBACK",
     "EFFECT_TO_SELF_AND_ROLLBACK",
     "EFFECT_TO_DEST_NOT_ROLLBACK",
     "EFFECT_TO_DEST_AND_ROLLBACK",
 };
 
-const char *LuaGlobalTable::AttributeType[] = {
+const char *ns_interface::luaAttributeType[] = {
     "RUN_SPEED_BASE",
     "MOVE_SPEED_PERCENT",
     "MIN_RUN_SPEED",
@@ -599,7 +593,7 @@ const char *LuaGlobalTable::AttributeType[] = {
     "STOP_XYZ",
 };
 
-const char *LuaGlobalTable::BuffCompareFlag[] = {
+const char *ns_interface::luaBuffCompareFlag[] = {
     "EQUAL",
     "GREATER",
     "GREATER_EQUAL",

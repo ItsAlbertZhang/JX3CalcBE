@@ -1,10 +1,10 @@
-#ifndef MAIN_INTERFACE_LUA_H_
-#define MAIN_INTERFACE_LUA_H_
+#ifndef MAIN_FRAME_LUA_H_
+#define MAIN_FRAME_LUA_H_
 
 #include <sol2/sol.hpp>
 #include <string>
 
-namespace ns_interface {
+namespace ns_frame {
 
 // lua 的初始化函数.
 bool lua_init(sol::state &lua);
@@ -19,9 +19,6 @@ public:
 // lua 中的表.
 class LuaGlobalTable {
 public:
-    static const char *AttributeEffectMode[];
-    static const char *AttributeType[];
-    static const char *BuffCompareFlag[];
     enum class ATTRIBUTE_EFFECT_MODE {
         EFFECT_TO_SELF_NOT_ROLLBACK,
         EFFECT_TO_SELF_AND_ROLLBACK,
@@ -623,6 +620,6 @@ public:
     };
 };
 
-} // namespace ns_interface
+} // namespace ns_frame
 
-#endif // MAIN_INTERFACE_LUA_H_
+#endif // MAIN_FRAME_LUA_H_
