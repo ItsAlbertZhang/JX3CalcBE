@@ -3,11 +3,16 @@
 
 #include <sol2/sol.hpp>
 #include <string>
+#include <vector>
 
 namespace ns_frame {
 
-// lua 的初始化函数.
-bool lua_init(sol::state &lua);
+// lua 依赖, 用于传递给 gdi 库的 initLua 函数.
+class LuaDependence {
+public:
+    static bool lua_init(sol::state &lua);                 // lua 的初始化函数.
+    static std::vector<std::string> staticFuncNeedConvert; // 需要转换的静态函数列表.
+};
 
 // lua 中的全局函数. 注意, 这是一个静态类, 无法创建实例.
 class LuaGlobalFunction {

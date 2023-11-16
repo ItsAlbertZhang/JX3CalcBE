@@ -15,9 +15,8 @@ namespace ns_frame {
 class Skill {
 public:
     // ---------- 数据存放区 ----------
-    static thread_local ns_frame::Skill *current_skill; // 当前正在被 lua 操作的技能
-    std::unordered_map<std::string, std::string> tab;   // skills.tab 中的数据
-    sol::protected_function GetSkillLevelData;          // GetSkillLevelData 函数
+    std::unordered_map<std::string, std::string> tab; // skills.tab 中的数据
+    sol::protected_function GetSkillLevelData;        // GetSkillLevelData 函数
     class SkillAttribute {
     public:
         SkillAttribute(int mode, int type, int param1, int param2)
@@ -43,26 +42,26 @@ public:
     int dwLevel = 1;
 
     // ---------- 魔法属性 ----------
-    static void AddAttribute_iiii(int a, int b, int c, int d);
-    static void AddAttribute_iisi(int a, int b, std::string c, int d);
-    static void AddAttribute_iidi(int a, int b, double c, int d);
+    void AddAttribute_iiii(int a, int b, int c, int d);
+    void AddAttribute_iisi(int a, int b, std::string c, int d);
+    void AddAttribute_iidi(int a, int b, double c, int d);
 
     // ---------- lua 直接操作的属性 ----------
 
     // 技能施放Buff需求
-    static void AddSlowCheckSelfBuff(int a, int b, int c, int d, int e);    // 需求自身Buff
-    static void AddSlowCheckDestBuff(int a, int b, int c, int d, int e);    // 需求目标Buff
-    static void AddSlowCheckSelfOwnBuff(int a, int b, int c, int d, int e); // 需求目标Buff
-    static void AddSlowCheckDestOwnBuff(int a, int b, int c, int d, int e); // 需求目标Buff
+    void AddSlowCheckSelfBuff(int a, int b, int c, int d, int e);    // 需求自身Buff
+    void AddSlowCheckDestBuff(int a, int b, int c, int d, int e);    // 需求目标Buff
+    void AddSlowCheckSelfOwnBuff(int a, int b, int c, int d, int e); // 需求目标Buff
+    void AddSlowCheckDestOwnBuff(int a, int b, int c, int d, int e); // 需求目标Buff
     // 技能施放技能需求
-    static void AddCheckSelfLearntSkill(int a, int b, int c); // 检查比较Caster自己已学习的技能ID和等级
+    void AddCheckSelfLearntSkill(int a, int b, int c); // 检查比较Caster自己已学习的技能ID和等级
     // BUFF相关
-    static void BindBuff(int a, int b, int c); // 设置a号位Buff
+    void BindBuff(int a, int b, int c); // 设置a号位Buff
 
     // 设置Cool down
-    static void SetPublicCoolDown(int a);
-    static void SetNormalCoolDown(int a, int b); // 技能普通CD
-    static void SetCheckCoolDown(int a, int b);  // 后跳公共CD
+    void SetPublicCoolDown(int a);
+    void SetNormalCoolDown(int a, int b); // 技能普通CD
+    void SetCheckCoolDown(int a, int b);  // 后跳公共CD
 
     // 经验升级相关
     int dwLevelUpExp = 0;      // 升级经验
@@ -84,7 +83,7 @@ public:
     bool bIsAccumulate = false; // 技能是否需要聚气
 
     // 链状技能相关
-    static void SetSubsectionSkill(int a, int b, int c, int d);
+    void SetSubsectionSkill(int a, int b, int c, int d);
     int nChainBranch = 0; // 链状技能分支数
     int nChainDepth = 0;  // 链状技能层数
 

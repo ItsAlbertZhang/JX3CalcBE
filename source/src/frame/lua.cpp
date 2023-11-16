@@ -4,7 +4,21 @@
 
 using namespace ns_frame;
 
-bool ns_frame::lua_init(sol::state &lua) {
+std::vector<std::string> LuaDependence::staticFuncNeedConvert = {
+    "AddAttribute",
+    "AddSlowCheckSelfBuff",
+    "AddSlowCheckDestBuff",
+    "AddSlowCheckSelfOwnBuff",
+    "AddSlowCheckDestOwnBuff",
+    "AddCheckSelfLearntSkill",
+    "BindBuff",
+    "SetPublicCoolDown",
+    "SetNormalCoolDown",
+    "SetCheckCoolDown",
+    "SetSubsectionSkill",
+};
+
+bool LuaDependence::lua_init(sol::state &lua) {
     lua.new_usertype<Skill>("Skill",
                             "dwLevel", &Skill::dwLevel,
                             "nChannelInterval", &Skill::nChannelInterval,

@@ -70,12 +70,13 @@ public:
     static bool initGameData(const fs::path &pJX3, const fs::path &pDirUnpacked);
 
     /**
-     * @brief 初始化 lua 脚本预处理函数
-     * @param func 预处理函数指针, 函数原型应为 bool (*)(sol::state &lua)
+     * @brief 初始化 lua 依赖
+     * @param lua_init 初始化函数指针, 应引用自 ns_frame::LuaDependence::lua_init
+     * @param staticFuncNeedConvert 需要转换的静态函数列表, 应引用自 ns_frame::LuaDependence::staticFuncNeedConvert
      * @return 是否成功
      * @warning 请确保在创建类的实例前调用此函数.
      */
-    static bool initLuaPreprocess(bool (*func)(sol::state &lua));
+    static bool initLuaPreprocess(bool (*lua_init)(sol::state &lua), const std::vector<std::string> &staticFuncNeedConvert);
 
     /**
      * @brief 初始化当前线程的接口实例指针
@@ -123,8 +124,8 @@ public:
 
 private:
     InterfaceInstanceResource *resource = nullptr;
-    static thread_local bool initedGameData;
-    static thread_local bool initedLuaPreprocess;
+    static bool initedGameData;
+    static bool initedLua;
 };
 
 extern thread_local InterfaceInstance *ptrInterface; // 当前线程的接口实例指针

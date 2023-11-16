@@ -5,7 +5,6 @@ using namespace ns_frame;
 
 // 静态成员变量初始化
 thread_local std::unordered_map<int, std::unordered_map<int, Skill>> SkillManager::data;
-thread_local Skill *Skill::current_skill = nullptr;
 
 Skill &SkillManager::get(int skillID, int skillLevel) {
     // 若技能 ID 不存在, 则添加
@@ -49,7 +48,6 @@ void SkillManager::add(int skillID, int skillLevel) {
     }
     // 调用 GetSkillLevelData 函数, 初始化技能
 
-    Skill::current_skill = &skill;
     skill.dwLevel = skillLevel;
     res = skill.GetSkillLevelData(skill);
     if (!res.valid()) {
@@ -62,7 +60,7 @@ void SkillManager::add(int skillID, int skillLevel) {
 }
 
 void Skill::AddAttribute_iiii(int a, int b, int c, int d) {
-    Skill::current_skill->attributes.emplace_back(a, b, c, d);
+    attributes.emplace_back(a, b, c, d);
 }
 
 void Skill::AddAttribute_iidi(int a, int b, double c, int d) {
@@ -70,8 +68,8 @@ void Skill::AddAttribute_iidi(int a, int b, double c, int d) {
 }
 
 void Skill::AddAttribute_iisi(int a, int b, std::string c, int d) {
-    Skill::current_skill->attributes.emplace_back(-1, -1, -1, -1); // 占位
-    Skill::current_skill->attributesString.emplace_back(a, b, c, d);
+    attributes.emplace_back(-1, -1, -1, -1); // 占位
+    attributesString.emplace_back(a, b, c, d);
 }
 
 void Skill::AddSlowCheckSelfBuff(int a, int b, int c, int d, int e) {
