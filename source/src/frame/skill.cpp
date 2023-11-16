@@ -68,57 +68,44 @@ void Skill::AddAttribute_iidi(int a, int b, double c, int d) {
 }
 
 void Skill::AddAttribute_iisi(int a, int b, std::string c, int d) {
-    attributes.emplace_back(-1, -1, -1, -1); // 占位
+    attributes.emplace_back(-1, -1, -1, -1); // 占位, 代表该去 attributesString 中取值
     attributesString.emplace_back(a, b, c, d);
 }
 
 void Skill::AddSlowCheckSelfBuff(int a, int b, int c, int d, int e) {
-    std::cout << "AddSlowCheckSelfBuff"
-              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << "\t# " << e
-              << std::endl;
+    checkBuff.emplace_back(CheckBuffEnum::self, a, b, c, d, e);
 }
 
 void Skill::AddSlowCheckDestBuff(int a, int b, int c, int d, int e) {
-    std::cout << "AddSlowCheckDestBuff"
-              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << "\t# " << e
-              << std::endl;
+    checkBuff.emplace_back(CheckBuffEnum::dest, a, b, c, d, e);
 }
 
 void Skill::AddSlowCheckSelfOwnBuff(int a, int b, int c, int d, int e) {
-    std::cout << "AddSlowCheckSelfOwnBuff"
-              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << "\t# " << e
-              << std::endl;
+    checkBuff.emplace_back(CheckBuffEnum::selfOwn, a, b, c, d, e);
 }
 
 void Skill::AddSlowCheckDestOwnBuff(int a, int b, int c, int d, int e) {
-    std::cout << "AddSlowCheckDestOwnBuff"
-              << "\t# " << a << "\t# " << b << "\t# " << c << "\t# " << d << "\t# " << e
-              << std::endl;
+    checkBuff.emplace_back(CheckBuffEnum::destOwn, a, b, c, d, e);
 }
 
 void Skill::AddCheckSelfLearntSkill(int a, int b, int c) {
-    std::cout << "AddCheckSelfLearntSkill"
-              << "\t# " << a << "\t# " << b << "\t# " << c << std::endl;
+    checkSelfLearntSkill.emplace_back(a, b, c);
 }
 
 void Skill::BindBuff(int a, int b, int c) {
-    std::cout << "BindBuff"
-              << "\t# " << a << "\t# " << b << "\t# " << c << std::endl;
+    bindBuff.emplace_back(a, b, c);
 }
 
 void Skill::SetPublicCoolDown(int a) {
-    std::cout << "SetPublicCoolDown"
-              << "\t# " << a << std::endl;
+    cooldown.emplace_back(CoolDownEnum::publicCD, 0, a);
 }
 
 void Skill::SetNormalCoolDown(int a, int b) {
-    std::cout << "SetNormalCoolDown"
-              << "\t# " << a << "\t# " << b << std::endl;
+    cooldown.emplace_back(CoolDownEnum::normalCD, a, b);
 }
 
 void Skill::SetCheckCoolDown(int a, int b) {
-    std::cout << "SetCheckCoolDown"
-              << "\t# " << a << "\t# " << b << std::endl;
+    cooldown.emplace_back(CoolDownEnum::checkCD, a, b);
 }
 
 void Skill::SetSubsectionSkill(int a, int b, int c, int d) {

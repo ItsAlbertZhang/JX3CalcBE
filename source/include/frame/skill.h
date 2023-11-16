@@ -1,6 +1,7 @@
 #ifndef MAIN_FRAME_SKILL_H_
 #define MAIN_FRAME_SKILL_H_
 
+#include "frame/skill_attribute.h"
 #include <sol2/sol.hpp>
 #include <string>
 #include <unordered_map>
@@ -17,36 +18,24 @@ public:
     // ---------- 数据存放区 ----------
     std::unordered_map<std::string, std::string> tab; // skills.tab 中的数据
     sol::protected_function GetSkillLevelData;        // GetSkillLevelData 函数
-    class SkillAttribute {
-    public:
-        SkillAttribute(int mode, int type, int param1, int param2)
-            : mode(mode), type(type), param1(param1), param2(param2) {}
-        int mode;
-        int type;
-        int param1;
-        int param2;
-    };
-    std::vector<SkillAttribute> attributes; // GetSkillLevelData 函数中添加的属性
-    class SkillAttributeString {
-    public:
-        SkillAttributeString(int mode, int type, std::string param1, int param2)
-            : mode(mode), type(type), param1(param1), param2(param2) {}
-        int mode;
-        int type;
-        std::string param1;
-        int param2;
-    };
-    std::vector<SkillAttributeString> attributesString; // GetSkillLevelData 函数中添加的属性
 
     // ---------- 技能等级 ----------
     int dwLevel = 1;
 
-    // ---------- 魔法属性 ----------
+    // ---------- GetSkillLevelData 中通过函数初始化的属性, 使用类存放 ----------
+
+    std::vector<SkillAttribute> attributes;                 // AddAttribute 添加的属性
+    std::vector<SkillAttributeString> attributesString;     // AddAttribute 添加的属性, 参数 1 为字符串
+    std::vector<CheckBuff> checkBuff;                       // 需要检查的 buff
+    std::vector<CheckSelfLearntSkill> checkSelfLearntSkill; // 需要检查的自身技能
+    std::vector<BindBuff> bindBuff;                         // 需要绑定的 buff
+    std::vector<CoolDown> cooldown;                         // CD
+
+    // ---------- GetSkillLevelData 中操作的属性 ----------
+
     void AddAttribute_iiii(int a, int b, int c, int d);
     void AddAttribute_iisi(int a, int b, std::string c, int d);
     void AddAttribute_iidi(int a, int b, double c, int d);
-
-    // ---------- lua 直接操作的属性 ----------
 
     // 技能施放Buff需求
     void AddSlowCheckSelfBuff(int a, int b, int c, int d, int e);    // 需求自身Buff
