@@ -1,7 +1,6 @@
 #ifndef MAIN_FRAME_SKILL_H_
 #define MAIN_FRAME_SKILL_H_
 
-#include "frame/skill_attribute.h"
 #include <sol2/sol.hpp>
 #include <string>
 #include <unordered_map>
@@ -22,7 +21,80 @@ public:
     // ---------- 技能等级 ----------
     int dwLevel = 1;
 
-    // ---------- GetSkillLevelData 中通过函数初始化的属性, 使用类存放 ----------
+    // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性类 ----------
+    class SkillAttribute {
+    public:
+        SkillAttribute(int mode, int type, int param1, int param2)
+            : mode(mode), type(type), param1(param1), param2(param2) {}
+        int mode;
+        int type;
+        int param1;
+        int param2;
+    };
+
+    class SkillAttributeString {
+    public:
+        SkillAttributeString(int mode, int type, std::string param1, int param2)
+            : mode(mode), type(type), param1(param1), param2(param2) {}
+        int mode;
+        int type;
+        std::string param1;
+        int param2;
+    };
+
+    enum class CheckBuffEnum {
+        self,
+        dest,
+        selfOwn,
+        destOwn,
+    };
+
+    class CheckBuff {
+    public:
+        CheckBuff(CheckBuffEnum type, int dwBuffID, int nStackNum, int nStackNumCompareFlag, int nLevel, int nLevelCompareFlag)
+            : type(type), dwBuffID(dwBuffID), nStackNum(nStackNum), nStackNumCompareFlag(nStackNumCompareFlag), nLevel(nLevel), nLevelCompareFlag(nLevelCompareFlag) {}
+        CheckBuffEnum type;
+        int dwBuffID;
+        int nStackNum;
+        int nStackNumCompareFlag;
+        int nLevel;
+        int nLevelCompareFlag;
+    };
+
+    class CheckSelfLearntSkill {
+    public:
+        CheckSelfLearntSkill(int dwSkillID, int dwSkillLevel, int LevelCompareFlag)
+            : dwSkillID(dwSkillID), dwSkillLevel(dwSkillLevel), LevelCompareFlag(LevelCompareFlag) {}
+        int dwSkillID;
+        int dwSkillLevel;
+        int LevelCompareFlag;
+    };
+
+    class BindBuff {
+    public:
+        BindBuff(int index, int nBuffID, int nBuffLevel)
+            : index(index), nBuffID(nBuffID), nBuffLevel(nBuffLevel) {}
+        int index;
+        int nBuffID;
+        int nBuffLevel;
+    };
+
+    enum class CoolDownEnum {
+        publicCD,
+        normalCD,
+        checkCD,
+    };
+
+    class CoolDown {
+    public:
+        CoolDown(CoolDownEnum type, int index, int nCoolDownID)
+            : type(type), index(index), nCoolDownID(nCoolDownID) {}
+        CoolDownEnum type;
+        int index;
+        int nCoolDownID;
+    };
+
+    // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性 ----------
 
     std::vector<SkillAttribute> attributes;                 // AddAttribute 添加的属性
     std::vector<SkillAttributeString> attributesString;     // AddAttribute 添加的属性, 参数 1 为字符串
