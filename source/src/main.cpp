@@ -11,9 +11,6 @@
 #include <Windows.h>
 #endif
 
-// 初始化变量, 暂时放在这里, 后续放到 thread 里面
-thread_local gdi::InterfaceInstance *gdi::ptrInterface = nullptr; // 当前线程的接口实例指针
-
 int main(int argc, char *argv[]) {
 
     // 如果是 Windows 操作系统, 将控制台编码设置为 UTF-8, 以便输出中文.
@@ -27,18 +24,15 @@ int main(int argc, char *argv[]) {
     // 初始化程序
     ns_program::Init::init(argc, argv);
     // 初始化接口
-    ret = gdi::InterfaceInstance::initGameData(ns_program::Config::pJX3, ns_program::Config::pUnpack);
+    ret = gdi::Interface::initGameData(ns_program::Config::pJX3, ns_program::Config::pUnpack);
     std::cout << "initGameData = " << ret << std::endl;
-    ret = gdi::InterfaceInstance::initLuaPreprocess(ns_frame::LuaDependence::lua_init, ns_frame::LuaDependence::staticFuncNeedConvert);
-    std::cout << "initLuaPreprocess  = " << ret << std::endl;
-    ret = gdi::InterfaceInstance::initPtrInterface(gdi::ptrInterface);
-    std::cout << "initPtrInterface = " << ret << std::endl;
+    ret = gdi::Interface::initLua(ns_frame::LuaDependence::lua_init, ns_frame::LuaDependence::staticFuncNeedConvert);
+    std::cout << "initLua  = " << ret << std::endl;
+    ret = gdi::Interface::initTab(static_cast<int>(gdi::Tab::COUNT));
+    std::cout << "initTab  = " << ret << std::endl;
 
     // 如果成功加载 GameDataFetcher, current_path 会发生改变.
     std::cout << std::filesystem::current_path() << std::endl;
-
-    // // 创建接口实例
-    // gdi::InterfaceInstance gdiInstance;
 
     // // 测试用例 1
     // gdiInstance.luaExecuteFile("scripts\\skill\\明教\\明教_烈日斩.lua");
@@ -79,7 +73,7 @@ int main(int argc, char *argv[]) {
     // arg2.emplace_back();
     // arg2[0]["SkillID"] = "112";
     // start = clock();
-    // gdiInstance.tabSelect(gdi::Tab::buff, arg1);
+    // gdi::Interface::tabSelect(gdi::Tab::buff, arg1);
     // end = clock();
     // std::cout << std::endl
     //           << "tabSelect 1: " << (double)((end - start) * 1000) / CLOCKS_PER_SEC << "ms." << std::endl
@@ -91,7 +85,7 @@ int main(int argc, char *argv[]) {
     //     std::cout << std::endl;
     // }
     // start = clock();
-    // gdiInstance.tabSelect(gdi::Tab::skills, arg2);
+    // gdi::Interface::tabSelect(gdi::Tab::skills, arg2);
     // end = clock();
     // std::cout << std::endl
     //           << "tabSelect 2: " << (double)((end - start) * 1000) / CLOCKS_PER_SEC << "ms." << std::endl

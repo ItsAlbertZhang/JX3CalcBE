@@ -17,12 +17,6 @@ namespace fs = std::filesystem;
 namespace gdi {
 
 /**
- * @brief 接口实例资源
- * @note 具体实现此处不可见
- */
-class InterfaceInstanceResource;
-
-/**
  * @brief 表枚举
  * @warning 请勿更改本枚举类! 如需添加表, 请联系作者同步更改 gdi 库.
  */
@@ -33,81 +27,51 @@ enum class Tab {
 };
 
 /**
- * @brief 表索引
- * @see InterfaceInstance::tabAddIndex()
- * @note 此处的索引字段会在表创建后被自动添加.
- * @note `tab_index.size()` 应当在数值上等于 `Tab::COUNT`.
- */
-const std::vector<std::vector<std::string>> tab_index = {
-    {
-        "SkillID",
-    }, // skills.tab
-    {
-        "ID",
-        "Level",
-    }, // buff.tab
-};
-
-/**
  * @brief 表查询数据类型
  * @see InterfaceInstance::tabSelect()
  */
 using TabSelectType = std::vector<std::unordered_map<std::string, std::string>>;
 
 // 接口实例. 每个并发的线程都应且仅应有一个 InterfaceInstance 实例.
-class InterfaceInstance {
+class Interface {
 public:
-    InterfaceInstance();  // 构造函数
-    ~InterfaceInstance(); // 析构函数
+    Interface() = delete; // 禁止创建实例
 
     /**
      * @brief 初始化数据管理器
      * @param pJX3 JX3 目录
      * @param pDirUnpacked 未打包的数据目录
      * @return 是否成功
-     * @warning 请确保在创建类的实例前调用此函数.
      */
     static bool initGameData(const fs::path &pJX3, const fs::path &pDirUnpacked);
 
     /**
-     * @brief 初始化 lua 依赖
-     * @param lua_init 初始化函数指针, 应引用自 ns_frame::LuaDependence::lua_init
+     * @brief 初始化 lua
+     * @param lua_init lua 初始化函数指针, 应引用自 ns_frame::LuaDependence::lua_init
      * @param staticFuncNeedConvert 需要转换的静态函数列表, 应引用自 ns_frame::LuaDependence::staticFuncNeedConvert
      * @return 是否成功
-     * @warning 请确保在创建类的实例前调用此函数.
      */
-    static bool initLuaPreprocess(bool (*lua_init)(sol::state &lua), const std::vector<std::string> &staticFuncNeedConvert);
+    static bool initLua(bool (*lua_init)(sol::state &lua), const std::vector<std::string> &staticFuncNeedConvert);
 
     /**
-     * @brief 初始化当前线程的接口实例指针
+     * @brief 初始化 tab
+     * @return 是否成功
      */
-    static bool initPtrInterface(InterfaceInstance *&ptrInterface);
+    static bool initTab(int tabCount);
 
     /**
      * @brief 执行游戏内 lua 脚本
      * @param filename 脚本路径
      * @return 执行结果
      */
-    sol::protected_function_result luaExecuteFile(const std::string &filename);
+    static sol::protected_function_result luaExecuteFile(const std::string &filename);
 
     /**
      * @brief 获取 lua 函数
      * @param name 函数名
      * @return lua 函数
      */
-    sol::protected_function luaGetFunction(const std::string &name);
-
-    /**
-     * @brief 添加索引
-     * @param keyVector 索引字段名的 `vector`. 靠前的字段优先级更高.
-     * @note 为表添加索引, 以提高查询效率. 在上文 `tab_index` 中定义的索引会被默认添加. 需要注意:
-     * @note - 索引字段必须具有顺序结构 (即在原始数据中, 该字段必须是按顺序排列的).
-     * @note - 索引字段不必唯一 (即在原始数据中, 该字段可以有重复值).
-     * @note - 若 `keyVector.size()` > 1, 则代表使用组合索引. 组合索引具有优先级, 靠前的索引优先级更高.
-     * @note - 如果使用组合索引, 最高优先级的索引必须对于整表有序, 次优先级的索引必须对于更高优先级的索引有序.
-     * @warning 本函数仅检查索引字段是否存在, 不检查索引字段是否有序. 如果索引字段是无序的, 则可能导致查询结果不正确.
-     */
-    bool tabAddIndex(Tab tab, const std::vector<std::string> &keyVector);
+    static sol::protected_function luaGetFunction(const std::string &name);
 
     /**
      * @brief 查询满足 key-value 的行
@@ -120,15 +84,8 @@ public:
      * @note #
      * @note 当用于传出数据时, 每一条 arg[i] 都是一行满足查询条件的数据, 且对于任何 i, arg[i].size() 是一个定值 (field 的数量, 也即列数).
      */
-    int tabSelect(Tab tab, TabSelectType &arg);
-
-private:
-    InterfaceInstanceResource *resource = nullptr;
-    static bool initedGameData;
-    static bool initedLua;
+    static int tabSelect(Tab tab, TabSelectType &arg);
 };
-
-extern thread_local InterfaceInstance *ptrInterface; // 当前线程的接口实例指针
 
 } // namespace gdi
 

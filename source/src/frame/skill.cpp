@@ -29,17 +29,17 @@ void SkillManager::add(int skillID, int skillLevel) {
         gdi::TabSelectType arg;
         arg.emplace_back();
         arg[0]["SkillID"] = std::to_string(skillID);
-        gdi::ptrInterface->tabSelect(gdi::Tab::skills, arg);
+        gdi::Interface::tabSelect(gdi::Tab::skills, arg);
         skill.tab = std::move(arg[0]);
         std::cout << skill.tab["ScriptFile"] << std::endl;
         // 获取 GetSkillLevelData 函数
-        res = gdi::ptrInterface->luaExecuteFile("scripts\\skill\\" + skill.tab["ScriptFile"]);
+        res = gdi::Interface::luaExecuteFile("scripts\\skill\\" + skill.tab["ScriptFile"]);
         if (!res.valid()) {
             sol::error err = res;
             std::cout << "luaExecuteFile failed:\n"
                       << err.what() << std::endl;
         } else {
-            skill.GetSkillLevelData = gdi::ptrInterface->luaGetFunction("GetSkillLevelData");
+            skill.GetSkillLevelData = gdi::Interface::luaGetFunction("GetSkillLevelData");
         }
     } else {
         auto it = data[skillID].begin();
