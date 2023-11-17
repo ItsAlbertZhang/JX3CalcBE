@@ -4,8 +4,8 @@
 using namespace ns_frame;
 
 // 静态成员变量初始化
-std::unordered_map<int, std::unordered_map<int, Skill>> SkillManager::data;
 std::mutex SkillManager::mutex;
+std::unordered_map<int, std::unordered_map<int, Skill>> SkillManager::data;
 
 Skill &SkillManager::get(int skillID, int skillLevel) {
     // 若技能 ID 不存在, 则添加
@@ -38,7 +38,7 @@ void SkillManager::add(int skillID, int skillLevel) {
         arg[0]["SkillID"] = std::to_string(skillID);
         gdi::Interface::tabSelect(gdi::Tab::skills, arg);
         skill.tab = std::move(arg[0]);
-        std::cout << skill.tab["ScriptFile"] << std::endl;
+        // std::cout << skill.tab["ScriptFile"] << std::endl;
     } else {
         // 如果该技能 ID 已存在, 则复用同 ID 技能的 tab
         auto it = data[skillID].begin();

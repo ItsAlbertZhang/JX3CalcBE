@@ -1,5 +1,4 @@
-#include "frame/lua.h"
-#include "frame/interface.h"
+#include "frame/lua_interface.h"
 #include "frame/skill.h"
 
 using namespace ns_frame;
@@ -92,25 +91,25 @@ bool LuaDependence::lua_init(sol::state &lua) {
 
     sol::table AttributeEffectMode = lua.create_table();
     for (int i = 0; i < static_cast<int>(LuaGlobalTable::ATTRIBUTE_EFFECT_MODE::COUNT); i++) {
-        AttributeEffectMode[ns_interface::luaAttributeEffectMode[i]] = i;
+        AttributeEffectMode[LuaTableString::luaAttributeEffectMode[i]] = i;
     }
     lua["ATTRIBUTE_EFFECT_MODE"] = AttributeEffectMode;
 
     sol::table AttributeType = lua.create_table();
     for (int i = 0; i < static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::COUNT); i++) {
-        AttributeType[ns_interface::luaAttributeType[i]] = i;
+        AttributeType[LuaTableString::luaAttributeType[i]] = i;
     }
     lua["ATTRIBUTE_TYPE"] = AttributeType;
 
     sol::table BuffCompareFlag = lua.create_table();
     for (int i = 0; i < static_cast<int>(LuaGlobalTable::BUFF_COMPARE_FLAG::COUNT); i++) {
-        BuffCompareFlag[ns_interface::luaBuffCompareFlag[i]] = i;
+        BuffCompareFlag[LuaTableString::luaBuffCompareFlag[i]] = i;
     }
     lua["BUFF_COMPARE_FLAG"] = BuffCompareFlag;
 
     sol::table SKILL_COMPARE_FLAG = lua.create_table();
     for (int i = 0; i < static_cast<int>(LuaGlobalTable::SKILL_COMPARE_FLAG::COUNT); i++) {
-        SKILL_COMPARE_FLAG[ns_interface::luaSkillCompareFlag[i]] = i;
+        SKILL_COMPARE_FLAG[LuaTableString::luaSkillCompareFlag[i]] = i;
     }
     lua["SKILL_COMPARE_FLAG"] = SKILL_COMPARE_FLAG;
 

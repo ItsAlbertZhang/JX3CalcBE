@@ -1,7 +1,6 @@
 #include "frame/character.h"
-#include "frame/interface.h"
-#include "frame/lua.h"
 #include "frame/lua_func.h"
+#include "frame/lua_interface.h"
 #include "frame/skill.h"
 
 using namespace ns_frame;
@@ -25,6 +24,9 @@ void Character::CastSkill(int skillID, int skillLevel) {
     // 检查技能是否可以释放
     for (auto &it : skill.checkBuff) {
         switch (it.type) {
+        // TODO: 检查 buff
+        default:
+            break;
         }
     }
     // 提前准备 switch 语句需要的资源
@@ -50,7 +52,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
                 break;
             default:
                 std::cerr << "Undefined type: " << currStrAttr->type << "\t"
-                          << ns_interface::luaAttributeType[currStrAttr->type] << std::endl;
+                          << LuaTableString::luaAttributeType[currStrAttr->type] << std::endl;
             }
             currStrAttrIdx++;
             break;
@@ -63,7 +65,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
             std::cout << "CAST_SKILL: " << it.param1 << " # " << it.param2 << std::endl;
             break;
         default:
-            std::cerr << "Undefined type: " << it.type << "\t" << ns_interface::luaAttributeType[it.type] << std::endl;
+            std::cerr << "Undefined type: " << it.type << "\t" << LuaTableString::luaAttributeType[it.type] << std::endl;
         }
     }
     while (!skillQueue.empty()) {

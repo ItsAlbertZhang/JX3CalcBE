@@ -1,5 +1,5 @@
 #include "frame/character.h"
-#include "frame/lua.h"
+#include "frame/lua_interface.h"
 #include "gdi.h"
 #include "program/init.h"
 #include <cstdlib>

@@ -1,13 +1,15 @@
-#include "frame/interface.h"
+#include "frame/lua_interface.h"
 
-const char *ns_interface::luaAttributeEffectMode[] = {
+using namespace ns_frame;
+
+const char *LuaTableString::luaAttributeEffectMode[] = {
     "EFFECT_TO_SELF_NOT_ROLLBACK",
     "EFFECT_TO_SELF_AND_ROLLBACK",
     "EFFECT_TO_DEST_NOT_ROLLBACK",
     "EFFECT_TO_DEST_AND_ROLLBACK",
 };
 
-const char *ns_interface::luaAttributeType[] = {
+const char *LuaTableString::luaAttributeType[] = {
     "RUN_SPEED_BASE",
     "MOVE_SPEED_PERCENT",
     "MIN_RUN_SPEED",
@@ -593,13 +595,13 @@ const char *ns_interface::luaAttributeType[] = {
     "STOP_XYZ",
 };
 
-const char *ns_interface::luaBuffCompareFlag[] = {
+const char *LuaTableString::luaBuffCompareFlag[] = {
     "EQUAL",
     "GREATER",
     "GREATER_EQUAL",
 };
 
-const char *ns_interface::luaSkillCompareFlag[] = {
+const char *LuaTableString::luaSkillCompareFlag[] = {
     "EQUAL",
     "GREATER",
     "GREATER_EQUAL",

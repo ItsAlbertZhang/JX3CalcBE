@@ -1,5 +1,5 @@
-#ifndef FRAME_LUA_H_
-#define FRAME_LUA_H_
+#ifndef FRAME_LUA_INTERFACE_H_
+#define FRAME_LUA_INTERFACE_H_
 
 #include <sol2/sol.hpp>
 #include <string>
@@ -19,6 +19,15 @@ class LuaGlobalFunction {
 public:
     LuaGlobalFunction() = delete;
     static void Include(const std::string &filename);
+};
+
+// lua 中的表对应的字符串数组.
+class LuaTableString {
+public:
+    static const char *luaAttributeEffectMode[];
+    static const char *luaAttributeType[];
+    static const char *luaBuffCompareFlag[];
+    static const char *luaSkillCompareFlag[];
 };
 
 // lua 中的表.
@@ -633,4 +642,4 @@ public:
 
 } // namespace ns_frame
 
-#endif // FRAME_LUA_H_
+#endif // FRAME_LUA_INTERFACE_H_

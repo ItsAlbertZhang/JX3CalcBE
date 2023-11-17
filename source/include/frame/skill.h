@@ -198,12 +198,6 @@ public:
     SkillManager() = delete; // 禁止创建实例
 
     /**
-     * 技能缓存数据
-     * 同一 ID, 不同 Level 的技能拥有不同的 Skill 实例.
-     */
-    static std::unordered_map<int, std::unordered_map<int, Skill>> data;
-
-    /**
      * @brief 获取技能. 若技能存在, 则命中缓存并返回技能数据; 若技能不存在, 则对其进行初始化并返回技能数据.
      * @param skillID
      * @param skillLevel
@@ -213,6 +207,12 @@ public:
 
 private:
     static std::mutex mutex; // 互斥锁. 用于保护 SkillManager::add 操作.
+
+    /**
+     * 技能缓存数据
+     * 同一 ID, 不同 Level 的技能拥有不同的 Skill 实例.
+     */
+    static std::unordered_map<int, std::unordered_map<int, Skill>> data;
 
     /**
      * @brief 初始化技能. 将指定 ID 与 Level 的技能数据存至缓存.
