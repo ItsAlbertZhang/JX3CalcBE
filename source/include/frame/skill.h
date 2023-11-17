@@ -1,6 +1,7 @@
 #ifndef MAIN_FRAME_SKILL_H_
 #define MAIN_FRAME_SKILL_H_
 
+#include <mutex>
 #include <sol2/sol.hpp>
 #include <string>
 #include <unordered_map>
@@ -16,7 +17,6 @@ class Skill {
 public:
     // ---------- 数据存放区 ----------
     std::unordered_map<std::string, std::string> tab; // skills.tab 中的数据
-    sol::protected_function GetSkillLevelData;        // GetSkillLevelData 函数
 
     // ---------- 技能等级 ----------
     int dwLevel = 1;
@@ -202,7 +202,7 @@ public:
      * 技能缓存数据
      * 同一 ID, 不同 Level 的技能拥有不同的 Skill 实例.
      */
-    static thread_local std::unordered_map<int, std::unordered_map<int, Skill>> data;
+    static std::unordered_map<int, std::unordered_map<int, Skill>> data;
 
     /**
      * @brief 获取技能. 若技能存在, 则命中缓存并返回技能数据; 若技能不存在, 则对其进行初始化并返回技能数据.
@@ -213,6 +213,8 @@ public:
     static Skill &get(int skillID, int skillLevel);
 
 private:
+    static std::mutex mutex; // 互斥锁. 用于保护 SkillManager::add 操作.
+
     /**
      * @brief 初始化技能. 将指定 ID 与 Level 的技能数据存至缓存.
      * @param skillID

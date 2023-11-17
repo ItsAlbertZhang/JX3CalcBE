@@ -4,7 +4,8 @@
 using namespace ns_frame;
 
 // 静态成员变量初始化
-thread_local std::unordered_map<int, std::unordered_map<int, Skill>> SkillManager::data;
+std::unordered_map<int, std::unordered_map<int, Skill>> SkillManager::data;
+std::mutex SkillManager::mutex;
 
 Skill &SkillManager::get(int skillID, int skillLevel) {
     // 若技能 ID 不存在, 则添加
@@ -20,43 +21,49 @@ Skill &SkillManager::get(int skillID, int skillLevel) {
 }
 
 void SkillManager::add(int skillID, int skillLevel) {
+    std::lock_guard<std::mutex> lock(mutex); // 加锁
+    // 可能有多个线程同时进入了 add 函数. 因此, 需要在加锁后再次判断技能是否存在.
+    if (data.find(skillID) != data.end() && data[skillID].find(skillLevel) != data[skillID].end()) {
+        // 若技能 ID 存在, 且技能等级存在, 则直接返回
+        return; // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
+    }
     // 初始化技能
     Skill skill;
-    sol::protected_function_result res;
-    // 获取 tab 和 GetSkillLevelData 函数. 这里省略了非常多的错误检查.
+    skill.dwLevel = skillLevel;
+    // 获取 tab
     if (data.find(skillID) == data.end()) {
-        // 获取 tab
+        // 如果没有该技能 ID, 则先获取 tab
         gdi::TabSelectType arg;
         arg.emplace_back();
         arg[0]["SkillID"] = std::to_string(skillID);
         gdi::Interface::tabSelect(gdi::Tab::skills, arg);
         skill.tab = std::move(arg[0]);
         std::cout << skill.tab["ScriptFile"] << std::endl;
-        // 获取 GetSkillLevelData 函数
-        res = gdi::Interface::luaExecuteFile("scripts\\skill\\" + skill.tab["ScriptFile"]);
-        if (!res.valid()) {
-            sol::error err = res;
-            std::cout << "luaExecuteFile failed:\n"
-                      << err.what() << std::endl;
-        } else {
-            skill.GetSkillLevelData = gdi::Interface::luaGetFunction("GetSkillLevelData");
-        }
     } else {
+        // 如果该技能 ID 已存在, 则复用同 ID 技能的 tab
         auto it = data[skillID].begin();
         skill.tab = it->second.tab;
-        skill.GetSkillLevelData = it->second.GetSkillLevelData;
     }
-    // 调用 GetSkillLevelData 函数, 初始化技能
-
-    skill.dwLevel = skillLevel;
-    res = skill.GetSkillLevelData(skill);
+    // 获取 GetSkillLevelData 函数
+    sol::protected_function GetSkillLevelData;
+    sol::protected_function_result res;
+    res = gdi::Interface::luaExecuteFile("scripts\\skill\\" + skill.tab["ScriptFile"]);
     if (!res.valid()) {
         sol::error err = res;
-        std::cout << "GetSkillLevelData failed:\n"
+        std::cout << "luaExecuteFile failed:\n"
                   << err.what() << std::endl;
+    } else {
+        GetSkillLevelData = gdi::Interface::luaGetFunction("GetSkillLevelData");
+        // 调用 GetSkillLevelData 函数, 初始化技能
+        res = GetSkillLevelData(skill);
+        if (!res.valid()) {
+            sol::error err = res;
+            std::cout << "GetSkillLevelData failed:\n"
+                      << err.what() << std::endl;
+        }
+        // 将技能存入缓存
+        data[skillID][skillLevel] = std::move(skill);
     }
-    // 将技能存入缓存
-    data[skillID][skillLevel] = std::move(skill);
 }
 
 void Skill::AddAttribute_iiii(int a, int b, int c, int d) {
