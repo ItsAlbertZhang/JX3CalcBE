@@ -1,5 +1,5 @@
-#ifndef FRAME_SKILL_H_
-#define FRAME_SKILL_H_
+#ifndef FRAME_BASE_SKILL_H_
+#define FRAME_BASE_SKILL_H_
 
 #include <mutex>
 #include <string>
@@ -224,4 +224,4 @@ private:
 
 } // namespace ns_frame
 
-#endif // FRAME_SKILL_H_
+#endif // FRAME_BASE_SKILL_H_

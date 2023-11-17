@@ -1,5 +1,5 @@
-#ifndef FRAME_BUFF_H_
-#define FRAME_BUFF_H_
+#ifndef FRAME_BASE_BUFF_H_
+#define FRAME_BASE_BUFF_H_
 
 #include <mutex>
 #include <string>
@@ -56,4 +56,4 @@ private:
 
 } // namespace ns_frame
 
-#endif // FRAME_BUFF_H_
+#endif // FRAME_BASE_BUFF_H_

@@ -1,4 +1,4 @@
-#include "frame/buff.h"
+#include "frame/base_buff.h"
 #include "gdi.h"
 
 using namespace ns_frame;

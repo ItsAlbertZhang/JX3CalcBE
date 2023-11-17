@@ -1,4 +1,4 @@
-#include "frame/skill.h"
+#include "frame/base_skill.h"
 #include "gdi.h"
 
 using namespace ns_frame;
