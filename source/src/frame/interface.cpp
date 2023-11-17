@@ -598,3 +598,9 @@ const char *ns_interface::luaBuffCompareFlag[] = {
     "GREATER",
     "GREATER_EQUAL",
 };
+
+const char *ns_interface::luaSkillCompareFlag[] = {
+    "EQUAL",
+    "GREATER",
+    "GREATER_EQUAL",
+};

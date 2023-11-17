@@ -1,50 +1,11 @@
-#ifndef MAIN_FRAME_CHARACTER_H_
-#define MAIN_FRAME_CHARACTER_H_
+#ifndef FRAME_CHARACTER_H_
+#define FRAME_CHARACTER_H_
 
+#include <queue>
 #include <unordered_map>
+#include <vector>
 
 namespace ns_frame {
-
-/**
- * @brief Character 类
- * @note 用于表示游戏中的角色.
- * @note 在平时的使用中, 基本上更多使用此类提供的接口, 而不直接操作此类的成员变量的方法.
- */
-class Character {
-public:
-    Character(); // 构造函数
-
-    // ---------- 一些比较确定的实现 ----------
-
-    int nCharacterID;      // 角色 ID
-    bool isPlayer = false; // 是否为玩家
-
-    void LearnSkill(int skillID, int skillLevel);
-    void CastSkill(int skillID, int skillLevel);
-    void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
-
-    // ---------- 一些连蒙带猜的实现 ----------
-
-    int nTargetID;                             // 目标 ID
-    std::unordered_map<int, int> skillLearned; // 已学习技能列表. key 为技能 ID, value 为技能等级
-
-    //  ---------- 不被 Attribute 包含的属性, 可能被 lua 调用, 以 "n" 开头而非 "at" ----------
-
-    int nSpunkToSolarAndLunarAttackPowerCof = 0;    // 元气转换为阳性和阴性内功攻击的系数
-    int nSpunkToSolarAndLunarCriticalStrikeCof = 0; // 元气转换为阳性和阴性内功会心的系数
-
-    int nMaxSunEnergy = 0;  // 最大日灵
-    int nMaxMoonEnergy = 0; // 最大月魂
-
-private:
-    static int nextCharacterID;
-};
-
-class Player : public Character {
-};
-
-class NPC : public Character {
-};
 
 /**
  * @brief Attribute 类
@@ -52,8 +13,6 @@ class NPC : public Character {
  */
 class Attribute {
 public:
-    int level = 120;
-
     int atBasePotentialAdd = 0;       // 所有主属性
     int atVitalityBase = 0;           // 体质
     int atStrengthBase = 0;           // 力道
@@ -249,6 +208,50 @@ private:
     int get_damage_add_percent(int attribute_type);
 };
 
+/**
+ * @brief Character 类
+ * @note 用于表示游戏中的角色.
+ * @note 在平时的使用中, 基本上更多使用此类提供的接口, 而不直接操作此类的成员变量的方法.
+ */
+class Character {
+public:
+    Character(); // 构造函数
+
+    int nCharacterID;                          // 角色 ID
+    bool isPlayer = false;                     // 是否为玩家
+    int nTargetID;                             // 目标 ID
+    Attribute attribute;                       // 角色属性
+    std::unordered_map<int, int> skillLearned; // 已学习技能列表. key 为技能 ID, value 为技能等级
+
+    struct skillQueueElement { // 技能队列元素
+        int skillID;           // 技能 ID
+        int skillLevel;        // 技能等级
+    };
+    std::queue<struct skillQueueElement> skillQueue; // 待执行的技能队列.
+
+    // ---------- 以下方法直接被 lua 调用 ----------
+    void LearnSkill(int skillID, int skillLevel);
+    void CastSkill(int skillID, int skillLevel);
+    void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
+
+    //  ---------- 不被 Attribute 包含的属性, 可能被 lua 调用, 以 "n" 开头而非 "at" ----------
+    int nLevel = 120;                               // 等级
+    int nSpunkToSolarAndLunarAttackPowerCof = 0;    // 元气转换为阳性和阴性内功攻击的系数
+    int nSpunkToSolarAndLunarCriticalStrikeCof = 0; // 元气转换为阳性和阴性内功会心的系数
+
+    int nMaxSunEnergy = 0;  // 最大日灵
+    int nMaxMoonEnergy = 0; // 最大月魂
+
+private:
+    static std::vector<Character *> characterList; // 角色列表
+};
+
+class Player : public Character {
+};
+
+class NPC : public Character {
+};
+
 } // namespace ns_frame
 
-#endif // MAIN_FRAME_CHARACTER_H_
+#endif // FRAME_CHARACTER_H_

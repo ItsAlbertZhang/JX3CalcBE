@@ -1,8 +1,7 @@
-#ifndef MAIN_FRAME_SKILL_H_
-#define MAIN_FRAME_SKILL_H_
+#ifndef FRAME_SKILL_H_
+#define FRAME_SKILL_H_
 
 #include <mutex>
-#include <sol2/sol.hpp>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -96,8 +95,8 @@ public:
 
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性 ----------
 
-    std::vector<SkillAttribute> attributes;                 // AddAttribute 添加的属性
-    std::vector<SkillAttributeString> attributesString;     // AddAttribute 添加的属性, 参数 1 为字符串
+    std::vector<SkillAttribute> attributes;                 // AddAttribute 添加的属性列表
+    std::vector<SkillAttributeString> attributesString;     // AddAttribute 添加的参数1为字符串的属性列表 (通常是执行脚本)
     std::vector<CheckBuff> checkBuff;                       // 需要检查的 buff
     std::vector<CheckSelfLearntSkill> checkSelfLearntSkill; // 需要检查的自身技能
     std::vector<BindBuff> bindBuff;                         // 需要绑定的 buff
@@ -225,4 +224,4 @@ private:
 
 } // namespace ns_frame
 
-#endif // MAIN_FRAME_SKILL_H_
+#endif // FRAME_SKILL_H_

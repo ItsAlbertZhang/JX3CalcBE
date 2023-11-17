@@ -1,5 +1,5 @@
-#ifndef MAIN_FRAME_LUA_H_
-#define MAIN_FRAME_LUA_H_
+#ifndef FRAME_LUA_H_
+#define FRAME_LUA_H_
 
 #include <sol2/sol.hpp>
 #include <string>
@@ -623,8 +623,14 @@ public:
         GREATER_EQUAL,
         COUNT,
     };
+    enum class SKILL_COMPARE_FLAG {
+        EQUAL,
+        GREATER,
+        GREATER_EQUAL,
+        COUNT,
+    };
 };
 
 } // namespace ns_frame
 
-#endif // MAIN_FRAME_LUA_H_
+#endif // FRAME_LUA_H_

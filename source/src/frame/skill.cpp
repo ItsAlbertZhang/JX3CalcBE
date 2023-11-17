@@ -47,10 +47,11 @@ void SkillManager::add(int skillID, int skillLevel) {
     // 获取 GetSkillLevelData 函数
     sol::protected_function GetSkillLevelData;
     sol::protected_function_result res;
-    res = gdi::Interface::luaExecuteFile("scripts\\skill\\" + skill.tab["ScriptFile"]);
+    std::string name = "scripts\\skill\\" + skill.tab["ScriptFile"];
+    res = gdi::Interface::luaExecuteFile(name);
     if (!res.valid()) {
         sol::error err = res;
-        std::cout << "luaExecuteFile failed:\n"
+        std::cerr << "luaExecuteFile failed:" << name << "\n"
                   << err.what() << std::endl;
     } else {
         GetSkillLevelData = gdi::Interface::luaGetFunction("GetSkillLevelData");
@@ -58,7 +59,7 @@ void SkillManager::add(int skillID, int skillLevel) {
         res = GetSkillLevelData(skill);
         if (!res.valid()) {
             sol::error err = res;
-            std::cout << "GetSkillLevelData failed:\n"
+            std::cerr << "GetSkillLevelData failed:\n"
                       << err.what() << std::endl;
         }
         // 将技能存入缓存

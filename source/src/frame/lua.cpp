@@ -95,16 +95,24 @@ bool LuaDependence::lua_init(sol::state &lua) {
         AttributeEffectMode[ns_interface::luaAttributeEffectMode[i]] = i;
     }
     lua["ATTRIBUTE_EFFECT_MODE"] = AttributeEffectMode;
+
     sol::table AttributeType = lua.create_table();
     for (int i = 0; i < static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::COUNT); i++) {
         AttributeType[ns_interface::luaAttributeType[i]] = i;
     }
     lua["ATTRIBUTE_TYPE"] = AttributeType;
+
     sol::table BuffCompareFlag = lua.create_table();
     for (int i = 0; i < static_cast<int>(LuaGlobalTable::BUFF_COMPARE_FLAG::COUNT); i++) {
         BuffCompareFlag[ns_interface::luaBuffCompareFlag[i]] = i;
     }
     lua["BUFF_COMPARE_FLAG"] = BuffCompareFlag;
+
+    sol::table SKILL_COMPARE_FLAG = lua.create_table();
+    for (int i = 0; i < static_cast<int>(LuaGlobalTable::SKILL_COMPARE_FLAG::COUNT); i++) {
+        SKILL_COMPARE_FLAG[ns_interface::luaSkillCompareFlag[i]] = i;
+    }
+    lua["SKILL_COMPARE_FLAG"] = SKILL_COMPARE_FLAG;
 
     lua["CONSUME_BASE"] = 100;
     lua["LENGTH_BASE"] = 64;

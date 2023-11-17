@@ -62,6 +62,7 @@ public:
     /**
      * @brief 执行游戏内 lua 脚本
      * @param filename 脚本路径
+     * @warning lua 的执行是线程本地的, 这意味着当前线程调用该函数不会影响其他线程!
      * @return 执行结果
      */
     static sol::protected_function_result luaExecuteFile(const std::string &filename);
@@ -69,6 +70,7 @@ public:
     /**
      * @brief 获取 lua 函数
      * @param name 函数名
+     * @warning lua 的执行是线程本地的, 不要让返回值被其他线程使用!
      * @return lua 函数
      */
     static sol::protected_function luaGetFunction(const std::string &name);

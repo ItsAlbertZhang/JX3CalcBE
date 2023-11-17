@@ -1,5 +1,5 @@
-#ifndef MAIN_PROGRAM_INIT_H_
-#define MAIN_PROGRAM_INIT_H_
+#ifndef PROGRAM_INIT_H_
+#define PROGRAM_INIT_H_
 
 #include <filesystem>
 
@@ -34,4 +34,4 @@ public:
 
 }; // namespace ns_program
 
-#endif // MAIN_PROGRAM_INIT_H_
+#endif // PROGRAM_INIT_H_
