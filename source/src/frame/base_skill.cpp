@@ -1,5 +1,6 @@
 #include "frame/base_skill.h"
 #include "gdi.h"
+#include "program/log.h"
 
 using namespace ns_frame;
 
@@ -38,7 +39,6 @@ void SkillManager::add(int skillID, int skillLevel) {
         arg[0]["SkillID"] = std::to_string(skillID);
         gdi::Interface::tabSelect(gdi::Tab::skills, arg);
         skill.tab = std::move(arg[0]);
-        // std::cout << skill.tab["ScriptFile"] << std::endl;
     } else {
         // 如果该技能 ID 已存在, 则复用同 ID 技能的 tab
         auto it = data[skillID].begin();
@@ -48,6 +48,7 @@ void SkillManager::add(int skillID, int skillLevel) {
     sol::protected_function GetSkillLevelData;
     sol::protected_function_result res;
     std::string name = "scripts\\skill\\" + skill.tab["ScriptFile"];
+    ns_program::log(std::format("GetSkillLevelData: {}\n", skill.tab["ScriptFile"]));
     res = gdi::Interface::luaExecuteFile(name);
     if (!res.valid()) {
         sol::error err = res;

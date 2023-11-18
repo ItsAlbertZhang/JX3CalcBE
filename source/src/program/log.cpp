@@ -17,16 +17,14 @@ Log::Log() {
 }
 
 Log::~Log() {
-    std::cout << std::endl
-              << "Log Page " << page++ << ":" << std::endl
+    std::cout << "\nLog: (Page " << page++ << ")\n\n"
               << data << std::endl;
     delete[] data;
 }
 
 void Log::operator()(const std::string &format) {
     if (format.length() > static_cast<size_t>(data + 1024 * 1024 - curr)) {
-        std::cout << std::endl
-                  << "Log Page" << page++ << ":" << std::endl
+        std::cout << "\nLog: (Page " << page++ << ")\n\n"
                   << data << std::endl;
         curr = data;
         memset(data, 0, 1024 * 1024);
