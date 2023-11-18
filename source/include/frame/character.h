@@ -2,7 +2,9 @@
 #define FRAME_CHARACTER_H_
 
 #include "frame/character_attribute.h"
+#include "frame/character_buff.h"
 #include <queue>
+#include <set>
 #include <unordered_map>
 #include <vector>
 
@@ -16,19 +18,22 @@ class Character {
 public:
     Character(); // 构造函数
 
-    int nCharacterID;        // 角色 ID
-    bool isPlayer = false;   // 是否为玩家
-    int nTargetID;           // 目标 ID
-    CharacterAttr attribute; // 角色属性
+    int nCharacterID;         // 角色 ID
+    bool isPlayer = false;    // 是否为玩家
+    Character *target = this; // 当前目标
+    CharacterAttr attribute;  // 角色属性
 
-    std::unordered_map<int, int> skillLearned;                       // 已学习技能列表. key 为技能 ID, value 为技能等级
-    std::unordered_map<int, std::unordered_map<int, int>> buffExist; // 已存在的 buff 列表. 第一个 key 为 buffID, 第二个 key 为 buffLevel, value 为剩余回合数
+    std::unordered_map<int, int> skillLearned; // 已学习技能列表. key 为技能 ID, value 为技能等级.
 
-    struct skillQueueElement { // 技能队列元素
-        int skillID;           // 技能 ID
-        int skillLevel;        // 技能等级
+    class SkillQueueElement { // 技能队列元素
+    public:
+        SkillQueueElement(int skillID, int skillLevel) : skillID(skillID), skillLevel(skillLevel) {}
+        int skillID;    // 技能 ID
+        int skillLevel; // 技能等级
     };
-    std::queue<struct skillQueueElement> skillQueue; // 待执行的技能队列.
+    std::queue<SkillQueueElement> skillQueue; // 待执行的技能队列.
+
+    std::unordered_map<int, std::unordered_map<int, CharacterBuff>> buffExist; // 已存在的 buff 列表. key1 为 Buff ID, key2 为 Buff Level.
 
     // ---------- 以下方法直接被 lua 调用 ----------
     void LearnSkill(int skillID, int skillLevel);
@@ -45,6 +50,8 @@ public:
 
 private:
     static std::vector<Character *> characterList; // 角色列表
+    bool hasBuff(int buffID, int buffLevel);       // 检查是否存在指定的 buff
+    static bool luaBuffCompare(int flag, int luaValue, int buffValue);
 };
 
 class Player : public Character {

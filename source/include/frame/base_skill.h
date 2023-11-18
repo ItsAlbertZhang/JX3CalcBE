@@ -62,11 +62,11 @@ public:
 
     class CheckSelfLearntSkill {
     public:
-        CheckSelfLearntSkill(int dwSkillID, int dwSkillLevel, int LevelCompareFlag)
-            : dwSkillID(dwSkillID), dwSkillLevel(dwSkillLevel), LevelCompareFlag(LevelCompareFlag) {}
+        CheckSelfLearntSkill(int dwSkillID, int dwSkillLevel, int nLevelCompareFlag)
+            : dwSkillID(dwSkillID), dwSkillLevel(dwSkillLevel), nLevelCompareFlag(nLevelCompareFlag) {}
         int dwSkillID;
         int dwSkillLevel;
-        int LevelCompareFlag;
+        int nLevelCompareFlag;
     };
 
     class BindBuff {

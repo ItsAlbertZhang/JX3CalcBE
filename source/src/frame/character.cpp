@@ -1,7 +1,7 @@
 #include "frame/character.h"
+#include "frame/base_skill.h"
 #include "frame/lua_func.h"
 #include "frame/lua_interface.h"
-#include "frame/base_skill.h"
 
 using namespace ns_frame;
 
@@ -18,17 +18,51 @@ void Character::LearnSkill(int skillID, int skillLevel) {
 }
 
 void Character::CastSkill(int skillID, int skillLevel) {
-    std::cout << "\nCastSkill: " << skillID << " # " << skillLevel << std::endl;
     // 获取技能
     Skill &skill = SkillManager::get(skillID, skillLevel);
+
     // 检查技能是否可以释放
+    ns_frame::CharacterBuff *checkbuffObj = nullptr;
+    Character *checkbuffCharacter = nullptr;
+    bool checkbuffSrcOwn = false;
     for (auto &it : skill.checkBuff) {
+        if (it.nStackNum == 0 || it.nLevel == 0) {
+            /**
+             * @brief 被废弃但未被从 lua 代码中移除的检查
+             * @note 出现在 明教_烈日斩.lua 中, 检查 6279, 为贪魔体 buff
+             * @author ItsAlbertZhang
+             */
+            continue;
+        }
         switch (it.type) {
-        // TODO: 检查 buff
-        default:
+        case Skill::CheckBuffEnum::self:
+            checkbuffCharacter = this;
+            break;
+        case Skill::CheckBuffEnum::dest:
+            checkbuffCharacter = this->target;
+            break;
+        case Skill::CheckBuffEnum::selfOwn:
+            checkbuffCharacter = this;
+            checkbuffSrcOwn = true;
+            break;
+        case Skill::CheckBuffEnum::destOwn:
+            checkbuffCharacter = this->target;
+            checkbuffSrcOwn = true;
             break;
         }
+        if (!checkbuffCharacter->hasBuff(it.dwBuffID, it.nLevel)) {
+            return; // 找不到符合要求的 buff, CastSkill 失败
+        }
+        checkbuffObj = &(checkbuffCharacter->buffExist[it.dwBuffID][it.nLevel]);
+        if (checkbuffSrcOwn && checkbuffObj->source != this) {
+            return; // buff 来源不是自己, CastSkill 失败
+        }
+        if (!Character::luaBuffCompare(it.nStackNumCompareFlag, it.nStackNum, checkbuffObj->nStackNum)) {
+            return; // buff 比较不符合要求, CastSkill 失败}
+        }
     }
+
+    std::cout << "\nCastSkill: " << skillID << " # " << skillLevel << std::endl;
     // 提前准备 switch 语句需要的资源
     int currStrAttrIdx = 0;                             // AddAttribute 添加的参数1为字符串的属性列表的当前下标
     Skill::SkillAttributeString *currStrAttr = nullptr; // AddAttribute 添加的参数1为字符串的属性列表的当前元素
@@ -57,11 +91,11 @@ void Character::CastSkill(int skillID, int skillLevel) {
             currStrAttrIdx++;
             break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):
-            skillQueue.push({.skillID = it.param1, .skillLevel = it.param2});
+            skillQueue.emplace(it.param1, it.param2);
             std::cout << "CAST_SKILL_TARGET_DST: " << it.param1 << " # " << it.param2 << std::endl;
             break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL):
-            skillQueue.push({.skillID = it.param1, .skillLevel = it.param2});
+            skillQueue.emplace(it.param1, it.param2);
             std::cout << "CAST_SKILL: " << it.param1 << " # " << it.param2 << std::endl;
             break;
         default:
@@ -76,4 +110,23 @@ void Character::CastSkill(int skillID, int skillLevel) {
 }
 
 void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel) {
+}
+
+bool Character::hasBuff(int buffID, int buffLevel) {
+    return this->buffExist.find(buffID) != this->buffExist.end() && this->buffExist[buffID].find(buffLevel) != this->buffExist[buffID].end();
+}
+
+bool Character::luaBuffCompare(int flag, int luaValue, int buffValue) {
+    switch (flag) {
+    case static_cast<int>(LuaGlobalTable::BUFF_COMPARE_FLAG::EQUAL):
+        return buffValue == luaValue;
+        break;
+    case static_cast<int>(LuaGlobalTable::BUFF_COMPARE_FLAG::GREATER):
+        return buffValue > luaValue;
+        break;
+    case static_cast<int>(LuaGlobalTable::BUFF_COMPARE_FLAG::GREATER_EQUAL):
+        return buffValue >= luaValue;
+        break;
+    }
+    return false;
 }

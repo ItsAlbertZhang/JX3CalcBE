@@ -1,8 +1,10 @@
 #ifndef FRAME_BASE_BUFF_H_
 #define FRAME_BASE_BUFF_H_
 
+#include "frame/tab_interface.h"
 #include <mutex>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -16,9 +18,21 @@ class Buff {
 public:
     // ---------- 数据存放区 ----------
     std::unordered_map<std::string, std::string> tab; // buffs.tab 中的数据
-    std::vector<std::string> BeginAttrib;
-    std::vector<std::string> ActiveAttrib;
-    std::vector<std::string> EndTimeAttrib;
+
+    int ID;
+    int nLevel;
+
+    class Attrib {
+    public:
+        Attrib(TabEnum::BuffAttrib type, int value) : type(type), valueInt(value) {}
+        Attrib(TabEnum::BuffAttrib type, std::string value) : type(type), valueStr(value) {}
+        TabEnum::BuffAttrib type = TabEnum::BuffAttrib::COUNT;
+        int valueInt = 0;
+        std::string valueStr = "";
+    };
+    std::vector<Attrib> BeginAttrib;
+    std::vector<Attrib> ActiveAttrib;
+    std::vector<Attrib> EndTimeAttrib;
 };
 
 /**
@@ -40,11 +54,20 @@ public:
 private:
     static std::mutex mutex; // 互斥锁. 用于保护 SkillManager::add 操作.
 
+    struct tuple_hash {
+        template <class T1, class T2>
+        std::size_t operator()(const std::tuple<T1, T2> &t) const {
+            auto h1 = std::hash<T1>{}(std::get<0>(t));
+            auto h2 = std::hash<T2>{}(std::get<1>(t));
+            return h1 ^ h2;
+        }
+    };
+
     /**
      * Buff 缓存数据
      * 同一 ID, 不同 Level 的 Buff 拥有不同的 Buff 实例.
      */
-    static std::unordered_map<int, std::unordered_map<int, Buff>> data;
+    static std::unordered_map<std::tuple<int, int>, Buff, tuple_hash> data;
 
     /**
      * @brief 初始化技能. 将指定 ID 与 Level 的 Buff 数据存至缓存.
