@@ -2,6 +2,7 @@
 #include "frame/base_skill.h"
 #include "frame/lua_func.h"
 #include "frame/lua_interface.h"
+#include "program/log.h"
 
 using namespace ns_frame;
 
@@ -62,7 +63,9 @@ void Character::CastSkill(int skillID, int skillLevel) {
         }
     }
 
-    std::cout << "\nCastSkill: " << skillID << " # " << skillLevel << std::endl;
+    // std::cout << "\nCastSkill: " << skillID << " # " << skillLevel << std::endl;
+    ns_program::log(std::format("CastSkill: {} # {}\n", skillID, skillLevel));
+    printf("\n");
     // 提前准备 switch 语句需要的资源
     int currStrAttrIdx = 0;                             // AddAttribute 添加的参数1为字符串的属性列表的当前下标
     Skill::SkillAttributeString *currStrAttr = nullptr; // AddAttribute 添加的参数1为字符串的属性列表的当前元素
