@@ -12,7 +12,10 @@
             "compilerPath": "cl.exe",
             "cStandard": "c17",
             "cppStandard": "c++20",
-            "intelliSenseMode": "windows-msvc-x64"
+            "intelliSenseMode": "windows-msvc-x64",
+            "compilerArgs": [
+                "-DDEBUG"
+            ]
         },
         {
             "name": "Mac",
@@ -26,7 +29,10 @@
             "compilerPath": "clang++",
             "cStandard": "c17",
             "cppStandard": "c++20",
-            "intelliSenseMode": "macos-clang-arm64"
+            "intelliSenseMode": "macos-clang-arm64",
+            "compilerArgs": [
+                "-DDEBUG"
+            ]
         }
     ],
     "version": 4

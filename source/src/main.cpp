@@ -96,7 +96,9 @@ int main(int argc, char *argv[]) {
     //     }
     //     std::cout << std::endl;
     // }
-
+#ifdef DEBUG
+    std::cout << "Press any key to exit..." << std::endl;
+#endif
     return 0;
 }
 
