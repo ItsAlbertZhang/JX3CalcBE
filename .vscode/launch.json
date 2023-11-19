@@ -15,16 +15,16 @@
             "console": "integratedTerminal",
         },
         {
-            "request": "launch", "program": "${workspaceFolder}/bin/jx3fycalc.app/Contents/MacOS/jx3fycalc", "args": [ ],
-            "name": "macos_debug",
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3fycalc", "args": [ ],
+            "name": "unix_debug",
             "type": "lldb",
-            "preLaunchTask": "macos_debug_build",
+            "preLaunchTask": "unix_debug_build",
         },
         {
-            "request": "launch", "program": "${workspaceFolder}/bin/jx3fycalc.app/Contents/MacOS/jx3fycalc", "args": [ ],
-            "name": "macos_release",
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3fycalc", "args": [ ],
+            "name": "unix_release",
             "type": "lldb",
-            "preLaunchTask": "macos_release_build",
+            "preLaunchTask": "unix_release_build",
         },
     ],
     "version": "2.0.0"

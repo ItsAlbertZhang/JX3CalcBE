@@ -33,6 +33,24 @@
             "compilerArgs": [
                 "-DDEBUG"
             ]
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/external/include",
+                "${workspaceFolder}/source/include",
+                "${workspaceFolder}/source/lib",
+                "${workspaceFolder}/JX3CalcBEgdi/include"
+            ],
+            "defines": [ ],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "linux-clang-x64",
+            "compilerArgs": [
+                "-stdlib=libc++",
+                "-DDEBUG"
+            ]
         }
     ],
     "version": 4

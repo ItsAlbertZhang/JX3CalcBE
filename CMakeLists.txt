@@ -5,6 +5,7 @@ set(CMAKE_CXX_STANDARD 20) # 设置 C++ 标准为 C++20
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # 设置 C++ 标准为必须
 set(CMAKE_CXX_EXTENSIONS OFF) # 设置 C++ 编译器不使用扩展特性
 set(CMAKE_BUILD_TYPE ${BUILD_MODE}) # Debug / Release
+# CMAKE_BUILD_TYPE 会作用于 clang 编译器. msvc 编译器则由 tasks.json 中的 make 指令控制.
 
 # ########## 编译选项 ##########
 
@@ -26,7 +27,14 @@ if(UNIX) # Linux & MacOS
     set(CMAKE_SKIP_BUILD_RPATH FALSE)
     set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
     set(CMAKE_INSTALL_RPATH "@executable_path/") # 设置 RPATH 为可执行文件所在目录
+  else()
+    add_compile_options("-stdlib=libc++")
+    add_link_options("-stdlib=libc++" "-fuse-ld=lld")
+    set(CMAKE_SKIP_BUILD_RPATH FALSE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    set(CMAKE_INSTALL_RPATH "$ORIGIN") # 设置 RPATH 为可执行文件所在目录
   endif()
+
 elseif(WIN32) # Windows
   set(CMAKE_C_COMPILER "cl")
   set(CMAKE_CXX_COMPILER "cl") # 设置编译器为 MSVC
