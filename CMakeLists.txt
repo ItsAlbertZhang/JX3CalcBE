@@ -14,26 +14,27 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-DDEBUG)
 endif()
 
-if(UNIX) # Linux & MacOS
-  # 编译选项
+# 编译选项
+if(APPLE)
   set(CMAKE_C_COMPILER "clang")
   set(CMAKE_CXX_COMPILER "clang++") # 设置编译器为 clang
   add_compile_options(
-    "-fcolor-diagnostics" "-fansi-escape-codes" # 启用编译器的彩色输出
+    "-fcolor-diagnostics" "-fansi-escape-codes" # 彩色输出诊断信息
     "-Wno-unknown-warning-option" # 禁用 clang 编译器下 sol 库一些烦人的警告
   )
-  if(APPLE)
-    set(CMAKE_MACOSX_RPATH ON) # MacOS 下使用 RPATH (库文件的搜索路径) (Windows 下会自动处理)
-    set(CMAKE_SKIP_BUILD_RPATH FALSE)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    set(CMAKE_INSTALL_RPATH "@executable_path/") # 设置 RPATH 为可执行文件所在目录
-  else()
-    add_compile_options("-stdlib=libc++")
-    add_link_options("-stdlib=libc++" "-fuse-ld=lld")
-    set(CMAKE_SKIP_BUILD_RPATH FALSE)
-    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    set(CMAKE_INSTALL_RPATH "$ORIGIN") # 设置 RPATH 为可执行文件所在目录
-  endif()
+  # 设置 RPATH 为可执行文件所在目录
+  set(CMAKE_MACOSX_RPATH ON)
+  set(CMAKE_SKIP_BUILD_RPATH FALSE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+  set(CMAKE_INSTALL_RPATH "@executable_path/")
+
+elseif(UNIX)
+  set(CMAKE_C_COMPILER "gcc")
+  set(CMAKE_CXX_COMPILER "g++") # 设置编译器为 clang
+  # 设置 RPATH 为可执行文件所在目录
+  set(CMAKE_SKIP_BUILD_RPATH FALSE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+  set(CMAKE_INSTALL_RPATH "$ORIGIN")
 
 elseif(WIN32) # Windows
   set(CMAKE_C_COMPILER "cl")
@@ -44,7 +45,7 @@ elseif(WIN32) # Windows
     "/D_CRT_SECURE_NO_WARNINGS" # 禁用 strcpy 等不安全的函数的警告
   )
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON) # Windows 下导出所有符号
-  add_compile_options(/MP) # 启用多核编译
+  add_compile_options(/MP) # 启用多核编译. UNIX 的类似实现位于 build 命令.
   add_link_options("/NODEFAULTLIB:LIBCMT") # 禁用 libcmt.lib
 endif()
 
