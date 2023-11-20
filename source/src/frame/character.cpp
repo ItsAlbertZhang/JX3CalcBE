@@ -19,7 +19,7 @@ void Character::LearnSkill(int skillID, int skillLevel) {
 }
 
 void Character::CastSkill(int skillID, int skillLevel) {
-    ns_program::log(std::format("\nTry to CastSkill: {} # {}\n", skillID, skillLevel));
+    LOG_INFO("\nTry to CastSkill: %d # %d\n", skillID, skillLevel);
     // 获取技能
     Skill &skill = SkillManager::get(skillID, skillLevel);
 
@@ -64,7 +64,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
         }
     }
 
-    ns_program::log(std::format("{} # {} cast successfully!\n", skillID, skillLevel));
+    LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
     // 提前准备 switch 语句需要的资源
     int currStrAttrIdx = 0;                             // AddAttribute 添加的参数1为字符串的属性列表的当前下标
     Skill::SkillAttributeString *currStrAttr = nullptr; // AddAttribute 添加的参数1为字符串的属性列表的当前元素
@@ -79,12 +79,12 @@ void Character::CastSkill(int skillID, int skillLevel) {
             case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):
                 currStrAttrParamStr = "scripts/" + currStrAttr->param1;
                 luaFunc = LuaApply::get(currStrAttrParamStr);
-                ns_program::log(std::format("EXECUTE_SCRIPT: {} # {}\n", currStrAttrParamStr, currStrAttr->param2));
+                LOG_INFO("EXECUTE_SCRIPT: %s # %d\n", currStrAttrParamStr.c_str(), currStrAttr->param2);
                 break;
             case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM):
                 currStrAttrParamStr = "scripts/" + currStrAttr->param1;
                 luaFunc = LuaApply::get(currStrAttrParamStr);
-                ns_program::log(std::format("EXECUTE_SCRIPT_WITH_PARAM: {} # {}\n", currStrAttrParamStr, currStrAttr->param2));
+                LOG_INFO("EXECUTE_SCRIPT_WITH_PARAM: %s # %d\n", currStrAttrParamStr, currStrAttr->param2);
                 break;
             default:
                 std::cerr << "Undefined type: " << currStrAttr->type << "\t"
@@ -94,11 +94,11 @@ void Character::CastSkill(int skillID, int skillLevel) {
             break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):
             skillQueue.emplace(it.param1, it.param2);
-            ns_program::log(std::format("CAST_SKILL_TARGET_DST: {} # {}\n", it.param1, it.param2));
+            LOG_INFO("CAST_SKILL_TARGET_DST: %d # %d\n", it.param1, it.param2);
             break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL):
             skillQueue.emplace(it.param1, it.param2);
-            ns_program::log(std::format("CAST_SKILL: {} # {}\n", it.param1, it.param2));
+            LOG_INFO("CAST_SKILL: %d # %d\n", it.param1, it.param2);
             break;
         default:
             std::cerr << "Undefined type: " << it.type << "\t" << LuaTableString::luaAttributeType[it.type] << std::endl;

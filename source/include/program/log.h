@@ -1,28 +1,43 @@
 #ifndef PROGRAM_LOG_H_
 #define PROGRAM_LOG_H_
 
-#include <format>
+#ifdef DEBUG
+
 #include <string>
 
 namespace ns_program {
 
 class Log {
 public:
-    static Log &getInstance();                  // 获取单例
-    void operator()(const std::string &format); // 重载()运算符
+    Log(const std::string &name);
+    ~Log();
+    template <typename... Args>
+    void operator()(const char *format, Args... args) {
+        curr += snprintf(curr, 1024 * 1024 - (curr - data), format, args...);
+    }
 
 private:
-    Log();                       // private 构造函数
-    ~Log();                      // private 析构函数
-    Log(const Log &);            // 阻止复制
-    Log &operator=(const Log &); // 阻止赋值
-    char *data = nullptr;
+    std::string name;
     char *curr = nullptr;
-    int page = 0;
+    char *data = nullptr;
 };
 
-extern Log &log;
+extern Log log_info;
+extern Log log_error;
 
 } // namespace ns_program
+
+#define LOG_INFO(format, ...) \
+    ns_program::log_info(format, __VA_ARGS__);
+
+#define LOG_ERROR(format, ...) \
+    ns_program::log_error(format, __VA_ARGS__);
+
+#else
+
+#define LOG_INFO(format, ...)
+#define LOG_ERROR(format, ...)
+
+#endif // DEBUG
 
 #endif // PROGRAM_LOG_H_

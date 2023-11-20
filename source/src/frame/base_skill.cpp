@@ -48,7 +48,7 @@ void SkillManager::add(int skillID, int skillLevel) {
     sol::protected_function GetSkillLevelData;
     sol::protected_function_result res;
     std::string name = "scripts\\skill\\" + skill.tab["ScriptFile"];
-    ns_program::log(std::format("GetSkillLevelData: {}\n", skill.tab["ScriptFile"]));
+    LOG_INFO("GetSkillLevelData: %s\n", skill.tab["ScriptFile"].c_str());
     res = gdi::Interface::luaExecuteFile(name);
     if (!res.valid()) {
         sol::error err = res;
