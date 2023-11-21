@@ -11,8 +11,8 @@
 namespace ns_frame {
 
 /**
- * Buff 类
- * 注意: Buff 是公共资源, 不属于某个角色. 应当使用 BuffManager 类对其统一进行存取.
+ * @brief Buff 类
+ * @warning Buff 是公共资源, 不属于某个角色. 应当使用 BuffManager 类对其统一进行存取.
  */
 class Buff {
 public:
@@ -37,7 +37,7 @@ public:
 
 /**
  * @brief Buff 管理类
- * 这是一个静态类, 用于管理 Buff 数据, 不应当被创建实例.
+ * @warning 这是一个静态类, 用于管理 Buff 数据, 不应当被创建实例.
  */
 class BuffManager {
 public:
@@ -52,7 +52,7 @@ public:
     static Buff &get(int buffID, int buffLevel);
 
 private:
-    static inline std::mutex mutex; // 互斥锁. 用于保护 SkillManager::add 操作.
+    static inline std::mutex mutex; // 互斥锁. 用于保护 add 操作.
 
     struct tuple_hash {
         template <class T1, class T2>
@@ -64,8 +64,8 @@ private:
     };
 
     /**
-     * Buff 缓存数据
-     * 同一 ID, 不同 Level 的 Buff 拥有不同的 Buff 实例.
+     * @brief Buff 缓存数据
+     * @note 同一 ID, 不同 Level 的 Buff 拥有不同的 Buff 实例.
      */
     static inline std::unordered_map<std::tuple<int, int>, Buff, tuple_hash> data;
 

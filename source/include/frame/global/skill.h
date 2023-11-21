@@ -9,8 +9,8 @@
 namespace ns_frame {
 
 /**
- * 技能类
- * 注意: 技能是公共资源, 不属于某个角色. 应当使用技能管理类对其统一进行存取.
+ * @brief 技能类
+ * @warning 技能是公共资源, 不属于某个角色. 应当使用技能管理类对其统一进行存取.
  */
 class Skill {
 public:
@@ -182,8 +182,8 @@ public:
 };
 
 /**
- * 技能管理类
- * 这是一个静态类, 用于管理技能数据, 不应当被创建实例.
+ * @brief 技能管理类
+ * @warning 这是一个静态类, 用于管理技能数据, 不应当被创建实例.
  */
 class SkillManager {
 public:
@@ -198,11 +198,11 @@ public:
     static Skill &get(int skillID, int skillLevel);
 
 private:
-    static inline std::mutex mutex; // 互斥锁. 用于保护 SkillManager::add 操作.
+    static inline std::mutex mutex; // 互斥锁. 用于保护 add 操作.
 
     /**
-     * 技能缓存数据
-     * 同一 ID, 不同 Level 的技能拥有不同的 Skill 实例.
+     * @brief 技能缓存数据
+     * @note 同一 ID, 不同 Level 的技能拥有不同的 Skill 实例.
      */
     static inline std::unordered_map<int, std::unordered_map<int, Skill>> data;
 

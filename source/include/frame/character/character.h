@@ -3,6 +3,7 @@
 
 #include "frame/character/property/attribute.h"
 #include "frame/character/property/buff.h"
+#include "frame/character/property/cooldown.h"
 #include "frame/character/property/skill.h"
 #include <vector>
 
@@ -19,9 +20,10 @@ public:
     bool isPlayer = false;    // 是否为玩家
     Character *target = this; // 当前目标
 
-    CharacterAttr chAttr;   // 角色属性
-    CharacterSkill chSkill; // 角色技能
-    CharacterBuff chBuff;   // 角色 buff
+    CharacterAttr chAttr;         // 角色属性
+    CharacterSkill chSkill;       // 角色技能
+    CharacterBuff chBuff;         // 角色 buff
+    CharacterCooldown chCooldown; // 角色冷却
 
     // ---------- 以下方法暂未确定是否被 lua 调用 ----------
     void LearnSkill(int skillID, int skillLevel);

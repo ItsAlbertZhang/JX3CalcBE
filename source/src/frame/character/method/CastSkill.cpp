@@ -26,24 +26,28 @@ void Character::CastSkill(int skillID, int skillLevel) {
         LOG_INFO("SkillCheckSelfLearntSkill failed!\n");
         return;
     }
+    if (!staticCheckCoolDown(this, skill)) {
+        LOG_INFO("CheckCoolDown failed!\n");
+        return;
+    }
 
     LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
-    // 提前准备 switch 语句需要的资源
-    std::string currStrAttrParamStr; // 当前元素的 param1
-    sol::protected_function luaFunc; // 用于提取 Lua 脚本中的函数
-    // 根据 type 执行对应的操作
+
+    // TODO: 可以释放, 走 CD, 绑定 buff
+
+    // 魔法属性
     for (auto &it : skill.attrAttributes) {
         switch (it.type) {
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):
-            currStrAttrParamStr = "scripts/" + it.param1Str;
-            luaFunc = LuaFunc::getApply(currStrAttrParamStr);
-            LOG_INFO("EXECUTE_SCRIPT: %s # %d\n", currStrAttrParamStr.c_str(), it.param2);
-            break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM):
-            currStrAttrParamStr = "scripts/" + it.param1Str;
-            luaFunc = LuaFunc::getApply(currStrAttrParamStr);
-            LOG_INFO("EXECUTE_SCRIPT_WITH_PARAM: %s # %d\n", currStrAttrParamStr, it.param2);
-            break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT): {
+            std::string paramstr = "scripts/" + it.param1Str;
+            sol::protected_function luaFunc = LuaFunc::getApply(paramstr);
+            LOG_INFO("EXECUTE_SCRIPT: %s # %d\n", paramstr.c_str(), it.param2);
+        } break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): {
+            std::string paramStr = "scripts/" + it.param1Str;
+            sol::protected_function luaFunc = LuaFunc::getApply(paramStr);
+            LOG_INFO("EXECUTE_SCRIPT_WITH_PARAM: %s # %d\n", paramStr, it.param2);
+        } break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):
             this->chSkill.skillQueue.emplace(it.param1Int, it.param2);
             LOG_INFO("CAST_SKILL_TARGET_DST: %d # %d\n", it.param1Int, it.param2);
@@ -56,6 +60,8 @@ void Character::CastSkill(int skillID, int skillLevel) {
             LOG_ERROR("Undefined type: %d\t%s\n", it.type, LuaTableString::luaAttributeType[it.type]);
         }
     }
+
+    // 执行队列中的剩余技能
     while (!this->chSkill.skillQueue.empty()) {
         auto it = this->chSkill.skillQueue.front();
         this->chSkill.skillQueue.pop();
@@ -154,6 +160,9 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
 
 static bool staticCheckCoolDown(Character *self, const Skill &skill) {
     for (const auto &it : skill.attrCoolDown) {
+        if (self->chCooldown.cooldownList.find(it.nCoolDownID) != self->chCooldown.cooldownList.end()) {
+            return false; // 在 CD 列表中找到了该 CD, CastSkill 失败
+        }
     }
     return true;
 }

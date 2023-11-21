@@ -23,6 +23,7 @@ namespace gdi {
 enum class Tab {
     skills,
     buff,
+    cooldown,
     COUNT, // 用于计数, 请勿使用
 };
 
