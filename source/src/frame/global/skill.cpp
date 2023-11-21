@@ -1,12 +1,8 @@
-#include "frame/base_skill.h"
+#include "frame/global/skill.h"
 #include "gdi.h"
 #include "program/log.h"
 
 using namespace ns_frame;
-
-// 静态成员变量初始化
-std::mutex SkillManager::mutex;
-std::unordered_map<int, std::unordered_map<int, Skill>> SkillManager::data;
 
 Skill &SkillManager::get(int skillID, int skillLevel) {
     // 若技能 ID 不存在, 则添加

@@ -1,12 +1,9 @@
-#include "frame/character.h"
-#include "frame/lua_interface.h"
+#include "frame/character/character.h"
+#include "frame/lua_static.h"
 #include "gdi.h"
 #include "program/init.h"
-#include <cstdlib>
 #include <filesystem>
 #include <iostream>
-#include <sol2/sol.hpp>
-#include <time.h>
 #ifdef _WIN32
 #include <Windows.h>
 #endif

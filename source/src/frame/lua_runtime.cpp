@@ -1,11 +1,9 @@
-#include "frame/lua_func.h"
+#include "frame/lua_runtime.h"
 #include "gdi.h"
 #include "program/log.h"
 
 using namespace ns_frame;
 using namespace std;
-
-thread_local unordered_map<string, sol::protected_function> LuaApply::data;
 
 sol::protected_function LuaApply::get(string name) {
     if (data.find(name) == data.end()) {

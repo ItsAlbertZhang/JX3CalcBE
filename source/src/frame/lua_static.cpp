@@ -1,5 +1,5 @@
-#include "frame/lua_interface.h"
-#include "frame/base_skill.h"
+#include "frame/lua_static.h"
+#include "frame/global/skill.h"
 
 using namespace ns_frame;
 

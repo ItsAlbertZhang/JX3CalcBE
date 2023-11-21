@@ -1,4 +1,4 @@
-#include "frame/lua_interface.h"
+#include "frame/lua_static.h"
 
 using namespace ns_frame;
 

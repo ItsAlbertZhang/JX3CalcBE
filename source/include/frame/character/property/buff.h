@@ -1,7 +1,7 @@
-#ifndef FRAME_CHARACTER_BUFF_H_
-#define FRAME_CHARACTER_BUFF_H_
+#ifndef FRAME_CHARACTER_PROPERTY_BUFF_H_
+#define FRAME_CHARACTER_PROPERTY_BUFF_H_
 
-#include "frame/base_buff.h"
+#include "frame/global/buff.h"
 
 namespace ns_frame {
 
@@ -16,4 +16,4 @@ public:
 
 } // namespace ns_frame
 
-#endif // FRAME_CHARACTER_BUFF_H_
+#endif // FRAME_CHARACTER_PROPERTY_BUFF_H_

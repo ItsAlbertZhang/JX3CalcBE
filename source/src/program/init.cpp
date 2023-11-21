@@ -3,11 +3,6 @@
 
 using namespace ns_program;
 
-// 静态成员变量初始化
-fs::path Config::pExeDir; // 可执行文件所在目录的路径
-fs::path Config::pUnpack; // 未打包的数据目录
-fs::path Config::pJX3;    // 已打包的数据目录
-
 void Init::init(int argc, char *argv[]) { // 初始化所有环境
     Config::pExeDir = fs::absolute(argv[0]).parent_path();
     Config::load();

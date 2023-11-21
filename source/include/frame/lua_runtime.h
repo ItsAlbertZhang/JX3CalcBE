@@ -13,7 +13,7 @@ public:
     static sol::protected_function get(std::string);
 
 private:
-    static thread_local std::unordered_map<std::string, sol::protected_function> data; // 数据存放区, 不同线程之间数据不共享
+    static inline thread_local std::unordered_map<std::string, sol::protected_function> data; // 数据存放区, 不同线程之间数据不共享
     static void add(std::string);
 };
 

@@ -1,5 +1,5 @@
-#ifndef FRAME_BASE_SKILL_H_
-#define FRAME_BASE_SKILL_H_
+#ifndef FRAME_GLOBAL_SKILL_H_
+#define FRAME_GLOBAL_SKILL_H_
 
 #include <mutex>
 #include <string>
@@ -206,13 +206,13 @@ public:
     static Skill &get(int skillID, int skillLevel);
 
 private:
-    static std::mutex mutex; // 互斥锁. 用于保护 SkillManager::add 操作.
+    static inline std::mutex mutex; // 互斥锁. 用于保护 SkillManager::add 操作.
 
     /**
      * 技能缓存数据
      * 同一 ID, 不同 Level 的技能拥有不同的 Skill 实例.
      */
-    static std::unordered_map<int, std::unordered_map<int, Skill>> data;
+    static inline std::unordered_map<int, std::unordered_map<int, Skill>> data;
 
     /**
      * @brief 初始化技能. 将指定 ID 与 Level 的技能数据存至缓存.
@@ -224,4 +224,4 @@ private:
 
 } // namespace ns_frame
 
-#endif // FRAME_BASE_SKILL_H_
+#endif // FRAME_GLOBAL_SKILL_H_

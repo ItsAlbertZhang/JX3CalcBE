@@ -1,5 +1,5 @@
-#ifndef FRAME_CHARACTER_ATTRIBUTE_H_
-#define FRAME_CHARACTER_ATTRIBUTE_H_
+#ifndef FRAME_CHARACTER_PROPERTY_ATTRIBUTE_H_
+#define FRAME_CHARACTER_PROPERTY_ATTRIBUTE_H_
 
 namespace ns_frame {
 /**
@@ -204,4 +204,4 @@ private:
 };
 } // namespace ns_frame
 
-#endif // FRAME_CHARACTER_ATTRIBUTE_H_
+#endif // FRAME_CHARACTER_PROPERTY_ATTRIBUTE_H_

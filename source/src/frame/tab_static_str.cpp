@@ -1,4 +1,4 @@
-#include "frame/tab_interface.h"
+#include "frame/tab_static.h"
 
 using namespace ns_frame;
 

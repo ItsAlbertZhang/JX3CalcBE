@@ -20,9 +20,9 @@ public:
 class Config {
 public:
     // 注意: 以下为静态成员变量, 必须在 .cpp 文件中初始化.
-    static fs::path pExeDir; // 可执行文件所在目录的路径
-    static fs::path pUnpack; // 未打包的数据目录
-    static fs::path pJX3;    // 已打包的数据目录
+    static inline fs::path pExeDir; // 可执行文件所在目录的路径
+    static inline fs::path pUnpack; // 未打包的数据目录
+    static inline fs::path pJX3;    // 已打包的数据目录
 
     // 禁止创建类实例
     Config() = delete;

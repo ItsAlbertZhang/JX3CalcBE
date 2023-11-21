@@ -1,11 +1,7 @@
-#include "frame/base_buff.h"
+#include "frame/global/buff.h"
 #include "gdi.h"
 
 using namespace ns_frame;
-
-// 静态成员变量初始化
-std::mutex BuffManager::mutex;
-std::unordered_map<std::tuple<int, int>, Buff, BuffManager::tuple_hash> BuffManager::data;
 
 Buff &BuffManager::get(int buffID, int buffLevel) {
     // 若 Buff ID 和 Level 任一不存在, 则添加

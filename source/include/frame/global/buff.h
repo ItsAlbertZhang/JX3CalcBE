@@ -1,7 +1,7 @@
-#ifndef FRAME_BASE_BUFF_H_
-#define FRAME_BASE_BUFF_H_
+#ifndef FRAME_GLOBAL_BUFF_H_
+#define FRAME_GLOBAL_BUFF_H_
 
-#include "frame/tab_interface.h"
+#include "frame/tab_static.h"
 #include <mutex>
 #include <string>
 #include <tuple>
@@ -52,7 +52,7 @@ public:
     static Buff &get(int buffID, int buffLevel);
 
 private:
-    static std::mutex mutex; // 互斥锁. 用于保护 SkillManager::add 操作.
+    static inline std::mutex mutex; // 互斥锁. 用于保护 SkillManager::add 操作.
 
     struct tuple_hash {
         template <class T1, class T2>
@@ -67,7 +67,7 @@ private:
      * Buff 缓存数据
      * 同一 ID, 不同 Level 的 Buff 拥有不同的 Buff 实例.
      */
-    static std::unordered_map<std::tuple<int, int>, Buff, tuple_hash> data;
+    static inline std::unordered_map<std::tuple<int, int>, Buff, tuple_hash> data;
 
     /**
      * @brief 初始化技能. 将指定 ID 与 Level 的 Buff 数据存至缓存.
@@ -79,4 +79,4 @@ private:
 
 } // namespace ns_frame
 
-#endif // FRAME_BASE_BUFF_H_
+#endif // FRAME_GLOBAL_BUFF_H_
