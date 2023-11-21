@@ -87,8 +87,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
                 LOG_INFO("EXECUTE_SCRIPT_WITH_PARAM: %s # %d\n", currStrAttrParamStr, currStrAttr->param2);
                 break;
             default:
-                std::cerr << "Undefined type: " << currStrAttr->type << "\t"
-                          << LuaTableString::luaAttributeType[currStrAttr->type] << std::endl;
+                LOG_ERROR("Undefined type: %d\t%s\n", currStrAttr->type, LuaTableString::luaAttributeType[currStrAttr->type]);
             }
             currStrAttrIdx++;
             break;
@@ -101,7 +100,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
             LOG_INFO("CAST_SKILL: %d # %d\n", it.param1, it.param2);
             break;
         default:
-            std::cerr << "Undefined type: " << it.type << "\t" << LuaTableString::luaAttributeType[it.type] << std::endl;
+            LOG_ERROR("Undefined type: %d\t%s\n", it.type, LuaTableString::luaAttributeType[it.type]);
         }
     }
     while (!skillQueue.empty()) {

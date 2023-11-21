@@ -1,5 +1,6 @@
 #include "frame/lua_func.h"
 #include "gdi.h"
+#include "program/log.h"
 
 using namespace ns_frame;
 using namespace std;
@@ -18,8 +19,7 @@ void LuaApply::add(string name) {
     sol::protected_function_result res = gdi::Interface::luaExecuteFile(name);
     if (!res.valid()) {
         sol::error err = res;
-        std::cerr << "luaExecuteFile failed:" << name << "\n"
-                  << err.what() << std::endl;
+        LOG_ERROR("luaExecuteFile failed: %s\n%s\n", name.c_str(), err.what());
     } else {
         sol::protected_function func = gdi::Interface::luaGetFunction("Apply");
         data[name] = func;

@@ -52,16 +52,14 @@ void SkillManager::add(int skillID, int skillLevel) {
     res = gdi::Interface::luaExecuteFile(name);
     if (!res.valid()) {
         sol::error err = res;
-        std::cerr << "luaExecuteFile failed:" << name << "\n"
-                  << err.what() << std::endl;
+        LOG_ERROR("luaExecuteFile failed: %s\n%s\n", name.c_str(), err.what());
     } else {
         GetSkillLevelData = gdi::Interface::luaGetFunction("GetSkillLevelData");
         // 调用 GetSkillLevelData 函数, 初始化技能
         res = GetSkillLevelData(skill);
         if (!res.valid()) {
             sol::error err = res;
-            std::cerr << "GetSkillLevelData failed:\n"
-                      << err.what() << std::endl;
+            LOG_ERROR("GetSkillLevelData failed:\n%s\n", err.what());
         }
         // 将技能存入缓存
         data[skillID][skillLevel] = std::move(skill);
@@ -118,5 +116,5 @@ void Skill::SetCheckCoolDown(int a, int b) {
 }
 
 void Skill::SetSubsectionSkill(int a, int b, int c, int d) {
-    std::cerr << "SetSubsectionSkill 未实现!" << std::endl;
+    LOG_ERROR("SetSubsectionSkill 未实现!\n");
 }
