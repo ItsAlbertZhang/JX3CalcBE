@@ -63,52 +63,51 @@ void SkillManager::add(int skillID, int skillLevel) {
 }
 
 void Skill::AddAttribute_iiii(int a, int b, int c, int d) {
-    attributes.emplace_back(a, b, c, d);
+    attrAttributes.emplace_back(a, b, c, d);
 }
 
 void Skill::AddAttribute_iidi(int a, int b, double c, int d) {
-    AddAttribute_iiii(a, b, (int)c, d);
+    attrAttributes.emplace_back(a, b, c, d);
 }
 
 void Skill::AddAttribute_iisi(int a, int b, std::string c, int d) {
-    attributes.emplace_back(-1, -1, -1, -1); // 占位, 代表该去 attributesString 中取值
-    attributesString.emplace_back(a, b, c, d);
+    attrAttributes.emplace_back(a, b, c, d);
 }
 
 void Skill::AddSlowCheckSelfBuff(int a, int b, int c, int d, int e) {
-    checkBuff.emplace_back(CheckBuffEnum::self, a, b, c, d, e);
+    attrCheckBuff.emplace_back(SkillCheckBuff::TypeEnum::self, a, b, c, d, e);
 }
 
 void Skill::AddSlowCheckDestBuff(int a, int b, int c, int d, int e) {
-    checkBuff.emplace_back(CheckBuffEnum::dest, a, b, c, d, e);
+    attrCheckBuff.emplace_back(SkillCheckBuff::TypeEnum::dest, a, b, c, d, e);
 }
 
 void Skill::AddSlowCheckSelfOwnBuff(int a, int b, int c, int d, int e) {
-    checkBuff.emplace_back(CheckBuffEnum::selfOwn, a, b, c, d, e);
+    attrCheckBuff.emplace_back(SkillCheckBuff::TypeEnum::selfOwn, a, b, c, d, e);
 }
 
 void Skill::AddSlowCheckDestOwnBuff(int a, int b, int c, int d, int e) {
-    checkBuff.emplace_back(CheckBuffEnum::destOwn, a, b, c, d, e);
+    attrCheckBuff.emplace_back(SkillCheckBuff::TypeEnum::destOwn, a, b, c, d, e);
 }
 
 void Skill::AddCheckSelfLearntSkill(int a, int b, int c) {
-    checkSelfLearntSkill.emplace_back(a, b, c);
+    attrCheckSelfLearntSkill.emplace_back(a, b, c);
 }
 
 void Skill::BindBuff(int a, int b, int c) {
-    bindBuff.emplace_back(a, b, c);
+    attrBindBuff.emplace_back(a, b, c);
 }
 
 void Skill::SetPublicCoolDown(int a) {
-    cooldown.emplace_back(CoolDownEnum::publicCD, 0, a);
+    attrCoolDown.emplace_back(SkillCoolDown::TypeEnum::publicCD, 0, a);
 }
 
 void Skill::SetNormalCoolDown(int a, int b) {
-    cooldown.emplace_back(CoolDownEnum::normalCD, a, b);
+    attrCoolDown.emplace_back(SkillCoolDown::TypeEnum::normalCD, a, b);
 }
 
 void Skill::SetCheckCoolDown(int a, int b) {
-    cooldown.emplace_back(CoolDownEnum::checkCD, a, b);
+    attrCoolDown.emplace_back(SkillCoolDown::TypeEnum::checkCD, a, b);
 }
 
 void Skill::SetSubsectionSkill(int a, int b, int c, int d) {

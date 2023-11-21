@@ -4,6 +4,6 @@
 using namespace ns_frame;
 
 void Character::LearnSkill(int skillID, int skillLevel) {
-    skillLearned[skillID] = skillLevel;
+    this->chSkill.skillLearned[skillID] = skillLevel;
     SkillManager::get(skillID, skillLevel);
 }

@@ -3,5 +3,5 @@
 using namespace ns_frame;
 
 bool Character::hasBuff(int buffID, int buffLevel) {
-    return this->buffExist.find(buffID) != this->buffExist.end() && this->buffExist[buffID].find(buffLevel) != this->buffExist[buffID].end();
+    return this->chBuff.buffList.find(std::make_tuple(buffID, buffLevel)) != this->chBuff.buffList.end();
 }

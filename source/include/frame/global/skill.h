@@ -23,36 +23,30 @@ public:
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性类 ----------
     class SkillAttribute {
     public:
-        SkillAttribute(int mode, int type, int param1, int param2)
-            : mode(mode), type(type), param1(param1), param2(param2) {}
-        int mode;
-        int type;
-        int param1;
-        int param2;
+        explicit SkillAttribute(int mode, int type, int param1Int, int param2)
+            : mode(mode), type(type), param1Int(param1Int), param2(param2) {}
+        explicit SkillAttribute(int mode, int type, std::string param1Str, int param2)
+            : mode(mode), type(type), param1Str(param1Str), param2(param2) {}
+        explicit SkillAttribute(int mode, int type, double param1Double, int param2)
+            : mode(mode), type(type), param1Int(static_cast<int>(param1Double)), param2(param2) {}
+        int mode = -1;
+        int type = -1;
+        int param1Int = -1;
+        std::string param1Str;
+        int param2 = -1;
     };
 
-    class SkillAttributeString {
+    class SkillCheckBuff {
     public:
-        SkillAttributeString(int mode, int type, std::string param1, int param2)
-            : mode(mode), type(type), param1(param1), param2(param2) {}
-        int mode;
-        int type;
-        std::string param1;
-        int param2;
-    };
-
-    enum class CheckBuffEnum {
-        self,
-        dest,
-        selfOwn,
-        destOwn,
-    };
-
-    class CheckBuff {
-    public:
-        CheckBuff(CheckBuffEnum type, int dwBuffID, int nStackNum, int nStackNumCompareFlag, int nLevel, int nLevelCompareFlag)
+        enum class TypeEnum {
+            self,
+            dest,
+            selfOwn,
+            destOwn,
+        };
+        SkillCheckBuff(TypeEnum type, int dwBuffID, int nStackNum, int nStackNumCompareFlag, int nLevel, int nLevelCompareFlag)
             : type(type), dwBuffID(dwBuffID), nStackNum(nStackNum), nStackNumCompareFlag(nStackNumCompareFlag), nLevel(nLevel), nLevelCompareFlag(nLevelCompareFlag) {}
-        CheckBuffEnum type;
+        TypeEnum type;
         int dwBuffID;
         int nStackNum;
         int nStackNumCompareFlag;
@@ -60,47 +54,45 @@ public:
         int nLevelCompareFlag;
     };
 
-    class CheckSelfLearntSkill {
+    class SkillCheckSelfLearntSkill {
     public:
-        CheckSelfLearntSkill(int dwSkillID, int dwSkillLevel, int nLevelCompareFlag)
+        SkillCheckSelfLearntSkill(int dwSkillID, int dwSkillLevel, int nLevelCompareFlag)
             : dwSkillID(dwSkillID), dwSkillLevel(dwSkillLevel), nLevelCompareFlag(nLevelCompareFlag) {}
         int dwSkillID;
         int dwSkillLevel;
         int nLevelCompareFlag;
     };
 
-    class BindBuff {
+    class SkillBindBuff {
     public:
-        BindBuff(int index, int nBuffID, int nBuffLevel)
+        SkillBindBuff(int index, int nBuffID, int nBuffLevel)
             : index(index), nBuffID(nBuffID), nBuffLevel(nBuffLevel) {}
         int index;
         int nBuffID;
         int nBuffLevel;
     };
 
-    enum class CoolDownEnum {
-        publicCD,
-        normalCD,
-        checkCD,
-    };
-
-    class CoolDown {
+    class SkillCoolDown {
     public:
-        CoolDown(CoolDownEnum type, int index, int nCoolDownID)
+        enum TypeEnum {
+            publicCD,
+            normalCD,
+            checkCD,
+        };
+        SkillCoolDown(TypeEnum type, int index, int nCoolDownID)
             : type(type), index(index), nCoolDownID(nCoolDownID) {}
-        CoolDownEnum type;
+        TypeEnum type;
         int index;
         int nCoolDownID;
     };
 
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性 ----------
 
-    std::vector<SkillAttribute> attributes;                 // AddAttribute 添加的属性列表
-    std::vector<SkillAttributeString> attributesString;     // AddAttribute 添加的参数1为字符串的属性列表 (通常是执行脚本)
-    std::vector<CheckBuff> checkBuff;                       // 需要检查的 buff
-    std::vector<CheckSelfLearntSkill> checkSelfLearntSkill; // 需要检查的自身技能
-    std::vector<BindBuff> bindBuff;                         // 需要绑定的 buff
-    std::vector<CoolDown> cooldown;                         // CD
+    std::vector<SkillAttribute> attrAttributes;                      // AddAttribute 添加的属性列表
+    std::vector<SkillCheckBuff> attrCheckBuff;                       // 需要检查的 buff
+    std::vector<SkillCheckSelfLearntSkill> attrCheckSelfLearntSkill; // 需要检查的自身技能
+    std::vector<SkillBindBuff> attrBindBuff;                         // 需要绑定的 buff
+    std::vector<SkillCoolDown> attrCoolDown;                         // CD
 
     // ---------- GetSkillLevelData 中操作的属性 ----------
 

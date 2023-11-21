@@ -7,14 +7,26 @@
 
 namespace ns_frame {
 
-class LuaApply {
+class LuaFunc {
 public:
-    LuaApply() = delete; // 禁止创建类实例
-    static sol::protected_function get(std::string);
+    LuaFunc() = delete; // 禁止创建类实例
+    static sol::protected_function getApply(std::string filename);
 
 private:
-    static inline thread_local std::unordered_map<std::string, sol::protected_function> data; // 数据存放区, 不同线程之间数据不共享
-    static void add(std::string);
+    enum class Enum {
+        Apply,
+        COUNT, // 计数用
+    };
+    static inline const std::string names[] = {
+        "Apply",
+    };
+    /**
+     * @brief 缓存数据, 不同线程之间数据不共享
+     * @note key 为 filename, value 为一个 vector, 其内存储该文件内的所有函数.
+     * @note vector 的 size() 应当等于 static_cast<int>(Enum::COUNT)
+     */
+    static inline thread_local std::unordered_map<std::string, std::vector<sol::protected_function>> data;
+    static void add(std::string filename);
 };
 
 } // namespace ns_frame

@@ -3,9 +3,7 @@
 
 #include "frame/character/property/attribute.h"
 #include "frame/character/property/buff.h"
-#include <queue>
-#include <set>
-#include <unordered_map>
+#include "frame/character/property/skill.h"
 #include <vector>
 
 namespace ns_frame {
@@ -20,22 +18,10 @@ public:
     int nCharacterID;         // 角色 ID
     bool isPlayer = false;    // 是否为玩家
     Character *target = this; // 当前目标
-    CharacterAttr attribute;  // 角色属性
 
-    // 已学习技能列表. key 为技能 ID, value 为技能等级.
-    std::unordered_map<int, int> skillLearned;
-
-    // 待执行的技能队列.
-    class SkillQueueElement {
-    public:
-        SkillQueueElement(int skillID, int skillLevel) : skillID(skillID), skillLevel(skillLevel) {}
-        int skillID;    // 技能 ID
-        int skillLevel; // 技能等级
-    };
-    std::queue<SkillQueueElement> skillQueue;
-
-    // 已存在的 buff 列表. key1 为 Buff ID, key2 为 Buff Level.
-    std::unordered_map<int, std::unordered_map<int, CharacterBuff>> buffExist;
+    CharacterAttr chAttr;   // 角色属性
+    CharacterSkill chSkill; // 角色技能
+    CharacterBuff chBuff;   // 角色 buff
 
     // ---------- 以下方法暂未确定是否被 lua 调用 ----------
     void LearnSkill(int skillID, int skillLevel);
