@@ -11,6 +11,8 @@ namespace ns_frame {
 /**
  * @brief Character 类
  * @note 用于表示游戏中的角色.
+ * @warning #### 关于线程安全:
+ * @warning 这个类的实例会在线程内部被创建. 因此, 其天然就是线程安全的.
  */
 class Character {
 public:

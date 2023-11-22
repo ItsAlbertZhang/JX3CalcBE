@@ -16,7 +16,7 @@ Log::Log(const std::string &name) : name(name) {
 }
 
 Log::~Log() {
-    std::cout << "\nLog (" << name << "):\n\n"
+    std::cout << "\nLog (" << name << "):\n"
               << data << std::endl;
     delete[] data;
 }

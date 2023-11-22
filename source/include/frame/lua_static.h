@@ -7,6 +7,8 @@
 
 namespace ns_frame {
 
+// gdi 库的 lua 本身是线程本地的. 因此, 传递给 lua 的所有函数都是线程安全的.
+
 // lua 依赖, 用于传递给 gdi 库的 initLua 函数.
 class LuaDependence {
 public:

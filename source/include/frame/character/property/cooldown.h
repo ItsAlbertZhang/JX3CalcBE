@@ -13,7 +13,7 @@ public:
      * @brief 单个 Cooldown
      */
     class Item {
-        public:
+    public:
         int tickOver = 0; // 结束 tick
     };
 

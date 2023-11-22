@@ -11,6 +11,10 @@ namespace ns_frame {
 /**
  * @brief 技能类
  * @warning 技能是公共资源, 不属于某个角色. 应当使用技能管理类对其统一进行存取.
+ * @warning #### 关于线程安全以及实现方式:
+ * @warning - 这个类的实例会在多线程之间共享.
+ * @warning - 在构造以外的情况下, 这个类的实例 **应当是** 只读的.
+ * @warning - 这个类实例的构造由 `Manager::add()` 完成, 并借助锁确保线程安全.
  */
 class Skill {
 public:

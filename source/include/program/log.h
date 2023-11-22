@@ -28,10 +28,10 @@ extern Log log_error;
 } // namespace ns_program
 
 #define LOG_INFO(format, ...) \
-    ns_program::log_info(format, __VA_ARGS__);
+    ns_program::log_info("%s:%d: " format, __FILE__, __LINE__, __VA_ARGS__);
 
 #define LOG_ERROR(format, ...) \
-    ns_program::log_error(format, __VA_ARGS__);
+    ns_program::log_error("%s:%d: " format, __FILE__, __LINE__, __VA_ARGS__);
 
 #else
 

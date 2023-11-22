@@ -13,7 +13,7 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
 static bool staticCheckCoolDown(Character *self, const Skill &skill);
 
 void Character::CastSkill(int skillID, int skillLevel) {
-    LOG_INFO("\nTry to CastSkill: %d # %d\n", skillID, skillLevel);
+    LOG_INFO("Try to CastSkill: %d # %d\n", skillID, skillLevel);
     // 获取技能
     Skill &skill = SkillManager::get(skillID, skillLevel);
 
@@ -57,7 +57,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
             LOG_INFO("CAST_SKILL: %d # %d\n", it.param1Int, it.param2);
             break;
         default:
-            LOG_ERROR("Undefined type: %d\t%s\n", it.type, LuaTableString::luaAttributeType[it.type]);
+            LOG_ERROR("Undefined type: %d %s\n", it.type, LuaTableString::luaAttributeType[it.type]);
         }
     }
 

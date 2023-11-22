@@ -7,6 +7,11 @@
 
 namespace ns_frame {
 
+/**
+ * @brief LuaFunc 类
+ * @warning 这是一个静态类, 用于存放和管理 lua 中的函数, 不应当被创建实例.
+ * @warning 这个类通过静态数据成员 thread_local 的形式实现线程安全.
+ */
 class LuaFunc {
 public:
     LuaFunc() = delete; // 禁止创建类实例
