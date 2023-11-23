@@ -51,13 +51,27 @@ void Character::CastSkill(int skillID, int skillLevel) {
     for (auto &it : skill.attrAttributes) {
         switch (it.type) {
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT): {
-            std::string paramstr = "scripts/" + it.param1Str;
-            sol::protected_function luaFunc = LuaFunc::getApply(paramstr);
-            LOG_INFO("EXECUTE_SCRIPT: %s # %d\n", paramstr.c_str(), it.param2);
+            std::string paramStr = "scripts/" + it.param1Str;
+            sol::protected_function luaFunc = LuaFunc::getApply(paramStr);
+            int dwCharacterID = characterMap[this->target];
+            int dwSkillSrcID = characterMap[this];
+            sol::protected_function_result res = luaFunc(dwCharacterID, dwSkillSrcID);
+            if (!res.valid()) {
+                sol::error err = res;
+                LOG_ERROR("EXECUTE_SCRIPT failed: %s\n%s\n", paramStr.c_str(), err.what());
+            }
+            LOG_INFO("EXECUTE_SCRIPT: %s # %d\n", paramStr.c_str(), it.param2);
         } break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): {
             std::string paramStr = "scripts/" + it.param1Str;
             sol::protected_function luaFunc = LuaFunc::getApply(paramStr);
+            int dwCharacterID = characterMap[this->target];
+            int dwSkillSrcID = characterMap[this];
+            sol::protected_function_result res = luaFunc(dwCharacterID, it.param2, dwSkillSrcID);
+            if (!res.valid()) {
+                sol::error err = res;
+                LOG_ERROR("EXECUTE_SCRIPT_WITH_PARAM failed: %s\n%s\n", paramStr.c_str(), err.what());
+            }
             LOG_INFO("EXECUTE_SCRIPT_WITH_PARAM: %s # %d\n", paramStr, it.param2);
         } break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):

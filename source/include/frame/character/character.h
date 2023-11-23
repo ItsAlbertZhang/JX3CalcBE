@@ -28,7 +28,8 @@ public:
     CharacterBuff chBuff;         // 角色 buff
     CharacterCooldown chCooldown; // 角色冷却
 
-    // ---------- 以下方法暂未确定是否被 lua 调用 ----------
+    // 以下方法未被 lua 调用
+    static Character *getCharacter(int nCharacterID);
     void LearnSkill(int skillID, int skillLevel);
 
     // ---------- 以下方法直接被 lua 调用 ----------
@@ -37,7 +38,7 @@ public:
     bool IsHaveBuff(int buffID, int buffLevel);
     void ModifyCoolDown(int ID, int frame);
 
-    //  ---------- 不被 CharacterAttr 包含的属性, 可能被 lua 调用, 以 "n" 开头而非 "at" ----------
+    //  ---------- 被 lua 调用的属性, 以 "n" 开头而非 "at" ----------
     int nLevel = 120;                               // 等级
     int nSpunkToSolarAndLunarAttackPowerCof = 0;    // 元气转换为阳性和阴性内功攻击的系数
     int nSpunkToSolarAndLunarCriticalStrikeCof = 0; // 元气转换为阳性和阴性内功会心的系数

@@ -1,9 +1,11 @@
 #include "frame/lua_static.h"
+#include "frame/character/character.h"
 #include "frame/global/skill.h"
 
 using namespace ns_frame;
 
 std::vector<std::string> LuaDependence::staticFuncNeedConvert = {
+    // Skill
     "AddAttribute",
     "AddSlowCheckSelfBuff",
     "AddSlowCheckDestBuff",
@@ -15,6 +17,11 @@ std::vector<std::string> LuaDependence::staticFuncNeedConvert = {
     "SetNormalCoolDown",
     "SetCheckCoolDown",
     "SetSubsectionSkill",
+    // Character
+    "CastSkill",
+    "AddBuff",
+    "IsHaveBuff",
+    "ModifyCoolDown",
 };
 
 bool LuaDependence::lua_init(sol::state &lua) {
@@ -87,7 +94,16 @@ bool LuaDependence::lua_init(sol::state &lua) {
                             "nDismountingRate", &Skill::nDismountingRate,
 
                             "nWeaponDamagePercent", &Skill::nWeaponDamagePercent);
+
+    lua.new_usertype<Character>("Skill",
+                                "CastSkill", &Character::CastSkill,
+                                "AddBuff", &Character::AddBuff,
+                                "IsHaveBuff", &Character::IsHaveBuff,
+                                "ModifyCoolDown", &Character::ModifyCoolDown);
+
     lua.set_function("Include", LuaGlobalFunction::Include);
+    lua.set_function("GetPlayer", LuaGlobalFunction::GetPlayer);
+    lua.set_function("GetNpc", LuaGlobalFunction::GetNpc);
 
     sol::table AttributeEffectMode = lua.create_table();
     for (int i = 0; i < static_cast<int>(LuaGlobalTable::ATTRIBUTE_EFFECT_MODE::COUNT); i++) {
@@ -121,4 +137,12 @@ bool LuaDependence::lua_init(sol::state &lua) {
 
 void LuaGlobalFunction::Include(const std::string &filename) {
     return;
+}
+
+Character *LuaGlobalFunction::GetPlayer(int nCharacterID) {
+    return Character::getCharacter(nCharacterID);
+}
+
+Character *LuaGlobalFunction::GetNpc(int nCharacterID) {
+    return Character::getCharacter(nCharacterID);
 }

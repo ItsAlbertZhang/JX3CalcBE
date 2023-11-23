@@ -1,6 +1,7 @@
 #ifndef FRAME_LUA_INTERFACE_H_
 #define FRAME_LUA_INTERFACE_H_
 
+#include "frame/character/character.h"
 #include <sol2/sol.hpp>
 #include <string>
 #include <vector>
@@ -21,6 +22,8 @@ class LuaGlobalFunction {
 public:
     LuaGlobalFunction() = delete;
     static void Include(const std::string &filename);
+    static Character *GetPlayer(int nCharacterID);
+    static Character *GetNpc(int nCharacterID);
 };
 
 // lua 中的表对应的字符串数组.

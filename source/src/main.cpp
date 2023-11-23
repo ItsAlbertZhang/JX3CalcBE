@@ -51,37 +51,32 @@ int main(int argc, char *argv[]) {
     player.CastSkill(3963, 10);
 
     // // 测试用例 3
-    // clock_t start, end;
-
-    // gdi::TabSelectType arg1, arg2;
-    // arg1.emplace_back();
-    // arg1[0]["ID"] = "112";
-    // arg1[0]["Level"] = "5";
-    // arg2.emplace_back();
-    // arg2[0]["SkillID"] = "112";
-    // start = clock();
-    // gdi::Interface::tabSelect(gdi::Tab::buff, arg1);
-    // end = clock();
-    // std::cout << std::endl
-    //           << "tabSelect 1: " << (double)((end - start) * 1000) / CLOCKS_PER_SEC << "ms." << std::endl
-    //           << std::endl;
-    // for (auto &idx : arg1) {
-    //     for (auto &j : idx) {
-    //         std::cout << j.first << ":" << j.second << " # ";
+    // class MyClass {
+    // public:
+    //     int a, b = 0;
+    //     MyClass *func() {
+    //         printf("%d in func\n", a);
+    //         // return this;
+    //         return nullptr;
     //     }
-    //     std::cout << std::endl;
-    // }
-    // start = clock();
-    // gdi::Interface::tabSelect(gdi::Tab::skills, arg2);
-    // end = clock();
-    // std::cout << std::endl
-    //           << "tabSelect 2: " << (double)((end - start) * 1000) / CLOCKS_PER_SEC << "ms." << std::endl
-    //           << std::endl;
-    // for (auto &idx : arg2) {
-    //     for (auto &j : idx) {
-    //         std::cout << j.first << ":" << j.second << " # ";
-    //     }
-    //     std::cout << std::endl;
+    // };
+    // sol::state lua;
+    // lua.open_libraries(sol::lib::base);
+    // MyClass obj;
+    // obj.a = 10;
+    // lua.new_usertype<MyClass>("MyClass",
+    //                           "a", &MyClass::a,
+    //                           "b", &MyClass::b,
+    //                           "func", &MyClass::func);
+    // lua.script("function f(obj) if(obj:func()) then obj.b = 123 end end");
+    // sol::protected_function luafunc = lua["f"];
+    // MyClass *ptr = &obj;
+    // sol::protected_function_result res = luafunc(ptr);
+    // if (!res.valid()) {
+    //     sol::error err = res;
+    //     std::cout << "Lua error: " << err.what() << std::endl;
+    // } else {
+    //     printf("%d\n", obj.b);
     // }
 
 #ifdef DEBUG

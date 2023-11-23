@@ -15,10 +15,13 @@ public:
     class Item {
     public:
         bool isValid = false;
-        Character *source = nullptr;
         using event_tick_t = unsigned long long;
         event_tick_t tickOver = 0; // 结束 tick
+
+        Character *source = nullptr;
         int nStackNum = 0;
+
+        // OnRemove: nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID
     };
 
     struct tuple_hash {
