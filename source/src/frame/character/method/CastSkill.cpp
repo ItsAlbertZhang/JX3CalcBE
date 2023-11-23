@@ -160,9 +160,10 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
 
 static bool staticCheckCoolDown(Character *self, const Skill &skill) {
     for (const auto &it : skill.attrCoolDown) {
-        if (self->chCooldown.cooldownList.find(it.nCoolDownID) != self->chCooldown.cooldownList.end()) {
-            return false; // 在 CD 列表中找到了该 CD, CastSkill 失败
+        if (self->chCooldown.cooldownList.find(it.nCoolDownID) == self->chCooldown.cooldownList.end()) { // 在 CD 列表中找不到该 CD, CastSkill 成功
+            return true;
+        } else {
+            return !self->chCooldown.cooldownList[it.nCoolDownID].isValid; // 在 CD 列表中找到了该 CD, CD 有效则 CastSkill 失败, 否则 CastSkill 成功
         }
     }
-    return true;
 }
