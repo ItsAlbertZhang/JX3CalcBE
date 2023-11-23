@@ -14,7 +14,7 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
 static bool staticCheckCoolDown(Character *self, const Skill &skill);
 
 void Character::CastSkill(int skillID, int skillLevel) {
-    CastSkillTarget(skillID, skillLevel, static_cast<int>(target->isPlayer), target->nCharacterID);
+    CastSkillTarget(skillID, skillLevel, static_cast<int>(target->isPlayer), target->dwID);
 }
 
 void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targetID) {
@@ -39,8 +39,7 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
 
     LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
 
-    // TODO: 可以释放, 走 CD, 绑定 buff
-    // 走 CD
+    // 触发 CD
     for (auto &it : skill.attrCoolDown) {
         if (it.type != Skill::SkillCoolDown::TypeEnum::checkCD) {
             auto &cooldown = CooldownManager::get(it.nCoolDownID);
@@ -57,27 +56,15 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
         switch (it.type) {
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT): {
             std::string paramStr = "scripts/" + it.param1Str;
-            sol::protected_function luaFunc = LuaFunc::getApply(paramStr);
             int dwCharacterID = characterMap[target];
             int dwSkillSrcID = characterMap[this];
-            sol::protected_function_result res = luaFunc(dwCharacterID, dwSkillSrcID);
-            if (!res.valid()) {
-                sol::error err = res;
-                LOG_ERROR("EXECUTE_SCRIPT failed: %s\n%s\n", paramStr.c_str(), err.what());
-            }
-            LOG_INFO("EXECUTE_SCRIPT: %s # %d\n", paramStr.c_str(), it.param2);
+            LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
         } break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): {
             std::string paramStr = "scripts/" + it.param1Str;
-            sol::protected_function luaFunc = LuaFunc::getApply(paramStr);
             int dwCharacterID = characterMap[target];
             int dwSkillSrcID = characterMap[this];
-            sol::protected_function_result res = luaFunc(dwCharacterID, it.param2, dwSkillSrcID);
-            if (!res.valid()) {
-                sol::error err = res;
-                LOG_ERROR("EXECUTE_SCRIPT_WITH_PARAM failed: %s\n%s\n", paramStr.c_str(), err.what());
-            }
-            LOG_INFO("EXECUTE_SCRIPT_WITH_PARAM: %s # %d\n", paramStr, it.param2);
+            LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
         } break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):
             this->chSkill.skillQueue.emplace(it.param1Int, it.param2);

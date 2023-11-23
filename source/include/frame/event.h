@@ -43,7 +43,7 @@ public:
 
 private:
     static inline thread_local event_tick_t tick;
-    static inline thread_local std::multiset<Event> data;
+    static inline thread_local std::set<Event> data;
 };
 
 } // namespace ns_frame

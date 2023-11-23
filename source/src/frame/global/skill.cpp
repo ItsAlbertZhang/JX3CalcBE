@@ -1,4 +1,5 @@
 #include "frame/global/skill.h"
+#include "frame/lua_runtime.h"
 #include "gdi.h"
 #include "program/log.h"
 
@@ -40,24 +41,11 @@ void SkillManager::add(int skillID, int skillLevel) {
         auto it = data[skillID].begin();
         skill.tab = it->second.tab;
     }
-    // 获取 GetSkillLevelData 函数
-    sol::protected_function GetSkillLevelData;
-    sol::protected_function_result res;
+    // 执行 GetSkillLevelData
     std::string name = "scripts\\skill\\" + skill.tab["ScriptFile"];
-    LOG_INFO("GetSkillLevelData: %s\n", skill.tab["ScriptFile"].c_str());
-    res = gdi::Interface::luaExecuteFile(name);
-    if (!res.valid()) {
-        sol::error err = res;
-        LOG_ERROR("luaExecuteFile failed: %s\n%s\n", name.c_str(), err.what());
-    } else {
-        GetSkillLevelData = gdi::Interface::luaGetFunction("GetSkillLevelData");
-        // 调用 GetSkillLevelData 函数, 初始化技能
-        res = GetSkillLevelData(skill);
-        if (!res.valid()) {
-            sol::error err = res;
-            LOG_ERROR("GetSkillLevelData failed:\n%s\n", err.what());
-        }
-        // 将技能存入缓存
+    bool res = LuaFunc::analysis(LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData);
+    if (res) {
+        // 成功执行, 将技能添加到 data 中
         data[skillID][skillLevel] = std::move(skill);
     }
 }

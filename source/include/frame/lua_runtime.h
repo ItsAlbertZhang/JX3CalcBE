@@ -15,27 +15,36 @@ namespace ns_frame {
 class LuaFunc {
 public:
     LuaFunc() = delete; // 禁止创建类实例
-    static int getIndex(const std::string &filename);
-    static sol::protected_function getApply(const std::string &filename);
-    static sol::protected_function getOnTimer(int idx);
 
-private:
     enum class Enum {
+        GetSkillLevelData,
         Apply,
         OnTimer,
         COUNT, // 计数用
     };
+    // 注意, 这个类接收 std::string &类型的参数, 均不保证 const 性. 它会将传入参数中的所有反斜杠替换为正斜杠.
+    static int getIndex(std::string &filename);
+    static sol::protected_function getGetSkillLevelData(std::string &filename);
+    static sol::protected_function getApply(std::string &filename);
+    static sol::protected_function getOnTimer(int idx);
+    static bool analysis(sol::protected_function_result res, std::string &filename, Enum func);
+    static bool analysis(sol::protected_function_result res, int idx, Enum func);
+
+private:
     static inline const std::string names[] = {
+        "GetSkillLevelData",
         "Apply",
         "OnTimer",
     };
     /**
      * @brief 缓存数据, 不同线程之间数据不共享
-     * @note key 为 filename, value 为一个 vector, 其内存储该文件内的所有函数.
-     * @note vector 的 size() 应当等于 static_cast<int>(Enum::COUNT)
+     * @note filename 存在有无法区分正反斜杠的问题, 但不影响使用.
+     * @note 在遇到不同的斜杠时, lua 会被再加载一次, 这样做的效率应该要高于每次检查传入并进行替换.
      */
+    static inline thread_local std::vector<std::string> filenameList;
     static inline thread_local std::unordered_map<std::string, int> filenameMap;
     static inline thread_local std::vector<std::vector<sol::protected_function>> filefuncList;
+    static const std::string &getFilename(int idx);
     static void add(const std::string &filename);
 };
 

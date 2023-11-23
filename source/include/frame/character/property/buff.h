@@ -6,6 +6,7 @@
 namespace ns_frame {
 
 class Character;
+using event_tick_t = unsigned long long;
 
 class CharacterBuff {
 public:
@@ -15,7 +16,6 @@ public:
     class Item {
     public:
         bool isValid = false;
-        using event_tick_t = unsigned long long;
         event_tick_t tickOver = 0; // 结束 tick
 
         Character *source = nullptr;

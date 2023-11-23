@@ -3,7 +3,7 @@
 using namespace ns_frame;
 
 Character::Character() {
-    nCharacterID = static_cast<int>(characterMap.size());
-    characterMap.emplace(this, nCharacterID);
+    this->dwID = static_cast<int>(characterList.size());
     characterList.push_back(this);
+    characterMap.emplace(this, dwID);
 }
