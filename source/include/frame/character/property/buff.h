@@ -14,6 +14,7 @@ public:
      */
     class Item {
     public:
+        bool isValid = false;
         Character *source = nullptr;
         int tickOver = 0; // 结束 tick
         int nStackNum = 0;

@@ -6,7 +6,7 @@
 namespace ns_frame {
 
 using event_tick_t = unsigned long long;
-using event_func_t = void (*)(void *);
+using event_func_t = void (*)(void *, void *);
 
 /**
  * @brief Event 类
@@ -17,11 +17,12 @@ using event_func_t = void (*)(void *);
  */
 class Event {
 public:
-    Event(event_tick_t tick, event_func_t func, void *param)
-        : tick(tick), func(func), param(param) {}
+    Event(event_tick_t tick, event_func_t func, void *self, void *param)
+        : tick(tick), func(func), self(self), param(param) {}
     event_tick_t tick; // 生效时间
     event_func_t func; // 回调函数
-    void *param;       // 回调函数参数
+    void *self;        // 回调函数的第一个参数
+    void *param;       // 回调函数的第二个参数
     bool operator<(const Event &other) const {
         return tick < other.tick;
     }
@@ -37,7 +38,7 @@ public:
     EventManager() = delete;
 
     bool run();
-    void add(event_tick_t delay, event_func_t func, void *param);
+    void add(event_tick_t delay, event_func_t func, void *self, void *param);
 
 private:
     static inline thread_local event_tick_t tick;

@@ -9,10 +9,10 @@ bool EventManager::run() {
     Event event = *data.begin();
     data.erase(data.begin());
     tick = event.tick;
-    event.func(event.param);
+    event.func(event.self, event.param);
     return true;
 }
 
-void EventManager::add(event_tick_t delay, event_func_t func, void *param) {
-    data.emplace(tick + delay, func, param);
+void EventManager::add(event_tick_t delay, event_func_t func, void *self, void *param) {
+    data.emplace(tick + delay, func, self, param);
 }

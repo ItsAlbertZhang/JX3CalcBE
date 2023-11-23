@@ -14,6 +14,7 @@ public:
      */
     class Item {
     public:
+        bool isValid = false;
         int tickOver = 0; // 结束 tick
     };
 
