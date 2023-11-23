@@ -1,4 +1,5 @@
 #include "frame/character/character.h"
+#include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
 #include "frame/lua_runtime.h"
 #include "frame/lua_static.h"
@@ -34,6 +35,17 @@ void Character::CastSkill(int skillID, int skillLevel) {
     LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
 
     // TODO: 可以释放, 走 CD, 绑定 buff
+    // 走 CD
+    for (auto &it : skill.attrCoolDown) {
+        if (it.type != Skill::SkillCoolDown::TypeEnum::checkCD) {
+            auto &cooldown = CooldownManager::get(it.nCoolDownID);
+            ModifyCoolDown(it.nCoolDownID, cooldown.Duration); // TODO: 加速效果还没做
+        }
+    }
+    // 绑定 buff
+    for (auto &it : skill.attrBindBuff) {
+        AddBuff(characterMap[this], characterMap[this->target], it.nBuffID, it.nBuffLevel);
+    }
 
     // 魔法属性
     for (auto &it : skill.attrAttributes) {
@@ -100,7 +112,7 @@ static bool staticCheckBuff(Character *self, const Skill &skill) {
             checkbuffSrcOwn = true;
             break;
         }
-        if (!checkbuffCharacter->hasBuff(it.dwBuffID, it.nLevel)) {
+        if (!checkbuffCharacter->IsHaveBuff(it.dwBuffID, it.nLevel)) {
             return false; // 找不到符合要求的 buff, CastSkill 失败
         }
         ns_frame::CharacterBuff::Item *checkbuffObj = &(checkbuffCharacter->chBuff.buffList[std::make_tuple(it.dwBuffID, it.nLevel)]);
@@ -160,10 +172,11 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
 
 static bool staticCheckCoolDown(Character *self, const Skill &skill) {
     for (const auto &it : skill.attrCoolDown) {
-        if (self->chCooldown.cooldownList.find(it.nCoolDownID) == self->chCooldown.cooldownList.end()) { // 在 CD 列表中找不到该 CD, CastSkill 成功
-            return true;
-        } else {
-            return !self->chCooldown.cooldownList[it.nCoolDownID].isValid; // 在 CD 列表中找到了该 CD, CD 有效则 CastSkill 失败, 否则 CastSkill 成功
+        if (self->chCooldown.cooldownList.find(it.nCoolDownID) != self->chCooldown.cooldownList.end() && self->chCooldown.cooldownList[it.nCoolDownID].isValid) {
+            // 在 CD 列表中找到了该 CD, 且 isValid 处于激活状态
+            return false;
+            // TODO: 充能技能尚未实现. 即使 CD 有效, 也有可能能够 CastSkill
         }
     }
+    return true;
 }

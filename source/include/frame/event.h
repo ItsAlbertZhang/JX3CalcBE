@@ -24,7 +24,7 @@ public:
     void *self;        // 回调函数的第一个参数
     void *param;       // 回调函数的第二个参数
     bool operator<(const Event &other) const {
-        return tick < other.tick;
+        return std::tie(tick, func, self, param) < std::tie(other.tick, other.func, other.self, other.param);
     }
 };
 
@@ -38,7 +38,8 @@ public:
     EventManager() = delete;
 
     bool run();
-    void add(event_tick_t delay, event_func_t func, void *self, void *param);
+    static event_tick_t add(event_tick_t delay, event_func_t func, void *self, void *param);
+    static event_tick_t cancel(event_tick_t tick, event_func_t func, void *self, void *param);
 
 private:
     static inline thread_local event_tick_t tick;

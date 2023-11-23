@@ -15,7 +15,8 @@ public:
     class Item {
     public:
         bool isValid = false;
-        int tickOver = 0; // 结束 tick
+        using event_tick_t = unsigned long long;
+        event_tick_t tickOver = 0; // 结束 tick
     };
 
     std::unordered_map<int, Item> cooldownList;

@@ -5,7 +5,7 @@
 #include "frame/character/property/buff.h"
 #include "frame/character/property/cooldown.h"
 #include "frame/character/property/skill.h"
-#include <vector>
+#include <unordered_map>
 
 namespace ns_frame {
 /**
@@ -29,11 +29,12 @@ public:
 
     // ---------- 以下方法暂未确定是否被 lua 调用 ----------
     void LearnSkill(int skillID, int skillLevel);
-    bool hasBuff(int buffID, int buffLevel); // 检查是否存在指定的 buff
 
     // ---------- 以下方法直接被 lua 调用 ----------
     void CastSkill(int skillID, int skillLevel);
     void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
+    bool IsHaveBuff(int buffID, int buffLevel);
+    void ModifyCoolDown(int ID, int frame);
 
     //  ---------- 不被 CharacterAttr 包含的属性, 可能被 lua 调用, 以 "n" 开头而非 "at" ----------
     int nLevel = 120;                               // 等级
@@ -44,7 +45,7 @@ public:
     int nMaxMoonEnergy = 0; // 最大月魂
 
 private:
-    static inline std::vector<Character *> characterList; // 角色列表
+    static inline std::unordered_map<Character *, int> characterMap; // 角色表
 };
 
 class Player : public Character {

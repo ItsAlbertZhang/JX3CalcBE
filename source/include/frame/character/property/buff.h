@@ -16,7 +16,8 @@ public:
     public:
         bool isValid = false;
         Character *source = nullptr;
-        int tickOver = 0; // 结束 tick
+        using event_tick_t = unsigned long long;
+        event_tick_t tickOver = 0; // 结束 tick
         int nStackNum = 0;
     };
 
