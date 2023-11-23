@@ -24,6 +24,7 @@ public:
     static void Include(const std::string &filename);
     static Character *GetPlayer(int nCharacterID);
     static Character *GetNpc(int nCharacterID);
+    static bool IsPlayer(int nCharacterID);
 };
 
 // lua 中的表对应的字符串数组.
@@ -33,6 +34,7 @@ public:
     static const char *luaAttributeType[];
     static const char *luaBuffCompareFlag[];
     static const char *luaSkillCompareFlag[];
+    static const char *luaTarget[];
 };
 
 // lua 中的表.
@@ -641,6 +643,11 @@ public:
         EQUAL,
         GREATER,
         GREATER_EQUAL,
+        COUNT,
+    };
+    enum class TARGET {
+        NPC,
+        PLAYER,
         COUNT,
     };
 };

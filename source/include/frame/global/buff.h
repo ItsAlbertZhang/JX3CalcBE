@@ -38,7 +38,7 @@ public:
     class Attrib {
     public:
         Attrib(TabEnum::BuffAttrib type, int valueA, int valueB) : type(type), valueAInt(valueA), valueB(valueB) {}
-        Attrib(TabEnum::BuffAttrib type, std::string valueA, int valueB) : type(type), valueAStr(valueA), valueB(valueB) {}
+        Attrib(TabEnum::BuffAttrib type, const std::string &valueA, int valueB) : type(type), valueAStr(valueA), valueB(valueB) {}
         TabEnum::BuffAttrib type = TabEnum::BuffAttrib::COUNT;
         int valueAInt = 0;
         std::string valueAStr = "";

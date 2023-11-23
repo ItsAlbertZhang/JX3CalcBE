@@ -22,6 +22,9 @@ std::vector<std::string> LuaDependence::staticFuncNeedConvert = {
     "AddBuff",
     "IsHaveBuff",
     "ModifyCoolDown",
+    "GetBuff",
+    "GetSkillLevel",
+    "SetTimer",
 };
 
 bool LuaDependence::lua_init(sol::state &lua) {
@@ -96,14 +99,20 @@ bool LuaDependence::lua_init(sol::state &lua) {
                             "nWeaponDamagePercent", &Skill::nWeaponDamagePercent);
 
     lua.new_usertype<Character>("Skill",
-                                "CastSkill", &Character::CastSkill,
+                                "CastSkill", sol::overload(&Character::CastSkill, &Character::CastSkillTarget),
                                 "AddBuff", &Character::AddBuff,
                                 "IsHaveBuff", &Character::IsHaveBuff,
-                                "ModifyCoolDown", &Character::ModifyCoolDown);
+                                "ModifyCoolDown", &Character::ModifyCoolDown,
+                                "GetBuff", &Character::GetBuff,
+                                "GetSkillLevel", &Character::GetSkillLevel,
+                                "SetTimer", &Character::SetTimer,
+                                "nCurrentSunEnergy", &Character::nCurrentSunEnergy,
+                                "nCurrentMoonEnergy", &Character::nCurrentMoonEnergy);
 
     lua.set_function("Include", LuaGlobalFunction::Include);
     lua.set_function("GetPlayer", LuaGlobalFunction::GetPlayer);
     lua.set_function("GetNpc", LuaGlobalFunction::GetNpc);
+    lua.set_function("IsPlayer", LuaGlobalFunction::IsPlayer);
 
     sol::table AttributeEffectMode = lua.create_table();
     for (int i = 0; i < static_cast<int>(LuaGlobalTable::ATTRIBUTE_EFFECT_MODE::COUNT); i++) {
@@ -129,6 +138,12 @@ bool LuaDependence::lua_init(sol::state &lua) {
     }
     lua["SKILL_COMPARE_FLAG"] = SKILL_COMPARE_FLAG;
 
+    sol::table TARGET = lua.create_table();
+    for (int i = 0; i < static_cast<int>(LuaGlobalTable::TARGET::COUNT); i++) {
+        TARGET[LuaTableString::luaTarget[i]] = i;
+    }
+    lua["TARGET"] = TARGET;
+
     lua["CONSUME_BASE"] = 100;
     lua["LENGTH_BASE"] = 64;
 
@@ -145,4 +160,8 @@ Character *LuaGlobalFunction::GetPlayer(int nCharacterID) {
 
 Character *LuaGlobalFunction::GetNpc(int nCharacterID) {
     return Character::getCharacter(nCharacterID);
+}
+
+bool LuaGlobalFunction::IsPlayer(int nCharacterID) {
+    return Character::getCharacter(nCharacterID)->isPlayer;
 }

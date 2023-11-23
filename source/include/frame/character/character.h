@@ -5,6 +5,7 @@
 #include "frame/character/property/buff.h"
 #include "frame/character/property/cooldown.h"
 #include "frame/character/property/skill.h"
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -22,29 +23,36 @@ public:
     int nCharacterID;         // 角色 ID
     bool isPlayer = false;    // 是否为玩家
     Character *target = this; // 当前目标
+    int nLevel = 120;         // 等级
 
     CharacterAttr chAttr;         // 角色属性
     CharacterSkill chSkill;       // 角色技能
     CharacterBuff chBuff;         // 角色 buff
     CharacterCooldown chCooldown; // 角色冷却
 
-    // 以下方法未被 lua 调用
+    // ---------- 以下方法未被 lua 调用 ----------
     static Character *getCharacter(int nCharacterID);
     void LearnSkill(int skillID, int skillLevel);
 
     // ---------- 以下方法直接被 lua 调用 ----------
     void CastSkill(int skillID, int skillLevel);
+    void CastSkillTarget(int skillID, int skillLevel, int type, int targetID);
     void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
     bool IsHaveBuff(int buffID, int buffLevel);
     void ModifyCoolDown(int ID, int frame);
+    CharacterBuff::Item *GetBuff(int buffID, int buffLevel);
+    int GetSkillLevel(int skillID);
+    void SetTimer(int frame, std::string filename, int type, int targetID);
 
     //  ---------- 被 lua 调用的属性, 以 "n" 开头而非 "at" ----------
-    int nLevel = 120;                               // 等级
+
     int nSpunkToSolarAndLunarAttackPowerCof = 0;    // 元气转换为阳性和阴性内功攻击的系数
     int nSpunkToSolarAndLunarCriticalStrikeCof = 0; // 元气转换为阳性和阴性内功会心的系数
 
-    int nMaxSunEnergy = 0;  // 最大日灵
-    int nMaxMoonEnergy = 0; // 最大月魂
+    int nMaxSunEnergy = 0;      // 最大日灵
+    int nMaxMoonEnergy = 0;     // 最大月魂
+    int nCurrentSunEnergy = 0;  // 当前日灵
+    int nCurrentMoonEnergy = 0; // 当前月魂
 
 private:
     static inline std::unordered_map<Character *, int> characterMap; // 角色表

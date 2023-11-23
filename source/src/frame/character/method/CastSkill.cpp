@@ -7,19 +7,24 @@
 
 using namespace ns_frame;
 
-static bool staticCheckBuff(Character *self, const Skill &skill);
+static bool staticCheckBuff(Character *self, Character *target, const Skill &skill);
 static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue);
 static bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
 static bool staticCheckCoolDown(Character *self, const Skill &skill);
 
 void Character::CastSkill(int skillID, int skillLevel) {
+    CastSkillTarget(skillID, skillLevel, static_cast<int>(target->isPlayer), target->nCharacterID);
+}
+
+void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targetID) {
+    Character *target = Character::getCharacter(targetID);
     LOG_INFO("Try to CastSkill: %d # %d\n", skillID, skillLevel);
     // 获取技能
     Skill &skill = SkillManager::get(skillID, skillLevel);
 
     // 检查技能是否可以释放
-    if (!staticCheckBuff(this, skill)) {
+    if (!staticCheckBuff(this, target, skill)) {
         LOG_INFO("Checkbuff failed!\n");
         return;
     }
@@ -44,7 +49,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
     }
     // 绑定 buff
     for (auto &it : skill.attrBindBuff) {
-        this->target->AddBuff(characterMap[this], this->nLevel, it.nBuffID, it.nBuffLevel);
+        target->AddBuff(characterMap[this], this->nLevel, it.nBuffID, it.nBuffLevel);
     }
 
     // 魔法属性
@@ -53,7 +58,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT): {
             std::string paramStr = "scripts/" + it.param1Str;
             sol::protected_function luaFunc = LuaFunc::getApply(paramStr);
-            int dwCharacterID = characterMap[this->target];
+            int dwCharacterID = characterMap[target];
             int dwSkillSrcID = characterMap[this];
             sol::protected_function_result res = luaFunc(dwCharacterID, dwSkillSrcID);
             if (!res.valid()) {
@@ -65,7 +70,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): {
             std::string paramStr = "scripts/" + it.param1Str;
             sol::protected_function luaFunc = LuaFunc::getApply(paramStr);
-            int dwCharacterID = characterMap[this->target];
+            int dwCharacterID = characterMap[target];
             int dwSkillSrcID = characterMap[this];
             sol::protected_function_result res = luaFunc(dwCharacterID, it.param2, dwSkillSrcID);
             if (!res.valid()) {
@@ -95,7 +100,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
     }
 }
 
-static bool staticCheckBuff(Character *self, const Skill &skill) {
+static bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {
     for (const auto &it : skill.attrCheckBuff) {
         Character *checkbuffCharacter = nullptr;
         bool checkbuffSrcOwn = false;
@@ -115,14 +120,14 @@ static bool staticCheckBuff(Character *self, const Skill &skill) {
             checkbuffCharacter = self;
             break;
         case Skill::SkillCheckBuff::TypeEnum::dest:
-            checkbuffCharacter = self->target;
+            checkbuffCharacter = target;
             break;
         case Skill::SkillCheckBuff::TypeEnum::selfOwn:
             checkbuffCharacter = self;
             checkbuffSrcOwn = true;
             break;
         case Skill::SkillCheckBuff::TypeEnum::destOwn:
-            checkbuffCharacter = self->target;
+            checkbuffCharacter = target;
             checkbuffSrcOwn = true;
             break;
         }

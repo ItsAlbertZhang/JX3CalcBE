@@ -29,7 +29,7 @@ public:
     public:
         explicit SkillAttribute(int mode, int type, int param1Int, int param2)
             : mode(mode), type(type), param1Int(param1Int), param2(param2) {}
-        explicit SkillAttribute(int mode, int type, std::string param1Str, int param2)
+        explicit SkillAttribute(int mode, int type, const std::string &param1Str, int param2)
             : mode(mode), type(type), param1Str(param1Str), param2(param2) {}
         explicit SkillAttribute(int mode, int type, double param1Double, int param2)
             : mode(mode), type(type), param1Int(static_cast<int>(param1Double)), param2(param2) {}

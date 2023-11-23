@@ -606,3 +606,8 @@ const char *LuaTableString::luaSkillCompareFlag[] = {
     "GREATER",
     "GREATER_EQUAL",
 };
+
+const char *LuaTableString::luaTarget[] = {
+    "NPC",
+    "PLAYER",
+};
