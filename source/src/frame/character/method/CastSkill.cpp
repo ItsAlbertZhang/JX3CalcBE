@@ -44,7 +44,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
     }
     // 绑定 buff
     for (auto &it : skill.attrBindBuff) {
-        AddBuff(characterMap[this], characterMap[this->target], it.nBuffID, it.nBuffLevel);
+        this->target->AddBuff(characterMap[this], this->nLevel, it.nBuffID, it.nBuffLevel);
     }
 
     // 魔法属性

@@ -6,6 +6,7 @@
 #include "frame/character/property/cooldown.h"
 #include "frame/character/property/skill.h"
 #include <unordered_map>
+#include <vector>
 
 namespace ns_frame {
 /**
@@ -46,6 +47,7 @@ public:
 
 private:
     static inline std::unordered_map<Character *, int> characterMap; // 角色表
+    static inline std::vector<Character *> characterList;            // 角色列表
 };
 
 class Player : public Character {
