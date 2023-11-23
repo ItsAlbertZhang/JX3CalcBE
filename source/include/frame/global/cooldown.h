@@ -18,6 +18,13 @@ namespace ns_frame {
 class Cooldown {
 public:
     std::unordered_map<std::string, std::string> tab; // buffs.tab 中的数据
+
+    // 初始化时拿出一些数据, 降低使用开销
+    int ID;
+    int Duration;
+    int MinDuration;
+    int MaxDuration;
+    int MaxCount;
 };
 
 /**

@@ -18,7 +18,7 @@ void CooldownManager::add(int ID) {
         // 若 Cooldown ID 存在, 则直接返回
         return; // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
     }
-    // 初始化 Cooldown
+
     Cooldown cooldown;
     // 获取 tab
     gdi::TabSelectType arg;
@@ -26,7 +26,12 @@ void CooldownManager::add(int ID) {
     arg[0]["ID"] = std::to_string(ID);
     gdi::Interface::tabSelect(gdi::Tab::cooldown, arg);
     cooldown.tab = std::move(arg[0]);
-    // TODO: 对 cooldown 进行处理
+    // 初始化 Cooldown
+    cooldown.ID = ID;
+    cooldown.Duration = std::stoi(cooldown.tab["Duration"]);
+    cooldown.MinDuration = std::stoi(cooldown.tab["MinDuration"]);
+    cooldown.MaxDuration = std::stoi(cooldown.tab["MaxDuration"]);
+    cooldown.MaxCount = std::stoi(cooldown.tab["MaxCount"]);
     // 将 Cooldown 存入缓存
     data[ID] = std::move(cooldown);
 }
