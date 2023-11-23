@@ -23,16 +23,26 @@ public:
     // ---------- 数据存放区 ----------
     std::unordered_map<std::string, std::string> tab; // buffs.tab 中的数据
 
+    // 初始化时拿出一些数据, 降低使用开销
     int ID;
-    int nLevel;
+    int Level;
+    bool IsStackable;
+    int MaxStackNum;
+    int Count;
+    int Interval;
+    bool Hide;
+    bool CanCancel;
+    int MinInterval;
+    int MaxInterval;
 
     class Attrib {
     public:
-        Attrib(TabEnum::BuffAttrib type, int value) : type(type), valueInt(value) {}
-        Attrib(TabEnum::BuffAttrib type, std::string value) : type(type), valueStr(value) {}
+        Attrib(TabEnum::BuffAttrib type, int valueA, int valueB) : type(type), valueAInt(valueA), valueB(valueB) {}
+        Attrib(TabEnum::BuffAttrib type, std::string valueA, int valueB) : type(type), valueAStr(valueA), valueB(valueB) {}
         TabEnum::BuffAttrib type = TabEnum::BuffAttrib::COUNT;
-        int valueInt = 0;
-        std::string valueStr = "";
+        int valueAInt = 0;
+        std::string valueAStr = "";
+        int valueB = 0;
     };
     std::vector<Attrib> BeginAttrib;
     std::vector<Attrib> ActiveAttrib;
@@ -79,6 +89,11 @@ private:
      * @param buffLevel
      */
     static void add(int buffID, int buffLevel);
+
+    static inline std::unordered_map<std::string, TabEnum::BuffAttrib> attribMap;
+    static inline bool isAttribMapInit = false;
+    static void initAttribMap();
+    static TabEnum::BuffAttrib getAttribType(const std::string &attribName);
 };
 
 } // namespace ns_frame

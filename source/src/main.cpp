@@ -32,26 +32,16 @@ int main(int argc, char *argv[]) {
     std::cout << std::filesystem::current_path() << std::endl;
 
     // // 测试用例 1
-    // gdiInstance.luaExecuteFile("scripts\\skill\\明教\\明教_烈日斩.lua");
-    // ns_interface::Skill skill;
-    // printf("in main, skill is %p\n", &skill);
-    // ns_interface::InterfaceSkill interfaceskill;
-    // ns_interface::InterfaceSkill::current_skill = &skill;
-    // sol::protected_function GetSkillLevelData = gdiInstance.luaGetFunction("GetSkillLevelData");
-    // sol::protected_function_result result = GetSkillLevelData(interfaceskill);
-    // if (!result.valid()) {
-    //     sol::error err = result;
-    //     std::cout << "GetSkillLevelData failed:\n"
-    //               << err.what() << std::endl;
-    // } else {
-    //     std::cout << "skill.nCostSprintPower = " << interfaceskill.nCostSprintPower << std::endl;
-    //     std::cout << "skill.nMinRadius = " << interfaceskill.nMinRadius << std::endl;
-    //     std::cout << "skill.nMaxRadius = " << interfaceskill.nMaxRadius << std::endl;
-    //     std::cout << "skill.nAngleRange = " << interfaceskill.nAngleRange << std::endl;
-    //     std::cout << "skill.bFullAngleInAir = " << interfaceskill.bFullAngleInAir << std::endl;
-    //     std::cout << "skill.nChannelInterval = " << interfaceskill.nChannelInterval << std::endl;
-    //     std::cout << "skill.nWeaponDamagePercent = " << interfaceskill.nWeaponDamagePercent << std::endl;
-    // }
+    // sol::state lua;
+    // lua.open_libraries(sol::lib::base);
+    // lua.script("function foo() return 1 end");
+    // sol::function foo = lua["foo"];
+    // std::cout << "First call: " << int(foo()) << std::endl;
+
+    // lua.script("function foo() return 2 end");
+    // std::cout << "Second call: " << int(foo()) << std::endl;
+    // sol::function foo2 = lua["foo"];
+    // std::cout << "Foo2 call: " << int(foo2()) << std::endl;
 
     // 测试用例 2
     ns_frame::Player player;
@@ -93,6 +83,7 @@ int main(int argc, char *argv[]) {
     //     }
     //     std::cout << std::endl;
     // }
+
 #ifdef DEBUG
     std::cout << "Press any key to exit..." << std::endl;
 #endif
