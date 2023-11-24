@@ -13,9 +13,19 @@ static bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
 static bool staticCheckCoolDown(Character *self, const Skill &skill);
 
-void Character::CastSkill(int skillID, int skillLevel) {
-    CastSkillTarget(skillID, skillLevel, static_cast<int>(target->isPlayer), target->dwID);
-}
+class StaticSkill {
+public:
+    int atPhysicsDamage = 0;
+    int atPhysicsDamageRand = 0;
+    int atSolarDamage = 0;
+    int atSolarDamageRand = 0;
+    int atLunarDamage = 0;
+    int atLunarDamageRand = 0;
+    int atNeutralDamage = 0;
+    int atNeutralDamageRand = 0;
+    int atPoisonDamage = 0;
+    int atPoisonDamageRand = 0;
+};
 
 void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targetID) {
     Character *target = Character::getCharacter(targetID);
@@ -37,6 +47,8 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
         return;
     }
 
+    CharacterAttr attr = this->chAttr; // 调用拷贝构造函数, 复制一份当前属性的副本. 因此, 在 CastSkill 中, 不会影响到原有的属性.
+    StaticSkill staticSkill;
     LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
 
     // 触发 CD
@@ -68,14 +80,43 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
         } break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):
             this->chSkill.skillQueue.emplace(it.param1Int, it.param2);
-            LOG_INFO("CAST_SKILL_TARGET_DST: %d # %d\n", it.param1Int, it.param2);
             break;
         case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL):
             this->chSkill.skillQueue.emplace(it.param1Int, it.param2);
-            LOG_INFO("CAST_SKILL: %d # %d\n", it.param1Int, it.param2);
             break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_PHYSICS_DAMAGE):
+            staticSkill.atPhysicsDamage = it.param1Int;
+            break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_PHYSICS_DAMAGE_RAND):
+            staticSkill.atPhysicsDamageRand = it.param1Int;
+            break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_SOLAR_DAMAGE):
+            staticSkill.atSolarDamage = it.param1Int;
+            break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_SOLAR_DAMAGE_RAND):
+            staticSkill.atSolarDamageRand = it.param1Int;
+            break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE):
+            staticSkill.atLunarDamage = it.param1Int;
+            break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE_RAND):
+            staticSkill.atLunarDamageRand = it.param1Int;
+            break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_NEUTRAL_DAMAGE):
+            staticSkill.atNeutralDamage = it.param1Int;
+            break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_NEUTRAL_DAMAGE_RAND):
+            staticSkill.atNeutralDamageRand = it.param1Int;
+            break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE):
+            staticSkill.atPoisonDamage = it.param1Int;
+            break;
+        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE_RAND):
+            staticSkill.atPoisonDamageRand = it.param1Int;
+            break;
+
         default:
-            LOG_ERROR("Undefined type: %d %s\n", it.type, LuaTableString::luaAttributeType[it.type]);
+            LOG_ERROR("Undefined type: %d %s: %d %d\n", it.type, LuaTableString::luaAttributeType[it.type], it.param1Int, it.param2);
         }
     }
 
@@ -85,6 +126,10 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
         this->chSkill.skillQueue.pop();
         this->CastSkill(it.skillID, it.skillLevel);
     }
+}
+
+void Character::CastSkill(int skillID, int skillLevel) {
+    CastSkillTarget(skillID, skillLevel, static_cast<int>(target->isPlayer), target->dwID);
 }
 
 static bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {

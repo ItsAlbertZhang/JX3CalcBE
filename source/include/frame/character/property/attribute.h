@@ -1,13 +1,21 @@
 #ifndef FRAME_CHARACTER_PROPERTY_ATTRIBUTE_H_
 #define FRAME_CHARACTER_PROPERTY_ATTRIBUTE_H_
 
+#include <cstring>
+
 namespace ns_frame {
 /**
  * @brief CharacterAttr 类
  * @note 作为 Character 类的一个属性, 其作用是封装, 避免 Character 类过于臃肿.
+ * @warning 注意该类的默认构造函数和拷贝构造函数! 应尽量避免向此类中添加高级数据类型, 如 std::string 等. 如果一定要添加, 请注意拷贝构造函数的实现.
  */
 class CharacterAttr {
 public:
+    CharacterAttr() = default;
+    CharacterAttr(const CharacterAttr &obj) {
+        memcpy(this, &obj, sizeof(CharacterAttr));
+    }
+
     int atBasePotentialAdd = 0;       // 所有主属性
     int atVitalityBase = 0;           // 体质
     int atStrengthBase = 0;           // 力道
