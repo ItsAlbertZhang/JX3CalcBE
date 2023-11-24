@@ -41,6 +41,8 @@ void SkillManager::add(int skillID, int skillLevel) {
         auto it = data[skillID].begin();
         skill.tab = it->second.tab;
     }
+    // 初始化数据
+    skill.type = SkillManager::typeMap.find(skill.tab["KindType"])->second;
     // 执行 GetSkillLevelData
     std::string name = "scripts\\skill\\" + skill.tab["ScriptFile"];
     bool res = LuaFunc::analysis(LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData);

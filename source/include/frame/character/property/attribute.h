@@ -139,11 +139,9 @@ public:
 
     int atAllDamageAddPercent = 0;      // 造成的全伤害和治疗效果提升1024分数
     int atAllMagicDamageAddPercent = 0; // 造成的内功伤害和治疗效果提升1024分数
-    int atAddDamageByDstMoveState = 0;  // 根据目标移动状态造成的伤害提升1024分数
 
     int atAllShieldIgnorePercent = 0;  // 无视防御1024分数
     int atActiveThreatCoefficient = 0; // 仇恨提升1024分数
-    int atDstNpcDamageCoefficient = 0; // 非侠士伤害
 
     int atPhysicsAttackPowerAdd = 0; // 外功额外攻击
     int atSolarAttackPowerAdd = 0;   // 阳性内功额外攻击
@@ -163,52 +161,55 @@ public:
     int atNeutralOvercomeAdd = 0; // 混元内功额外破防等级
     int atPoisonOvercomeAdd = 0;  // 毒性内功额外破防等级
 
-    int getPhysicsAttackPower(); // 获取外功攻击
-    int getSolarAttackPower();   // 获取阳性内功攻击
-    int getLunarAttackPower();   // 获取阴性内功攻击
-    int getNeutralAttackPower(); // 获取混元内功攻击
-    int getPoisonAttackPower();  // 获取毒性内功攻击
+    int getPhysicsAttackPower() const; // 获取外功攻击
+    int getSolarAttackPower() const;   // 获取阳性内功攻击
+    int getLunarAttackPower() const;   // 获取阴性内功攻击
+    int getNeutralAttackPower() const; // 获取混元内功攻击
+    int getPoisonAttackPower() const;  // 获取毒性内功攻击
 
-    int getPhysicsCriticalStrike(); // 获取外功会心. 结果为万分数, 这符合游戏内的实际原理.
-    int getSolarCriticalStrike();   // 获取阳性内功会心. 结果为万分数, 这符合游戏内的实际原理.
-    int getLunarCriticalStrike();   // 获取阴性内功会心. 结果为万分数, 这符合游戏内的实际原理.
-    int getNeutralCriticalStrike(); // 获取混元内功会心. 结果为万分数, 这符合游戏内的实际原理.
-    int getPoisonCriticalStrike();  // 获取毒性内功会心. 结果为万分数, 这符合游戏内的实际原理.
+    int getPhysicsCriticalStrike() const; // 获取外功会心. 结果为万分数, 这符合游戏内的实际原理.
+    int getSolarCriticalStrike() const;   // 获取阳性内功会心. 结果为万分数, 这符合游戏内的实际原理.
+    int getLunarCriticalStrike() const;   // 获取阴性内功会心. 结果为万分数, 这符合游戏内的实际原理.
+    int getNeutralCriticalStrike() const; // 获取混元内功会心. 结果为万分数, 这符合游戏内的实际原理.
+    int getPoisonCriticalStrike() const;  // 获取毒性内功会心. 结果为万分数, 这符合游戏内的实际原理.
 
-    int getPhysicsCriticalDamagePower(); // 获取外功会心效果. 结果为一个1024分数, 且最大为 1280 (对应 300% 会心效果), 这符合游戏内的实际原理.
-    int getSolarCriticalDamagePower();   // 获取阳性内功会心效果. 结果为一个1024分数, 且最大为 1280 (对应 300% 会心效果), 这符合游戏内的实际原理.
-    int getLunarCriticalDamagePower();   // 获取阴性内功会心效果. 结果为一个1024分数, 且最大为 1280 (对应 300% 会心效果), 这符合游戏内的实际原理.
-    int getNeutralCriticalDamagePower(); // 获取混元内功会心效果. 结果为一个1024分数, 且最大为 1280 (对应 300% 会心效果), 这符合游戏内的实际原理.
-    int getPoisonCriticalDamagePower();  // 获取毒性内功会心效果. 结果为一个1024分数, 且最大为 1280 (对应 300% 会心效果), 这符合游戏内的实际原理.
+    int getPhysicsCriticalDamagePower() const; // 获取外功会心效果. 结果为一个1024分数, 且最大为 1280 (对应 300% 会心效果), 这符合游戏内的实际原理.
+    int getSolarCriticalDamagePower() const;   // 获取阳性内功会心效果. 结果为一个1024分数, 且最大为 1280 (对应 300% 会心效果), 这符合游戏内的实际原理.
+    int getLunarCriticalDamagePower() const;   // 获取阴性内功会心效果. 结果为一个1024分数, 且最大为 1280 (对应 300% 会心效果), 这符合游戏内的实际原理.
+    int getNeutralCriticalDamagePower() const; // 获取混元内功会心效果. 结果为一个1024分数, 且最大为 1280 (对应 300% 会心效果), 这符合游戏内的实际原理.
+    int getPoisonCriticalDamagePower() const;  // 获取毒性内功会心效果. 结果为一个1024分数, 且最大为 1280 (对应 300% 会心效果), 这符合游戏内的实际原理.
 
-    int getPhysicsOvercome(); // 获取外功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
-    int getSolarOvercome();   // 获取阳性内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
-    int getLunarOvercome();   // 获取阴性内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
-    int getNeutralOvercome(); // 获取混元内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
-    int getPoisonOvercome();  // 获取毒性内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getPhysicsOvercome() const; // 获取外功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getSolarOvercome() const;   // 获取阳性内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getLunarOvercome() const;   // 获取阴性内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getNeutralOvercome() const; // 获取混元内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getPoisonOvercome() const;  // 获取毒性内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
 
-    int getPhysicsShield(); // 获取外功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
-    int getSolarShield();   // 获取阳性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
-    int getLunarShield();   // 获取阴性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
-    int getNeutralShield(); // 获取混元内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
-    int getPoisonShield();  // 获取毒性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
+    int getPhysicsShield() const; // 获取外功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
+    int getSolarShield() const;   // 获取阳性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
+    int getLunarShield() const;   // 获取阴性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
+    int getNeutralShield() const; // 获取混元内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
+    int getPoisonShield() const;  // 获取毒性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
 
-    int getStrain(); // 获取无双. 结果为一个1024分数, 这符合游戏内的实际原理.
-    int getHaste();  // 获取加速. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getStrain() const; // 获取无双. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getHaste() const;  // 获取加速. 结果为一个1024分数, 这符合游戏内的实际原理.
 
-    int getPhysicsDamageAddPercent(); // 获取外功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
-    int getSolarDamageAddPercent();   // 获取阳性内功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
-    int getLunarDamageAddPercent();   // 获取阴性内功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
-    int getNeutralDamageAddPercent(); // 获取混元内功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
-    int getPoisonDamageAddPercent();  // 获取毒性内功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getPhysicsDamageAddPercent() const; // 获取外功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getSolarDamageAddPercent() const;   // 获取阳性内功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getLunarDamageAddPercent() const;   // 获取阴性内功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getNeutralDamageAddPercent() const; // 获取混元内功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getPoisonDamageAddPercent() const;  // 获取毒性内功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
+
+    int atDstNpcDamageCoefficient = 0; // 非侠士伤害提升1024分数
+    int atAddDamageByDstMoveState = 0; // 根据目标移动状态造成的伤害提升1024分数, 出现于: 明教/秘笈/明教_秘籍_烈日斩_静止目标加伤害.lua
 
 private:
-    int get_attack_power(int attribute_type);
-    int get_critical_strike(int attribute_type);
-    int get_critical_damage_power(int attribute_type);
-    int get_overcome(int attribute_type);
-    int get_shield(int attribute_type);
-    int get_damage_add_percent(int attribute_type);
+    int get_attack_power(int attribute_type) const;
+    int get_critical_strike(int attribute_type) const;
+    int get_critical_damage_power(int attribute_type) const;
+    int get_overcome(int attribute_type) const;
+    int get_shield(int attribute_type) const;
+    int get_damage_add_percent(int attribute_type) const;
 };
 } // namespace ns_frame
 

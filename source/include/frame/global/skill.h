@@ -8,6 +8,17 @@
 
 namespace ns_frame {
 
+enum class SkillType {
+    None,
+    Physics,
+    SolarMagic,
+    LunarMagic,
+    NeutralMagic,
+    Poison,
+    Leap,
+    Adaptive,
+};
+
 /**
  * @brief 技能类
  * @warning 技能是公共资源, 不属于某个角色. 应当使用技能管理类对其统一进行存取.
@@ -20,6 +31,7 @@ class Skill {
 public:
     // ---------- 数据存放区 ----------
     std::unordered_map<std::string, std::string> tab; // skills.tab 中的数据
+    SkillType type = SkillType::None;                 // 技能类型
 
     // ---------- 技能等级 ----------
     int dwLevel = 1;
@@ -216,6 +228,17 @@ private:
      * @param skillLevel
      */
     static void add(int skillID, int skillLevel);
+
+    static inline const std::unordered_map<std::string, SkillType> typeMap = {
+        {"None", SkillType::None},
+        {"Physics", SkillType::Physics},
+        {"SolarMagic", SkillType::SolarMagic},
+        {"LunarMagic", SkillType::LunarMagic},
+        {"NeutralMagic", SkillType::NeutralMagic},
+        {"Poison", SkillType::Poison},
+        {"Leap", SkillType::Leap},
+        {"Adaptive", SkillType::Adaptive},
+    };
 };
 
 } // namespace ns_frame
