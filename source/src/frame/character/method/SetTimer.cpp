@@ -12,11 +12,7 @@ static void callbackSetTimer(void *self, void *param) {
     int type = data[1];
     int targetID = data[2];
     delete[] data;
-    sol::protected_function_result res = LuaFunc::getOnTimer(idx)(selfPtr, type, targetID);
-    if (!res.valid()) {
-        sol::error err = res;
-        LOG_ERROR("LuaFunc::getOnTimer failed: %s\n", err.what());
-    }
+    LuaFunc::analysis(LuaFunc::getOnTimer(idx)(selfPtr, type, targetID), idx, LuaFunc::Enum::OnTimer);
 }
 void Character::SetTimer(int frame, std::string filename, int type, int targetID) {
     int *data = new int[3];
