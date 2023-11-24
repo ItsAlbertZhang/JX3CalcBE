@@ -3,7 +3,7 @@
 
 using namespace ns_frame;
 
-Cooldown &CooldownManager::get(int ID) {
+const Cooldown &CooldownManager::get(int ID) {
     // 若 Cooldown ID 不存在, 则添加
     if (data.find(ID) == data.end()) {
         add(ID);

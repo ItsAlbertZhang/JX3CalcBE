@@ -3,7 +3,7 @@
 
 using namespace ns_frame;
 
-Buff &BuffManager::get(int buffID, int buffLevel) {
+const Buff &BuffManager::get(int buffID, int buffLevel) {
     // 若 Buff ID 和 Level 任一不存在, 则添加
     if (data.find(std::make_tuple(buffID, buffLevel)) == data.end()) {
         add(buffID, buffLevel);

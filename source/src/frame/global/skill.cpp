@@ -5,7 +5,7 @@
 
 using namespace ns_frame;
 
-Skill &SkillManager::get(int skillID, int skillLevel) {
+const Skill &SkillManager::get(int skillID, int skillLevel) {
     // 若技能 ID 不存在, 则添加
     if (data.find(skillID) == data.end()) {
         add(skillID, skillLevel);

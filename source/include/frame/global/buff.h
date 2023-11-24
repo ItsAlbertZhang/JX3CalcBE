@@ -63,7 +63,7 @@ public:
      * @param buffLevel
      * @return Buff&
      */
-    static Buff &get(int buffID, int buffLevel);
+    static const Buff &get(int buffID, int buffLevel);
 
 private:
     static inline std::mutex mutex; // 互斥锁. 用于保护 add 操作.

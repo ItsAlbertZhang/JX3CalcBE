@@ -27,11 +27,11 @@ public:
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性类 ----------
     class SkillAttribute {
     public:
-        explicit SkillAttribute(int mode, int type, int param1Int, int param2)
+        SkillAttribute(int mode, int type, int param1Int, int param2)
             : mode(mode), type(type), param1Int(param1Int), param2(param2) {}
-        explicit SkillAttribute(int mode, int type, const std::string &param1Str, int param2)
+        SkillAttribute(int mode, int type, const std::string &param1Str, int param2)
             : mode(mode), type(type), param1Str(param1Str), param2(param2) {}
-        explicit SkillAttribute(int mode, int type, double param1Double, int param2)
+        SkillAttribute(int mode, int type, double param1Double, int param2)
             : mode(mode), type(type), param1Int(static_cast<int>(param1Double)), param2(param2) {}
         int mode = -1;
         int type = -1;
@@ -199,7 +199,7 @@ public:
      * @param skillLevel
      * @return Skill&
      */
-    static Skill &get(int skillID, int skillLevel);
+    static const Skill &get(int skillID, int skillLevel);
 
 private:
     static inline std::mutex mutex; // 互斥锁. 用于保护 add 操作.

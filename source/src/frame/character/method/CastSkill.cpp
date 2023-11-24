@@ -31,7 +31,7 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
     Character *target = Character::getCharacter(targetID);
     LOG_INFO("Try to CastSkill: %d # %d\n", skillID, skillLevel);
     // 获取技能
-    Skill &skill = SkillManager::get(skillID, skillLevel);
+    const Skill &skill = SkillManager::get(skillID, skillLevel);
 
     // 检查技能是否可以释放
     if (!staticCheckBuff(this, target, skill)) {
@@ -54,7 +54,7 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
     // 触发 CD
     for (auto &it : skill.attrCoolDown) {
         if (it.type != Skill::SkillCoolDown::TypeEnum::checkCD) {
-            auto &cooldown = CooldownManager::get(it.nCoolDownID);
+            const Cooldown &cooldown = CooldownManager::get(it.nCoolDownID);
             ModifyCoolDown(it.nCoolDownID, cooldown.Duration); // TODO: 加速效果还没做
         }
     }

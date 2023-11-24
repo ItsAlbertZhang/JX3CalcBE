@@ -40,7 +40,7 @@ public:
      * @param ID
      * @return Cooldown&
      */
-    static Cooldown &get(int ID);
+    static const Cooldown &get(int ID);
 
 private:
     static inline std::mutex mutex; // 互斥锁. 用于保护 add 操作.
