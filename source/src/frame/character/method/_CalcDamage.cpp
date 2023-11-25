@@ -36,20 +36,15 @@ std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int 
 int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, int damageBase, int damageRand, int atCriticalStrike, int atCriticalDamagePower, int nChannelInterval, int nWeaponDamagePercent) {
     // TODO: 目标御劲降低会心率和会心效果.
 
-    // 此处的快照并非指延时类的快照, 而是广义上的瞬间快照.
-    // 例如, 在 Skill 的 AddAttribute 中提高的属性, 实际上会在一个快照中计算, 而非在角色属性中.
-    // 因此, 应当尽量避免直接使用 this->chAttr, 而是使用 attrSelf, 除非明确知道这个属性不会被快照.
-    // 若使用 this->chAttr, 则 Skill 的 AddAttribute 中提高的属性无法生效, 除非调用了 AdditionalAttribute(skill), 例如心法技能的 lua.
-
     int atStrain = this->chAttr.getStrain();                                // 类型× 快照
     int atDstNpcDamageCoefficient = this->chAttr.atDstNpcDamageCoefficient; // 类型× 快照
     int atAddDamageByDstMoveState = this->chAttr.atAddDamageByDstMoveState; // 类型× 快照
 
     int atAttackPower = 0;           // 类型√ 快照
     int atDamageAddPercent = 0;      // 类型√ 快照
-    int atOvercome = 0;              // 类型√ 自身
-    int targetShield = 0;            // 类型√ 目标
-    int targetDamageCoefficient = 0; // 类型√ 目标
+    int atOvercome = 0;              // 类型√ 自身实时
+    int targetShield = 0;            // 类型√ 目标实时
+    int targetDamageCoefficient = 0; // 类型√ 目标实时
     int c = 12;
     int weaponDamage = 0;
     switch (typeDamage) {
