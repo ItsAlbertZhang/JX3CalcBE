@@ -34,6 +34,7 @@ public:
     SkillType type = SkillType::None;                 // 技能类型
 
     // ---------- 技能等级 ----------
+    int dwID = -1;
     int dwLevel = 1;
 
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性类 ----------

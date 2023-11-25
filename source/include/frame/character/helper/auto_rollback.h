@@ -30,12 +30,15 @@ private:
  */
 class AutoRollbackAttribute {
 public:
-    AutoRollbackAttribute(Character *self, const Skill &skill);
+    AutoRollbackAttribute(Character *self, const Skill &skill, int atCriticalStrike, int atCriticalDamagePower, bool isCritical);
     ~AutoRollbackAttribute();
 
 private:
     Character *self;
     const Skill *skill;
+    const int atCriticalStrike = 0;
+    const int atCriticalDamagePower = 0;
+    const bool isCritical = false;
     int atPhysicsDamage = 0;
     int atPhysicsDamageRand = 0;
     int atSolarDamage = 0;

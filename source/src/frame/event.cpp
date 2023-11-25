@@ -22,3 +22,7 @@ event_tick_t EventManager::cancel(event_tick_t tick, event_func_t func, void *se
     data.erase(Event(tick, func, self, param));
     return tick - EventManager::tick;
 }
+
+event_tick_t EventManager::now() {
+    return tick;
+}

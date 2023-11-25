@@ -5,6 +5,7 @@
 #include "frame/runtime_lua.h"
 #include "frame/static_ref.h"
 #include "program/log.h"
+#include <random>
 
 using namespace ns_frame;
 using namespace ns_framestatic;
@@ -51,11 +52,18 @@ void Character::CastSkill(int skillID, int skillLevel) {
     }
     // 绑定 buff
     for (auto &it : skill.attrBindBuff) {
-        target->AddBuff(characterMap[this], this->nLevel, it.nBuffID, it.nBuffLevel);
+        target->AddBuff(characterMap[this], this->nLevel, it.nBuffID, it.nBuffLevel); // TODO: 快照属性
     }
 
+    // 计算会心
+    auto [atCriticalStrike, atCriticalDamagePower] = CalcCritical(this->chAttr, skillID, skillLevel);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 9999);
+    bool isCritical = dis(gen) < atCriticalStrike;
+
     // 自动回滚的魔法属性
-    AutoRollbackAttribute autoRollbackAttribute{this, skill};
+    AutoRollbackAttribute autoRollbackAttribute{this, skill, atCriticalStrike, atCriticalDamagePower, isCritical};
 }
 
 static bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {

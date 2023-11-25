@@ -40,6 +40,7 @@ public:
     bool run();
     static event_tick_t add(event_tick_t delay, event_func_t func, void *self, void *param);
     static event_tick_t cancel(event_tick_t tick, event_func_t func, void *self, void *param);
+    static event_tick_t now();
 
 private:
     static inline thread_local event_tick_t tick;

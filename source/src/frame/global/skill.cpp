@@ -27,6 +27,7 @@ void SkillManager::add(int skillID, int skillLevel) {
     }
     // 初始化技能
     Skill skill;
+    skill.dwID = skillID;
     skill.dwLevel = skillLevel;
     // 获取 tab
     if (data.find(skillID) == data.end()) {

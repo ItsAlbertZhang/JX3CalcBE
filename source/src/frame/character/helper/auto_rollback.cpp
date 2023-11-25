@@ -1,4 +1,5 @@
 #include "frame/character/helper/auto_rollback.h"
+#include "frame/event.h"
 #include "frame/runtime_lua.h"
 #include "frame/static_ref.h"
 #include "frame/static_refmap.h"
@@ -17,9 +18,8 @@ AutoRollbackTarget::~AutoRollbackTarget() {
     self->target = this->target;
 }
 
-AutoRollbackAttribute::AutoRollbackAttribute(Character *self, const Skill &skill) {
-    this->self = self;
-    this->skill = &skill;
+AutoRollbackAttribute::AutoRollbackAttribute(Character *self, const Skill &skill, int atCriticalStrike, int atCriticalDamagePower, bool isCritical)
+    : self(self), skill(&skill), atCriticalStrike(atCriticalStrike), atCriticalDamagePower(atCriticalDamagePower), isCritical(isCritical) {
     handle(false);
 }
 AutoRollbackAttribute::~AutoRollbackAttribute() {
@@ -110,6 +110,66 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 int dwCharacterID = Character::getCharacterID(self->target);
                 int dwSkillSrcID = Character::getCharacterID(self);
                 LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_PHYSICS_DAMAGE): {
+                self->chDamage.damageList.emplace_back(
+                    EventManager::now(),
+                    skill->dwID, skill->dwLevel,
+                    this->isCritical,
+                    self->CalcDamage(
+                        self->chAttr, self->target, DamageType::Physics,
+                        atSolarDamage, atSolarDamageRand, atCriticalStrike, atCriticalDamagePower,
+                        static_cast<int>(skill->nChannelInterval),
+                        skill->nWeaponDamagePercent),
+                    DamageType::Physics);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SOLAR_DAMAGE): {
+                self->chDamage.damageList.emplace_back(
+                    EventManager::now(),
+                    skill->dwID, skill->dwLevel,
+                    this->isCritical,
+                    self->CalcDamage(
+                        self->chAttr, self->target, DamageType::Solar,
+                        atSolarDamage, atSolarDamageRand, atCriticalStrike, atCriticalDamagePower,
+                        static_cast<int>(skill->nChannelInterval),
+                        skill->nWeaponDamagePercent),
+                    DamageType::Solar);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_LUNAR_DAMAGE): {
+                self->chDamage.damageList.emplace_back(
+                    EventManager::now(),
+                    skill->dwID, skill->dwLevel,
+                    this->isCritical,
+                    self->CalcDamage(
+                        self->chAttr, self->target, DamageType::Lunar,
+                        atSolarDamage, atSolarDamageRand, atCriticalStrike, atCriticalDamagePower,
+                        static_cast<int>(skill->nChannelInterval),
+                        skill->nWeaponDamagePercent),
+                    DamageType::Lunar);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_NEUTRAL_DAMAGE): {
+                self->chDamage.damageList.emplace_back(
+                    EventManager::now(),
+                    skill->dwID, skill->dwLevel,
+                    this->isCritical,
+                    self->CalcDamage(
+                        self->chAttr, self->target, DamageType::Neutral,
+                        atSolarDamage, atSolarDamageRand, atCriticalStrike, atCriticalDamagePower,
+                        static_cast<int>(skill->nChannelInterval),
+                        skill->nWeaponDamagePercent),
+                    DamageType::Neutral);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_POISON_DAMAGE): {
+                self->chDamage.damageList.emplace_back(
+                    EventManager::now(),
+                    skill->dwID, skill->dwLevel,
+                    this->isCritical,
+                    self->CalcDamage(
+                        self->chAttr, self->target, DamageType::Poison,
+                        atSolarDamage, atSolarDamageRand, atCriticalStrike, atCriticalDamagePower,
+                        static_cast<int>(skill->nChannelInterval),
+                        skill->nWeaponDamagePercent),
+                    DamageType::Poison);
             } break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
