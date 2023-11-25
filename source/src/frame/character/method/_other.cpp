@@ -9,5 +9,17 @@ void Character::LearnSkill(int skillID, int skillLevel) {
 }
 
 Character *Character::getCharacter(int nCharacterID) {
-    return characterList[nCharacterID];
+    if (nCharacterID < 0 || nCharacterID >= characterList.size()) {
+        return nullptr;
+    } else {
+        return characterList.at(nCharacterID);
+    }
+}
+
+int Character::getCharacterID(Character *character) {
+    if (characterMap.find(character) == characterMap.end()) {
+        return -1;
+    } else {
+        return characterMap.at(character);
+    }
 }

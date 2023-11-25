@@ -1,9 +1,9 @@
 #include "frame/character/character.h"
+#include "frame/character/helper/auto_rollback.h"
 #include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
 #include "frame/runtime_lua.h"
 #include "frame/static_ref.h"
-#include "frame/static_refmap.h"
 #include "program/log.h"
 
 using namespace ns_frame;
@@ -15,23 +15,14 @@ static bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
 static bool staticCheckCoolDown(Character *self, const Skill &skill);
 
-class StaticSkill {
-public:
-    int atPhysicsDamage = 0;
-    int atPhysicsDamageRand = 0;
-    int atSolarDamage = 0;
-    int atSolarDamageRand = 0;
-    int atLunarDamage = 0;
-    int atLunarDamageRand = 0;
-    int atNeutralDamage = 0;
-    int atNeutralDamageRand = 0;
-    int atPoisonDamage = 0;
-    int atPoisonDamageRand = 0;
-};
-
 void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targetID) {
-    Character *target = Character::getCharacter(targetID);
+    AutoRollbackTarget autoRollbackTarget{this, getCharacter(targetID)}; // 自动回滚的目标切换
+    CastSkill(skillID, skillLevel);
+}
+
+void Character::CastSkill(int skillID, int skillLevel) {
     LOG_INFO("Try to CastSkill: %d # %d\n", skillID, skillLevel);
+
     // 获取技能
     const Skill &skill = SkillManager::get(skillID, skillLevel);
 
@@ -49,8 +40,6 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
         return;
     }
 
-    CharacterAttr attr = this->chAttr; // 调用拷贝构造函数, 复制一份当前属性的副本. 因此, 在 CastSkill 中, 不会影响到原有的属性.
-    StaticSkill staticSkill;
     LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
 
     // 触发 CD
@@ -65,73 +54,8 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
         target->AddBuff(characterMap[this], this->nLevel, it.nBuffID, it.nBuffLevel);
     }
 
-    // 魔法属性
-    for (auto &it : skill.attrAttributes) {
-        switch (it.type) {
-        case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT): {
-            std::string paramStr = "scripts/" + it.param1Str;
-            int dwCharacterID = characterMap[target];
-            int dwSkillSrcID = characterMap[this];
-            LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
-        } break;
-        case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
-            std::string paramStr = "scripts/" + it.param1Str;
-            int dwCharacterID = characterMap[target];
-            int dwSkillSrcID = characterMap[this];
-            LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
-        } break;
-        case static_cast<int>(enumLuaAttributeType::CAST_SKILL_TARGET_DST):
-            this->chSkill.skillQueue.emplace(it.param1Int, it.param2);
-            break;
-        case static_cast<int>(enumLuaAttributeType::CAST_SKILL):
-            this->chSkill.skillQueue.emplace(it.param1Int, it.param2);
-            break;
-        case static_cast<int>(enumLuaAttributeType::SKILL_PHYSICS_DAMAGE):
-            staticSkill.atPhysicsDamage = it.param1Int;
-            break;
-        case static_cast<int>(enumLuaAttributeType::SKILL_PHYSICS_DAMAGE_RAND):
-            staticSkill.atPhysicsDamageRand = it.param1Int;
-            break;
-        case static_cast<int>(enumLuaAttributeType::SKILL_SOLAR_DAMAGE):
-            staticSkill.atSolarDamage = it.param1Int;
-            break;
-        case static_cast<int>(enumLuaAttributeType::SKILL_SOLAR_DAMAGE_RAND):
-            staticSkill.atSolarDamageRand = it.param1Int;
-            break;
-        case static_cast<int>(enumLuaAttributeType::SKILL_LUNAR_DAMAGE):
-            staticSkill.atLunarDamage = it.param1Int;
-            break;
-        case static_cast<int>(enumLuaAttributeType::SKILL_LUNAR_DAMAGE_RAND):
-            staticSkill.atLunarDamageRand = it.param1Int;
-            break;
-        case static_cast<int>(enumLuaAttributeType::SKILL_NEUTRAL_DAMAGE):
-            staticSkill.atNeutralDamage = it.param1Int;
-            break;
-        case static_cast<int>(enumLuaAttributeType::SKILL_NEUTRAL_DAMAGE_RAND):
-            staticSkill.atNeutralDamageRand = it.param1Int;
-            break;
-        case static_cast<int>(enumLuaAttributeType::SKILL_POISON_DAMAGE):
-            staticSkill.atPoisonDamage = it.param1Int;
-            break;
-        case static_cast<int>(enumLuaAttributeType::SKILL_POISON_DAMAGE_RAND):
-            staticSkill.atPoisonDamageRand = it.param1Int;
-            break;
-
-        default:
-            LOG_ERROR("Undefined type: %s: %d %d\n", refLuaAttributeType[it.type], it.param1Int, it.param2);
-        }
-    }
-
-    // 执行队列中的剩余技能
-    while (!this->chSkill.skillQueue.empty()) {
-        auto it = this->chSkill.skillQueue.front();
-        this->chSkill.skillQueue.pop();
-        this->CastSkill(it.skillID, it.skillLevel);
-    }
-}
-
-void Character::CastSkill(int skillID, int skillLevel) {
-    CastSkillTarget(skillID, skillLevel, static_cast<int>(target->isPlayer), target->dwID);
+    // 自动回滚的魔法属性
+    AutoRollbackAttribute autoRollbackAttribute{this, skill};
 }
 
 static bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {

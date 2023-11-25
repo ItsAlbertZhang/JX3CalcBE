@@ -49,6 +49,11 @@ int main(int argc, char *argv[]) {
     // player.LearnSkill(10242, 13); // 焚影圣诀
     player.LearnSkill(3963, 10); // 烈日斩
     player.CastSkill(3963, 10);
+    while (!player.chSkill.skillQueue.empty()) {
+        auto it = player.chSkill.skillQueue.front();
+        player.chSkill.skillQueue.pop();
+        player.CastSkill(it.skillID, it.skillLevel);
+    }
 
     // // 测试用例 3
     // class MyClass {
