@@ -1,11 +1,13 @@
 #include "frame/character/character.h"
 #include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
-#include "frame/lua_runtime.h"
-#include "frame/lua_static.h"
+#include "frame/runtime_lua.h"
+#include "frame/static_ref.h"
+#include "frame/static_refmap.h"
 #include "program/log.h"
 
 using namespace ns_frame;
+using namespace ns_framestatic;
 
 static bool staticCheckBuff(Character *self, Character *target, const Skill &skill);
 static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue);
@@ -66,57 +68,57 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
     // 魔法属性
     for (auto &it : skill.attrAttributes) {
         switch (it.type) {
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT): {
+        case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT): {
             std::string paramStr = "scripts/" + it.param1Str;
             int dwCharacterID = characterMap[target];
             int dwSkillSrcID = characterMap[this];
             LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
         } break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): {
+        case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
             std::string paramStr = "scripts/" + it.param1Str;
             int dwCharacterID = characterMap[target];
             int dwSkillSrcID = characterMap[this];
             LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
         } break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):
+        case static_cast<int>(enumLuaAttributeType::CAST_SKILL_TARGET_DST):
             this->chSkill.skillQueue.emplace(it.param1Int, it.param2);
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::CAST_SKILL):
+        case static_cast<int>(enumLuaAttributeType::CAST_SKILL):
             this->chSkill.skillQueue.emplace(it.param1Int, it.param2);
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_PHYSICS_DAMAGE):
+        case static_cast<int>(enumLuaAttributeType::SKILL_PHYSICS_DAMAGE):
             staticSkill.atPhysicsDamage = it.param1Int;
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_PHYSICS_DAMAGE_RAND):
+        case static_cast<int>(enumLuaAttributeType::SKILL_PHYSICS_DAMAGE_RAND):
             staticSkill.atPhysicsDamageRand = it.param1Int;
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_SOLAR_DAMAGE):
+        case static_cast<int>(enumLuaAttributeType::SKILL_SOLAR_DAMAGE):
             staticSkill.atSolarDamage = it.param1Int;
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_SOLAR_DAMAGE_RAND):
+        case static_cast<int>(enumLuaAttributeType::SKILL_SOLAR_DAMAGE_RAND):
             staticSkill.atSolarDamageRand = it.param1Int;
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE):
+        case static_cast<int>(enumLuaAttributeType::SKILL_LUNAR_DAMAGE):
             staticSkill.atLunarDamage = it.param1Int;
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE_RAND):
+        case static_cast<int>(enumLuaAttributeType::SKILL_LUNAR_DAMAGE_RAND):
             staticSkill.atLunarDamageRand = it.param1Int;
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_NEUTRAL_DAMAGE):
+        case static_cast<int>(enumLuaAttributeType::SKILL_NEUTRAL_DAMAGE):
             staticSkill.atNeutralDamage = it.param1Int;
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_NEUTRAL_DAMAGE_RAND):
+        case static_cast<int>(enumLuaAttributeType::SKILL_NEUTRAL_DAMAGE_RAND):
             staticSkill.atNeutralDamageRand = it.param1Int;
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE):
+        case static_cast<int>(enumLuaAttributeType::SKILL_POISON_DAMAGE):
             staticSkill.atPoisonDamage = it.param1Int;
             break;
-        case static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE_RAND):
+        case static_cast<int>(enumLuaAttributeType::SKILL_POISON_DAMAGE_RAND):
             staticSkill.atPoisonDamageRand = it.param1Int;
             break;
 
         default:
-            LOG_ERROR("Undefined type: %d %s: %d %d\n", it.type, LuaTableString::luaAttributeType[it.type], it.param1Int, it.param2);
+            LOG_ERROR("Undefined type: %s: %d %d\n", refLuaAttributeType[it.type], it.param1Int, it.param2);
         }
     }
 
@@ -179,13 +181,13 @@ static bool staticCheckBuff(Character *self, Character *target, const Skill &ski
 
 static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue) {
     switch (flag) {
-    case static_cast<int>(LuaGlobalTable::BUFF_COMPARE_FLAG::EQUAL):
+    case static_cast<int>(enumLuaBuffCompareFlag::EQUAL):
         return buffValue == luaValue;
         break;
-    case static_cast<int>(LuaGlobalTable::BUFF_COMPARE_FLAG::GREATER):
+    case static_cast<int>(enumLuaBuffCompareFlag::GREATER):
         return buffValue > luaValue;
         break;
-    case static_cast<int>(LuaGlobalTable::BUFF_COMPARE_FLAG::GREATER_EQUAL):
+    case static_cast<int>(enumLuaBuffCompareFlag::GREATER_EQUAL):
         return buffValue >= luaValue;
         break;
     }
@@ -208,13 +210,13 @@ static bool staticCheckSelfLearntSkill(Character *self, const Skill &skill) {
 
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue) {
     switch (flag) {
-    case static_cast<int>(LuaGlobalTable::SKILL_COMPARE_FLAG::EQUAL):
+    case static_cast<int>(enumLuaSkillCompareFlag::EQUAL):
         return skillValue == luaValue;
         break;
-    case static_cast<int>(LuaGlobalTable::SKILL_COMPARE_FLAG::GREATER):
+    case static_cast<int>(enumLuaSkillCompareFlag::GREATER):
         return skillValue > luaValue;
         break;
-    case static_cast<int>(LuaGlobalTable::SKILL_COMPARE_FLAG::GREATER_EQUAL):
+    case static_cast<int>(enumLuaSkillCompareFlag::GREATER_EQUAL):
         return skillValue >= luaValue;
         break;
     }

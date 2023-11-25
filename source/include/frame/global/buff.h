@@ -1,7 +1,7 @@
 #ifndef FRAME_GLOBAL_BUFF_H_
 #define FRAME_GLOBAL_BUFF_H_
 
-#include "frame/tab_static.h"
+#include "frame/static_refmap.h"
 #include <mutex>
 #include <string>
 #include <tuple>
@@ -37,12 +37,12 @@ public:
 
     class Attrib {
     public:
-        Attrib(TabEnum::BuffAttrib type, int valueA, int valueB) : type(type), valueAInt(valueA), valueB(valueB) {}
-        Attrib(TabEnum::BuffAttrib type, const std::string &valueA, int valueB) : type(type), valueAStr(valueA), valueB(valueB) {}
-        TabEnum::BuffAttrib type = TabEnum::BuffAttrib::COUNT;
-        int valueAInt = 0;
+        Attrib(ns_framestatic::enumTabAttribute type, const std::string &valueA, const std::string &valueB) : type(type), valueAStr(valueA), valueBStr(valueB) {}
+        ns_framestatic::enumTabAttribute type = ns_framestatic::enumTabAttribute::COUNT;
         std::string valueAStr = "";
-        int valueB = 0;
+        std::string valueBStr = "";
+        int valueAInt = 0;
+        int valueBInt = 0;
     };
     std::vector<Attrib> BeginAttrib;
     std::vector<Attrib> ActiveAttrib;
@@ -89,11 +89,6 @@ private:
      * @param buffLevel
      */
     static void add(int buffID, int buffLevel);
-
-    static inline std::unordered_map<std::string, TabEnum::BuffAttrib> attribMap;
-    static inline bool isAttribMapInit = false;
-    static void initAttribMap();
-    static TabEnum::BuffAttrib getAttribType(const std::string &attribName);
 };
 
 } // namespace ns_frame

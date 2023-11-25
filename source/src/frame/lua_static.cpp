@@ -1,10 +1,12 @@
-#include "frame/lua_static.h"
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
+#include "frame/static_lua.h"
+#include "frame/static_ref.h"
+#include "frame/static_refmap.h"
 
 using namespace ns_frame;
 
-std::vector<std::string> LuaDependence::staticFuncNeedConvert = {
+const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
     // Skill
     "AddAttribute",
     "AddSlowCheckSelfBuff",
@@ -27,7 +29,7 @@ std::vector<std::string> LuaDependence::staticFuncNeedConvert = {
     "SetTimer",
 };
 
-bool LuaDependence::lua_init(sol::state &lua) {
+bool ns_framestatic::luaInit(sol::state &lua) {
     lua.new_usertype<Skill>("Skill",
                             "dwLevel", &Skill::dwLevel,
                             "nChannelInterval", &Skill::nChannelInterval,
@@ -114,33 +116,33 @@ bool LuaDependence::lua_init(sol::state &lua) {
     lua.set_function("GetNpc", LuaGlobalFunction::GetNpc);
     lua.set_function("IsPlayer", LuaGlobalFunction::IsPlayer);
 
-    sol::table AttributeEffectMode = lua.create_table();
-    for (int i = 0; i < static_cast<int>(LuaGlobalTable::ATTRIBUTE_EFFECT_MODE::COUNT); i++) {
-        AttributeEffectMode[LuaTableString::luaAttributeEffectMode[i]] = i;
-    }
-    lua["ATTRIBUTE_EFFECT_MODE"] = AttributeEffectMode;
-
     sol::table AttributeType = lua.create_table();
-    for (int i = 0; i < static_cast<int>(LuaGlobalTable::ATTRIBUTE_TYPE::COUNT); i++) {
-        AttributeType[LuaTableString::luaAttributeType[i]] = i;
+    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaAttributeType::COUNT); i++) {
+        AttributeType[ns_framestatic::refLuaAttributeType[i]] = i;
     }
     lua["ATTRIBUTE_TYPE"] = AttributeType;
 
+    sol::table AttributeEffectMode = lua.create_table();
+    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaAttributeEffectMode::COUNT); i++) {
+        AttributeEffectMode[ns_framestatic::refLuaAttributeEffectMode[i]] = i;
+    }
+    lua["ATTRIBUTE_EFFECT_MODE"] = AttributeEffectMode;
+
     sol::table BuffCompareFlag = lua.create_table();
-    for (int i = 0; i < static_cast<int>(LuaGlobalTable::BUFF_COMPARE_FLAG::COUNT); i++) {
-        BuffCompareFlag[LuaTableString::luaBuffCompareFlag[i]] = i;
+    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaBuffCompareFlag::COUNT); i++) {
+        BuffCompareFlag[ns_framestatic::refLuaBuffCompareFlag[i]] = i;
     }
     lua["BUFF_COMPARE_FLAG"] = BuffCompareFlag;
 
     sol::table SKILL_COMPARE_FLAG = lua.create_table();
-    for (int i = 0; i < static_cast<int>(LuaGlobalTable::SKILL_COMPARE_FLAG::COUNT); i++) {
-        SKILL_COMPARE_FLAG[LuaTableString::luaSkillCompareFlag[i]] = i;
+    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaSkillCompareFlag::COUNT); i++) {
+        SKILL_COMPARE_FLAG[ns_framestatic::refLuaSkillCompareFlag[i]] = i;
     }
     lua["SKILL_COMPARE_FLAG"] = SKILL_COMPARE_FLAG;
 
     sol::table TARGET = lua.create_table();
-    for (int i = 0; i < static_cast<int>(LuaGlobalTable::TARGET::COUNT); i++) {
-        TARGET[LuaTableString::luaTarget[i]] = i;
+    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaTarget::COUNT); i++) {
+        TARGET[ns_framestatic::refLuaTarget[i]] = i;
     }
     lua["TARGET"] = TARGET;
 
@@ -150,18 +152,18 @@ bool LuaDependence::lua_init(sol::state &lua) {
     return true;
 }
 
-void LuaGlobalFunction::Include(const std::string &filename) {
+void ns_framestatic::LuaGlobalFunction::Include(const std::string &filename) {
     return;
 }
 
-Character *LuaGlobalFunction::GetPlayer(int nCharacterID) {
+Character *ns_framestatic::LuaGlobalFunction::GetPlayer(int nCharacterID) {
     return Character::getCharacter(nCharacterID);
 }
 
-Character *LuaGlobalFunction::GetNpc(int nCharacterID) {
+Character *ns_framestatic::LuaGlobalFunction::GetNpc(int nCharacterID) {
     return Character::getCharacter(nCharacterID);
 }
 
-bool LuaGlobalFunction::IsPlayer(int nCharacterID) {
+bool ns_framestatic::LuaGlobalFunction::IsPlayer(int nCharacterID) {
     return Character::getCharacter(nCharacterID)->isPlayer;
 }

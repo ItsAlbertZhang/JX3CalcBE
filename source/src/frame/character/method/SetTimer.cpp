@@ -1,6 +1,6 @@
 #include "frame/character/character.h"
 #include "frame/event.h"
-#include "frame/lua_runtime.h"
+#include "frame/runtime_lua.h"
 #include "program/log.h"
 
 using namespace ns_frame;

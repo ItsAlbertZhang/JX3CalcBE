@@ -48,8 +48,8 @@ public:
 
     /**
      * @brief 初始化 lua
-     * @param lua_init lua 初始化函数指针, 应引用自 ns_frame::LuaDependence::lua_init
-     * @param staticFuncNeedConvert 需要转换的静态函数列表, 应引用自 ns_frame::LuaDependence::staticFuncNeedConvert
+     * @param lua_init lua 初始化函数指针
+     * @param staticFuncNeedConvert 需要从静态转换至动态的 lua 函数列表
      * @return 是否成功
      */
     static bool initLua(bool (*lua_init)(sol::state &lua), const std::vector<std::string> &staticFuncNeedConvert);

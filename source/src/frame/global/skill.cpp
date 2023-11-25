@@ -1,5 +1,5 @@
 #include "frame/global/skill.h"
-#include "frame/lua_runtime.h"
+#include "frame/runtime_lua.h"
 #include "gdi.h"
 #include "program/log.h"
 

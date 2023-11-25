@@ -1,5 +1,5 @@
 #include "frame/character/character.h"
-#include "frame/lua_static.h"
+#include "frame/static_lua.h"
 #include "gdi.h"
 #include "program/init.h"
 #include <filesystem>
@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     // 初始化接口
     ret = gdi::Interface::initGameData(ns_program::Config::pJX3, ns_program::Config::pUnpack);
     std::cout << "initGameData = " << ret << std::endl;
-    ret = gdi::Interface::initLua(ns_frame::LuaDependence::lua_init, ns_frame::LuaDependence::staticFuncNeedConvert);
+    ret = gdi::Interface::initLua(ns_framestatic::luaInit, ns_framestatic::luaFuncStaticToDynamic);
     std::cout << "initLua  = " << ret << std::endl;
     ret = gdi::Interface::initTab(static_cast<int>(gdi::Tab::COUNT));
     std::cout << "initTab  = " << ret << std::endl;

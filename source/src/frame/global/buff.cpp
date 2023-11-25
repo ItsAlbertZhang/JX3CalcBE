@@ -1,5 +1,6 @@
 #include "frame/global/buff.h"
 #include "gdi.h"
+#include "program/log.h"
 
 using namespace ns_frame;
 
@@ -11,6 +12,12 @@ const Buff &BuffManager::get(int buffID, int buffLevel) {
     return data[std::make_tuple(buffID, buffLevel)];
 }
 
+static inline void addAttribute(std::vector<ns_frame::Buff::Attrib> &attrib, ns_framestatic::enumTabAttribute type, const std::string &valueA, const std::string &valueB) {
+    auto &it = attrib.emplace_back(type, valueA, valueB);
+    // 尝试将 valueA 和 value B 转换为数字形态. 若转换失败, 则其会被置为 0, 且不会引发报错.
+    it.valueAInt = atoi(valueA.c_str());
+    it.valueBInt = atoi(valueB.c_str());
+}
 void BuffManager::add(int buffID, int buffLevel) {
     std::lock_guard<std::mutex> lock(mutex); // 加锁
     // 可能有多个线程同时进入了 add 函数. 因此, 需要在加锁后再次判断 Buff 是否存在.
@@ -40,66 +47,70 @@ void BuffManager::add(int buffID, int buffLevel) {
     buff.MaxInterval = std::stoi(buff.tab["MaxInterval"]);
     // 初始化 buff Attrib
     static const std::string attribName[] = {"Begin", "Active", "EndTime"};
-    static int attribCount[3]; // 3 = sizeof(attribName)
-    static bool isFieldCountInit = false;
-    if (!isFieldCountInit) {
-        // 初始化 attribCount. 当前版本下, 三个字段的数量分别为 15, 2, 2.
-        for (int i = 0; i < 3; i++) { // 3 = sizeof(attribName)
-            int cnt = 1;
-            while (buff.tab.find(attribName[i] + "Attrib" + std::to_string(cnt)) != buff.tab.end()) { // BeginAttrib1, BeginAttrib2, ...
-                cnt++;
+    for (int attribIdx = 0; attribIdx < 3; attribIdx++) {
+        for (int i = 1; buff.tab.find(attribName[attribIdx] + "Attrib" + std::to_string(i)) != buff.tab.end(); i++) {
+            std::string name = buff.tab[attribName[attribIdx] + "Attrib" + std::to_string(i)];        // BeginAttrib1, BeginAttrib2, ...
+            std::string valueA = buff.tab[attribName[attribIdx] + "Value" + std::to_string(i) + "A"]; // BeginValue1A, BeginValue2A, ...
+            std::string valueB = buff.tab[attribName[attribIdx] + "Value" + std::to_string(i) + "B"]; // BeginValue1B, BeginValue2B, ...
+            if (ns_framestatic::mapTabAttribute.find(name) == ns_framestatic::mapTabAttribute.end()) {
+                LOG_ERROR("BuffManager::add: Unknown Attribute: %s", name.c_str());
+                continue;
             }
-            attribCount[i] = cnt - 1;
-        }
-        isFieldCountInit = true;
-    }
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < attribCount[i]; j++) {
-            std::string name = buff.tab[attribName[i] + "Attrib" + std::to_string(j + 1)];        // BeginAttrib1, BeginAttrib2, ...
-            std::string valueA = buff.tab[attribName[i] + "Value" + std::to_string(j + 1) + "A"]; // BeginValue1A, BeginValue2A, ...
-            std::string valueB = buff.tab[attribName[i] + "Value" + std::to_string(j + 1) + "B"]; // BeginValue1B, BeginValue2B, ...
-            // valueB 的数字形态. 之所以不用 std::stoi, 是因为 tab 表中存在有 valueB 为字符串的情况 (与此同时 valueA 为空, 怕是策划填错了位置)
-            int valueBInt = atoi(valueB.c_str());
-            TabEnum::BuffAttrib type = getAttribType(name); // BeginAttrib1 的枚举类型
-            std::vector<Buff::Attrib> *attrib;
-            switch (i) {
+            switch (attribIdx) {
             case 0:
-                attrib = &buff.BeginAttrib;
+                addAttribute(buff.BeginAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
                 break;
             case 1:
-                attrib = &buff.ActiveAttrib;
+                addAttribute(buff.BeginAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
                 break;
             case 2:
-                attrib = &buff.EndTimeAttrib;
+                addAttribute(buff.BeginAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
                 break;
-            }
-            if (TabAdditional::buffAttribIsValue[static_cast<int>(type)]) {
-                attrib->emplace_back(type, std::stoi(valueA), valueBInt);
-            } else {
-                attrib->emplace_back(type, valueA, valueBInt);
             }
         }
     }
+    // static const std::string attribName[] = {"Begin", "Active", "EndTime"};
+    // static int attribCount[3]; // 3 = sizeof(attribName)
+    // static bool isFieldCountInit = false;
+    // if (!isFieldCountInit) {
+    //     // 初始化 attribCount. 当前版本下, 三个字段的数量分别为 15, 2, 2.
+    //     for (int i = 0; i < 3; i++) { // 3 = sizeof(attribName)
+    //         int cnt = 1;
+    //         while (buff.tab.find(attribName[i] + "Attrib" + std::to_string(cnt)) != buff.tab.end()) { // BeginAttrib1, BeginAttrib2, ...
+    //             cnt++;
+    //         }
+    //         attribCount[i] = cnt - 1;
+    //     }
+    //     isFieldCountInit = true;
+    // }
+    // for (int i = 0; i < 3; i++) {
+    //     for (int j = 0; j < attribCount[i]; j++) {
+    //         std::string name = buff.tab[attribName[i] + "Attrib" + std::to_string(j + 1)];        // BeginAttrib1, BeginAttrib2, ...
+    //         std::string valueA = buff.tab[attribName[i] + "Value" + std::to_string(j + 1) + "A"]; // BeginValue1A, BeginValue2A, ...
+    //         std::string valueB = buff.tab[attribName[i] + "Value" + std::to_string(j + 1) + "B"]; // BeginValue1B, BeginValue2B, ...
+    //         // valueB 的数字形态. 之所以不用 std::stoi, 是因为 tab 表中存在有 valueB 为字符串的情况 (与此同时 valueA 为空, 怕是策划填错了位置)
+    //         int valueBInt = atoi(valueB.c_str());
+    //         TabEnum::BuffAttrib type = getAttribType(name); // BeginAttrib1 的枚举类型
+    //         std::vector<Buff::Attrib> *attrib;
+    //         switch (i) {
+    //         case 0:
+    //             attrib = &buff.BeginAttrib;
+    //             break;
+    //         case 1:
+    //             attrib = &buff.ActiveAttrib;
+    //             break;
+    //         case 2:
+    //             attrib = &buff.EndTimeAttrib;
+    //             break;
+    //         }
+    //         if (TabAdditional::buffAttribIsValue[static_cast<int>(type)]) {
+    //             attrib->emplace_back(type, std::stoi(valueA), valueBInt);
+    //         } else {
+    //             attrib->emplace_back(type, valueA, valueBInt);
+    //         }
+    //     }
+    // }
 
     // 将 Buff 存入缓存
     data[std::make_tuple(buffID, buffLevel)] = std::move(buff);
-}
-
-void BuffManager::initAttribMap() {
-    // 这一函数只会被调用一次, 且调用堆栈为 add -> getAttribType -> initAttribMap, 因此其调用时天然处于加锁状态.
-    for (int i = 0; i < static_cast<int>(TabEnum::BuffAttrib::COUNT); i++) {
-        attribMap[TabString::buffAttrib[i]] = static_cast<TabEnum::BuffAttrib>(i);
-    }
-    isAttribMapInit = true;
-}
-
-TabEnum::BuffAttrib BuffManager::getAttribType(const std::string &attribName) {
-    // 这一函数只会被调用一次, 且调用堆栈为 add -> getAttribType, 因此其调用时天然处于加锁状态.
-    if (!isAttribMapInit) {
-        initAttribMap();
-    }
-    if (attribMap.find(attribName) == attribMap.end()) {
-        return TabEnum::BuffAttrib::COUNT;
-    }
-    return attribMap[attribName];
 }
