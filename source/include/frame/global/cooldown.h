@@ -21,9 +21,9 @@ public:
 
     // 初始化时拿出一些数据, 降低使用开销
     int ID;
-    int Duration;
-    int MinDuration;
-    int MaxDuration;
+    int DurationFrame;
+    int MinDurationFrame;
+    int MaxDurationFrame;
     int MaxCount;
 };
 

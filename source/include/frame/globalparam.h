@@ -40,6 +40,21 @@ public:
     double fSurplusParam = 13.192;
     double fAssistedPowerCof = 9.53;
 
+    static int levelCof(int level) {
+        if (level > 110)
+            return 450 * (level - 110) + 3750;
+        else if (level > 100)
+            return 205 * (level - 100) + 1700;
+        else if (level > 95)
+            return 185 * (level - 95) + 775;
+        else if (level > 90)
+            return 85 * (level - 90) + 350;
+        else if (level > 15)
+            return 4 * level - 10;
+        else
+            return 50;
+    }
+
 private:
     GlobalParam() = default;
     static inline GlobalParam *ptr = nullptr;

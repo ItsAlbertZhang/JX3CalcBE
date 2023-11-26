@@ -47,7 +47,10 @@ void Character::CastSkill(int skillID, int skillLevel) {
     for (auto &it : skill.attrCoolDown) {
         if (it.type != Skill::SkillCoolDown::TypeEnum::checkCD) {
             const Cooldown &cooldown = CooldownManager::get(it.nCoolDownID);
-            ModifyCoolDown(it.nCoolDownID, cooldown.Duration); // TODO: 加速效果还没做
+            int durationFrame = cooldown.DurationFrame * (1024 - this->chAttr.getHaste()) / 1024;
+            durationFrame = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
+            durationFrame = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
+            ModifyCoolDown(it.nCoolDownID, durationFrame);
         }
     }
     // 绑定 buff

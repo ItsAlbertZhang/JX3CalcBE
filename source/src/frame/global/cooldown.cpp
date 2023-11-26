@@ -28,9 +28,9 @@ void CooldownManager::add(int ID) {
     cooldown.tab = std::move(arg[0]);
     // 初始化 Cooldown
     cooldown.ID = ID;
-    cooldown.Duration = std::stoi(cooldown.tab["Duration"]);
-    cooldown.MinDuration = std::stoi(cooldown.tab["MinDuration"]);
-    cooldown.MaxDuration = std::stoi(cooldown.tab["MaxDuration"]);
+    cooldown.DurationFrame = static_cast<int>(std::stod(cooldown.tab["Duration"]) * 16 + 0.5);
+    cooldown.MinDurationFrame = static_cast<int>(std::stod(cooldown.tab["MinDuration"]) * 16 + 0.5);
+    cooldown.MaxDurationFrame = static_cast<int>(std::stod(cooldown.tab["MaxDuration"]) * 16 + 0.5);
     cooldown.MaxCount = std::stoi(cooldown.tab["MaxCount"]);
     // 将 Cooldown 存入缓存
     data[ID] = std::move(cooldown);

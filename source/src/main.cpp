@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
     // player.LearnSkill(10242, 13); // 焚影圣诀
     player.target = &npc;
     player.chAttr.atSolarAttackPowerBase = 1000;
+    player.chAttr.atHasteBase = 95;
     player.LearnSkill(3963, 10); // 烈日斩
     player.CastSkill(3963, 10);
     while (!player.chSkill.skillQueue.empty()) {
