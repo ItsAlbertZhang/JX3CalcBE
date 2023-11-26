@@ -52,7 +52,7 @@ int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, Dama
         atAttackPower = attrSelf.getPhysicsAttackPower();
         atDamageAddPercent = attrSelf.getPhysicsDamageAddPercent();
         atOvercome = this->chAttr.getPhysicsOvercome();
-        targetShield = target->chAttr.getPhysicsShield();
+        targetShield = target->chAttr.getPhysicsShield(attrSelf.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atPhysicsDamageCoefficient;
         c = 10;
         weaponDamage = attrSelf.atMeleeWeaponDamageBase + attrSelf.atMeleeWeaponDamageRand / 2;
@@ -62,28 +62,28 @@ int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, Dama
         atAttackPower = attrSelf.getSolarAttackPower();
         atDamageAddPercent = attrSelf.getSolarDamageAddPercent();
         atOvercome = this->chAttr.getSolarOvercome();
-        targetShield = target->chAttr.getSolarShield();
+        targetShield = target->chAttr.getSolarShield(attrSelf.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atSolarDamageCoefficient;
         break;
     case DamageType::Lunar:
         atAttackPower = attrSelf.getLunarAttackPower();
         atDamageAddPercent = attrSelf.getLunarDamageAddPercent();
         atOvercome = this->chAttr.getLunarOvercome();
-        targetShield = target->chAttr.getLunarShield();
+        targetShield = target->chAttr.getLunarShield(attrSelf.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atLunarDamageCoefficient;
         break;
     case DamageType::Neutral:
         atAttackPower = attrSelf.getNeutralAttackPower();
         atDamageAddPercent = attrSelf.getNeutralDamageAddPercent();
         atOvercome = this->chAttr.getNeutralOvercome();
-        targetShield = target->chAttr.getNeutralShield();
+        targetShield = target->chAttr.getNeutralShield(attrSelf.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atNeutralDamageCoefficient;
         break;
     case DamageType::Poison:
         atAttackPower = attrSelf.getPoisonAttackPower();
         atDamageAddPercent = attrSelf.getPoisonDamageAddPercent();
         atOvercome = this->chAttr.getPoisonOvercome();
-        targetShield = target->chAttr.getPoisonShield();
+        targetShield = target->chAttr.getPoisonShield(attrSelf.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atPoisonDamageCoefficient;
         break;
     }

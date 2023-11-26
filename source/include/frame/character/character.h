@@ -49,16 +49,11 @@ public:
     void SetTimer(int frame, std::string filename, int type, int targetID);
 
     //  ---------- 被 lua 调用的属性, 通常以 "n" 开头 ----------
-    int dwID;         // 角色 ID
-    int nLevel = 120; // 等级
+    int dwID; // 角色 ID
 
-    int nSpunkToSolarAndLunarAttackPowerCof = 0;    // 元气转换为阳性和阴性内功攻击的系数
-    int nSpunkToSolarAndLunarCriticalStrikeCof = 0; // 元气转换为阳性和阴性内功会心的系数
-
-    int nMaxSunEnergy = 0;      // 最大日灵
-    int nMaxMoonEnergy = 0;     // 最大月魂
-    int nCurrentSunEnergy = 0;  // 当前日灵
-    int nCurrentMoonEnergy = 0; // 当前月魂
+    int nLevel = chAttr.atLevel; // 等级, 这是唯一一个同时存在于此处和 chAttr 内部的属性
+    int nCurrentSunEnergy = 0;   // 当前日灵
+    int nCurrentMoonEnergy = 0;  // 当前月魂
 
 private:
     static inline std::vector<Character *> characterList;            // 角色列表

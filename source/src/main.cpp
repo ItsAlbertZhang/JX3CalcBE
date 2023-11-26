@@ -48,6 +48,7 @@ int main(int argc, char *argv[]) {
     ns_frame::NPC npc;
     // player.LearnSkill(10242, 13); // 焚影圣诀
     player.target = &npc;
+    player.chAttr.atSolarAttackPowerBase = 1000;
     player.LearnSkill(3963, 10); // 烈日斩
     player.CastSkill(3963, 10);
     while (!player.chSkill.skillQueue.empty()) {
@@ -55,6 +56,7 @@ int main(int argc, char *argv[]) {
         player.chSkill.skillQueue.pop();
         player.CastSkill(it.skillID, it.skillLevel);
     }
+    player.CastSkill(3963, 10);
     for (auto &it : player.chDamage.damageList) {
         std::cout << it.tick << " " << it.skillID << " " << it.skillLevel << " " << it.isCritical << " " << it.damage << " " << static_cast<int>(it.damageType) << std::endl;
     }

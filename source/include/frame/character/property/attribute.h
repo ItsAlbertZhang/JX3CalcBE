@@ -16,6 +16,8 @@ public:
         memcpy(this, &obj, sizeof(CharacterAttr));
     }
 
+    int atLevel = 120; // 等级
+
     int atBasePotentialAdd = 0;       // 所有主属性
     int atVitalityBase = 0;           // 体质
     int atStrengthBase = 0;           // 力道
@@ -161,6 +163,12 @@ public:
     int atNeutralOvercomeAdd = 0; // 混元内功额外破防等级
     int atPoisonOvercomeAdd = 0;  // 毒性内功额外破防等级
 
+    int getVitality() const; // 体质
+    int getStrength() const; // 力道
+    int getAgility() const;  // 身法
+    int getSpirit() const;   // 根骨
+    int getSpunk() const;    // 元气
+
     int getPhysicsAttackPower() const; // 获取外功攻击
     int getSolarAttackPower() const;   // 获取阳性内功攻击
     int getLunarAttackPower() const;   // 获取阴性内功攻击
@@ -185,11 +193,11 @@ public:
     int getNeutralOvercome() const; // 获取混元内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
     int getPoisonOvercome() const;  // 获取毒性内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
 
-    int getPhysicsShield() const; // 获取外功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
-    int getSolarShield() const;   // 获取阳性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
-    int getLunarShield() const;   // 获取阴性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
-    int getNeutralShield() const; // 获取混元内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
-    int getPoisonShield() const;  // 获取毒性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理. 注意, 结果并非最终防御! (还需要计算伤害来源的无视防御效果)
+    int getPhysicsShield(int atAllShieldIgnorePercent) const; // 获取外功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
+    int getSolarShield(int atAllShieldIgnorePercent) const;   // 获取阳性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
+    int getLunarShield(int atAllShieldIgnorePercent) const;   // 获取阴性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
+    int getNeutralShield(int atAllShieldIgnorePercent) const; // 获取混元内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
+    int getPoisonShield(int atAllShieldIgnorePercent) const;  // 获取毒性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
 
     int getStrain() const; // 获取无双. 结果为一个1024分数, 这符合游戏内的实际原理.
     int getHaste() const;  // 获取加速. 结果为一个1024分数, 这符合游戏内的实际原理.
@@ -203,13 +211,11 @@ public:
     int atDstNpcDamageCoefficient = 0; // 非侠士伤害提升1024分数
     int atAddDamageByDstMoveState = 0; // 根据目标移动状态造成的伤害提升1024分数, 出现于: 明教/秘笈/明教_秘籍_烈日斩_静止目标加伤害.lua
 
-private:
-    int get_attack_power(int attribute_type) const;
-    int get_critical_strike(int attribute_type) const;
-    int get_critical_damage_power(int attribute_type) const;
-    int get_overcome(int attribute_type) const;
-    int get_shield(int attribute_type) const;
-    int get_damage_add_percent(int attribute_type) const;
+    int atSpunkToSolarAndLunarAttackPowerCof = 0;    // 元气转换为阳性和阴性内功攻击的系数
+    int atSpunkToSolarAndLunarCriticalStrikeCof = 0; // 元气转换为阳性和阴性内功会心的系数
+
+    int atMaxSunEnergy = 0;  // 最大日灵
+    int atMaxMoonEnergy = 0; // 最大月魂
 };
 } // namespace ns_frame
 
