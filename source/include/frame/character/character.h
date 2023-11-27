@@ -35,12 +35,15 @@ public:
     static Character *getCharacter(int nCharacterID);
     static int getCharacterID(Character *character);
     void LearnSkill(int skillID, int skillLevel);
+    CharacterBuff::Item *GetBuffWithCompareFlag(int buffID, int buffLevel, int flag);
+    CharacterBuff::Item *GetBuffByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
     std::tuple<int, int> CalcCritical(const CharacterAttr &attrSelf, int skillID, int skillLevel);
     int CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, int damageBase, int damageRand, int atCriticalStrike, int atCriticalDamagePower, int nChannelInterval, int nWeaponDamagePercent);
 
     // ---------- 以下方法直接被 lua 调用 ----------
     bool IsHaveBuff(int buffID, int buffLevel);
     CharacterBuff::Item *GetBuff(int buffID, int buffLevel);
+    CharacterBuff::Item *GetBuffByOwner(int buffID, int buffLevel, int sourceID);
     int GetSkillLevel(int skillID);
     void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
     void CastSkill(int skillID, int skillLevel);

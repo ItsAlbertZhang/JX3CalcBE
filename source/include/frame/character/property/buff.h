@@ -1,6 +1,8 @@
 #ifndef FRAME_CHARACTER_PROPERTY_BUFF_H_
 #define FRAME_CHARACTER_PROPERTY_BUFF_H_
 
+#include "frame/character/property/attribute.h"
+#include <map>
 #include <unordered_map>
 
 namespace ns_frame {
@@ -19,21 +21,26 @@ public:
         event_tick_t tickOver = 0; // 结束 tick
 
         Character *source = nullptr;
+        CharacterAttr attr; // 保存一份属性的副本, 用于快照
+
         int nStackNum = 0;
 
         // OnRemove: nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID
     };
 
-    struct tuple_hash {
-        template <class T1, class T2>
-        std::size_t operator()(const std::tuple<T1, T2> &t) const {
-            auto h1 = std::hash<T1>{}(std::get<0>(t));
-            auto h2 = std::hash<T2>{}(std::get<1>(t));
-            return h1 ^ h2;
-        }
-    };
+    /**
+     * @brief buff 列表
+     * @note 三层嵌套: sourceID -> buffID -> buffLevel
+     * @note 为最大化查找效率, 使用此结构.
+     */
+    std::unordered_map<int, std::unordered_map<int, std::map<int, Item>>> buffList;
 
-    std::unordered_map<std::tuple<int, int>, Item, tuple_hash> buffList;
+    /**
+     * @brief 按插入时间排序的 buff 列表
+     * @note 游戏内的真实实现大概率采用此结构. 在处理 buff 的卸除时, 需要使用有序的列表.
+     * @note 计算器并不需要此逻辑. 未来需要使用时, 再做相关实现.
+     */
+    // std::multimap<event_tick_t, Item *> buffTickList;
 };
 
 } // namespace ns_frame

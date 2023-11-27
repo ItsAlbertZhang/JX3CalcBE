@@ -177,10 +177,10 @@ void AutoRollbackAttribute::handle(bool isRollback) {
         } break; // EFFECT_TO_DEST_NOT_ROLLBACK
 
         case static_cast<int>(enumLuaAttributeEffectMode::EFFECT_TO_DEST_AND_ROLLBACK): {
-            switch (it.type) {
-            default:
-                LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
-            }
+            // switch (it.type) {
+            // default:
+            LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+            // }
         } break; // EFFECT_TO_DEST_AND_ROLLBACK
 
         } // switch (it.mode)

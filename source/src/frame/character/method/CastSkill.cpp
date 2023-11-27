@@ -70,21 +70,10 @@ void Character::CastSkill(int skillID, int skillLevel) {
 }
 
 static bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {
-    for (const auto &it : skill.attrCheckBuff) {
+    for (const auto &cond : skill.attrCheckBuff) {
         Character *checkbuffCharacter = nullptr;
         bool checkbuffSrcOwn = false;
-        if (it.nStackNum == 0 || it.nLevel == 0) {
-            /**
-             * @note 出现在 明教_烈日斩.lua 等文件中, 检查 6279, 为贪魔体 buff
-             * @warning 暂时未知: 检查 "层数为 0, Level 为 0" 是何种逻辑
-             * @warning - 可能逻辑 1: **不检查** 该 buff.
-             * @warning - 可能逻辑 2: 要求 **不存在** 该 buff.
-             * @warning 此处按照逻辑 1 处理. 若日后发现实际使用逻辑 2, 则需要修改此处.
-             * @author ItsAlbertZhang
-             */
-            continue;
-        }
-        switch (it.type) {
+        switch (cond.type) {
         case Skill::SkillCheckBuff::TypeEnum::self:
             checkbuffCharacter = self;
             break;
@@ -100,14 +89,28 @@ static bool staticCheckBuff(Character *self, Character *target, const Skill &ski
             checkbuffSrcOwn = true;
             break;
         }
-        if (!checkbuffCharacter->IsHaveBuff(it.dwBuffID, it.nLevel)) {
-            return false; // 找不到符合要求的 buff, CastSkill 失败
+        CharacterBuff::Item *buff = nullptr;
+        int nLevelCompareFlag = cond.nLevelCompareFlag;
+        if (cond.nLevel == 0 && cond.nLevelCompareFlag == static_cast<int>(enumLuaBuffCompareFlag::EQUAL)) {
+            /**
+             * @note
+             * 对于 "要求 buff 不存在" 的检查逻辑, 理论上讲应当是: 对于任何 level 的 buff, 要求其均不存在.
+             * 也即: 对于 nLevel GREATER 0 的 buff, 要求其 nStackNum EQUAL 0.
+             * 但不知为何, 在实际的 lua 中, 此逻辑变成了: 对于 nLevel EQUAL 0 的 buff, 要求其 nStackNum EQUAL 0. (可见 明教_烈日斩.lua)
+             * 因此, 此处对其逻辑进行还原, 将 nLevel 的比较标志设置为 GREATER, 以符合实际的检查逻辑.
+             */
+            nLevelCompareFlag = static_cast<int>(enumLuaBuffCompareFlag::GREATER);
         }
-        ns_frame::CharacterBuff::Item *checkbuffObj = &(checkbuffCharacter->chBuff.buffList[std::make_tuple(it.dwBuffID, it.nLevel)]);
-        if (checkbuffSrcOwn && checkbuffObj->source != self) {
-            return false; // buff 来源不是自己, CastSkill 失败
+        if (checkbuffSrcOwn) {
+            buff = checkbuffCharacter->GetBuffByOwnerWithCompareFlag(cond.dwBuffID, cond.nLevel, self->dwID, cond.nLevelCompareFlag);
+        } else {
+            buff = checkbuffCharacter->GetBuffWithCompareFlag(cond.dwBuffID, cond.nLevel, cond.nLevelCompareFlag);
         }
-        if (!staticCheckBuffCompare(it.nStackNumCompareFlag, it.nStackNum, checkbuffObj->nStackNum)) {
+        int nStackNum = 0;
+        if (nullptr != buff) {
+            nStackNum = buff->nStackNum;
+        }
+        if (!staticCheckBuffCompare(cond.nStackNumCompareFlag, cond.nStackNum, nStackNum)) {
             return false; // buff 比较不符合要求, CastSkill 失败
         }
     }
