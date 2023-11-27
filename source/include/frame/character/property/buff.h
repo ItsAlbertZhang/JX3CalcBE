@@ -25,10 +25,12 @@ public:
         const int nBuffLevel = 0;
 
         bool isValid = false;
-        event_tick_t tickOver = 0; // 结束 tick
+        event_tick_t tickActive = 0; // 下一次生效的 tick
+        int interval = 0;            // 生效间隔 (单位: 帧). 该属性非必要, 因其可以通过 attr 计算得出. 但为了避免每次 active 时都需要调用 BuffManager::get(), 故在此保存一份.
+        int count = 0;               // 剩余生效次数
 
-        CharacterAttr attr;        // 保存一份属性的副本, 用于快照
         void *ptrAttrib = nullptr; // 自动回滚的 buff 属性, 用于处理 buff 的 BeginAttrib, ActiveAttrib, EndTimeAttrib
+        CharacterAttr attr;        // 保存一份属性的副本, 用于快照
 
         int nLeftFrame = 0;
         int nCustomValue = 0;

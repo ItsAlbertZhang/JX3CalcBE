@@ -5,7 +5,8 @@
 using namespace ns_frame;
 using namespace ns_framestatic;
 
-AutoRollbackAttrib::AutoRollbackAttrib(Character *self, const Buff &buff) : self(self), buff(buff) {
+AutoRollbackAttrib::AutoRollbackAttrib(Character *self, CharacterAttr *attr, const Buff &buff)
+    : self(self), attr(attr), buff(buff) {
     for (const auto &it : buff.BeginAttrib) {
         handle(it, false);
     }

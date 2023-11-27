@@ -14,9 +14,11 @@ namespace ns_frame {
  */
 class AutoRollbackAttrib {
 public:
-    AutoRollbackAttrib(Character *self, const Buff &buff);
+    AutoRollbackAttrib(Character *self, CharacterAttr *attr, const Buff &buff);
     ~AutoRollbackAttrib();
     void active();
+
+    CharacterAttr *attr;
 
 private:
     Character *self;

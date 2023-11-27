@@ -35,6 +35,7 @@ public:
     static Character *getCharacter(int nCharacterID);
     static int getCharacterID(Character *character);
     void LearnSkill(int skillID, int skillLevel);
+    void DelBuffAllStackNum(CharacterBuff::Item &it);
     CharacterBuff::Item *GetBuffWithCompareFlag(int buffID, int buffLevel, int flag);
     CharacterBuff::Item *GetBuffByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
     std::tuple<int, int> CalcCritical(const CharacterAttr &attrSelf, int skillID, int skillLevel);
