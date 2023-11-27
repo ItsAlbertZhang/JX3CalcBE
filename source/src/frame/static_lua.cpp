@@ -1,6 +1,6 @@
+#include "frame/static_lua.h"
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
-#include "frame/static_lua.h"
 #include "frame/static_ref.h"
 #include "frame/static_refmap.h"
 
@@ -27,6 +27,7 @@ const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
     "GetBuff",
     "GetSkillLevel",
     "SetTimer",
+    "GetSkillTarget",
 };
 
 bool ns_framestatic::luaInit(sol::state &lua) {
@@ -107,7 +108,8 @@ bool ns_framestatic::luaInit(sol::state &lua) {
                                 "ModifyCoolDown", &Character::ModifyCoolDown,
                                 "GetBuff", &Character::GetBuff,
                                 "GetSkillLevel", &Character::GetSkillLevel,
-                                "SetTimer", &Character::SetTimer,
+                                "SetTimer", sol::overload(&Character::SetTimer3, &Character::SetTimer4),
+                                "GetSkillTarget", &Character::GetSkillTarget,
                                 "nCurrentSunEnergy", &Character::nCurrentSunEnergy,
                                 "nCurrentMoonEnergy", &Character::nCurrentMoonEnergy);
 

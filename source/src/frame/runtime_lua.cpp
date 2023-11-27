@@ -50,10 +50,10 @@ bool LuaFunc::analysis(sol::protected_function_result res, int idx, Enum func) {
     // 传入的 idx 是先前通过 getIndex 获取的, 一定存在
     if (!res.valid()) {
         sol::error err = res;
-        LOG_ERROR("%s %s() failed: \n%s\n", names[idx].c_str(), names[static_cast<int>(func)].c_str(), err.what());
+        LOG_ERROR("%s %s() failed: \n%s\n", filenameList[idx].c_str(), names[static_cast<int>(func)].c_str(), err.what());
         return false;
     } else {
-        LOG_INFO("%s %s() success\n", names[idx].c_str(), names[static_cast<int>(func)].c_str());
+        LOG_INFO("%s %s() success\n", filenameList[idx].c_str(), names[static_cast<int>(func)].c_str());
         return true;
     }
 }
@@ -61,6 +61,7 @@ bool LuaFunc::analysis(sol::protected_function_result res, int idx, Enum func) {
 void LuaFunc::add(const std::string &filename) {
     // 由于 data 是线程本地的, 因此不用考虑线程安全问题
     filenameMap[filename] = static_cast<int>(filefuncList.size());
+    filenameList.emplace_back(filename);
     std::vector<sol::protected_function> &funcs = filefuncList.emplace_back();
     bool executeSuccess = false;
     sol::protected_function_result res = gdi::Interface::luaExecuteFile(filename);

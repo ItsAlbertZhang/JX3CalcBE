@@ -46,6 +46,9 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(enumLuaAttributeType::CURRENT_SUN_ENERGY):
                 self->nCurrentSunEnergy += it.param1Int;
                 break;
+            case static_cast<int>(enumLuaAttributeType::CURRENT_MOON_ENERGY):
+                self->nCurrentMoonEnergy += it.param1Int;
+                break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
             }

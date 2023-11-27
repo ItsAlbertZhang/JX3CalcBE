@@ -14,7 +14,12 @@ static void callbackSetTimer(void *self, void *param) {
     delete[] data;
     LuaFunc::analysis(LuaFunc::getOnTimer(idx)(selfPtr, type, targetID), idx, LuaFunc::Enum::OnTimer);
 }
-void Character::SetTimer(int frame, std::string filename, int type, int targetID) {
+
+void Character::SetTimer3(int frame, std::string filename, int targetID) {
+    this->SetTimer4(frame, filename, getCharacter(targetID)->isPlayer ? 1 : 0, targetID);
+}
+
+void Character::SetTimer4(int frame, std::string filename, int type, int targetID) {
     int *data = new int[3];
     data[0] = LuaFunc::getIndex(filename);
     data[1] = type;

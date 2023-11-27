@@ -46,11 +46,13 @@ public:
     CharacterBuff::Item *GetBuff(int buffID, int buffLevel);
     CharacterBuff::Item *GetBuffByOwner(int buffID, int buffLevel, int sourceID);
     int GetSkillLevel(int skillID);
+    int GetSkillTarget();
     void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
     void CastSkill(int skillID, int skillLevel);
     void CastSkillTarget(int skillID, int skillLevel, int type, int targetID);
     void ModifyCoolDown(int cooldownID, int frame);
-    void SetTimer(int frame, std::string filename, int type, int targetID);
+    void SetTimer3(int frame, std::string filename, int targetID);
+    void SetTimer4(int frame, std::string filename, int type, int targetID);
 
     //  ---------- 被 lua 调用的属性, 通常以 "n" 开头 ----------
     int dwID; // 角色 ID

@@ -37,7 +37,7 @@ class EventManager {
 public:
     EventManager() = delete;
 
-    bool run();
+    static bool run();
 
     /**
      * @brief 添加一个事件

@@ -1,4 +1,5 @@
 #include "frame/character/character.h"
+#include "frame/event.h"
 #include "frame/static_lua.h"
 #include "gdi.h"
 #include "program/init.h"
@@ -50,14 +51,16 @@ int main(int argc, char *argv[]) {
     player.target = &npc;
     player.chAttr.atSolarAttackPowerBase = 1000;
     player.chAttr.atHasteBase = 95;
-    player.LearnSkill(3963, 10); // 烈日斩
-    player.CastSkill(3963, 10);
+    player.LearnSkill(3960, 10); // 银月斩
+    player.CastSkill(3960, 10);
     while (!player.chSkill.skillQueue.empty()) {
         auto it = player.chSkill.skillQueue.front();
         player.chSkill.skillQueue.pop();
         player.CastSkill(it.skillID, it.skillLevel);
     }
-    player.CastSkill(3963, 10);
+    player.CastSkill(3960, 10);
+    while (ns_frame::EventManager::run()) {
+    }
     for (auto &it : player.chDamage.damageList) {
         std::cout << it.tick << " " << it.skillID << " " << it.skillLevel << " " << it.isCritical << " " << it.damage << " " << static_cast<int>(it.damageType) << std::endl;
     }

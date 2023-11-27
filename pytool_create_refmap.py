@@ -40,6 +40,7 @@ list_to_create = {
             "atAllDamageAddPercent",
             "atSolarDamageCoefficient",
             "atLunarDamageCoefficient",
+            "atCallLunarDamage",
         ],
     },
 }
