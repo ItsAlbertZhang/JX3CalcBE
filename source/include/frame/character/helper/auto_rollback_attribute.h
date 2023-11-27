@@ -1,26 +1,10 @@
-#ifndef FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_H_
-#define FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_H_
+#ifndef FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
+#define FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
 
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
 
 namespace ns_frame {
-
-/**
- * @brief 自动回滚的目标切换
- * @param self 自身
- * @param target 新目标
- * @note 当 AutoRollbackTarget 对象销毁时, 会自动将 self->target 回滚到原来的值.
- */
-class AutoRollbackTarget {
-public:
-    AutoRollbackTarget(Character *self, Character *target);
-    ~AutoRollbackTarget();
-
-private:
-    Character *self;
-    Character *target;
-};
 
 /**
  * @brief 自动回滚的魔法属性
@@ -35,7 +19,7 @@ public:
 
 private:
     Character *self;
-    const Skill *skill;
+    const Skill &skill;
     const int atCriticalStrike = 0;
     const int atCriticalDamagePower = 0;
     const bool isCritical = false;
@@ -55,4 +39,4 @@ private:
 
 } // namespace ns_frame
 
-#endif // FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_H_
+#endif // FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_

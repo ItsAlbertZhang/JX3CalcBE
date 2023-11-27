@@ -38,6 +38,8 @@ list_to_create = {
         "map": True,
         "list": [
             "atAllDamageAddPercent",
+            "atSolarDamageCoefficient",
+            "atLunarDamageCoefficient",
         ],
     },
 }

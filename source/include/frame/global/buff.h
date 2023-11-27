@@ -31,6 +31,7 @@ public:
     int Count;
     int Interval;
     bool Hide;
+    bool Exclude;
     bool CanCancel;
     int MinInterval;
     int MaxInterval;

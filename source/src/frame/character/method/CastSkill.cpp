@@ -1,5 +1,6 @@
 #include "frame/character/character.h"
-#include "frame/character/helper/auto_rollback.h"
+#include "frame/character/helper/auto_rollback_attribute.h"
+#include "frame/character/helper/auto_rollback_target.h"
 #include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
 #include "frame/runtime_lua.h"

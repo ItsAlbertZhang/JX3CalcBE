@@ -42,6 +42,7 @@ void BuffManager::add(int buffID, int buffLevel) {
     buff.Count = std::stoi(buff.tab["Count"]);
     buff.Interval = std::stoi(buff.tab["Interval"]);
     buff.Hide = buff.tab["Hide"] == "1";
+    buff.Exclude = buff.tab["Exclude"] == "1";
     buff.CanCancel = buff.tab["CanCancel"] == "1";
     buff.MinInterval = std::stoi(buff.tab["MinInterval"]);
     buff.MaxInterval = std::stoi(buff.tab["MaxInterval"]);
@@ -49,11 +50,16 @@ void BuffManager::add(int buffID, int buffLevel) {
     static const std::string attribName[] = {"Begin", "Active", "EndTime"};
     for (int attribIdx = 0; attribIdx < 3; attribIdx++) {
         for (int i = 1; buff.tab.find(attribName[attribIdx] + "Attrib" + std::to_string(i)) != buff.tab.end(); i++) {
-            std::string name = buff.tab[attribName[attribIdx] + "Attrib" + std::to_string(i)];        // BeginAttrib1, BeginAttrib2, ...
+
+            std::string name = buff.tab[attribName[attribIdx] + "Attrib" + std::to_string(i)]; // BeginAttrib1, BeginAttrib2, ...
+            if (name.empty())
+                break; // 属性为空, 直接跳出, 进行下一个 attribIdx
+
             std::string valueA = buff.tab[attribName[attribIdx] + "Value" + std::to_string(i) + "A"]; // BeginValue1A, BeginValue2A, ...
             std::string valueB = buff.tab[attribName[attribIdx] + "Value" + std::to_string(i) + "B"]; // BeginValue1B, BeginValue2B, ...
+
             if (ns_framestatic::mapTabAttribute.find(name) == ns_framestatic::mapTabAttribute.end()) {
-                LOG_ERROR("BuffManager::add: Unknown Attribute: %s", name.c_str());
+                LOG_ERROR("BuffManager::add: %d Unknown Attribute: %s\n", attribIdx, name.c_str());
                 continue;
             }
             switch (attribIdx) {
@@ -61,10 +67,10 @@ void BuffManager::add(int buffID, int buffLevel) {
                 addAttribute(buff.BeginAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
                 break;
             case 1:
-                addAttribute(buff.BeginAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
+                addAttribute(buff.ActiveAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
                 break;
             case 2:
-                addAttribute(buff.BeginAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
+                addAttribute(buff.EndTimeAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
                 break;
             }
         }

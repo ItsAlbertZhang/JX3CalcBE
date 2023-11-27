@@ -17,15 +17,24 @@ public:
      */
     class Item {
     public:
+        Item(int nCharacterID, int dwSkillSrcID, int BuffID, int nBuffLevel)
+            : nCharacterID(nCharacterID), dwSkillSrcID(dwSkillSrcID), BuffID(BuffID), nBuffLevel(nBuffLevel) {}
+        const int nCharacterID = 0; // 角色 ID
+        const int dwSkillSrcID = 0; // 来源 ID
+        const int BuffID = 0;
+        const int nBuffLevel = 0;
+
         bool isValid = false;
         event_tick_t tickOver = 0; // 结束 tick
 
-        Character *source = nullptr;
-        CharacterAttr attr; // 保存一份属性的副本, 用于快照
+        CharacterAttr attr;        // 保存一份属性的副本, 用于快照
+        void *ptrAttrib = nullptr; // 自动回滚的 buff 属性, 用于处理 buff 的 BeginAttrib, ActiveAttrib, EndTimeAttrib
 
+        int nLeftFrame = 0;
+        int nCustomValue = 0;
         int nStackNum = 0;
 
-        // OnRemove: nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID
+        // OnRemove: nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, [[nBuffIndex, dwCasterID, dwCasterSkillID]] 未实现
     };
 
     /**

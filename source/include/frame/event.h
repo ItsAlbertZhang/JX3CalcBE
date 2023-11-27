@@ -38,8 +38,30 @@ public:
     EventManager() = delete;
 
     bool run();
+
+    /**
+     * @brief 添加一个事件
+     * @param delay 生效延迟, 为生效 tick 与 当前 tick 的差值
+     * @param func 回调函数
+     * @param self 回调函数的第一个参数
+     * @param param 回调函数的第二个参数
+     * @retval 该事件的生效 tick
+     */
     static event_tick_t add(event_tick_t delay, event_func_t func, void *self, void *param);
+
+    /**
+     * @brief 移除一个事件
+     * @param tick 该事件的生效 tick
+     * @param func 该事件的回调函数
+     * @param self 该事件的回调函数的第一个参数
+     * @param param 该事件的回调函数的第二个参数
+     * @retval 原本的生效延迟, 即该事件的生效 tick 与 当前 tick 的差值
+     */
     static event_tick_t cancel(event_tick_t tick, event_func_t func, void *self, void *param);
+
+    /**
+     * @return 当前 tick
+     */
     static event_tick_t now();
 
 private:

@@ -68,13 +68,19 @@ inline const char *refLuaAttributeType[] = {
 
 enum class enumTabAttribute {
     atAllDamageAddPercent,
+    atLunarDamageCoefficient,
+    atSolarDamageCoefficient,
     COUNT,
 };
 inline const std::string refTabAttribute[] = {
     "atAllDamageAddPercent",
+    "atLunarDamageCoefficient",
+    "atSolarDamageCoefficient",
 };
 inline const std::unordered_map<std::string, enumTabAttribute> mapTabAttribute = {
     {"atAllDamageAddPercent", enumTabAttribute::atAllDamageAddPercent},
+    {"atLunarDamageCoefficient", enumTabAttribute::atLunarDamageCoefficient},
+    {"atSolarDamageCoefficient", enumTabAttribute::atSolarDamageCoefficient},
 };
 
 } // namespace ns_framestatic
