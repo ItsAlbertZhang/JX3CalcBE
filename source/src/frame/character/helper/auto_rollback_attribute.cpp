@@ -43,6 +43,9 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 int dwSkillSrcID = Character::getCharacterID(self);
                 LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
             } break;
+            case static_cast<int>(enumLuaAttributeType::CURRENT_SUN_ENERGY):
+                self->nCurrentSunEnergy += it.param1Int;
+                break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
             }
@@ -79,6 +82,9 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_POISON_DAMAGE_RAND):
                 this->atPoisonDamageRand += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::PHYSICS_ATTACK_POWER_PERCENT):
+                self->chAttr.atPhysicsAttackPowerPercent += it.param1Int * c;
                 break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
