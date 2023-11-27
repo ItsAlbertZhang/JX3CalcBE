@@ -22,7 +22,7 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
 }
 
 void Character::CastSkill(int skillID, int skillLevel) {
-    LOG_INFO("Try to CastSkill: %d # %d\n", skillID, skillLevel);
+    LOG_INFO("\nTry to CastSkill: %d # %d\n", skillID, skillLevel);
 
     // 获取技能
     const Skill &skill = SkillManager::get(skillID, skillLevel);
