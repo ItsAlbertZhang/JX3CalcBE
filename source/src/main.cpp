@@ -25,10 +25,18 @@ int main(int argc, char *argv[]) {
     // 初始化接口
     ret = gdi::Interface::initGameData(ns_program::Config::pJX3, ns_program::Config::pUnpack);
     std::cout << "initGameData = " << ret << std::endl;
+    if (!ret)
+        return 0;
+
     ret = gdi::Interface::initLua(ns_framestatic::luaInit, ns_framestatic::luaFuncStaticToDynamic);
     std::cout << "initLua  = " << ret << std::endl;
+    if (!ret)
+        return 0;
+
     ret = gdi::Interface::initTab(static_cast<int>(gdi::Tab::COUNT));
     std::cout << "initTab  = " << ret << std::endl;
+    if (!ret)
+        return 0;
 
     // 如果成功加载 GameDataFetcher, current_path 会发生改变.
     std::cout << std::filesystem::current_path() << std::endl;
