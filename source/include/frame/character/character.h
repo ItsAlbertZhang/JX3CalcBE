@@ -58,11 +58,12 @@ public:
     void SetTimer4(int frame, std::string filename, int type, int targetID);
 
     //  ---------- 被 lua 调用的属性, 通常以 "n" 开头 ----------
-    int dwID; // 角色 ID
-
-    int nLevel = chAttr.atLevel; // 等级, 这是唯一一个同时存在于此处和 chAttr 内部的属性
-    int nCurrentSunEnergy = 0;   // 当前日灵
-    int nCurrentMoonEnergy = 0;  // 当前月魂
+    int dwID;                          // 角色 ID
+    int nLevel = chAttr.atLevel;       // 等级, 这是唯一一个同时存在于此处和 chAttr 内部的属性
+    int nCurrentSunEnergy = 0;         // 当前日灵
+    int nCurrentMoonEnergy = 0;        // 当前月魂
+    bool bSurplusAutoCast = false;     // 出现于 明教_套路_内功_焚影圣诀.lua
+    bool bSurplusAutoReplenish = true; // 出现于 明教_套路_内功_焚影圣诀.lua
 
 private:
     static inline std::vector<Character *> characterList;            // 角色列表

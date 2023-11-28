@@ -38,12 +38,12 @@ int CharacterAttr::getPhysicsAttackPower() const {
 int CharacterAttr::getSolarAttackPower() const {
     return (atSolarAttackPowerBase + atMagicAttackPowerBase) +
            (atSolarAttackPowerBase + atMagicAttackPowerBase) * (atSolarAttackPowerPercent + atMagicAttackPowerPercent) / 1024 +
-           atSpunkToSolarAndLunarAttackPowerCof * getSpunk();
+           atSpunkToSolarAndLunarAttackPowerCof * getSpunk() / 1024;
 }
 int CharacterAttr::getLunarAttackPower() const {
     return (atLunarAttackPowerBase + atMagicAttackPowerBase) +
            (atLunarAttackPowerBase + atMagicAttackPowerBase) * (atLunarAttackPowerPercent + atMagicAttackPowerPercent) / 1024 +
-           atSpunkToSolarAndLunarAttackPowerCof * getSpunk();
+           atSpunkToSolarAndLunarAttackPowerCof * getSpunk() / 1024;
 }
 int CharacterAttr::getNeutralAttackPower() const {
     return (atNeutralAttackPowerBase + atMagicAttackPowerBase) +
@@ -63,13 +63,13 @@ int CharacterAttr::getPhysicsCriticalStrike() const {
 }
 int CharacterAttr::getSolarCriticalStrike() const {
     return static_cast<int>((atSolarCriticalStrike + atAllTypeCriticalStrike + atMagicCriticalStrike +
-                             atSolarCriticalStrikeAdd + atSpunkToSolarAndLunarCriticalStrikeCof * getSpunk()) *
+                             atSolarCriticalStrikeAdd + atSpunkToSolarAndLunarCriticalStrikeCof * getSpunk() / 1024) *
                             10000 / (GlobalParam::get().fCriticalStrikeParam * GlobalParam::levelCof(atLevel))) +
            atSolarCriticalStrikeBaseRate;
 }
 int CharacterAttr::getLunarCriticalStrike() const {
     return static_cast<int>((atLunarCriticalStrike + atAllTypeCriticalStrike + atMagicCriticalStrike +
-                             atLunarCriticalStrikeAdd + atSpunkToSolarAndLunarCriticalStrikeCof * getSpunk()) *
+                             atLunarCriticalStrikeAdd + atSpunkToSolarAndLunarCriticalStrikeCof * getSpunk() / 1024) *
                             10000 / (GlobalParam::get().fCriticalStrikeParam * GlobalParam::levelCof(atLevel))) +
            atLunarCriticalStrikeBaseRate;
 }

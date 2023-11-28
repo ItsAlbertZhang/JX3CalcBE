@@ -89,6 +89,63 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(enumLuaAttributeType::PHYSICS_ATTACK_POWER_PERCENT):
                 self->chAttr.atPhysicsAttackPowerPercent += it.param1Int * c;
                 break;
+            case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT): {
+                std::string paramStr = "scripts/" + it.param1Str;
+                int dwCharacterID = Character::getCharacterID(self);
+                int dwSkillSrcID = Character::getCharacterID(self);
+                LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
+                std::string paramStr = "scripts/" + it.param1Str;
+                int dwCharacterID = Character::getCharacterID(self);
+                int dwSkillSrcID = Character::getCharacterID(self);
+                LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::DST_NPC_DAMAGE_COEFFICIENT):
+                self->chAttr.atDstNpcDamageCoefficient += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::MAGIC_SHIELD):
+                self->chAttr.atMagicShield += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::PHYSICS_SHIELD_BASE):
+                self->chAttr.atPhysicsShieldBase += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::DROP_DEFENCE):
+                // 未做相关实现
+                break;
+            case static_cast<int>(enumLuaAttributeType::ACTIVE_THREAT_COEFFICIENT):
+                // 未做相关实现
+                break;
+            case static_cast<int>(enumLuaAttributeType::BEAT_BACK_RATE):
+                // 未做相关实现
+                break;
+            case static_cast<int>(enumLuaAttributeType::SPUNK_TO_SOLAR_AND_LUNAR_ATTACK_POWER_COF):
+                self->chAttr.atSpunkToSolarAndLunarAttackPowerCof += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::SPUNK_TO_SOLAR_AND_LUNAR_CRITICAL_STRIKE_COF):
+                self->chAttr.atSpunkToSolarAndLunarCriticalStrikeCof += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::MAX_SUN_ENERGY):
+                self->chAttr.atMaxSunEnergy += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::MAX_MOON_ENERGY):
+                self->chAttr.atMaxMoonEnergy += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::MAX_LIFE_PERCENT_ADD):
+                // 未做相关实现
+                break;
+            case static_cast<int>(enumLuaAttributeType::SOLAR_ATTACK_POWER_BASE):
+                self->chAttr.atSolarAttackPowerBase += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::LUNAR_ATTACK_POWER_BASE):
+                self->chAttr.atLunarAttackPowerBase += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::MANA_REPLENISH_PERCENT):
+                // 未做相关实现
+                break;
+            case static_cast<int>(enumLuaAttributeType::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE):
+                self->chAttr.atDecriticalDamagePowerBaseKiloNumRate += it.param1Int * c;
+                break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
             }

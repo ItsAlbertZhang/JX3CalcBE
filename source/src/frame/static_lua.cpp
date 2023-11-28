@@ -110,8 +110,12 @@ bool ns_framestatic::luaInit(sol::state &lua) {
                                 "GetSkillLevel", &Character::GetSkillLevel,
                                 "SetTimer", sol::overload(&Character::SetTimer3, &Character::SetTimer4),
                                 "GetSkillTarget", &Character::GetSkillTarget,
+                                "dwID", &Character::dwID,
+                                "nLevel", &Character::nLevel,
                                 "nCurrentSunEnergy", &Character::nCurrentSunEnergy,
-                                "nCurrentMoonEnergy", &Character::nCurrentMoonEnergy);
+                                "nCurrentMoonEnergy", &Character::nCurrentMoonEnergy,
+                                "bSurplusAutoCast", &Character::bSurplusAutoCast,
+                                "bSurplusAutoReplenish", &Character::bSurplusAutoReplenish);
 
     lua.set_function("Include", LuaGlobalFunction::Include);
     lua.set_function("GetPlayer", LuaGlobalFunction::GetPlayer);
