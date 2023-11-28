@@ -1,5 +1,6 @@
 #include "frame/character/character.h"
 #include "frame/event.h"
+#include "frame/runtime_lua.h"
 #include "frame/static_lua.h"
 #include "gdi.h"
 #include "program/init.h"
@@ -93,6 +94,8 @@ int main(int argc, char *argv[]) {
     // } else {
     //     printf("%d\n", obj.b);
     // }
+
+    ns_frame::LuaFunc::clear();
 
 #ifdef DEBUG
     std::cout << "Press any key to exit..." << std::endl;

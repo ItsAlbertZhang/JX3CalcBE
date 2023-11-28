@@ -1,5 +1,6 @@
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
+#include "program/log.h"
 
 using namespace ns_frame;
 
@@ -27,6 +28,9 @@ std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int 
     case SkillType::Poison:
         atCriticalStrike = attrSelf.getPoisonCriticalStrike();
         atCriticalDamagePower = attrSelf.getPoisonCriticalDamagePower();
+        break;
+    default:
+        LOG_ERROR("Unknown skill type: %d", static_cast<int>(skill.type));
         break;
     }
 

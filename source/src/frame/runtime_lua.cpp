@@ -75,3 +75,9 @@ void LuaFunc::add(const std::string &filename) {
         funcs.emplace_back(executeSuccess ? gdi::Interface::luaGetFunction(names[i]) : sol::nil);
     }
 }
+
+void LuaFunc::clear() {
+    filenameList.clear();
+    filenameMap.clear();
+    filefuncList.clear();
+}

@@ -29,6 +29,12 @@ public:
     static sol::protected_function getOnTimer(int idx);
     static bool analysis(sol::protected_function_result res, std::string &filename, Enum func);
     static bool analysis(sol::protected_function_result res, int idx, Enum func);
+    /**
+     * @note 在 MacOS 上, 程序退出时, 类的静态变量析构晚于在 gdi 库中的 lua 状态机(同样是类的静态变量)的析构.
+     * @note 在 lua 状态机析构后, 再析构 filefuncList 中的 lua 函数, 会导致程序出口崩溃.
+     * @note 因此, 暂时先使用此方法, 在程序退出时手动清空 filefuncList 中的 lua 函数.
+     */
+    static void clear();
 
 private:
     static inline const std::string names[] = {
@@ -38,8 +44,6 @@ private:
     };
     /**
      * @brief 缓存数据, 不同线程之间数据不共享
-     * @note filename 存在有无法区分正反斜杠的问题, 但不影响使用.
-     * @note 在遇到不同的斜杠时, lua 会被再加载一次, 这样做的效率应该要高于每次检查传入并进行替换.
      */
     static inline thread_local std::vector<std::string> filenameList;
     static inline thread_local std::unordered_map<std::string, int> filenameMap;

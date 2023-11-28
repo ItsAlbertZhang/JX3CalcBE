@@ -102,5 +102,5 @@ void Skill::SetCheckCoolDown(int a, int b) {
 }
 
 void Skill::SetSubsectionSkill(int a, int b, int c, int d) {
-    LOG_ERROR("SetSubsectionSkill 未实现!\n");
+    LOG_ERROR("SetSubsectionSkill 未实现!\n%s", "");
 }

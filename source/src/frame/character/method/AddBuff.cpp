@@ -67,7 +67,7 @@ void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int b
 
 void Character::DelBuffAllStackNum(CharacterBuff::Item &it) {
     it.isValid = false;
-    delete it.ptrAttrib; // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
+    delete (AutoRollbackAttrib *)it.ptrAttrib; // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
     it.ptrAttrib = nullptr;
     EventManager::cancel(it.tickActive, callbackActiveBuff, this, &it); // 取出回调函数
 }

@@ -30,15 +30,15 @@ void Character::CastSkill(int skillID, int skillLevel) {
 
     // 检查技能是否可以释放
     if (!staticCheckBuff(this, target, skill)) {
-        LOG_INFO("Checkbuff failed!\n");
+        LOG_INFO("Checkbuff failed!\n%s", "");
         return;
     }
     if (!staticCheckSelfLearntSkill(this, skill)) {
-        LOG_INFO("SkillCheckSelfLearntSkill failed!\n");
+        LOG_INFO("SkillCheckSelfLearntSkill failed!\n%s", "");
         return;
     }
     if (!staticCheckCoolDown(this, skill)) {
-        LOG_INFO("CheckCoolDown failed!\n");
+        LOG_INFO("CheckCoolDown failed!\n%s", "");
         return;
     }
 
