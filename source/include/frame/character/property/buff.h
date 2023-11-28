@@ -20,9 +20,13 @@ public:
         Item(int nCharacterID, int dwSkillSrcID, int BuffID, int nBuffLevel)
             : nCharacterID(nCharacterID), dwSkillSrcID(dwSkillSrcID), BuffID(BuffID), nBuffLevel(nBuffLevel) {}
         const int nCharacterID = 0; // 角色 ID
-        const int dwSkillSrcID = 0; // 来源 ID
+        const int dwSkillSrcID = 0; // 来源角色 ID, 注意不是技能 ID
         const int BuffID = 0;
         const int nBuffLevel = 0;
+
+        int nLeftFrame = 0;
+        int nCustomValue = 0;
+        int nStackNum = 0;
 
         bool isValid = false;
         event_tick_t tickActive = 0; // 下一次生效的 tick
@@ -32,9 +36,10 @@ public:
         void *ptrAttrib = nullptr; // 自动回滚的 buff 属性, 用于处理 buff 的 BeginAttrib, ActiveAttrib, EndTimeAttrib
         CharacterAttr attr;        // 保存一份属性的副本, 用于快照
 
-        int nLeftFrame = 0;
-        int nCustomValue = 0;
-        int nStackNum = 0;
+        // 以下属性只有 BindBuff 才拥有
+        int dwCasterSkillID = 0;    // 来源技能 ID
+        int dwCasterSkillLevel = 0; // 来源技能等级
+        int nChannelInterval = 0;   // 单跳系数
 
         // OnRemove: nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, [[nBuffIndex, dwCasterID, dwCasterSkillID]] 未实现
     };

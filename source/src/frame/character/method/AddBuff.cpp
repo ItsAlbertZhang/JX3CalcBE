@@ -2,6 +2,7 @@
 #include "frame/character/helper/auto_rollback_attrib.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
+#include "frame/global/skill.h"
 
 using namespace ns_frame;
 
@@ -19,7 +20,6 @@ static void callbackActiveBuff(void *selfPtr, void *param) {
 }
 
 void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel) {
-    printf("%d AddBuff: %d %d %d %d\n", this->dwID, buffSourceID, buffSourceLevel, buffID, buffLevel);
     if (this->chBuff.buffList[buffSourceID][buffID].find(buffLevel) == this->chBuff.buffList[buffSourceID][buffID].end()) {
         // 对于 buffSourceID 和 buffID, 直接使用 [] 运算符, 没有则直接创建.
         this->chBuff.buffList[buffSourceID][buffID].emplace(
@@ -33,8 +33,8 @@ void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int b
     if (!it.isValid) {
         // 当前不存在 buff
         it.isValid = true;
-        it.attr = getCharacter(buffSourceID)->chAttr;                // 锁面板
-        it.ptrAttrib = new AutoRollbackAttrib(this, &it.attr, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
+        it.attr = getCharacter(buffSourceID)->chAttr;           // 锁面板
+        it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
         it.count = buff.Count;
         // 计算 interval
         it.interval = buff.Interval * (1024 - it.attr.getHaste()) / 1024;
@@ -46,9 +46,8 @@ void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int b
         it.nStackNum = 1; // 将层数设置为 1
     } else {
         // 当前存在该 buff
-        it.attr = getCharacter(buffSourceID)->chAttr;          // 锁面板
-        ((AutoRollbackAttrib *)it.ptrAttrib)->attr = &it.attr; // 更换 Attrib 所使用的 attr
-        it.count = buff.Count;                                 // 重置计数
+        it.attr = getCharacter(buffSourceID)->chAttr; // 锁面板
+        it.count = buff.Count;                        // 重置计数
         // 重新计算 interval
         it.interval = buff.Interval * (1024 - it.attr.getHaste()) / 1024;
         it.interval = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
@@ -70,4 +69,16 @@ void Character::DelBuffAllStackNum(CharacterBuff::Item &it) {
     delete (AutoRollbackAttrib *)it.ptrAttrib; // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
     it.ptrAttrib = nullptr;
     EventManager::cancel(it.tickActive, callbackActiveBuff, this, &it); // 取出回调函数
+}
+
+void Character::BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel) {
+    const Skill &skill = SkillManager::get(skillID, skillLevel);
+    const Buff &buff = BuffManager::get(buffID, buffLevel);
+    this->AddBuff(buffSourceID, buffSourceLevel, buffID, buffLevel);
+    CharacterBuff::Item &it = this->chBuff.buffList[buffSourceID][buffID].at(buffLevel);
+    it.dwCasterSkillID = skillID;
+    it.dwCasterSkillLevel = skillLevel;
+    int cof = buff.Interval / 12;
+    cof = cof > 16 ? cof : 16;
+    it.nChannelInterval = static_cast<int>(skill.nChannelInterval / buff.Count * cof / 16);
 }

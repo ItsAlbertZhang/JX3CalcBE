@@ -59,6 +59,10 @@ int main(int argc, char *argv[]) {
     // player.LearnSkill(10242, 13); // 焚影圣诀
     player.target = &npc;
     player.chAttr.atSolarAttackPowerBase = 1000;
+    player.chAttr.atLunarAttackPowerBase = 1000;
+    player.chAttr.atSolarCriticalStrikeBaseRate = 5000; // 50% 会心率
+    player.chAttr.atLunarCriticalStrikeBaseRate = 5000; // 50% 会心率
+    player.chAttr.atMeleeWeaponDamageBase = 500;
     player.chAttr.atHasteBase = 95;
     player.LearnSkill(3960, 10); // 银月斩
     player.CastSkill(3960, 10);
@@ -70,8 +74,14 @@ int main(int argc, char *argv[]) {
     player.CastSkill(3960, 10);
     while (ns_frame::EventManager::run()) {
     }
+    std::cout << "tick\t"
+              << "ID\t"
+              << "lv\t"
+              << "cri\t"
+              << "dmg\t"
+              << "type" << std::endl;
     for (auto &it : player.chDamage.damageList) {
-        std::cout << it.tick << " " << it.skillID << " " << it.skillLevel << " " << it.isCritical << " " << it.damage << " " << static_cast<int>(it.damageType) << std::endl;
+        std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s:\t" << it.skillID << "\t" << it.skillLevel << "\t" << it.isCritical << "\t" << it.damage << "\t" << static_cast<int>(it.damageType) << std::endl;
     }
 
     // // 测试用例 3

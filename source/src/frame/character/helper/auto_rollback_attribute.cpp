@@ -117,7 +117,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     this->isCritical,
                     self->CalcDamage(
                         self->chAttr, self->target, DamageType::Physics,
-                        atSolarDamage, atSolarDamageRand, atCriticalStrike, atCriticalDamagePower,
+                        atSolarDamage, atSolarDamageRand, isCritical, atCriticalDamagePower,
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Physics);
@@ -129,7 +129,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     this->isCritical,
                     self->CalcDamage(
                         self->chAttr, self->target, DamageType::Solar,
-                        atSolarDamage, atSolarDamageRand, atCriticalStrike, atCriticalDamagePower,
+                        atSolarDamage, atSolarDamageRand, isCritical, atCriticalDamagePower,
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Solar);
@@ -141,7 +141,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     this->isCritical,
                     self->CalcDamage(
                         self->chAttr, self->target, DamageType::Lunar,
-                        atSolarDamage, atSolarDamageRand, atCriticalStrike, atCriticalDamagePower,
+                        atSolarDamage, atSolarDamageRand, isCritical, atCriticalDamagePower,
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Lunar);
@@ -153,7 +153,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     this->isCritical,
                     self->CalcDamage(
                         self->chAttr, self->target, DamageType::Neutral,
-                        atSolarDamage, atSolarDamageRand, atCriticalStrike, atCriticalDamagePower,
+                        atSolarDamage, atSolarDamageRand, isCritical, atCriticalDamagePower,
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Neutral);
@@ -165,7 +165,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     this->isCritical,
                     self->CalcDamage(
                         self->chAttr, self->target, DamageType::Poison,
-                        atSolarDamage, atSolarDamageRand, atCriticalStrike, atCriticalDamagePower,
+                        atSolarDamage, atSolarDamageRand, isCritical, atCriticalDamagePower,
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Poison);

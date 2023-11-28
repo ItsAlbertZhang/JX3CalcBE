@@ -5,6 +5,7 @@
 using namespace ns_frame;
 
 std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int skillID, int skillLevel) {
+    // TODO: 目标御劲降低会心率和会心效果.
     int atCriticalStrike = 0;
     int atCriticalDamagePower = 0;
     const Skill &skill = SkillManager::get(skillID, skillLevel);
@@ -37,9 +38,7 @@ std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int 
     return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 }
 
-int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, int damageBase, int damageRand, int atCriticalStrike, int atCriticalDamagePower, int nChannelInterval, int nWeaponDamagePercent) {
-    // TODO: 目标御劲降低会心率和会心效果.
-
+int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, int damageBase, int damageRand, bool isCritical, int atCriticalDamagePower, int nChannelInterval, int nWeaponDamagePercent) {
     int atStrain = this->chAttr.getStrain();                                // 类型× 快照
     int atDstNpcDamageCoefficient = this->chAttr.atDstNpcDamageCoefficient; // 类型× 快照
     int atAddDamageByDstMoveState = this->chAttr.atAddDamageByDstMoveState; // 类型× 快照
@@ -106,6 +105,10 @@ int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, Dama
     damage = damage * (1024 + atOvercome) / 1024;
     damage = damage * (1024 - targetShield) / 1024;
     damage = damage * (1024 + targetDamageCoefficient) / 1024;
+
+    if (isCritical) {
+        damage = damage * (1792 + atCriticalDamagePower) / 1024;
+    }
 
     return damage;
 }

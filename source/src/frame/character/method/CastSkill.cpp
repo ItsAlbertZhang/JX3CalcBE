@@ -56,7 +56,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
     }
     // 绑定 buff
     for (auto &it : skill.attrBindBuff) {
-        target->AddBuff(characterMap[this], this->nLevel, it.nBuffID, it.nBuffLevel); // TODO: 快照属性
+        target->BindBuff(characterMap[this], this->nLevel, it.nBuffID, it.nBuffLevel, skillID, skillLevel);
     }
 
     // 计算会心
