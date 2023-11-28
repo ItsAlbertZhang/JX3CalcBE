@@ -51,6 +51,22 @@ inline const char *refLuaTarget[] = {
     "PLAYER",
 };
 
+enum class enumLuaSkillKindType {
+    PHYSICS,
+    SOLAR_MAGIC,
+    LUNAR_MAGIC,
+    NEUTRAL_MAGIC,
+    POISON_MAGIC,
+    COUNT,
+};
+inline const char *refLuaSkillKindType[] = {
+    "PHYSICS",
+    "SOLAR_MAGIC",
+    "LUNAR_MAGIC",
+    "NEUTRAL_MAGIC",
+    "POISON_MAGIC",
+};
+
 } // namespace ns_framestatic
 
 #endif // FRAME_STATIC_REF_H_

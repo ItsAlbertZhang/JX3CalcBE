@@ -2,6 +2,7 @@
 #define FRAME_STATIC_LUA_H_
 
 #include "frame/character/character.h"
+#include "frame/global/skill.h"
 #include <sol2/sol.hpp>
 #include <string>
 #include <vector>
@@ -19,6 +20,7 @@ public:
     static ns_frame::Character *GetPlayer(int nCharacterID);
     static ns_frame::Character *GetNpc(int nCharacterID);
     static bool IsPlayer(int nCharacterID);
+    static void AdditionalAttribute(ns_frame::Skill &skill);
 };
 
 } // namespace ns_framestatic

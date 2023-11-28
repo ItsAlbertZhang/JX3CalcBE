@@ -172,3 +172,18 @@ static bool staticCheckCoolDown(Character *self, const Skill &skill) {
     }
     return true;
 }
+
+void Character::ActiveSkill(int skillID, int skillLevel) {
+    const Skill &skill = SkillManager::get(skillID, skillLevel);
+    AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, skill, 0, 0, false};
+    // this->chSkill.skillActived[skillID] = CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)};
+    this->chSkill.skillActived.emplace(skillID, CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)});
+}
+
+void Character::DeactiveSkill(int skillID) {
+    auto it = this->chSkill.skillActived.find(skillID);
+    if (it != this->chSkill.skillActived.end()) {
+        delete static_cast<AutoRollbackAttribute *>(it->second.attribute);
+        this->chSkill.skillActived.erase(it);
+    }
+}

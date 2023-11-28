@@ -35,6 +35,8 @@ public:
     static Character *getCharacter(int nCharacterID);
     static int getCharacterID(Character *character);
     void LearnSkill(int skillID, int skillLevel);
+    void ActiveSkill(int skillID, int skillLevel);
+    void DeactiveSkill(int skillID);
     void DelBuffAllStackNum(CharacterBuff::Item &it);
     void BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
     CharacterBuff::Item *GetBuffWithCompareFlag(int buffID, int buffLevel, int flag);

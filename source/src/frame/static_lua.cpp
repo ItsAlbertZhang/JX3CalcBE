@@ -117,6 +117,7 @@ bool ns_framestatic::luaInit(sol::state &lua) {
     lua.set_function("GetPlayer", LuaGlobalFunction::GetPlayer);
     lua.set_function("GetNpc", LuaGlobalFunction::GetNpc);
     lua.set_function("IsPlayer", LuaGlobalFunction::IsPlayer);
+    lua.set_function("AdditionalAttribute", LuaGlobalFunction::AdditionalAttribute);
 
     sol::table AttributeType = lua.create_table();
     for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaAttributeType::COUNT); i++) {
@@ -148,6 +149,12 @@ bool ns_framestatic::luaInit(sol::state &lua) {
     }
     lua["TARGET"] = TARGET;
 
+    sol::table SKILL_KIND_TYPE = lua.create_table();
+    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaSkillKindType::COUNT); i++) {
+        SKILL_KIND_TYPE[ns_framestatic::refLuaSkillKindType[i]] = i;
+    }
+    lua["SKILL_KIND_TYPE"] = SKILL_KIND_TYPE;
+
     lua["CONSUME_BASE"] = 100;
     lua["LENGTH_BASE"] = 64;
 
@@ -168,4 +175,13 @@ Character *ns_framestatic::LuaGlobalFunction::GetNpc(int nCharacterID) {
 
 bool ns_framestatic::LuaGlobalFunction::IsPlayer(int nCharacterID) {
     return Character::getCharacter(nCharacterID)->isPlayer;
+}
+
+void ns_framestatic::LuaGlobalFunction::AdditionalAttribute(Skill &skill) {
+    // 出现于 Skill.lh, 其本应被 Include 包含. 但 Include 实际上置空, 因此在此处实现相关逻辑.
+    skill.AddAttribute_iiii(
+        static_cast<int>(enumLuaAttributeEffectMode::EFFECT_TO_SELF_AND_ROLLBACK),
+        static_cast<int>(enumLuaAttributeType::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE),
+        100,
+        0);
 }
