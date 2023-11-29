@@ -56,6 +56,8 @@ void Character::CastSkill(int skillID, int skillLevel) {
     Skill::SkillCoolDown cooldown = skill.attrCoolDown;
     Skill::SkillBindBuff bindbuff = skill.attrBindBuff;
 
+    // TODO: SkillRecipe
+
     if (!staticCheckCoolDown(this, cooldown)) {
         LOG_INFO("CheckCoolDown failed!\n%s", "");
         return;

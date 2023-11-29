@@ -44,10 +44,13 @@ void SkillRecipeManager::add(int RecipeID, int RecipeLevel) {
 
     Skill skill;
     // 执行 GetSkillRecipeData
-    std::string name = "scripts/skill/" + skillrecipe.tab["ScriptFile"];
-    bool res = LuaFunc::analysis(LuaFunc::getGetSkillRecipeData(name)(skill, RecipeID, RecipeLevel), name, LuaFunc::Enum::GetSkillRecipeData);
-    if (res) {
-        // 成功执行, 将技能添加到 ScriptSkill 中
-        ScriptSkill[curr] = std::move(skill);
+    std::string path = skillrecipe.tab["ScriptFile"];
+    if (!path.empty()) {
+        std::string name = "scripts/skill/" + path;
+        bool res = LuaFunc::analysis(LuaFunc::getGetSkillRecipeData(name)(skill, RecipeID, RecipeLevel), name, LuaFunc::Enum::GetSkillRecipeData);
+        if (res) {
+            // 成功执行, 将技能添加到 ScriptSkill 中
+            ScriptSkill[curr] = std::move(skill);
+        }
     }
 }
