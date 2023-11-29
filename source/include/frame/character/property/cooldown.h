@@ -5,7 +5,6 @@
 
 namespace ns_frame {
 
-class Character;
 using event_tick_t = unsigned long long;
 
 class CharacterCooldown {
@@ -19,6 +18,10 @@ public:
         event_tick_t tickOver = 0; // 结束 tick
     };
 
+    /**
+     * @brief CD 列表
+     * @note key 为 ID
+     */
     std::unordered_map<int, Item> cooldownList;
 };
 

@@ -11,11 +11,12 @@
 using namespace ns_frame;
 using namespace ns_framestatic;
 
-static bool staticCheckBuff(Character *self, Character *target, const Skill &skill);
+static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill);
 static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue);
-static bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
+static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
-static bool staticCheckCoolDown(Character *self, const Skill &skill);
+static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDown &cooldown);
+static inline void staticTriggerCoolDown(Character *self, int nCoolDownID);
 
 void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targetID) {
     AutoRollbackTarget autoRollbackTarget{this, getCharacter(targetID)}; // 自动回滚的目标切换
@@ -28,16 +29,34 @@ void Character::CastSkill(int skillID, int skillLevel) {
     // 获取技能
     const Skill &skill = SkillManager::get(skillID, skillLevel);
 
-    // 检查技能是否可以释放
+    // 检查 tab 中的释放条件
+    if (skill.NeedOutOfFight && !this->isOutOfFight) {
+        LOG_INFO("Check failed: NeedOutOfFight!\n%s", "");
+        return;
+    }
+    if (this->target->isPlayer && !skill.TargetTypePlayer) {
+        LOG_INFO("Check failed: TargetTypePlayer!\n%s", "");
+        return;
+    }
+    if (!this->target->isPlayer && !skill.TargetTypeNpc) {
+        LOG_INFO("Check failed: TargetTypeNpc!\n%s", "");
+        return;
+    }
+
+    // 检查 lua 中添加的释放条件
     if (!staticCheckBuff(this, target, skill)) {
-        LOG_INFO("Checkbuff failed!\n%s", "");
+        LOG_INFO("CheckBuff failed!\n%s", "");
         return;
     }
     if (!staticCheckSelfLearntSkill(this, skill)) {
-        LOG_INFO("SkillCheckSelfLearntSkill failed!\n%s", "");
+        LOG_INFO("CheckSelfLearntSkill failed!\n%s", "");
         return;
     }
-    if (!staticCheckCoolDown(this, skill)) {
+
+    Skill::SkillCoolDown cooldown = skill.attrCoolDown;
+    Skill::SkillBindBuff bindbuff = skill.attrBindBuff;
+
+    if (!staticCheckCoolDown(this, cooldown)) {
         LOG_INFO("CheckCoolDown failed!\n%s", "");
         return;
     }
@@ -45,18 +64,20 @@ void Character::CastSkill(int skillID, int skillLevel) {
     LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
 
     // 触发 CD
-    for (auto &it : skill.attrCoolDown) {
-        if (it.type != Skill::SkillCoolDown::TypeEnum::checkCD) {
-            const Cooldown &cooldown = CooldownManager::get(it.nCoolDownID);
-            int durationFrame = cooldown.DurationFrame * (1024 - this->chAttr.getHaste()) / 1024;
-            durationFrame = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
-            durationFrame = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
-            ModifyCoolDown(it.nCoolDownID, durationFrame);
+    if (cooldown.isValidPublicCoolDown) {
+        staticTriggerCoolDown(this, cooldown.nPublicCoolDown);
+    }
+    for (int i = 0; i < 3; i++) {
+        if (cooldown.isValidNormalCoolDown[i]) {
+            staticTriggerCoolDown(this, cooldown.nNormalCoolDownID[i]);
         }
     }
+
     // 绑定 buff
-    for (auto &it : skill.attrBindBuff) {
-        target->BindBuff(characterMap[this], this->nLevel, it.nBuffID, it.nBuffLevel, skillID, skillLevel);
+    for (int i = 0; i < 4; i++) {
+        if (bindbuff.isValid[i]) {
+            target->BindBuff(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+        }
     }
 
     // 计算会心
@@ -70,7 +91,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
     AutoRollbackAttribute autoRollbackAttribute{this, skill, atCriticalStrike, atCriticalDamagePower, isCritical};
 }
 
-static bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {
+static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {
     for (const auto &cond : skill.attrCheckBuff) {
         Character *checkbuffCharacter = nullptr;
         bool checkbuffSrcOwn = false;
@@ -133,7 +154,7 @@ static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue)
     return false;
 }
 
-static bool staticCheckSelfLearntSkill(Character *self, const Skill &skill) {
+static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skill) {
     for (const auto &it : skill.attrCheckSelfLearntSkill) {
         auto skillLearned = self->chSkill.skillLearned.find(it.dwSkillID);
         if (skillLearned == self->chSkill.skillLearned.end()) {
@@ -162,15 +183,37 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
     return false;
 }
 
-static bool staticCheckCoolDown(Character *self, const Skill &skill) {
-    for (const auto &it : skill.attrCoolDown) {
-        if (self->chCooldown.cooldownList.find(it.nCoolDownID) != self->chCooldown.cooldownList.end() && self->chCooldown.cooldownList[it.nCoolDownID].isValid) {
-            // 在 CD 列表中找到了该 CD, 且 isValid 处于激活状态
-            return false;
-            // TODO: 充能技能尚未实现. 即使 CD 有效, 也有可能能够 CastSkill
+static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDown &cooldown) {
+    // TODO: 充能技能尚未实现. 即使 CD 有效, 也有可能能够 CastSkill
+    if (cooldown.isValidPublicCoolDown) {
+        if (self->chCooldown.cooldownList.find(cooldown.nPublicCoolDown) != self->chCooldown.cooldownList.end() &&
+            self->chCooldown.cooldownList[cooldown.nPublicCoolDown].isValid) {
+            return false; // CD 存在于列表中且未冷却完毕, CastSkill 失败
+        }
+    }
+    for (int i = 0; i < 3; i++) {
+        if (cooldown.isValidNormalCoolDown[i]) {
+            if (self->chCooldown.cooldownList.find(cooldown.nNormalCoolDownID[i]) != self->chCooldown.cooldownList.end() &&
+                self->chCooldown.cooldownList[cooldown.nNormalCoolDownID[i]].isValid) {
+                return false; // CD 存在于列表中且未冷却完毕, CastSkill 失败
+            }
+        }
+        if (cooldown.isValidCheckCoolDown[i]) {
+            if (self->chCooldown.cooldownList.find(cooldown.nCheckCoolDownID[i]) != self->chCooldown.cooldownList.end() &&
+                self->chCooldown.cooldownList[cooldown.nCheckCoolDownID[i]].isValid) {
+                return false; // CD 存在于列表中且未冷却完毕, CastSkill 失败
+            }
         }
     }
     return true;
+}
+
+static inline void staticTriggerCoolDown(Character *self, int cooldownID) {
+    const Cooldown &cooldown = CooldownManager::get(cooldownID);
+    int durationFrame = cooldown.DurationFrame * (1024 - self->chAttr.getHaste()) / 1024;
+    durationFrame = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
+    durationFrame = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
+    self->ModifyCoolDown(cooldownID, durationFrame);
 }
 
 void Character::ActiveSkill(int skillID, int skillLevel) {

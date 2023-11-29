@@ -24,6 +24,8 @@ enum class Tab {
     skills,
     buff,
     cooldown,
+    skillrecipe,
+    skillevent,
     COUNT, // 用于计数, 请勿使用
 };
 

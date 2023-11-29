@@ -17,23 +17,6 @@ const string &LuaFunc::getFilename(int idx) {
     return filenameList[idx];
 }
 
-sol::protected_function LuaFunc::getGetSkillLevelData(string &filename) {
-    std::replace(filename.begin(), filename.end(), '\\', '/');
-    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
-    return filefuncList[idx][static_cast<int>(Enum::GetSkillLevelData)];
-}
-
-sol::protected_function LuaFunc::getApply(string &filename) {
-    std::replace(filename.begin(), filename.end(), '\\', '/');
-    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
-    return filefuncList[idx][static_cast<int>(Enum::Apply)];
-}
-
-sol::protected_function LuaFunc::getOnTimer(int idx) {
-    // 传入的 idx 是先前通过 getIndex 获取的, 一定存在
-    return filefuncList[idx][static_cast<int>(Enum::OnTimer)];
-}
-
 bool LuaFunc::analysis(sol::protected_function_result res, std::string &filename, Enum func) {
     std::replace(filename.begin(), filename.end(), '\\', '/');
     if (!res.valid()) {
@@ -80,4 +63,27 @@ void LuaFunc::clear() {
     filenameList.clear();
     filenameMap.clear();
     filefuncList.clear();
+}
+
+sol::protected_function LuaFunc::getGetSkillLevelData(string &filename) {
+    std::replace(filename.begin(), filename.end(), '\\', '/');
+    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
+    return filefuncList[idx][static_cast<int>(Enum::GetSkillLevelData)];
+}
+
+sol::protected_function LuaFunc::getGetSkillRecipeData(string &filename) {
+    std::replace(filename.begin(), filename.end(), '\\', '/');
+    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
+    return filefuncList[idx][static_cast<int>(Enum::GetSkillRecipeData)];
+}
+
+sol::protected_function LuaFunc::getApply(string &filename) {
+    std::replace(filename.begin(), filename.end(), '\\', '/');
+    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
+    return filefuncList[idx][static_cast<int>(Enum::Apply)];
+}
+
+sol::protected_function LuaFunc::getOnTimer(int idx) {
+    // 传入的 idx 是先前通过 getIndex 获取的, 一定存在
+    return filefuncList[idx][static_cast<int>(Enum::OnTimer)];
 }

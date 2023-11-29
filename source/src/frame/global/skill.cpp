@@ -42,13 +42,20 @@ void SkillManager::add(int skillID, int skillLevel) {
         auto it = data[skillID].begin();
         skill.tab = it->second.tab;
     }
-    // 初始化数据
-    skill.type = SkillManager::typeMap.find(skill.tab["KindType"])->second;
+    // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
+    skill.KindType = SkillManager::SkillTypeMap.find(skill.tab["KindType"])->second;
+    skill.HasCriticalStrike = skill.tab["HasCriticalStrike"] == "1";
+    skill.SkillEventMask1 = atoi(skill.tab["SkillEventMask1"].c_str());
+    skill.SkillEventMask2 = atoi(skill.tab["SkillEventMask2"].c_str());
+    skill.NeedOutOfFight = skill.tab["NeedOutOfFight"] == "1";
+    skill.TargetTypePlayer = skill.tab["TargetTypePlayer"] == "1";
+    skill.TargetTypeNpc = skill.tab["TargetTypeNpc"] == "1";
+    skill.RecipeType = atoi(skill.tab["RecipeType"].c_str());
     // 执行 GetSkillLevelData
-    std::string name = "scripts\\skill\\" + skill.tab["ScriptFile"];
+    std::string name = "scripts/skill/" + skill.tab["ScriptFile"];
     bool res = LuaFunc::analysis(LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData);
     if (res) {
-        // 成功执行, 将技能添加到 data 中
+        // 成功执行, 将技能存入缓存
         data[skillID][skillLevel] = std::move(skill);
     }
 }
@@ -86,19 +93,28 @@ void Skill::AddCheckSelfLearntSkill(int a, int b, int c) {
 }
 
 void Skill::BindBuff(int a, int b, int c) {
-    attrBindBuff.emplace_back(a, b, c);
+    attrBindBuff.used = true;
+    attrBindBuff.isValid[a] = true;
+    attrBindBuff.nBuffID[a] = b;
+    attrBindBuff.nBuffLevel[a] = c;
 }
 
 void Skill::SetPublicCoolDown(int a) {
-    attrCoolDown.emplace_back(SkillCoolDown::TypeEnum::publicCD, 0, a);
+    attrCoolDown.used = true;
+    attrCoolDown.isValidPublicCoolDown = true;
+    attrCoolDown.nPublicCoolDown = a;
 }
 
 void Skill::SetNormalCoolDown(int a, int b) {
-    attrCoolDown.emplace_back(SkillCoolDown::TypeEnum::normalCD, a, b);
+    attrCoolDown.used = true;
+    attrCoolDown.isValidNormalCoolDown[a] = true;
+    attrCoolDown.nNormalCoolDownID[a] = b;
 }
 
 void Skill::SetCheckCoolDown(int a, int b) {
-    attrCoolDown.emplace_back(SkillCoolDown::TypeEnum::checkCD, a, b);
+    attrCoolDown.used = true;
+    attrCoolDown.isValidCheckCoolDown[a] = true;
+    attrCoolDown.nCheckCoolDownID[a] = b;
 }
 
 void Skill::SetSubsectionSkill(int a, int b, int c, int d) {

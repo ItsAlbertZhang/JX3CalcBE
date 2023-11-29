@@ -56,36 +56,39 @@ int main(int argc, char *argv[]) {
     // 测试用例 2
     ns_frame::Player player;
     ns_frame::NPC npc;
-    // player.LearnSkill(10242, 13); // 焚影圣诀
+    player.isPlayer = true;
     player.target = &npc;
-    // player.chAttr.atSolarAttackPowerBase = 1000;
-    // player.chAttr.atLunarAttackPowerBase = 1000;
-    // player.chAttr.atSolarCriticalStrikeBaseRate = 5000; // 50% 会心率
-    // player.chAttr.atLunarCriticalStrikeBaseRate = 5000; // 50% 会心率
-    // player.chAttr.atMeleeWeaponDamageBase = 500;
-    // player.chAttr.atHasteBase = 95;
-    // player.LearnSkill(3960, 10); // 银月斩
-    // player.CastSkill(3960, 10);
-    // while (!player.chSkill.skillQueue.empty()) {
-    //     auto it = player.chSkill.skillQueue.front();
-    //     player.chSkill.skillQueue.pop();
-    //     player.CastSkill(it.skillID, it.skillLevel);
-    // }
-    // player.CastSkill(3960, 10);
-    // while (ns_frame::EventManager::run()) {
-    // }
-    // std::cout << "tick\t"
-    //           << "ID\t"
-    //           << "lv\t"
-    //           << "cri\t"
-    //           << "dmg\t"
-    //           << "type" << std::endl;
-    // for (auto &it : player.chDamage.damageList) {
-    //     std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s:\t" << it.skillID << "\t" << it.skillLevel << "\t" << it.isCritical << "\t" << it.damage << "\t" << static_cast<int>(it.damageType) << std::endl;
-    // }
+
+    player.chAttr.atSolarAttackPowerBase = 1000;
+    player.chAttr.atLunarAttackPowerBase = 1000;
+    player.chAttr.atSolarCriticalStrikeBaseRate = 5000;   // 50% 会心率
+    player.chAttr.atLunarCriticalStrikeBaseRate = 5000;   // 50% 会心率
+    player.chAttr.atPhysicsCriticalStrikeBaseRate = 5000; // 50% 会心率
+    player.chAttr.atMeleeWeaponDamageBase = 500;
+    player.chAttr.atHasteBase = 95;
+
     player.LearnSkill(10242, 13); // 焚影圣诀
     player.ActiveSkill(10242, 13);
-    player.DeactiveSkill(10242);
+    // player.DeactiveSkill(10242);
+    player.LearnSkill(3960, 10); // 银月斩
+    player.CastSkill(3960, 10);
+    while (!player.chSkill.skillQueue.empty()) {
+        auto it = player.chSkill.skillQueue.front();
+        player.chSkill.skillQueue.pop();
+        player.CastSkill(it.skillID, it.skillLevel);
+    }
+    player.CastSkill(3960, 10);
+    while (ns_frame::EventManager::run()) {
+    }
+    std::cout << "tick\t"
+              << "ID\t"
+              << "lv\t"
+              << "cri\t"
+              << "dmg\t"
+              << "type" << std::endl;
+    for (auto &it : player.chDamage.damageList) {
+        std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s:\t" << it.skillID << "\t" << it.skillLevel << "\t" << it.isCritical << "\t" << it.damage << "\t" << static_cast<int>(it.damageType) << std::endl;
+    }
 
     // // 测试用例 3
     // class MyClass {

@@ -26,7 +26,10 @@ void BuffManager::add(int buffID, int buffLevel) {
         return; // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
     }
 
+    // 初始化 buff
     Buff buff;
+    buff.ID = buffID;
+    buff.Level = buffLevel;
     // 获取 tab
     gdi::TabSelectType arg;
     arg.emplace_back();
@@ -34,9 +37,7 @@ void BuffManager::add(int buffID, int buffLevel) {
     arg[0]["Level"] = std::to_string(buffLevel);
     gdi::Interface::tabSelect(gdi::Tab::buff, arg);
     buff.tab = std::move(arg[0]);
-    // 初始化 buff
-    buff.ID = buffID;
-    buff.Level = buffLevel;
+    // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     buff.IsStackable = buff.tab["IsStackable"] == "1";
     buff.MaxStackNum = std::stoi(buff.tab["MaxStackNum"]);
     buff.Count = std::stoi(buff.tab["Count"]);

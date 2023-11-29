@@ -1,6 +1,7 @@
 #ifndef FRAME_GLOBAL_SKILL_H_
 #define FRAME_GLOBAL_SKILL_H_
 
+#include <cstdint>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -17,6 +18,7 @@ enum class SkillType {
     Poison,
     Leap,
     Adaptive,
+    COUNT, // 用于计数以及表明出错
 };
 
 /**
@@ -31,7 +33,15 @@ class Skill {
 public:
     // ---------- 数据存放区 ----------
     std::unordered_map<std::string, std::string> tab; // skills.tab 中的数据
-    SkillType type = SkillType::None;                 // 技能类型
+
+    SkillType KindType;
+    bool HasCriticalStrike;
+    uint32_t SkillEventMask1;
+    uint32_t SkillEventMask2;
+    bool NeedOutOfFight;
+    bool TargetTypePlayer;
+    bool TargetTypeNpc;
+    int RecipeType;
 
     // ---------- 技能等级 ----------
     int dwID = -1;
@@ -82,25 +92,50 @@ public:
 
     class SkillBindBuff {
     public:
-        SkillBindBuff(int index, int nBuffID, int nBuffLevel)
-            : index(index), nBuffID(nBuffID), nBuffLevel(nBuffLevel) {}
-        int index;
-        int nBuffID;
-        int nBuffLevel;
+        bool used = false;
+        bool isValid[4] = {false, false, false, false};
+        int nBuffID[4] = {0, 0, 0, 0};
+        int nBuffLevel[4] = {0, 0, 0, 0};
+        void overload(const SkillBindBuff &other) {
+            if (other.used) {
+                for (int i = 0; i < 4; ++i) {
+                    if (other.isValid[i]) {
+                        isValid[i] = true;
+                        nBuffID[i] = other.nBuffID[i];
+                        nBuffLevel[i] = other.nBuffLevel[i];
+                    }
+                }
+            }
+        }
     };
 
     class SkillCoolDown {
     public:
-        enum TypeEnum {
-            publicCD,
-            normalCD,
-            checkCD,
-        };
-        SkillCoolDown(TypeEnum type, int index, int nCoolDownID)
-            : type(type), index(index), nCoolDownID(nCoolDownID) {}
-        TypeEnum type;
-        int index;
-        int nCoolDownID;
+        bool used = false;
+        bool isValidPublicCoolDown = false;
+        int nPublicCoolDown = 0;
+        bool isValidNormalCoolDown[3] = {false, false, false};
+        int nNormalCoolDownID[3] = {0, 0, 0};
+        bool isValidCheckCoolDown[3] = {false, false, false};
+        int nCheckCoolDownID[3] = {0, 0, 0};
+        void overload(const SkillCoolDown &other) {
+            if (other.used) {
+                if (other.isValidPublicCoolDown) {
+                    isValidPublicCoolDown = true;
+                    nPublicCoolDown = other.nPublicCoolDown;
+                }
+                for (int i = 0; i < 3; ++i) {
+                    if (other.isValidNormalCoolDown[i]) {
+                        isValidNormalCoolDown[i] = true;
+                        nNormalCoolDownID[i] = other.nNormalCoolDownID[i];
+                    }
+                    if (other.isValidCheckCoolDown[i]) {
+                        isValidCheckCoolDown[i] = true;
+                        nCheckCoolDownID[i] = other.nCheckCoolDownID[i];
+                    }
+                }
+            }
+        }
     };
 
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性 ----------
@@ -108,8 +143,8 @@ public:
     std::vector<SkillAttribute> attrAttributes;                      // AddAttribute 添加的属性列表
     std::vector<SkillCheckBuff> attrCheckBuff;                       // 需要检查的 buff
     std::vector<SkillCheckSelfLearntSkill> attrCheckSelfLearntSkill; // 需要检查的自身技能
-    std::vector<SkillBindBuff> attrBindBuff;                         // 需要绑定的 buff
-    std::vector<SkillCoolDown> attrCoolDown;                         // CD
+    SkillBindBuff attrBindBuff;                                      // 需要绑定的 buff
+    SkillCoolDown attrCoolDown;                                      // 需要绑定的 CD
 
     // ---------- GetSkillLevelData 中操作的属性 ----------
 
@@ -230,7 +265,7 @@ private:
      */
     static void add(int skillID, int skillLevel);
 
-    static inline const std::unordered_map<std::string, SkillType> typeMap = {
+    static inline const std::unordered_map<std::string, SkillType> SkillTypeMap = {
         {"None", SkillType::None},
         {"Physics", SkillType::Physics},
         {"SolarMagic", SkillType::SolarMagic},

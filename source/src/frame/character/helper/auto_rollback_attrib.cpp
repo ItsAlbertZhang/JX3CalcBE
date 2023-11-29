@@ -57,6 +57,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
                 item->nChannelInterval,
                 0),
             DamageType::Lunar);
+        src->isOutOfFight = false;
     } break;
     default:
         LOG_ERROR("Undefined: Unknown Attribute: %s\n", refTabAttribute[static_cast<int>(attrib.type)].c_str());

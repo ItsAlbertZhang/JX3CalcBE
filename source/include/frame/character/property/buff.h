@@ -7,7 +7,6 @@
 
 namespace ns_frame {
 
-class Character;
 using event_tick_t = unsigned long long;
 
 class CharacterBuff {
@@ -46,7 +45,7 @@ public:
 
     /**
      * @brief buff 列表
-     * @note 三层嵌套: sourceID -> buffID -> buffLevel
+     * @note key 为三层嵌套: sourceID -> buffID -> buffLevel
      * @note 为最大化查找效率, 使用此结构.
      */
     std::unordered_map<int, std::unordered_map<int, std::map<int, Item>>> buffList;

@@ -146,6 +146,12 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(enumLuaAttributeType::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE):
                 self->chAttr.atDecriticalDamagePowerBaseKiloNumRate += it.param1Int * c;
                 break;
+            case static_cast<int>(enumLuaAttributeType::SET_TALENT_RECIPE):
+                if (isRollback)
+                    self->chSkillRecipe.remove(it.param1Int, it.param2);
+                else
+                    self->chSkillRecipe.add(it.param1Int, it.param2);
+                break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
             }
@@ -178,6 +184,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Physics);
+                self->isOutOfFight = false;
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_SOLAR_DAMAGE): {
                 self->chDamage.damageList.emplace_back(
@@ -190,6 +197,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Solar);
+                self->isOutOfFight = false;
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_LUNAR_DAMAGE): {
                 self->chDamage.damageList.emplace_back(
@@ -202,6 +210,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Lunar);
+                self->isOutOfFight = false;
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_NEUTRAL_DAMAGE): {
                 self->chDamage.damageList.emplace_back(
@@ -214,6 +223,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Neutral);
+                self->isOutOfFight = false;
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_POISON_DAMAGE): {
                 self->chDamage.damageList.emplace_back(
@@ -226,6 +236,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Poison);
+                self->isOutOfFight = false;
             } break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);

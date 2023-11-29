@@ -6,8 +6,6 @@
 
 namespace ns_frame {
 
-class Character;
-
 class CharacterSkill {
 public:
     // 已学习技能列表. key 为技能 ID, value 为技能等级.
@@ -19,6 +17,10 @@ public:
         int level;       // 技能等级
         void *attribute; // 魔法属性对象
     };
+    /**
+     * @brief 激活的技能列表
+     * @note key 为 SkillID
+     */
     std::unordered_map<int, SkillActived> skillActived;
 
     // 待执行的技能队列.

@@ -9,7 +9,10 @@ std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int 
     int atCriticalStrike = 0;
     int atCriticalDamagePower = 0;
     const Skill &skill = SkillManager::get(skillID, skillLevel);
-    switch (skill.type) {
+    if (!skill.HasCriticalStrike)
+        return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
+
+    switch (skill.KindType) {
     case SkillType::Physics:
         atCriticalStrike = attrSelf.getPhysicsCriticalStrike();
         atCriticalDamagePower = attrSelf.getPhysicsCriticalDamagePower();
@@ -31,7 +34,7 @@ std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int 
         atCriticalDamagePower = attrSelf.getPoisonCriticalDamagePower();
         break;
     default:
-        LOG_ERROR("Unknown skill type: %d", static_cast<int>(skill.type));
+        LOG_ERROR("Unknown skill KindType: %d", static_cast<int>(skill.KindType));
         break;
     }
 

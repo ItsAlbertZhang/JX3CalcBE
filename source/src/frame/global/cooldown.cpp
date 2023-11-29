@@ -19,15 +19,16 @@ void CooldownManager::add(int ID) {
         return; // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
     }
 
+    // 初始化 Cooldown
     Cooldown cooldown;
+    cooldown.ID = ID;
     // 获取 tab
     gdi::TabSelectType arg;
     arg.emplace_back();
     arg[0]["ID"] = std::to_string(ID);
     gdi::Interface::tabSelect(gdi::Tab::cooldown, arg);
     cooldown.tab = std::move(arg[0]);
-    // 初始化 Cooldown
-    cooldown.ID = ID;
+    // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     cooldown.DurationFrame = static_cast<int>(std::stod(cooldown.tab["Duration"]) * 16 + 0.5);
     cooldown.MinDurationFrame = static_cast<int>(std::stod(cooldown.tab["MinDuration"]) * 16 + 0.5);
     cooldown.MaxDurationFrame = static_cast<int>(std::stod(cooldown.tab["MaxDuration"]) * 16 + 0.5);
