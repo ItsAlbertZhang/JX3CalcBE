@@ -50,6 +50,9 @@ list_to_create = {
             "SET_ADAPTIVE_SKILL_TYPE",
             "SKILL_EVENT_HANDLER",
             "DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE",
+            "LUNAR_CRITICAL_STRIKE_BASE_RATE",
+            "SOLAR_CRITICAL_STRIKE_BASE_RATE",
+            "MAGIC_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE",
         ],
     },
     "TabAttribute": {

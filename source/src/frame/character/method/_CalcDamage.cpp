@@ -41,7 +41,7 @@ std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int 
     return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 }
 
-int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, int damageBase, int damageRand, bool isCritical, int atCriticalDamagePower, int nChannelInterval, int nWeaponDamagePercent) {
+int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent) {
     int atStrain = this->chAttr.getStrain();                                // 类型× 快照
     int atDstNpcDamageCoefficient = this->chAttr.atDstNpcDamageCoefficient; // 类型× 快照
     int atAddDamageByDstMoveState = this->chAttr.atAddDamageByDstMoveState; // 类型× 快照
@@ -104,7 +104,7 @@ int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, Dama
         // TODO: 实现目标移动状态
         damage = damage * (1024 + atAddDamageByDstMoveState) / 1024;
     }
-    damage = damage * (1024 + atDamageAddPercent) / 1024;
+    damage = damage * (1024 + atDamageAddPercent + DamageAddPercent) / 1024;
     damage = damage * (1024 + atOvercome) / 1024;
     damage = damage * (1024 - targetShield) / 1024;
     damage = damage * (1024 + targetDamageCoefficient) / 1024;

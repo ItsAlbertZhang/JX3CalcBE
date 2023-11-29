@@ -14,7 +14,7 @@ namespace ns_frame {
  */
 class AutoRollbackAttribute {
 public:
-    AutoRollbackAttribute(Character *self, const Skill &skill, int atCriticalStrike, int atCriticalDamagePower, bool isCritical);
+    AutoRollbackAttribute(Character *self, const Skill &skill, int atCriticalStrike, int atCriticalDamagePower, bool isCritical, int DamageAddPercent);
     ~AutoRollbackAttribute();
 
 private:
@@ -23,6 +23,7 @@ private:
     const int atCriticalStrike = 0;
     const int atCriticalDamagePower = 0;
     const bool isCritical = false;
+    const int DamageAddPercent = 0;
     int atPhysicsDamage = 0;
     int atPhysicsDamageRand = 0;
     int atSolarDamage = 0;

@@ -23,9 +23,9 @@ public:
         int SkillID;
     };
 
-    void add(int RecipeID, int RecipeLevel);                           // 添加秘籍
-    void remove(int RecipeID, int RecipeLevel);                        // 移除秘籍
-    const std::set<Item *> getList(int SkillID, int SkillRecipeType); // 获取指定技能的秘籍列表
+    void add(int RecipeID, int RecipeLevel);                    // 添加秘籍
+    void remove(int RecipeID, int RecipeLevel);                 // 移除秘籍. 实际上是将其标记为失效并从 SkillRecipeTypeMap 和 SkillIDMap 的 std::set 中移除.
+    std::set<Item *> getList(int SkillID, int SkillRecipeType); // 获取指定技能的秘籍列表. 只会返回有效的秘籍.
 
 private:
     /**

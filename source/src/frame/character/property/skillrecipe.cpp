@@ -22,7 +22,7 @@ void CharacterSkillRecipe::remove(int RecipeID, int RecipeLevel) {
     itPtr->isValid = false;
 }
 
-const std::set<CharacterSkillRecipe::Item *> CharacterSkillRecipe::getList(int SkillID, int SkillRecipeType) {
+std::set<CharacterSkillRecipe::Item *> CharacterSkillRecipe::getList(int SkillID, int SkillRecipeType) {
     if (SkillRecipeType == 0) {
         return SkillIDMap[SkillID];
     }

@@ -136,6 +136,13 @@ public:
                 }
             }
         }
+        void add(int CoolDownAdd1, int CoolDownAdd2, int CoolDownAdd3) {
+            for (int i = 0; i < 3; i++) {
+                if (isValidNormalCoolDown[i]) {
+                    nNormalCoolDownID[i] += CoolDownAdd1;
+                }
+            }
+        }
     };
 
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性 ----------

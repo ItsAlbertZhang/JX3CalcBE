@@ -3,6 +3,7 @@
 #include "frame/character/helper/auto_rollback_target.h"
 #include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
+#include "frame/global/skillrecipe.h"
 #include "frame/runtime_lua.h"
 #include "frame/static_ref.h"
 #include "program/log.h"
@@ -56,14 +57,44 @@ void Character::CastSkill(int skillID, int skillLevel) {
     Skill::SkillCoolDown cooldown = skill.attrCoolDown;
     Skill::SkillBindBuff bindbuff = skill.attrBindBuff;
 
-    // TODO: SkillRecipe
+    // SkillRecipe: 准备及配合检查
+    std::set<CharacterSkillRecipe::Item *> chSkillrecipeList = this->chSkillRecipe.getList(skillID, skill.RecipeType);
+    std::vector<const SkillRecipe *> skillrecipeList; // 技能的秘籍
+    std::vector<const Skill *> recipeskillList;       // 秘籍的技能
+    for (auto it : chSkillrecipeList) {
+        if (it->isValid) {
+            const SkillRecipe *ptrSkillRecipe = &SkillRecipeManager::get(it->RecipeID, it->RecipeLevel);
+            skillrecipeList.emplace_back(ptrSkillRecipe); // 将技能的秘籍加入列表
+            const Skill *ptrSkill = SkillRecipeManager::getSkill(ptrSkillRecipe);
+            if (nullptr != ptrSkill) {                  // 如果技能的秘籍存在对应技能
+                recipeskillList.emplace_back(ptrSkill); // 将秘籍的技能加入列表
+                // 使用秘籍的技能重载当前的 CD 和 bindbuff
+                cooldown.overload(ptrSkill->attrCoolDown);
+                bindbuff.overload(ptrSkill->attrBindBuff);
+            }
+        }
+    }
 
     if (!staticCheckCoolDown(this, cooldown)) {
         LOG_INFO("CheckCoolDown failed!\n%s", "");
         return;
     }
 
+    // 检查完毕, 可以释放技能
     LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
+
+    // SkillRecipe: skill 的 Attribute. 秘籍加成的双会可以作用于绑定 buff.
+    std::vector<AutoRollbackAttribute> autoRollbackAttributeList;
+    for (const auto &it : recipeskillList) {
+        autoRollbackAttributeList.emplace_back(this, *it, 0, 0, false, 0);
+        // 当前函数结束时, autoRollbackAttributeList 会被析构, 从而自动回滚.
+    }
+    // SkillRecipe: CoolDownAdd 和 DamageAddPercent.
+    int DamageAddPercent = 0;
+    for (const auto &it : skillrecipeList) {
+        cooldown.add(it->CoolDownAdd1, it->CoolDownAdd2, it->CoolDownAdd3);
+        DamageAddPercent += it->DamageAddPercent; // DamageAddPercent 仅能作用于当前技能.
+    }
 
     // 触发 CD
     if (cooldown.isValidPublicCoolDown) {
@@ -90,7 +121,7 @@ void Character::CastSkill(int skillID, int skillLevel) {
     bool isCritical = dis(gen) < atCriticalStrike;
 
     // 自动回滚的魔法属性
-    AutoRollbackAttribute autoRollbackAttribute{this, skill, atCriticalStrike, atCriticalDamagePower, isCritical};
+    AutoRollbackAttribute autoRollbackAttribute{this, skill, atCriticalStrike, atCriticalDamagePower, isCritical, DamageAddPercent};
 }
 
 static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {
@@ -220,7 +251,7 @@ static inline void staticTriggerCoolDown(Character *self, int cooldownID) {
 
 void Character::ActiveSkill(int skillID, int skillLevel) {
     const Skill &skill = SkillManager::get(skillID, skillLevel);
-    AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, skill, 0, 0, false};
+    AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, skill, 0, 0, false, 0};
     // this->chSkill.skillActived[skillID] = CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)};
     this->chSkill.skillActived.emplace(skillID, CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)});
 }

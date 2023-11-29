@@ -33,7 +33,7 @@ void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int b
     if (!it.isValid) {
         // 当前不存在 buff
         it.isValid = true;
-        it.attr = getCharacter(buffSourceID)->chAttr;           // 锁面板
+        it.attr = getCharacter(buffSourceID)->chAttr;           // 调用复制构造函数, 锁面板
         it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
         it.count = buff.Count;
         // 计算 interval
