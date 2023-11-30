@@ -20,16 +20,16 @@ static void callbackActiveBuff(void *selfPtr, void *param) {
 }
 
 void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel) {
+    const Buff &buff = BuffManager::get(buffID, buffLevel);
     if (this->chBuff.buffList[buffSourceID][buffID].find(buffLevel) == this->chBuff.buffList[buffSourceID][buffID].end()) {
         // 对于 buffSourceID 和 buffID, 直接使用 [] 运算符, 没有则直接创建.
         this->chBuff.buffList[buffSourceID][buffID].emplace(
             std::piecewise_construct,
             std::forward_as_tuple(buffLevel),
-            std::forward_as_tuple(this->dwID, buffSourceID, buffID, buffLevel));
+            std::forward_as_tuple(this->dwID, buffSourceID, buffID, buffLevel, buff.Interval, buff.Count));
         // 原地插入. 通过这种方式插入的 key 和 value, 不是构造后移动至容器, 而是直接在容器内构造. 这可以避免 Item 的 const 属性出现问题.
     }
     CharacterBuff::Item &it = this->chBuff.buffList[buffSourceID][buffID].at(buffLevel);
-    const Buff &buff = BuffManager::get(buffID, buffLevel);
     if (!it.isValid) {
         // 当前不存在 buff
         it.isValid = true;
@@ -78,7 +78,5 @@ void Character::BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int 
     CharacterBuff::Item &it = this->chBuff.buffList[buffSourceID][buffID].at(buffLevel);
     it.dwCasterSkillID = skillID;
     it.dwCasterSkillLevel = skillLevel;
-    int cof = buff.Interval / 12;
-    cof = cof > 16 ? cof : 16;
-    it.nChannelInterval = static_cast<int>(skill.nChannelInterval / buff.Count * cof / 16);
+    it.nChannelInterval = static_cast<int>(skill.nChannelInterval);
 }

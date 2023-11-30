@@ -41,7 +41,7 @@ std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int 
     return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 }
 
-int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent) {
+int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent, int dotInterval, int dotCount) {
     int atStrain = this->chAttr.getStrain();                                // 类型× 快照
     int atDstNpcDamageCoefficient = this->chAttr.atDstNpcDamageCoefficient; // 类型× 快照
     int atAddDamageByDstMoveState = this->chAttr.atAddDamageByDstMoveState; // 类型× 快照
@@ -51,8 +51,16 @@ int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, Dama
     int atOvercome = 0;              // 类型√ 自身实时
     int targetShield = 0;            // 类型√ 目标实时
     int targetDamageCoefficient = 0; // 类型√ 目标实时
+
+    int levelCof = 100 - (target->chAttr.atLevel - attrSelf.atLevel) * 5; // 等级压制, 注意仅对 NPC 有效
+
     int c = 12;
     int weaponDamage = 0;
+
+    int coeffCount = dotCount;
+    int coeffInterval = dotInterval * dotCount / 12;
+    coeffInterval = coeffInterval > 16 ? coeffInterval : 16;
+
     switch (typeDamage) {
     case DamageType::Physics:
         atAttackPower = attrSelf.getPhysicsAttackPower();
@@ -95,17 +103,18 @@ int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, Dama
     }
 
     int damage = damageBase + damageRand / 2;
-    damage = damage + atAttackPower * nChannelInterval / c / 16 + weaponDamage;
+    damage = damage + atAttackPower * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 + weaponDamage;
     if (!target->isPlayer) {
         damage = damage * (1024 + atStrain) / 1024;
         damage = damage * (1024 + atDstNpcDamageCoefficient) / 1024;
+        damage = damage * levelCof / 100;
     }
+    damage = damage * (1024 + atOvercome) / 1024;
+    damage = damage * (1024 + atDamageAddPercent + DamageAddPercent) / 1024;
     if (true) {
         // TODO: 实现目标移动状态
         damage = damage * (1024 + atAddDamageByDstMoveState) / 1024;
     }
-    damage = damage * (1024 + atDamageAddPercent + DamageAddPercent) / 1024;
-    damage = damage * (1024 + atOvercome) / 1024;
     damage = damage * (1024 - targetShield) / 1024;
     damage = damage * (1024 + targetDamageCoefficient) / 1024;
 

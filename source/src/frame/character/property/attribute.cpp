@@ -94,25 +94,25 @@ int CharacterAttr::getPhysicsCriticalDamagePower() const {
     return res > 1280 ? 1280 : res;
 }
 int CharacterAttr::getSolarCriticalDamagePower() const {
-    int res = static_cast<int>((atAllTypeCriticalDamagePowerBase + atMagicCriticalDamagePowerBase) *
+    int res = static_cast<int>((atSolarCriticalDamagePowerBase + atAllTypeCriticalDamagePowerBase + atMagicCriticalDamagePowerBase) *
                                1024 / (GlobalParam::get().fCriticalStrikePowerParam * GlobalParam::levelCof(atLevel))) +
               atSolarCriticalDamagePowerBaseKiloNumRate + atMagicCriticalDamagePowerBaseKiloNumRate;
     return res > 1280 ? 1280 : res;
 }
 int CharacterAttr::getLunarCriticalDamagePower() const {
-    int res = static_cast<int>((atAllTypeCriticalDamagePowerBase + atMagicCriticalDamagePowerBase) *
+    int res = static_cast<int>((atLunarCriticalDamagePowerBase + atAllTypeCriticalDamagePowerBase + atMagicCriticalDamagePowerBase) *
                                1024 / (GlobalParam::get().fCriticalStrikePowerParam * GlobalParam::levelCof(atLevel))) +
               atLunarCriticalDamagePowerBaseKiloNumRate + atMagicCriticalDamagePowerBaseKiloNumRate;
     return res > 1280 ? 1280 : res;
 }
 int CharacterAttr::getNeutralCriticalDamagePower() const {
-    int res = static_cast<int>((atAllTypeCriticalDamagePowerBase + atMagicCriticalDamagePowerBase) *
+    int res = static_cast<int>((atNeutralCriticalDamagePowerBase + atAllTypeCriticalDamagePowerBase + atMagicCriticalDamagePowerBase) *
                                1024 / (GlobalParam::get().fCriticalStrikePowerParam * GlobalParam::levelCof(atLevel))) +
               atNeutralCriticalDamagePowerBaseKiloNumRate + atMagicCriticalDamagePowerBaseKiloNumRate;
     return res > 1280 ? 1280 : res;
 }
 int CharacterAttr::getPoisonCriticalDamagePower() const {
-    int res = static_cast<int>((atAllTypeCriticalDamagePowerBase + atMagicCriticalDamagePowerBase) *
+    int res = static_cast<int>((atPoisonCriticalDamagePowerBase + atAllTypeCriticalDamagePowerBase + atMagicCriticalDamagePowerBase) *
                                1024 / (GlobalParam::get().fCriticalStrikePowerParam * GlobalParam::levelCof(atLevel))) +
               atPoisonCriticalDamagePowerBaseKiloNumRate + atMagicCriticalDamagePowerBaseKiloNumRate;
     return res > 1280 ? 1280 : res;
@@ -151,35 +151,35 @@ int CharacterAttr::getPhysicsShield(int atAllShieldIgnorePercent) const {
                atPhysicsShieldBase * atPhysicsShieldPercent / 1024 +
                atPhysicsShieldAdditional) *
               (1024 - atAllShieldIgnorePercent) / 1024;
-    res = static_cast<int>(res * 1024 / (GlobalParam::get().fPhysicsShieldParam * GlobalParam::levelCof(atLevel)));
+    res = static_cast<int>(res * 1024 / (GlobalParam::get().fPhysicsShieldParam * GlobalParam::levelCof(atLevel) + res));
     return res > 768 ? 768 : res;
 }
 int CharacterAttr::getSolarShield(int atAllShieldIgnorePercent) const {
     int res = ((atSolarMagicShieldBase + atMagicShield) +
                (atSolarMagicShieldBase + atMagicShield) * atSolarMagicShieldPercent / 1024) *
               (1024 - atAllShieldIgnorePercent) / 1024;
-    res = static_cast<int>(res * 1024 / (GlobalParam::get().fMagicShieldParam * GlobalParam::levelCof(atLevel)));
+    res = static_cast<int>(res * 1024 / (GlobalParam::get().fMagicShieldParam * GlobalParam::levelCof(atLevel) + res));
     return res > 768 ? 768 : res;
 }
 int CharacterAttr::getLunarShield(int atAllShieldIgnorePercent) const {
     int res = ((atLunarMagicShieldBase + atMagicShield) +
                (atLunarMagicShieldBase + atMagicShield) * atLunarMagicShieldPercent / 1024) *
               (1024 - atAllShieldIgnorePercent) / 1024;
-    res = static_cast<int>(res * 1024 / (GlobalParam::get().fMagicShieldParam * GlobalParam::levelCof(atLevel)));
+    res = static_cast<int>(res * 1024 / (GlobalParam::get().fMagicShieldParam * GlobalParam::levelCof(atLevel) + res));
     return res > 768 ? 768 : res;
 }
 int CharacterAttr::getNeutralShield(int atAllShieldIgnorePercent) const {
     int res = ((atNeutralMagicShieldBase + atMagicShield) +
                (atNeutralMagicShieldBase + atMagicShield) * atNeutralMagicShieldPercent / 1024) *
               (1024 - atAllShieldIgnorePercent) / 1024;
-    res = static_cast<int>(res * 1024 / (GlobalParam::get().fMagicShieldParam * GlobalParam::levelCof(atLevel)));
+    res = static_cast<int>(res * 1024 / (GlobalParam::get().fMagicShieldParam * GlobalParam::levelCof(atLevel) + res));
     return res > 768 ? 768 : res;
 }
 int CharacterAttr::getPoisonShield(int atAllShieldIgnorePercent) const {
     int res = ((atPoisonMagicShieldBase + atMagicShield) +
                (atPoisonMagicShieldBase + atMagicShield) * atPoisonMagicShieldPercent / 1024) *
               (1024 - atAllShieldIgnorePercent) / 1024;
-    res = static_cast<int>(res * 1024 / (GlobalParam::get().fMagicShieldParam * GlobalParam::levelCof(atLevel)));
+    res = static_cast<int>(res * 1024 / (GlobalParam::get().fMagicShieldParam * GlobalParam::levelCof(atLevel) + res));
     return res > 768 ? 768 : res;
 }
 

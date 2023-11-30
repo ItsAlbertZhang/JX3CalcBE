@@ -56,8 +56,8 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
                 item->attr, src->target, DamageType::Lunar, // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
                 isCritical, atCriticalDamagePower, 0,
                 attrib.valueAInt, 0,
-                item->nChannelInterval,
-                0),
+                item->nChannelInterval, 0,
+                item->rawInterval, item->rawCount),
             DamageType::Lunar);
         src->isOutOfFight = false;
     } break;

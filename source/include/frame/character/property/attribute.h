@@ -61,6 +61,10 @@ public:
     int atAllTypeCriticalDamagePowerBase = 0;            // 全会心效果等级
     int atPhysicsCriticalDamagePowerBase = 0;            // 外功会心效果等级
     int atMagicCriticalDamagePowerBase = 0;              // 内功会心效果等级
+    int atSolarCriticalDamagePowerBase = 0;              // 阳性内功会心效果等级
+    int atLunarCriticalDamagePowerBase = 0;              // 阴性内功会心效果等级
+    int atNeutralCriticalDamagePowerBase = 0;            // 混元内功会心效果等级
+    int atPoisonCriticalDamagePowerBase = 0;             // 毒性内功会心效果等级
     int atPhysicsCriticalDamagePowerBaseKiloNumRate = 0; // 外功额外会心效果1024分数
     int atMagicCriticalDamagePowerBaseKiloNumRate = 0;   // 内功额外会心效果1024分数
     int atSolarCriticalDamagePowerBaseKiloNumRate = 0;   // 阳性内功额外会心效果1024分数

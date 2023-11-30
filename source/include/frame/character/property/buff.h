@@ -16,12 +16,14 @@ public:
      */
     class Item {
     public:
-        Item(int nCharacterID, int dwSkillSrcID, int BuffID, int nBuffLevel)
-            : nCharacterID(nCharacterID), dwSkillSrcID(dwSkillSrcID), BuffID(BuffID), nBuffLevel(nBuffLevel) {}
+        Item(int nCharacterID, int dwSkillSrcID, int BuffID, int nBuffLevel, int rawInterval, int rawCount)
+            : nCharacterID(nCharacterID), dwSkillSrcID(dwSkillSrcID), BuffID(BuffID), nBuffLevel(nBuffLevel), rawInterval(rawInterval), rawCount(rawCount) {}
         const int nCharacterID = 0; // 角色 ID
         const int dwSkillSrcID = 0; // 来源角色 ID, 注意不是技能 ID
         const int BuffID = 0;
         const int nBuffLevel = 0;
+        const int rawInterval = 0;
+        const int rawCount = 0;
 
         int nLeftFrame = 0;
         int nCustomValue = 0;

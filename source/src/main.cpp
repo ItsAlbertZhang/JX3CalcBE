@@ -13,7 +13,7 @@
 
 void callbackCastSkill(void *self, void *param) {
     ns_frame::Character *player = static_cast<ns_frame::Character *>(self);
-    player->CastSkill(3960, 10);
+    player->CastSkill(3963, 18);
 }
 
 int main(int argc, char *argv[]) {
@@ -65,29 +65,56 @@ int main(int argc, char *argv[]) {
     player.isPlayer = true;
     player.target = &npc;
 
-    player.chAttr.atSolarAttackPowerBase = 1000;
-    player.chAttr.atLunarAttackPowerBase = 1000;
-    player.chAttr.atSolarCriticalStrikeBaseRate = 5000;   // 50% 会心率
-    player.chAttr.atLunarCriticalStrikeBaseRate = 5000;   // 50% 会心率
-    player.chAttr.atPhysicsCriticalStrikeBaseRate = 5000; // 50% 会心率
-    player.chAttr.atMeleeWeaponDamageBase = 500;
-    player.chAttr.atHasteBase = 95;
-
     player.LearnSkill(10242, 13); // 焚影圣诀
     player.dwKungfuID = 10242;
-    player.LearnSkill(5972, 1);  // 腾焰飞芒
-    player.LearnSkill(3960, 10); // 银月斩
+    // player.LearnSkill(5972, 1);  // 腾焰飞芒
+    player.LearnSkill(3960, 18); // 银月斩
+    player.LearnSkill(3963, 32); // 烈日斩
     player.ActiveSkill(10242, 13);
-    player.ActiveSkill(5972, 1);
+    // player.ActiveSkill(5972, 1);
     // player.DeactiveSkill(10242);
-    // player.CastSkill(3960, 10);
-    // // player.LearnSkill(3963, 10); // 烈日斩
-    // // player.CastSkill(3963, 10);
-    // player.CastSkill(3960, 10);
-    while (ns_frame::Event::now() < 1024 * 300) {
-        ns_frame::Event::add(20, callbackCastSkill, &player, nullptr);
-        ns_frame::Event::run();
-    }
+
+    player.chAttr.atHasteBase = 95;
+    player.chAttr.atSpunkBase = 7155;
+
+    player.chAttr.atPhysicsAttackPowerBase = 6;
+    player.chAttr.atSolarAttackPowerBase = 23075;
+    player.chAttr.atLunarAttackPowerBase = 23075;
+    player.chAttr.atNeutralAttackPowerBase = 13020;
+    player.chAttr.atPoisonAttackPowerBase = 13020;
+
+    player.chAttr.atPhysicsCriticalStrike = 8325;
+    player.chAttr.atSolarCriticalStrike = 19224;
+    player.chAttr.atLunarCriticalStrike = 19224;
+    player.chAttr.atNeutralCriticalStrike = 8325;
+    player.chAttr.atPoisonCriticalStrike = 8325;
+
+    player.chAttr.atPhysicsCriticalDamagePowerBase = 0;
+    player.chAttr.atSolarCriticalDamagePowerBase = 1445;
+    player.chAttr.atLunarCriticalDamagePowerBase = 1445;
+    player.chAttr.atNeutralCriticalDamagePowerBase = 975;
+    player.chAttr.atPoisonCriticalDamagePowerBase = 975;
+
+    player.chAttr.atPhysicsOvercomeBase = 12;
+    player.chAttr.atMagicOvercome = 19393;
+
+    player.chAttr.atStrainBase = 26748;
+    player.chAttr.atSurplusValueBase = 9536;
+    player.chAttr.atMeleeWeaponDamageBase = 1574;
+    player.chAttr.atMeleeWeaponDamageRand = 1049;
+
+    npc.nLevel = 124;
+    npc.chAttr.atLevel = 124;
+    npc.chAttr.atPhysicsShieldBase = 27550;
+    npc.chAttr.atMagicShield = 27550;
+
+    player.CastSkill(3960, 18);
+    while (ns_frame::Event::run())
+        ;
+    // while (ns_frame::Event::now() < 1024 * 300) {
+    //     ns_frame::Event::add(20, callbackCastSkill, &player, nullptr);
+    //     ns_frame::Event::run();
+    // }
     std::cout << "tick\t"
               << "ID\t"
               << "lv\t"

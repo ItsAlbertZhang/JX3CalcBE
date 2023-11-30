@@ -202,7 +202,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     self->CalcDamage(
                         self->chAttr, self->target, DamageType::Physics,
                         isCritical, atCriticalDamagePower, 0,
-                        atSolarDamage, atSolarDamageRand,
+                        atPhysicsDamage, atPhysicsDamageRand,
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Physics);
@@ -230,7 +230,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     self->CalcDamage(
                         self->chAttr, self->target, DamageType::Lunar,
                         isCritical, atCriticalDamagePower, 0,
-                        atSolarDamage, atSolarDamageRand,
+                        atLunarDamage, atLunarDamageRand,
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Lunar);
@@ -244,7 +244,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     self->CalcDamage(
                         self->chAttr, self->target, DamageType::Neutral,
                         isCritical, atCriticalDamagePower, 0,
-                        atSolarDamage, atSolarDamageRand,
+                        atNeutralDamage, atNeutralDamageRand,
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Neutral);
@@ -258,7 +258,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     self->CalcDamage(
                         self->chAttr, self->target, DamageType::Poison,
                         isCritical, atCriticalDamagePower, 0,
-                        atSolarDamage, atSolarDamageRand,
+                        atPoisonDamage, atPoisonDamageRand,
                         static_cast<int>(skill.nChannelInterval),
                         skill.nWeaponDamagePercent),
                     DamageType::Poison);
