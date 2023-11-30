@@ -119,13 +119,6 @@ void Character::CastOnce(int skillID, int skillLevel) {
         }
     }
 
-    // 绑定 buff
-    for (int i = 0; i < 4; i++) {
-        if (bindbuff.isValid[i]) {
-            target->BindBuff(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
-        }
-    }
-
     // 计算会心
     auto [atCriticalStrike, atCriticalDamagePower] = CalcCritical(this->chAttr, skillID, skillLevel);
     std::random_device rd;
@@ -139,6 +132,13 @@ void Character::CastOnce(int skillID, int skillLevel) {
     // SkillEvent: Cast & Hit
     staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+
+    // 绑定 buff
+    for (int i = 0; i < 4; i++) {
+        if (bindbuff.isValid[i]) {
+            target->BindBuff(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+        }
+    }
 
     // 注: 其余的 SkillEvent 尚未实现.
 }
