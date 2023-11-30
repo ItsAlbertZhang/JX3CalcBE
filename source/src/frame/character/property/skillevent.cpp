@@ -34,19 +34,19 @@ std::set<const SkillEvent *> CharacterSkillEvent::getList(EventType type, int Ev
         return emptySet;
     }
     if (EventSkillID != 0) {
-        emptySet.merge(data[static_cast<int>(type)].EventSkillID[EventSkillID]);
+        emptySet.insert(data[static_cast<int>(type)].EventSkillID[EventSkillID].begin(), data[static_cast<int>(type)].EventSkillID[EventSkillID].end());
     }
     if (EventMask1 != 0) {
         for (int i = 0; i < 32; i++) {
             if (EventMask1 & (1 << i)) {
-                emptySet.merge(data[static_cast<int>(type)].EventMask1[i]);
+                emptySet.insert(data[static_cast<int>(type)].EventMask1[i].begin(), data[static_cast<int>(type)].EventMask1[i].end());
             }
         }
     }
     if (EventMask2 != 0) {
         for (int i = 0; i < 32; i++) {
             if (EventMask2 & (1 << i)) {
-                emptySet.merge(data[static_cast<int>(type)].EventMask2[i]);
+                emptySet.insert(data[static_cast<int>(type)].EventMask2[i].begin(), data[static_cast<int>(type)].EventMask2[i].end());
             }
         }
     }

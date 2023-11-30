@@ -17,10 +17,10 @@ void CharacterSkillRecipe::remove(int RecipeID, int RecipeLevel) {
 std::set<const SkillRecipe *> CharacterSkillRecipe::getList(int SkillID, int SkillRecipeType) {
     std::set<const SkillRecipe *> emptySet;
     if (SkillID != 0) {
-        emptySet.merge(SkillIDMap[SkillID]);
+        emptySet.insert(SkillIDMap[SkillID].begin(), SkillIDMap[SkillID].end());
     }
     if (SkillRecipeType != 0) {
-        emptySet.merge(SkillRecipeTypeMap[SkillRecipeType]);
+        emptySet.insert(SkillRecipeTypeMap[SkillRecipeType].begin(), SkillRecipeTypeMap[SkillRecipeType].end());
     }
     return emptySet;
 }
