@@ -118,13 +118,6 @@ void Character::CastSkill(int skillID, int skillLevel) {
         }
     }
 
-    // 绑定 buff
-    for (int i = 0; i < 4; i++) {
-        if (bindbuff.isValid[i]) {
-            target->BindBuff(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
-        }
-    }
-
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
             runtime.skillQueue.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel);
@@ -147,6 +140,13 @@ void Character::CastSkill(int skillID, int skillLevel) {
     staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     // 注: 其余的 SkillEvent 尚未实现.
+
+    // 绑定 buff. 其晚于魔法属性, 直观佐证为日斩无法享受其 BindBuff 的加成.
+    for (int i = 0; i < 4; i++) {
+        if (bindbuff.isValid[i]) {
+            target->BindBuff(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+        }
+    }
 
     // 析构顺序: autoRollbackAttribute (回滚当前技能 lua 的 GetSkillLevelData)
     //       -> autoRollbackAttributeList (回滚秘籍 lua 的 GetSkillLevelData)
