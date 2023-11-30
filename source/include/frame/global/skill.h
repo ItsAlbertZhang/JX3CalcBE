@@ -42,6 +42,10 @@ public:
     bool TargetTypePlayer;
     bool TargetTypeNpc;
     int RecipeType;
+    int SunSubsectionSkillID;
+    int SunSubsectionSkillLevel;
+    int MoonSubsectionSkillID;
+    int MoonSubsectionSkillLevel;
 
     // ---------- 技能等级 ----------
     int dwID = -1;
@@ -208,8 +212,9 @@ public:
     int nRectWidth = 0;     // 矩形AOE的宽度，全宽，不填为nAreaRadius
     int nAngleRange = 0;    // 攻击范围的扇形角度范围
     bool bFullAngleInAir = false;
-    int nAreaRadius = 0;       // 技能作用半径
-    int nTargetCountLimit = 0; // 技能作用目标数量限制,(小于0 代表目标数量不限制)
+    int nAreaRadius = 0;              // 技能作用半径
+    int nTargetCountLimit = 0;        // 技能作用目标数量限制,(小于0 代表目标数量不限制)
+    bool bIgnorePrepareState = false; // 技能是否可在吟唱中施放，吟唱、通道、蓄力技不能填true
 
     // 时间相关
     int nPrepareFrames = 0;      // 吟唱帧数
@@ -218,9 +223,12 @@ public:
     int nBulletVelocity = 0;     // 子弹速度，单位 点/帧
 
     // 阵法相关
-    bool bIsFormationSkill = false;    // 是否阵眼技能
-    int nFormationRange = 0;           // 结阵的范围
-    int nLeastFormationPopulation = 2; // 结阵的范围的最少队员数（包括队长）
+    bool bIsSunMoonPower = false;                            // 技能是否需要日月豆
+    void SetSunSubsectionSkill(int a, int b, int c, int d);  // 日豆技能
+    void SetMoonSubsectionSkill(int a, int b, int c, int d); // 月豆技能
+    bool bIsFormationSkill = false;                          // 是否阵眼技能
+    int nFormationRange = 0;                                 // 结阵的范围
+    int nLeastFormationPopulation = 2;                       // 结阵的范围的最少队员数（包括队长）
 
     // 目标血量需求
     int nTargetLifePercentMin = 0;   // 血量最小值>=

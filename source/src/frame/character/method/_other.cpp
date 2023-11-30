@@ -31,3 +31,7 @@ int Character::GetKungfuMountID() {
 bool Character::IsFormationLeader() {
     return false; // TODO: 暂时未实现阵眼功能
 }
+
+void Character::PlayPublicShadowAnimation(int a, int b, bool c, bool d) {
+    return;
+}

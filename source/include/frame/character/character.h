@@ -44,10 +44,10 @@ public:
     static Character *getCharacter(int nCharacterID);
     static int getCharacterID(Character *character);
     void LearnSkill(int skillID, int skillLevel);
-    void ActiveSkill(int skillID, int skillLevel);
+    void ActiveSkill(int skillID);
     void DeactiveSkill(int skillID);
+    void Cast(int skillID);
     void DelBuffAllStackNum(CharacterBuff::Item &it);
-    void CastOnce(int skillID, int skillLevel);
     void BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
     CharacterBuff::Item *GetBuffWithCompareFlag(int buffID, int buffLevel, int flag);
     CharacterBuff::Item *GetBuffByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
@@ -63,15 +63,19 @@ public:
     int GetSkillLevel(int skillID);
     int GetSkillTarget();
     void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
+    void DelBuff(int buffID, int buffLevel);
     void CastSkill(int skillID, int skillLevel);
     void CastSkillTarget(int skillID, int skillLevel, int type, int targetID);
+    void CastSkillXYZ(int skillID, int skillLevel, int x, int y, int z);
     void ModifyCoolDown(int cooldownID, int frame);
     void SetTimer3(int frame, std::string filename, int targetID);
     void SetTimer4(int frame, std::string filename, int type, int targetID);
+    void PlayPublicShadowAnimation(int a, int b, bool c, bool d);
 
     //  ---------- 被 lua 调用的属性, 通常以 "n" 开头 ----------
     int dwID;                          // 角色 ID
     int nLevel = chAttr.atLevel;       // 等级, 这是唯一一个同时存在于此处和 chAttr 内部的属性
+    int nX, nY, nZ;                    // 坐标
     int nCurrentSunEnergy = 0;         // 当前日灵
     int nCurrentMoonEnergy = 0;        // 当前月魂
     int nSunPowerValue = 0;            // 满日

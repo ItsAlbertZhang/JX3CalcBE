@@ -64,6 +64,20 @@ void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int b
     }
 }
 
+void Character::DelBuff(int buffID, int buffLevel) {
+    CharacterBuff::Item *ptr = GetBuff(buffID, buffLevel);
+    // 返回的一定是 isValie == true 的 Item.
+    if (nullptr != ptr) {
+        if (ptr->nStackNum > 1) {
+            // 层数大于 1, 则层数 -1
+            ptr->nStackNum--;
+        } else {
+            // 层数等于 1, 则删除该 buff
+            DelBuffAllStackNum(*ptr);
+        }
+    }
+}
+
 void Character::DelBuffAllStackNum(CharacterBuff::Item &it) {
     it.isValid = false;
     delete (AutoRollbackAttrib *)it.ptrAttrib; // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib

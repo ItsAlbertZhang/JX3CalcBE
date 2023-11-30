@@ -1,7 +1,6 @@
 #ifndef FRAME_CHARACTER_PROPERTY_SKILL_H_
 #define FRAME_CHARACTER_PROPERTY_SKILL_H_
 
-#include <queue>
 #include <unordered_map>
 
 namespace ns_frame {
@@ -22,15 +21,6 @@ public:
      * @note key 为 SkillID
      */
     std::unordered_map<int, SkillActived> skillActived;
-
-    // 待执行的技能队列.
-    class SkillQueueElement {
-    public:
-        SkillQueueElement(int skillID, int skillLevel) : skillID(skillID), skillLevel(skillLevel) {}
-        int skillID;    // 技能 ID
-        int skillLevel; // 技能等级
-    };
-    std::queue<SkillQueueElement> skillQueue;
 };
 
 } // namespace ns_frame

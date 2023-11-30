@@ -19,9 +19,12 @@ const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
     "SetNormalCoolDown",
     "SetCheckCoolDown",
     "SetSubsectionSkill",
+    "SetSunSubsectionSkill",
+    "SetMoonSubsectionSkill",
     // Character
     "CastSkill",
     "AddBuff",
+    "DelBuff",
     "IsHaveBuff",
     "ModifyCoolDown",
     "GetBuff",
@@ -30,6 +33,8 @@ const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
     "GetSkillTarget",
     "GetKungfuMountID",
     "IsFormationLeader",
+    "CastSkillXYZ",
+    "PlayPublicShadowAnimation",
 };
 
 bool ns_framestatic::luaInit(sol::state &lua) {
@@ -81,11 +86,15 @@ bool ns_framestatic::luaInit(sol::state &lua) {
                             "bFullAngleInAir", &Skill::bFullAngleInAir,
                             "nAreaRadius", &Skill::nAreaRadius,
                             "nTargetCountLimit", &Skill::nTargetCountLimit,
+                            "bIgnorePrepareState", &Skill::bIgnorePrepareState,
 
                             "nPrepareFrames", &Skill::nPrepareFrames,
                             "nChannelFrame", &Skill::nChannelFrame,
                             "nBulletVelocity", &Skill::nBulletVelocity,
 
+                            "bIsSunMoonPower", &Skill::bIsSunMoonPower,
+                            "SetSunSubsectionSkill", &Skill::SetSunSubsectionSkill,
+                            "SetMoonSubsectionSkill", &Skill::SetMoonSubsectionSkill,
                             "bIsFormationSkill", &Skill::bIsFormationSkill,
                             "nFormationRange", &Skill::nFormationRange,
                             "nLeastFormationPopulation", &Skill::nLeastFormationPopulation,
@@ -106,6 +115,7 @@ bool ns_framestatic::luaInit(sol::state &lua) {
     lua.new_usertype<Character>("Skill",
                                 "CastSkill", sol::overload(&Character::CastSkill, &Character::CastSkillTarget),
                                 "AddBuff", &Character::AddBuff,
+                                "DelBuff", &Character::DelBuff,
                                 "IsHaveBuff", &Character::IsHaveBuff,
                                 "ModifyCoolDown", &Character::ModifyCoolDown,
                                 "GetBuff", &Character::GetBuff,
@@ -114,8 +124,11 @@ bool ns_framestatic::luaInit(sol::state &lua) {
                                 "GetSkillTarget", &Character::GetSkillTarget,
                                 "GetKungfuMountID", &Character::GetKungfuMountID,
                                 "IsFormationLeader", &Character::IsFormationLeader,
+                                "CastSkillXYZ", &Character::CastSkillXYZ,
+                                "PlayPublicShadowAnimation", &Character::PlayPublicShadowAnimation,
                                 "dwID", &Character::dwID,
                                 "nLevel", &Character::nLevel,
+                                "nX", &Character::nX, "nY", &Character::nY, "nZ", &Character::nZ,
                                 "nCurrentSunEnergy", &Character::nCurrentSunEnergy,
                                 "nCurrentMoonEnergy", &Character::nCurrentMoonEnergy,
                                 "nSunPowerValue", &Character::nSunPowerValue,
@@ -164,6 +177,12 @@ bool ns_framestatic::luaInit(sol::state &lua) {
         SKILL_KIND_TYPE[ns_framestatic::refLuaSkillKindType[i]] = i;
     }
     lua["SKILL_KIND_TYPE"] = SKILL_KIND_TYPE;
+
+    sol::table MOVE_STATE = lua.create_table();
+    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaMoveState::COUNT); i++) {
+        MOVE_STATE[ns_framestatic::refLuaMoveState[i]] = i;
+    }
+    lua["MOVE_STATE"] = MOVE_STATE;
 
     lua["CONSUME_BASE"] = 100;
     lua["LENGTH_BASE"] = 64;

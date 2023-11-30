@@ -1,6 +1,7 @@
 #include "frame/character/character.h"
 #include "frame/character/helper/auto_rollback_attribute.h"
 #include "frame/character/helper/auto_rollback_target.h"
+#include "frame/character/helper/skill_runtime.h"
 #include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
 #include "frame/global/skillrecipe.h"
@@ -22,24 +23,15 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
 
 void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targetID) {
     AutoRollbackTarget autoRollbackTarget{this, getCharacter(targetID)}; // 自动回滚的目标切换
-    CastOnce(skillID, skillLevel);
-    while (!chSkill.skillQueue.empty()) {
-        auto it = chSkill.skillQueue.front();
-        chSkill.skillQueue.pop();
-        CastOnce(it.skillID, it.skillLevel);
-    }
+    CastSkill(skillID, skillLevel);
+}
+
+void Character::CastSkillXYZ(int skillID, int skillLevel, int x, int y, int z) {
+    CastSkill(skillID, skillLevel);
+    // TODO: 与净身明礼的互动 (怀疑是 CastSkillXYZ 会导致 runtime.skillQueue 失效)
 }
 
 void Character::CastSkill(int skillID, int skillLevel) {
-    CastOnce(skillID, skillLevel);
-    while (!chSkill.skillQueue.empty()) {
-        auto it = chSkill.skillQueue.front();
-        chSkill.skillQueue.pop();
-        CastOnce(it.skillID, it.skillLevel);
-    }
-}
-
-void Character::CastOnce(int skillID, int skillLevel) {
     LOG_INFO("\nTry to CastSkill: %d # %d\n", skillID, skillLevel);
 
     // 获取技能
@@ -68,11 +60,17 @@ void Character::CastOnce(int skillID, int skillLevel) {
         LOG_INFO("CheckSelfLearntSkill failed!\n%s", "");
         return;
     }
+    if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
+        if (0 == this->nSunPowerValue && 0 == this->nMoonPowerValue) {
+            return;
+        }
+    }
 
+    // 暂停检查, 准备一些资源
     Skill::SkillCoolDown cooldown = skill.attrCoolDown;
     Skill::SkillBindBuff bindbuff = skill.attrBindBuff;
 
-    // SkillRecipe: 准备及配合检查
+    // 准备 SkillRecipe: 配合检查
     std::set<const SkillRecipe *> skillrecipeList = this->chSkillRecipe.getList(skillID, skill.RecipeType);
     std::vector<const Skill *> recipeskillList;
     for (const auto &it : skillrecipeList) {
@@ -85,6 +83,7 @@ void Character::CastOnce(int skillID, int skillLevel) {
         }
     }
 
+    // 继续检查 CD
     if (!staticCheckCoolDown(this, cooldown)) {
         LOG_INFO("CheckCoolDown failed!\n%s", "");
         return;
@@ -92,17 +91,17 @@ void Character::CastOnce(int skillID, int skillLevel) {
 
     // 检查完毕, 可以释放技能
     LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
+    SkillRuntime runtime{this, skillID, skillLevel};
 
-    // SkillEvent: PreCast
+    // 处理 SkillEvent: PreCast
     staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
 
-    // SkillRecipe: skill 的 Attribute. 秘籍加成的双会可以作用于绑定 buff.
+    // 处理 SkillRecipe: skill 的 Attribute. 秘籍加成的双会可以作用于绑定 buff.
     std::vector<AutoRollbackAttribute> autoRollbackAttributeList;
     for (const auto &it : recipeskillList) {
-        autoRollbackAttributeList.emplace_back(this, *it, 0, 0, false, 0);
-        // 当前函数结束时, autoRollbackAttributeList 会被析构, 从而自动回滚.
+        autoRollbackAttributeList.emplace_back(this, *it, 0, 0, 0, &runtime);
     }
-    // SkillRecipe: CoolDownAdd 和 DamageAddPercent.
+    // 处理 SkillRecipe: CoolDownAdd 和 DamageAddPercent.
     int DamageAddPercent = 0;
     for (const auto &it : skillrecipeList) {
         cooldown.add(it->CoolDownAdd1, it->CoolDownAdd2, it->CoolDownAdd3);
@@ -119,20 +118,6 @@ void Character::CastOnce(int skillID, int skillLevel) {
         }
     }
 
-    // 计算会心
-    auto [atCriticalStrike, atCriticalDamagePower] = CalcCritical(this->chAttr, skillID, skillLevel);
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, 9999);
-    bool isCritical = dis(gen) < atCriticalStrike;
-
-    // 自动回滚的魔法属性
-    AutoRollbackAttribute autoRollbackAttribute{this, skill, atCriticalStrike, atCriticalDamagePower, isCritical, DamageAddPercent};
-
-    // SkillEvent: Cast & Hit
-    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-
     // 绑定 buff
     for (int i = 0; i < 4; i++) {
         if (bindbuff.isValid[i]) {
@@ -140,7 +125,32 @@ void Character::CastOnce(int skillID, int skillLevel) {
         }
     }
 
+    if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
+        if (this->nSunPowerValue) {
+            runtime.skillQueue.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel);
+        } else { // 不需要再判断, 因为 nSunPowerValue 和 nMoonPowerValue 不可能同时为 0 (那样在前面就 return 了)
+            runtime.skillQueue.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel);
+        }
+    }
+
+    // 计算会心
+    auto [atCriticalStrike, atCriticalDamagePower] = CalcCritical(this->chAttr, skillID, skillLevel);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 9999);
+    runtime.isCritical = dis(gen) < atCriticalStrike;
+
+    // 自动回滚的魔法属性
+    AutoRollbackAttribute autoRollbackAttribute{this, skill, atCriticalStrike, atCriticalDamagePower, DamageAddPercent, &runtime};
+
+    // SkillEvent: Cast & Hit
+    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     // 注: 其余的 SkillEvent 尚未实现.
+
+    // 析构顺序: autoRollbackAttribute (回滚当前技能 lua 的 GetSkillLevelData)
+    //       -> autoRollbackAttributeList (回滚秘籍 lua 的 GetSkillLevelData)
+    //       -> runtime (释放技能队列并添加伤害)
 }
 
 static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {
@@ -176,9 +186,9 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
             nLevelCompareFlag = static_cast<int>(enumLuaBuffCompareFlag::GREATER);
         }
         if (checkbuffSrcOwn) {
-            buff = checkbuffCharacter->GetBuffByOwnerWithCompareFlag(cond.dwBuffID, cond.nLevel, self->dwID, cond.nLevelCompareFlag);
+            buff = checkbuffCharacter->GetBuffByOwnerWithCompareFlag(cond.dwBuffID, cond.nLevel, self->dwID, nLevelCompareFlag);
         } else {
-            buff = checkbuffCharacter->GetBuffWithCompareFlag(cond.dwBuffID, cond.nLevel, cond.nLevelCompareFlag);
+            buff = checkbuffCharacter->GetBuffWithCompareFlag(cond.dwBuffID, cond.nLevel, nLevelCompareFlag);
         }
         int nStackNum = 0;
         if (nullptr != buff) {
@@ -286,7 +296,11 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
     }
 }
 
-void Character::ActiveSkill(int skillID, int skillLevel) {
+void Character::ActiveSkill(int skillID) {
+    int skillLevel = GetSkillLevel(skillID);
+    if (skillLevel == 0) {
+        return;
+    }
     LOG_INFO("\nActiveSkill: %d # %d\n", skillID, skillLevel);
     const Skill &skill = SkillManager::get(skillID, skillLevel);
     AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, skill, 0, 0, false, 0};
@@ -301,4 +315,12 @@ void Character::DeactiveSkill(int skillID) {
         delete static_cast<AutoRollbackAttribute *>(it->second.attribute);
         this->chSkill.skillActived.erase(it);
     }
+}
+
+void Character::Cast(int skillID) {
+    int skillLevel = GetSkillLevel(skillID);
+    if (skillLevel == 0) {
+        return;
+    }
+    CastSkill(skillID, skillLevel);
 }

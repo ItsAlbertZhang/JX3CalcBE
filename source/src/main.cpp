@@ -67,11 +67,44 @@ int main(int argc, char *argv[]) {
 
     player.LearnSkill(10242, 13); // 焚影圣诀
     player.dwKungfuID = 10242;
-    // player.LearnSkill(5972, 1);  // 腾焰飞芒
-    player.LearnSkill(3960, 18); // 银月斩
+    player.ActiveSkill(10242);
+
+    player.LearnSkill(3962, 33); // 赤日轮
     player.LearnSkill(3963, 32); // 烈日斩
-    player.ActiveSkill(10242, 13);
-    // player.ActiveSkill(5972, 1);
+    player.LearnSkill(3966, 1);  // 生死劫
+    player.LearnSkill(3967, 32); // 净世破魔击
+    player.LearnSkill(3959, 24); // 幽月轮
+    player.LearnSkill(3960, 18); // 银月斩
+    player.LearnSkill(3969, 1);  // 光明相
+    player.LearnSkill(3974, 1);  // 暗尘弥散
+    player.LearnSkill(3979, 29); // 驱夜断愁
+
+    player.LearnSkill(5972, 1);  // 腾焰飞芒
+    player.LearnSkill(18279, 1); // 净身明礼
+    player.LearnSkill(22888, 1); // 诛邪镇魔
+    player.LearnSkill(6717, 1);  // 无明业火
+    player.LearnSkill(34383, 1); // 明光恒照
+    player.LearnSkill(34395, 1); // 日月同辉
+    player.LearnSkill(34372, 1); // 靡业报劫
+    player.LearnSkill(17567, 1); // 用晦而明
+    player.LearnSkill(25166, 1); // 净体不畏
+    player.LearnSkill(34378, 1); // 降灵尊
+    player.LearnSkill(34347, 1); // 悬象著明
+    player.LearnSkill(34370, 1); // 日月齐光
+
+    player.ActiveSkill(5972);
+    player.ActiveSkill(18279);
+    player.ActiveSkill(22888);
+    player.ActiveSkill(6717);
+    player.ActiveSkill(34383);
+    player.ActiveSkill(34395);
+    player.ActiveSkill(34372);
+    player.ActiveSkill(17597);
+    player.ActiveSkill(25166);
+    player.ActiveSkill(34378);
+    // player.ActiveSkill(34347);
+    player.ActiveSkill(34370);
+
     // player.DeactiveSkill(10242);
 
     player.chAttr.atHasteBase = 95;

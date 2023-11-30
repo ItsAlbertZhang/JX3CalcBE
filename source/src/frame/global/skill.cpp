@@ -120,3 +120,13 @@ void Skill::SetCheckCoolDown(int a, int b) {
 void Skill::SetSubsectionSkill(int a, int b, int c, int d) {
     LOG_ERROR("SetSubsectionSkill 未实现!\n%s", "");
 }
+
+void Skill::SetSunSubsectionSkill(int a, int b, int c, int d) {
+    SunSubsectionSkillID = c;
+    SunSubsectionSkillLevel = d;
+}
+
+void Skill::SetMoonSubsectionSkill(int a, int b, int c, int d) {
+    MoonSubsectionSkillID = c;
+    MoonSubsectionSkillLevel = d;
+}

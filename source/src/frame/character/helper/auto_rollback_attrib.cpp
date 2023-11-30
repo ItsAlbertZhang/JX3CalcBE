@@ -33,10 +33,10 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     int c = isRollback ? -1 : 1;
     switch (attrib.type) {
     case enumTabAttribute::atLunarDamageCoefficient:
-        self->chAttr.atLunarDamageCoefficient += c * attrib.valueAInt;
+        self->chAttr.atLunarDamageCoefficient += attrib.valueAInt * c;
         break;
     case enumTabAttribute::atSolarDamageCoefficient:
-        self->chAttr.atSolarDamageCoefficient += c * attrib.valueAInt;
+        self->chAttr.atSolarDamageCoefficient += attrib.valueAInt * c;
         break;
     case enumTabAttribute::atCallLunarDamage: {
         // 计算会心
@@ -65,6 +65,15 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         std::string paramStr = "scripts/" + attrib.valueAStr;
         LuaFunc::analysis(LuaFunc::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
     } break;
+    case enumTabAttribute::atLunarCriticalStrikeBaseRate:
+        self->chAttr.atLunarCriticalStrikeBaseRate += attrib.valueAInt * c;
+        break;
+    case enumTabAttribute::atSolarCriticalStrikeBaseRate:
+        self->chAttr.atSolarCriticalStrikeBaseRate += attrib.valueAInt * c;
+        break;
+    case enumTabAttribute::atMagicCriticalDamagePowerBaseKiloNumRate:
+        self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
+        break;
     default:
         LOG_ERROR("Undefined: Unknown Attribute: %s\n", refTabAttribute[static_cast<int>(attrib.type)].c_str());
         break;

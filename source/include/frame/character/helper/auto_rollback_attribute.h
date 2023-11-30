@@ -2,6 +2,7 @@
 #define FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
 
 #include "frame/character/character.h"
+#include "frame/character/helper/skill_runtime.h"
 #include "frame/global/skill.h"
 
 namespace ns_frame {
@@ -14,16 +15,16 @@ namespace ns_frame {
  */
 class AutoRollbackAttribute {
 public:
-    AutoRollbackAttribute(Character *self, const Skill &skill, int atCriticalStrike, int atCriticalDamagePower, bool isCritical, int DamageAddPercent);
+    AutoRollbackAttribute(Character *self, const Skill &skill, int atCriticalStrike, int atCriticalDamagePower, int DamageAddPercent, SkillRuntime *runtime);
     ~AutoRollbackAttribute();
 
 private:
     Character *self;
     const Skill &skill;
-    const int atCriticalStrike = 0;
-    const int atCriticalDamagePower = 0;
-    const bool isCritical = false;
-    const int DamageAddPercent = 0;
+    const int atCriticalStrike;
+    const int atCriticalDamagePower;
+    const int DamageAddPercent;
+    SkillRuntime *runtime;
     int atPhysicsDamage = 0;
     int atPhysicsDamageRand = 0;
     int atSolarDamage = 0;

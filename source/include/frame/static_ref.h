@@ -67,6 +67,28 @@ inline const char *refLuaSkillKindType[] = {
     "POISON_MAGIC",
 };
 
+enum class enumLuaMoveState { // 不全, 出现在 明教/明教_暗尘弥散.lua
+    ON_ENTRAP,
+    ON_FREEZE,
+    ON_HALT,
+    ON_KNOCKED_BACK,
+    ON_KNOCKED_DOWN,
+    ON_KNOCKED_OFF,
+    ON_SKILL_MOVE_DST,
+    ON_REPULSED,
+    COUNT,
+};
+inline const char *refLuaMoveState[] = {
+    "ON_ENTRAP",
+    "ON_FREEZE",
+    "ON_HALT",
+    "ON_KNOCKED_BACK",
+    "ON_KNOCKED_DOWN",
+    "ON_KNOCKED_OFF",
+    "ON_SKILL_MOVE_DST",
+    "ON_REPULSED",
+};
+
 } // namespace ns_framestatic
 
 #endif // FRAME_STATIC_REF_H_

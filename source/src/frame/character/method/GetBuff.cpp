@@ -4,7 +4,7 @@
 using namespace ns_frame;
 
 bool Character::IsHaveBuff(int buffID, int buffLevel) {
-    return nullptr == GetBuff(buffID, buffLevel);
+    return nullptr != GetBuff(buffID, buffLevel);
 }
 
 CharacterBuff::Item *Character::GetBuff(int buffID, int buffLevel) {
