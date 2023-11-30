@@ -85,9 +85,6 @@ private:
      * @brief SkillEvent 缓存数据
      */
     static inline std::unordered_map<int, SkillEvent> data;
-    static inline std::unordered_map<EventType, std::unordered_map<uint32_t, std::vector<SkillEvent *>>> EventMask1Map;
-    static inline std::unordered_map<EventType, std::unordered_map<uint32_t, std::vector<SkillEvent *>>> EventMask2Map;
-    static inline std::unordered_map<EventType, std::unordered_map<int, std::vector<SkillEvent *>>> EventSkillIDMap;
 
     /**
      * @brief 初始化 SkillEvent. 将指定 ID 的 SkillEvent 数据存至缓存.

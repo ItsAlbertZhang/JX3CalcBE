@@ -1,0 +1,43 @@
+#include "frame/global/skillevent.h"
+#include "gdi.h"
+
+using namespace ns_frame;
+
+const SkillEvent &SkillEventManager::get(int ID) {
+    // 若 SkillEvent ID 不存在, 则添加
+    if (data.find(ID) == data.end()) {
+        add(ID);
+    }
+    return data[ID];
+}
+
+void SkillEventManager::add(int ID) {
+    std::lock_guard<std::mutex> lock(mutex); // 加锁
+    // 可能有多个线程同时进入了 add 函数. 因此, 需要在加锁后再次判断 SkillEvent 是否存在.
+    if (data.find(ID) != data.end()) {
+        // 若 SkillEvent ID 存在, 则直接返回
+        return; // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
+    }
+
+    // 初始化 SkillEvent
+    SkillEvent skillevent;
+    skillevent.ID = ID;
+    // 获取 tab
+    gdi::TabSelectType arg;
+    arg.emplace_back();
+    arg[0]["ID"] = std::to_string(ID);
+    gdi::Interface::tabSelect(gdi::Tab::skillevent, arg);
+    skillevent.tab = std::move(arg[0]);
+    // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
+    skillevent.type = EventTypeMap.find(skillevent.tab["EventType"]) != EventTypeMap.end() ? EventTypeMap.at(skillevent.tab["EventType"]) : EventType::COUNT;
+    skillevent.Odds = std::stoi(skillevent.tab["Odds"]);
+    skillevent.SkillID = std::stoi(skillevent.tab["SkillID"]);
+    skillevent.SkillLevel = std::stoi(skillevent.tab["SkillLevel"]);
+    skillevent.SkillCaster = EventCTMap.find(skillevent.tab["SkillCaster"]) != EventCTMap.end() ? EventCTMap.at(skillevent.tab["SkillCaster"]) : EventCT::COUNT;
+    skillevent.SkillTarget = EventCTMap.find(skillevent.tab["SkillTarget"]) != EventCTMap.end() ? EventCTMap.at(skillevent.tab["SkillTarget"]) : EventCT::COUNT;
+    skillevent.EventMask1 = std::stoi(skillevent.tab["EventMask1"]);
+    skillevent.EventMask2 = std::stoi(skillevent.tab["EventMask2"]);
+    skillevent.EventSkillID = std::stoi(skillevent.tab["EventSkillID"]);
+    // 将 SkillEvent 存入缓存
+    data[ID] = std::move(skillevent);
+}

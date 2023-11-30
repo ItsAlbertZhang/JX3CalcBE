@@ -68,11 +68,11 @@ int main(int argc, char *argv[]) {
     player.chAttr.atHasteBase = 95;
 
     player.LearnSkill(10242, 13); // 焚影圣诀
+    player.LearnSkill(5972, 1);   // 腾焰飞芒
+    player.LearnSkill(3960, 10);  // 银月斩
     player.ActiveSkill(10242, 13);
-    player.LearnSkill(5972, 1); // 腾焰飞芒
     player.ActiveSkill(5972, 1);
     // player.DeactiveSkill(10242);
-    player.LearnSkill(3960, 10); // 银月斩
     player.CastSkill(3960, 10);
     // player.LearnSkill(3963, 10); // 烈日斩
     // player.CastSkill(3963, 10);

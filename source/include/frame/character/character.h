@@ -6,7 +6,9 @@
 #include "frame/character/property/cooldown.h"
 #include "frame/character/property/damage.h"
 #include "frame/character/property/skill.h"
+#include "frame/character/property/skillevent.h"
 #include "frame/character/property/skillrecipe.h"
+#include "frame/static_ref.h"
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -26,6 +28,7 @@ public:
     bool isPlayer = false;    // 是否为玩家
     Character *target = this; // 当前目标
     bool isOutOfFight = true; // 是否处于战斗状态
+    ns_framestatic::enumLuaSkillKindType atAdaptiveSkillType = ns_framestatic::enumLuaSkillKindType::COUNT;
 
     CharacterAttr chAttr;               // 角色属性
     CharacterBuff chBuff;               // 角色 buff
@@ -33,6 +36,7 @@ public:
     CharacterDamage chDamage;           // 角色伤害
     CharacterSkill chSkill;             // 角色技能
     CharacterSkillRecipe chSkillRecipe; // 角色技能秘籍
+    CharacterSkillEvent chSkillEvent;   // 角色技能事件
 
     // ---------- 以下方法未被 lua 调用 ----------
     static Character *getCharacter(int nCharacterID);

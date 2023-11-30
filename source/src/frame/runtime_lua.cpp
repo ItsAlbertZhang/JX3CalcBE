@@ -53,6 +53,7 @@ void LuaFunc::add(const std::string &filename) {
         LOG_ERROR("luaExecuteFile failed: %s\n%s\n", filename.c_str(), err.what());
     } else {
         executeSuccess = true;
+        LOG_INFO("luaExecuteFile success: %s\n", filename.c_str());
     }
     for (int i = 0; i < static_cast<int>(Enum::COUNT); i++) {
         funcs.emplace_back(executeSuccess ? gdi::Interface::luaGetFunction(names[i]) : sol::nil);

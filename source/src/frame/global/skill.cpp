@@ -43,7 +43,7 @@ void SkillManager::add(int skillID, int skillLevel) {
         skill.tab = it->second.tab;
     }
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    skill.KindType = SkillManager::SkillTypeMap.find(skill.tab["KindType"])->second;
+    skill.KindType = SkillTypeMap.find(skill.tab["KindType"]) != SkillTypeMap.end() ? SkillTypeMap.at(skill.tab["KindType"]) : SkillType::COUNT;
     skill.HasCriticalStrike = skill.tab["HasCriticalStrike"] == "1";
     skill.SkillEventMask1 = atoi(skill.tab["SkillEventMask1"].c_str());
     skill.SkillEventMask2 = atoi(skill.tab["SkillEventMask2"].c_str());

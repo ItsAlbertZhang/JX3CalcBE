@@ -146,12 +146,6 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(enumLuaAttributeType::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE):
                 self->chAttr.atDecriticalDamagePowerBaseKiloNumRate += it.param1Int * c;
                 break;
-            case static_cast<int>(enumLuaAttributeType::SET_TALENT_RECIPE):
-                if (isRollback)
-                    self->chSkillRecipe.remove(it.param1Int, it.param2);
-                else
-                    self->chSkillRecipe.add(it.param1Int, it.param2);
-                break;
             case static_cast<int>(enumLuaAttributeType::SOLAR_CRITICAL_STRIKE_BASE_RATE):
                 self->chAttr.atSolarCriticalStrikeBaseRate += it.param1Int * c;
                 break;
@@ -160,6 +154,24 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             case static_cast<int>(enumLuaAttributeType::MAGIC_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE):
                 self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::SET_ADAPTIVE_SKILL_TYPE):
+                if (isRollback)
+                    self->atAdaptiveSkillType = enumLuaSkillKindType::COUNT;
+                else
+                    self->atAdaptiveSkillType = static_cast<enumLuaSkillKindType>(it.param1Int);
+                break;
+            case static_cast<int>(enumLuaAttributeType::SET_TALENT_RECIPE):
+                if (isRollback)
+                    self->chSkillRecipe.remove(it.param1Int, it.param2);
+                else
+                    self->chSkillRecipe.add(it.param1Int, it.param2);
+                break;
+            case static_cast<int>(enumLuaAttributeType::SKILL_EVENT_HANDLER):
+                if (isRollback)
+                    self->chSkillEvent.remove(it.param1Int);
+                else
+                    self->chSkillEvent.add(it.param1Int);
                 break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);

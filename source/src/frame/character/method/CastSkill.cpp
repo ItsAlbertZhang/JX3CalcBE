@@ -18,6 +18,7 @@ static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skil
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
 static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDown &cooldown);
 static inline void staticTriggerCoolDown(Character *self, int nCoolDownID);
+static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
 
 void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targetID) {
     AutoRollbackTarget autoRollbackTarget{this, getCharacter(targetID)}; // 自动回滚的目标切换
@@ -58,20 +59,15 @@ void Character::CastSkill(int skillID, int skillLevel) {
     Skill::SkillBindBuff bindbuff = skill.attrBindBuff;
 
     // SkillRecipe: 准备及配合检查
-    std::set<CharacterSkillRecipe::Item *> chSkillrecipeList = this->chSkillRecipe.getList(skillID, skill.RecipeType);
-    std::vector<const SkillRecipe *> skillrecipeList; // 技能的秘籍
-    std::vector<const Skill *> recipeskillList;       // 秘籍的技能
-    for (auto it : chSkillrecipeList) {
-        if (it->isValid) {
-            const SkillRecipe *ptrSkillRecipe = &SkillRecipeManager::get(it->RecipeID, it->RecipeLevel);
-            skillrecipeList.emplace_back(ptrSkillRecipe); // 将技能的秘籍加入列表
-            const Skill *ptrSkill = SkillRecipeManager::getSkill(ptrSkillRecipe);
-            if (nullptr != ptrSkill) {                  // 如果技能的秘籍存在对应技能
-                recipeskillList.emplace_back(ptrSkill); // 将秘籍的技能加入列表
-                // 使用秘籍的技能重载当前的 CD 和 bindbuff
-                cooldown.overload(ptrSkill->attrCoolDown);
-                bindbuff.overload(ptrSkill->attrBindBuff);
-            }
+    std::set<const SkillRecipe *> skillrecipeList = this->chSkillRecipe.getList(skillID, skill.RecipeType);
+    std::vector<const Skill *> recipeskillList;
+    for (const auto &it : skillrecipeList) {
+        const Skill *ptrSkill = SkillRecipeManager::getSkill(it);
+        if (nullptr != ptrSkill) {                  // 如果技能的秘籍存在对应技能
+            recipeskillList.emplace_back(ptrSkill); // 将秘籍的技能加入列表
+            // 使用秘籍的技能重载当前的 CD 和 bindbuff
+            cooldown.overload(ptrSkill->attrCoolDown);
+            bindbuff.overload(ptrSkill->attrBindBuff);
         }
     }
 
@@ -82,6 +78,9 @@ void Character::CastSkill(int skillID, int skillLevel) {
 
     // 检查完毕, 可以释放技能
     LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
+
+    // SkillEvent: PreCast
+    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
 
     // SkillRecipe: skill 的 Attribute. 秘籍加成的双会可以作用于绑定 buff.
     std::vector<AutoRollbackAttribute> autoRollbackAttributeList;
@@ -122,6 +121,12 @@ void Character::CastSkill(int skillID, int skillLevel) {
 
     // 自动回滚的魔法属性
     AutoRollbackAttribute autoRollbackAttribute{this, skill, atCriticalStrike, atCriticalDamagePower, isCritical, DamageAddPercent};
+
+    // SkillEvent: Cast & Hit
+    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+
+    // 注: 其余的 SkillEvent 尚未实现.
 }
 
 static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {
@@ -249,7 +254,26 @@ static inline void staticTriggerCoolDown(Character *self, int cooldownID) {
     self->ModifyCoolDown(cooldownID, durationFrame);
 }
 
+static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent) {
+    for (const auto &it : skillevent) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, 1023);
+        if (dis(gen) < it->Odds) {
+            Character *caster = it->SkillCaster == EventCT::EventCaster ? self : self->target;
+            Character *target = it->SkillTarget == EventCT::EventTarget ? self->target : self;
+            caster->CastSkillTarget(
+                it->SkillID, it->SkillLevel,
+                target->isPlayer
+                    ? static_cast<int>(ns_framestatic::enumLuaTarget::PLAYER)
+                    : static_cast<int>(ns_framestatic::enumLuaTarget::NPC),
+                target->dwID);
+        }
+    }
+}
+
 void Character::ActiveSkill(int skillID, int skillLevel) {
+    LOG_INFO("\nActiveSkill: %d # %d\n", skillID, skillLevel);
     const Skill &skill = SkillManager::get(skillID, skillLevel);
     AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, skill, 0, 0, false, 0};
     // this->chSkill.skillActived[skillID] = CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)};
@@ -257,6 +281,7 @@ void Character::ActiveSkill(int skillID, int skillLevel) {
 }
 
 void Character::DeactiveSkill(int skillID) {
+    LOG_INFO("\nDeactiveSkill: %d\n", skillID);
     auto it = this->chSkill.skillActived.find(skillID);
     if (it != this->chSkill.skillActived.end()) {
         delete static_cast<AutoRollbackAttribute *>(it->second.attribute);
