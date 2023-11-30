@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
               << "dmg\t"
               << "type" << std::endl;
     for (auto &it : player.chDamage.damageList) {
-        std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s:\t" << it.skillID << "\t" << it.skillLevel << "\t" << it.isCritical << "\t" << it.damage << "\t" << static_cast<int>(it.damageType) << std::endl;
+        std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s\t" << it.skillID << "\t" << it.skillLevel << "\t" << it.isCritical << "\t" << it.damage << "\t" << static_cast<int>(it.damageType) << std::endl;
     }
 
     // // 测试用例 3
