@@ -23,3 +23,11 @@ int Character::getCharacterID(Character *character) {
         return characterMap.at(character);
     }
 }
+
+int Character::GetKungfuMountID() {
+    return this->dwKungfuID;
+}
+
+bool Character::IsFormationLeader() {
+    return false; // TODO: 暂时未实现阵眼功能
+}

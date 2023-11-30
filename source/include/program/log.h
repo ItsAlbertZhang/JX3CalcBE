@@ -3,27 +3,50 @@
 
 #ifdef DEBUG
 
+#include <iostream>
 #include <string>
 
 namespace ns_program {
 
 class Log {
 public:
-    Log(const std::string &name);
-    ~Log();
+    Log(const std::string &name) : name(name) {
+        data = new char[size];
+        curr = data;
+        memset(data, 0, size);
+    }
+
+    ~Log() {
+        delete[] data;
+    }
+
     template <typename... Args>
     void operator()(const char *format, Args... args) {
-        curr += snprintf(curr, 1024 * 1024 - (curr - data), format, args...);
+        if (static_cast<size_t>(curr - data + 1024) > size) {
+            char *tmp = new char[size * 2];
+            memcpy(tmp, data, size);
+            delete[] data;
+            curr = tmp + (curr - data);
+            data = tmp;
+            size *= 2;
+        }
+        curr += snprintf(curr, size - (curr - data), format, args...);
+    }
+
+    void print() {
+        std::cout << "\nLog (" << name << "):\n"
+                  << data << std::endl;
     }
 
 private:
     std::string name;
+    size_t size = 1024 * 1024;
     char *curr = nullptr;
     char *data = nullptr;
 };
 
-extern Log log_info;
-extern Log log_error;
+inline Log log_info{"info"};
+inline Log log_error{"error"};
 
 } // namespace ns_program
 

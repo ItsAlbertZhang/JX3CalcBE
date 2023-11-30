@@ -22,10 +22,24 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
 
 void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targetID) {
     AutoRollbackTarget autoRollbackTarget{this, getCharacter(targetID)}; // 自动回滚的目标切换
-    CastSkill(skillID, skillLevel);
+    CastOnce(skillID, skillLevel);
+    while (!chSkill.skillQueue.empty()) {
+        auto it = chSkill.skillQueue.front();
+        chSkill.skillQueue.pop();
+        CastOnce(it.skillID, it.skillLevel);
+    }
 }
 
 void Character::CastSkill(int skillID, int skillLevel) {
+    CastOnce(skillID, skillLevel);
+    while (!chSkill.skillQueue.empty()) {
+        auto it = chSkill.skillQueue.front();
+        chSkill.skillQueue.pop();
+        CastOnce(it.skillID, it.skillLevel);
+    }
+}
+
+void Character::CastOnce(int skillID, int skillLevel) {
     LOG_INFO("\nTry to CastSkill: %d # %d\n", skillID, skillLevel);
 
     // 获取技能

@@ -196,7 +196,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_PHYSICS_DAMAGE): {
                 self->chDamage.damageList.emplace_back(
-                    EventManager::now(),
+                    Event::now(),
                     skill.dwID, skill.dwLevel,
                     this->isCritical,
                     self->CalcDamage(
@@ -210,7 +210,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_SOLAR_DAMAGE): {
                 self->chDamage.damageList.emplace_back(
-                    EventManager::now(),
+                    Event::now(),
                     skill.dwID, skill.dwLevel,
                     this->isCritical,
                     self->CalcDamage(
@@ -224,7 +224,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_LUNAR_DAMAGE): {
                 self->chDamage.damageList.emplace_back(
-                    EventManager::now(),
+                    Event::now(),
                     skill.dwID, skill.dwLevel,
                     this->isCritical,
                     self->CalcDamage(
@@ -238,7 +238,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_NEUTRAL_DAMAGE): {
                 self->chDamage.damageList.emplace_back(
-                    EventManager::now(),
+                    Event::now(),
                     skill.dwID, skill.dwLevel,
                     this->isCritical,
                     self->CalcDamage(
@@ -252,7 +252,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_POISON_DAMAGE): {
                 self->chDamage.damageList.emplace_back(
-                    EventManager::now(),
+                    Event::now(),
                     skill.dwID, skill.dwLevel,
                     this->isCritical,
                     self->CalcDamage(

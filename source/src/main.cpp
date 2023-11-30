@@ -4,11 +4,17 @@
 #include "frame/static_lua.h"
 #include "gdi.h"
 #include "program/init.h"
+#include "program/log.h"
 #include <filesystem>
 #include <iostream>
 #ifdef _WIN32
 #include <Windows.h>
 #endif
+
+void callbackCastSkill(void *self, void *param) {
+    ns_frame::Character *player = static_cast<ns_frame::Character *>(self);
+    player->CastSkill(3960, 10);
+}
 
 int main(int argc, char *argv[]) {
 
@@ -68,21 +74,19 @@ int main(int argc, char *argv[]) {
     player.chAttr.atHasteBase = 95;
 
     player.LearnSkill(10242, 13); // 焚影圣诀
-    player.LearnSkill(5972, 1);   // 腾焰飞芒
-    player.LearnSkill(3960, 10);  // 银月斩
+    player.dwKungfuID = 10242;
+    player.LearnSkill(5972, 1);  // 腾焰飞芒
+    player.LearnSkill(3960, 10); // 银月斩
     player.ActiveSkill(10242, 13);
     player.ActiveSkill(5972, 1);
     // player.DeactiveSkill(10242);
-    player.CastSkill(3960, 10);
-    // player.LearnSkill(3963, 10); // 烈日斩
-    // player.CastSkill(3963, 10);
-    while (!player.chSkill.skillQueue.empty()) {
-        auto it = player.chSkill.skillQueue.front();
-        player.chSkill.skillQueue.pop();
-        player.CastSkill(it.skillID, it.skillLevel);
-    }
-    player.CastSkill(3960, 10);
-    while (ns_frame::EventManager::run()) {
+    // player.CastSkill(3960, 10);
+    // // player.LearnSkill(3963, 10); // 烈日斩
+    // // player.CastSkill(3963, 10);
+    // player.CastSkill(3960, 10);
+    while (ns_frame::Event::now() < 1024 * 300) {
+        ns_frame::Event::add(20, callbackCastSkill, &player, nullptr);
+        ns_frame::Event::run();
     }
     std::cout << "tick\t"
               << "ID\t"
@@ -126,7 +130,12 @@ int main(int argc, char *argv[]) {
     ns_frame::LuaFunc::clear();
 
 #ifdef DEBUG
-    std::cout << "Press any key to exit..." << std::endl;
+    ns_program::log_error.print();
+    if (argc > 1) {
+        if (strcmp(argv[1], "--log=info") == 0) {
+            ns_program::log_info.print();
+        }
+    }
 #endif
     return 0;
 }

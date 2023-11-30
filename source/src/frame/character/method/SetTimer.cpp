@@ -24,5 +24,5 @@ void Character::SetTimer4(int frame, std::string filename, int type, int targetI
     data[0] = LuaFunc::getIndex(filename);
     data[1] = type;
     data[2] = targetID;
-    EventManager::add(frame * 1024 / 16, callbackSetTimer, this, data);
+    Event::add(frame * 1024 / 16, callbackSetTimer, this, data);
 }

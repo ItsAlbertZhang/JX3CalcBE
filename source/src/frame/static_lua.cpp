@@ -28,6 +28,8 @@ const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
     "GetSkillLevel",
     "SetTimer",
     "GetSkillTarget",
+    "GetKungfuMountID",
+    "IsFormationLeader",
 };
 
 bool ns_framestatic::luaInit(sol::state &lua) {
@@ -110,10 +112,14 @@ bool ns_framestatic::luaInit(sol::state &lua) {
                                 "GetSkillLevel", &Character::GetSkillLevel,
                                 "SetTimer", sol::overload(&Character::SetTimer3, &Character::SetTimer4),
                                 "GetSkillTarget", &Character::GetSkillTarget,
+                                "GetKungfuMountID", &Character::GetKungfuMountID,
+                                "IsFormationLeader", &Character::IsFormationLeader,
                                 "dwID", &Character::dwID,
                                 "nLevel", &Character::nLevel,
                                 "nCurrentSunEnergy", &Character::nCurrentSunEnergy,
                                 "nCurrentMoonEnergy", &Character::nCurrentMoonEnergy,
+                                "nSunPowerValue", &Character::nSunPowerValue,
+                                "nMoonPowerValue", &Character::nMoonPowerValue,
                                 "bSurplusAutoCast", &Character::bSurplusAutoCast,
                                 "bSurplusAutoReplenish", &Character::bSurplusAutoReplenish);
 

@@ -9,6 +9,7 @@
 #include "frame/character/property/skillevent.h"
 #include "frame/character/property/skillrecipe.h"
 #include "frame/static_ref.h"
+#include <mutex>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -19,7 +20,7 @@ namespace ns_frame {
  * @brief Character 类
  * @note 用于表示游戏中的角色.
  * @warning #### 关于线程安全:
- * @warning 这个类的实例会在线程内部被创建. 因此, 其天然就是线程安全的.
+ * @warning 在构造实例时, 使用线程锁确保线程安全.
  */
 class Character {
 public:
@@ -29,6 +30,7 @@ public:
     Character *target = this; // 当前目标
     bool isOutOfFight = true; // 是否处于战斗状态
     ns_framestatic::enumLuaSkillKindType atAdaptiveSkillType = ns_framestatic::enumLuaSkillKindType::COUNT;
+    int dwKungfuID = 0;
 
     CharacterAttr chAttr;               // 角色属性
     CharacterBuff chBuff;               // 角色 buff
@@ -45,6 +47,7 @@ public:
     void ActiveSkill(int skillID, int skillLevel);
     void DeactiveSkill(int skillID);
     void DelBuffAllStackNum(CharacterBuff::Item &it);
+    void CastOnce(int skillID, int skillLevel);
     void BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
     CharacterBuff::Item *GetBuffWithCompareFlag(int buffID, int buffLevel, int flag);
     CharacterBuff::Item *GetBuffByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
@@ -52,9 +55,11 @@ public:
     int CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent);
 
     // ---------- 以下方法直接被 lua 调用 ----------
+    bool IsFormationLeader();
     bool IsHaveBuff(int buffID, int buffLevel);
     CharacterBuff::Item *GetBuff(int buffID, int buffLevel);
     CharacterBuff::Item *GetBuffByOwner(int buffID, int buffLevel, int sourceID);
+    int GetKungfuMountID();
     int GetSkillLevel(int skillID);
     int GetSkillTarget();
     void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
@@ -69,10 +74,13 @@ public:
     int nLevel = chAttr.atLevel;       // 等级, 这是唯一一个同时存在于此处和 chAttr 内部的属性
     int nCurrentSunEnergy = 0;         // 当前日灵
     int nCurrentMoonEnergy = 0;        // 当前月魂
+    int nSunPowerValue = 0;            // 满日
+    int nMoonPowerValue = 0;           // 满月
     bool bSurplusAutoCast = false;     // 出现于 明教_套路_内功_焚影圣诀.lua
     bool bSurplusAutoReplenish = true; // 出现于 明教_套路_内功_焚影圣诀.lua
 
 private:
+    static inline std::mutex mutex;                                  // 互斥锁. 用于保护构造操作.
     static inline std::vector<Character *> characterList;            // 角色列表
     static inline std::unordered_map<Character *, int> characterMap; // 角色表
 };

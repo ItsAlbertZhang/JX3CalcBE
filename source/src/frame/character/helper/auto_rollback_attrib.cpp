@@ -1,5 +1,6 @@
 #include "frame/character/helper/auto_rollback_attrib.h"
 #include "frame/event.h"
+#include "frame/runtime_lua.h"
 #include "frame/static_refmap.h" // enumTabAttribute
 #include "program/log.h"
 #include <random>
@@ -48,7 +49,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         std::uniform_int_distribution<> dis(0, 9999);
         bool isCritical = dis(gen) < atCriticalStrike;
         src->chDamage.damageList.emplace_back(
-            EventManager::now(),
+            Event::now(),
             item->dwCasterSkillID, item->dwCasterSkillLevel,
             isCritical,
             src->CalcDamage(
@@ -59,6 +60,10 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
                 0),
             DamageType::Lunar);
         src->isOutOfFight = false;
+    } break;
+    case enumTabAttribute::atExecuteScript: {
+        std::string paramStr = "scripts/" + attrib.valueAStr;
+        LuaFunc::analysis(LuaFunc::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
     } break;
     default:
         LOG_ERROR("Undefined: Unknown Attribute: %s\n", refTabAttribute[static_cast<int>(attrib.type)].c_str());

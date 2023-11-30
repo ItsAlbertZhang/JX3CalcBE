@@ -62,6 +62,7 @@ list_to_create = {
             "atSolarDamageCoefficient",
             "atLunarDamageCoefficient",
             "atCallLunarDamage",
+            "atExecuteScript",
         ],
     },
 }

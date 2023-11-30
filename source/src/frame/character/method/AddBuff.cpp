@@ -15,7 +15,7 @@ static void callbackActiveBuff(void *selfPtr, void *param) {
     if (it->count <= 0) {
         self->DelBuffAllStackNum(*it);
     } else {
-        it->tickActive = EventManager::add(it->interval * 1024 / 16, callbackActiveBuff, self, it); // 重新注册回调函数
+        it->tickActive = Event::add(it->interval * 1024 / 16, callbackActiveBuff, self, it); // 重新注册回调函数
     }
 }
 
@@ -41,7 +41,7 @@ void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int b
         it.interval = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
         it.interval = it.interval < buff.MinInterval ? buff.MinInterval : it.interval;
         // 注册回调函数
-        it.tickActive = EventManager::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it);
+        it.tickActive = Event::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it);
         // 其他工作
         it.nStackNum = 1; // 将层数设置为 1
     } else {
@@ -57,8 +57,8 @@ void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int b
             it.nStackNum++; // 层数 +1
         if (buff.Exclude) {
             // Exclude 为 1 (true), 则重置下次生效时间 (通常用于常规 buff)
-            EventManager::cancel(it.tickActive, callbackActiveBuff, this, &it);                        // 取出回调函数
-            it.tickActive = EventManager::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it); // 重新注册回调函数
+            Event::cancel(it.tickActive, callbackActiveBuff, this, &it);                        // 取出回调函数
+            it.tickActive = Event::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it); // 重新注册回调函数
             // else: Exclude 为 0 (false), 则不重置下次生效时间 (通常用于 DOT/HOT), 无需处理.
         }
     }
@@ -68,7 +68,7 @@ void Character::DelBuffAllStackNum(CharacterBuff::Item &it) {
     it.isValid = false;
     delete (AutoRollbackAttrib *)it.ptrAttrib; // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
     it.ptrAttrib = nullptr;
-    EventManager::cancel(it.tickActive, callbackActiveBuff, this, &it); // 取出回调函数
+    Event::cancel(it.tickActive, callbackActiveBuff, this, &it); // 取出回调函数
 }
 
 void Character::BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel) {

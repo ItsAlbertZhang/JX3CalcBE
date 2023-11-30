@@ -2,27 +2,27 @@
 
 using namespace ns_frame;
 
-bool EventManager::run() {
-    if (data.empty()) {
+bool Event::run() {
+    if (eventList.empty()) {
         return false;
     }
-    Event event = *data.begin();
-    data.erase(data.begin());
+    EventItem event = *eventList.begin();
+    eventList.erase(eventList.begin());
     tick = event.tick;
     event.func(event.self, event.param);
     return true;
 }
 
-event_tick_t EventManager::add(event_tick_t delay, event_func_t func, void *self, void *param) {
-    data.emplace(tick + delay, func, self, param);
+event_tick_t Event::add(event_tick_t delay, event_func_t func, void *self, void *param) {
+    eventList.emplace(tick + delay, func, self, param);
     return tick + delay;
 }
 
-event_tick_t EventManager::cancel(event_tick_t tick, event_func_t func, void *self, void *param) {
-    data.erase(Event(tick, func, self, param));
-    return tick - EventManager::tick;
+event_tick_t Event::cancel(event_tick_t tick, event_func_t func, void *self, void *param) {
+    eventList.erase(EventItem(tick, func, self, param));
+    return tick - Event::tick;
 }
 
-event_tick_t EventManager::now() {
+event_tick_t Event::now() {
     return tick;
 }
