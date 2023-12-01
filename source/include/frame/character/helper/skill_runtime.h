@@ -4,13 +4,16 @@
 #include "frame/character/character.h"
 #include "frame/event.h"
 #include <queue>
+#include <stack>
 
 namespace ns_frame {
 
 class SkillRuntime {
 public:
     SkillRuntime(Character *self, int skillID, int skillLevel)
-        : self(self), skillID(skillID), skillLevel(skillLevel) {}
+        : self(self), skillID(skillID), skillLevel(skillLevel) {
+        runtimeStack.push(this); // 将自己压入技能运行时栈
+    }
     Character *self;
     const int skillID;
     const int skillLevel;
@@ -29,6 +32,7 @@ public:
         int skillLevel; // 技能等级
     };
     std::queue<SkillQueueElement> skillQueue;
+    static thread_local inline std::stack<SkillRuntime *> runtimeStack;
 
     ~SkillRuntime() {
         // 执行技能队列
@@ -83,6 +87,8 @@ public:
                 DamageType::Poison);
             self->isOutOfFight = false;
         }
+        // 从技能运行时栈中弹出
+        runtimeStack.pop();
     }
 };
 

@@ -28,14 +28,16 @@ void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targe
 }
 
 void Character::CastSkillXYZ(int skillID, int skillLevel, int x, int y, int z) {
-    CastSkill(skillID, skillLevel);
     /**
      * 猜测实现:
      * 现象: 明教在激活奇穴"净身明礼"的情况下, 烈日斩和银月斩会调用 CastSkillXYZ, 与此同时 AddAttribute 中的 CAST_SKILL (武器伤害) 失效.
-     * 推测原因: CastSkill 会将自身目标置空, 导致后续技能队列无法正确执行.
-     * 因此, 此处将目标置空, 以还原类似游戏内的逻辑. 除非更确切地知道了游戏内的实现逻辑, 否则不建议修改此处.
+     * 推测原因: CastSkillXYZ 会清空上一个 SkillRuntime 的技能队列. (虽然很离谱, 但是似乎没有别的更好的解释)
+     * 因此, 此处将其置空, 以还原类似游戏内的逻辑. 除非更确切地知道了游戏内的实现逻辑, 否则不建议修改此处.
      */
-    this->targetCurr = nullptr;
+    SkillRuntime *ptr = SkillRuntime::runtimeStack.top();
+    std::queue<ns_frame::SkillRuntime::SkillQueueElement> empty;
+    ptr->skillQueue.swap(empty);
+    CastSkill(skillID, skillLevel);
 }
 
 void Character::CastSkill(int skillID, int skillLevel) {

@@ -21,14 +21,12 @@ void Character::ModifyCoolDown(int cooldownID, int frame) {
     if (item->isValid) {
         // 若该 CD 正在冷却, 则取消 Event
         delay = Event::cancel(item->tickOver, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
-        if (frame < 0 && -frame * 1024 / 16 > delay) {
-            // 传入了一个负值的 frame, 且该值大于当前的冷却时间, 则直接结束冷却
-            // 之所以将其放置在 item->isValid 中, 是因为只有当 CD 正在冷却时, 传入一个负值的 frame 才有意义
-            callbackModifyCoolDown(this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
-            return; // 直接返回
-        }
     }
-    // 若此时仍未 return, 说明仍需要进行冷却
-    item->isValid = true;
-    item->tickOver = Event::add(delay + frame * 1024 / 16, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
+    if (frame < 0 && -frame * 1024 / 16 >= delay) {
+        // 传入了一个负值的 frame, 且该值大于等于当前的冷却时间, 则直接结束冷却
+        item->isValid = false;
+    } else {
+        item->isValid = true;
+        item->tickOver = Event::add(delay + frame * 1024 / 16, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
+    }
 }

@@ -13,7 +13,9 @@
 
 void callbackCastSkill(void *self, void *param) {
     ns_frame::Character *player = static_cast<ns_frame::Character *>(self);
-    player->CastSkill(3963, 18);
+    player->Cast(3963);
+    player->Cast(3960);
+    ns_frame::Event::add(20, callbackCastSkill, self, nullptr);
 }
 
 int main(int argc, char *argv[]) {
@@ -141,13 +143,13 @@ int main(int argc, char *argv[]) {
     npc.chAttr.atPhysicsShieldBase = 27550;
     npc.chAttr.atMagicShield = 27550;
 
-    player.Cast(3960);
-    while (ns_frame::Event::run())
-        ;
-    // while (ns_frame::Event::now() < 1024 * 300) {
-    //     ns_frame::Event::add(20, callbackCastSkill, &player, nullptr);
-    //     ns_frame::Event::run();
-    // }
+    // player.Cast(3960);
+    // while (ns_frame::Event::run())
+    //     ;
+    callbackCastSkill(&player, nullptr);
+    while (ns_frame::Event::now() < 1024 * 45) {
+        ns_frame::Event::run();
+    }
     std::cout << "tick\t"
               << "ID\t"
               << "lv\t"
