@@ -22,13 +22,20 @@ static inline void staticTriggerCoolDown(Character *self, int nCoolDownID);
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
 
 void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targetID) {
-    AutoRollbackTarget autoRollbackTarget{this, getCharacter(targetID)}; // 自动回滚的目标切换
+    AutoRollbackTarget autoRollbackTarget{this}; // 自动回滚的目标切换
+    this->targetCurr = getCharacter(targetID);
     CastSkill(skillID, skillLevel);
 }
 
 void Character::CastSkillXYZ(int skillID, int skillLevel, int x, int y, int z) {
     CastSkill(skillID, skillLevel);
-    // TODO: 与净身明礼的互动 (怀疑是 CastSkillXYZ 会导致 runtime.skillQueue 失效)
+    /**
+     * 猜测实现:
+     * 现象: 明教在激活奇穴"净身明礼"的情况下, 烈日斩和银月斩会调用 CastSkillXYZ, 与此同时 AddAttribute 中的 CAST_SKILL (武器伤害) 失效.
+     * 推测原因: CastSkill 会将自身目标置空, 导致后续技能队列无法正确执行.
+     * 因此, 此处将目标置空, 以还原类似游戏内的逻辑. 除非更确切地知道了游戏内的实现逻辑, 否则不建议修改此处.
+     */
+    this->targetCurr = nullptr;
 }
 
 void Character::CastSkill(int skillID, int skillLevel) {
@@ -38,32 +45,34 @@ void Character::CastSkill(int skillID, int skillLevel) {
     const Skill &skill = SkillManager::get(skillID, skillLevel);
 
     // 检查 tab 中的释放条件
-    if (skill.NeedOutOfFight && !this->isOutOfFight) {
-        LOG_INFO("Check failed: NeedOutOfFight!\n%s", "");
-        return;
+    if (skill.NeedOutOfFight && !this->isOutOfFight)
+        return; // 需要处于非战斗状态, 但当前处于战斗状态, CastSkill 失败
+
+    AutoRollbackTarget autoRollbackTarget{this}; // 自动回滚的目标切换
+    if ((this->targetCurr == nullptr && !skill.TargetRelationNone) ||
+        (this->targetCurr != nullptr && this->targetCurr != this && !skill.TargetRelationEnemy)) {
+        if (skill.TargetRelationSelf)
+            this->targetCurr = this; // 自动自我运功.
+        else
+            return;
     }
-    if (this->target->isPlayer && !skill.TargetTypePlayer) {
-        LOG_INFO("Check failed: TargetTypePlayer!\n%s", "");
-        return;
-    }
-    if (!this->target->isPlayer && !skill.TargetTypeNpc) {
-        LOG_INFO("Check failed: TargetTypeNpc!\n%s", "");
-        return;
+    if (this->targetCurr != nullptr) {
+        if (this->targetCurr->isPlayer && !skill.TargetTypePlayer)
+            return;
+        if (!this->targetCurr->isPlayer && !skill.TargetTypeNpc)
+            return;
     }
 
     // 检查 lua 中添加的释放条件
-    if (!staticCheckBuff(this, target, skill)) {
-        LOG_INFO("CheckBuff failed!\n%s", "");
+    if (!staticCheckBuff(this, targetCurr, skill))
         return;
-    }
-    if (!staticCheckSelfLearntSkill(this, skill)) {
-        LOG_INFO("CheckSelfLearntSkill failed!\n%s", "");
+
+    if (!staticCheckSelfLearntSkill(this, skill))
         return;
-    }
+
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
-        if (0 == this->nSunPowerValue && 0 == this->nMoonPowerValue) {
+        if (0 == this->nSunPowerValue && 0 == this->nMoonPowerValue)
             return;
-        }
     }
 
     // 暂停检查, 准备一些资源
@@ -84,10 +93,8 @@ void Character::CastSkill(int skillID, int skillLevel) {
     }
 
     // 继续检查 CD
-    if (!staticCheckCoolDown(this, cooldown)) {
-        LOG_INFO("CheckCoolDown failed!\n%s", "");
+    if (!staticCheckCoolDown(this, cooldown))
         return;
-    }
 
     // 检查完毕, 可以释放技能
     LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
@@ -143,8 +150,8 @@ void Character::CastSkill(int skillID, int skillLevel) {
 
     // 绑定 buff. 其晚于魔法属性, 直观佐证为日斩无法享受其 BindBuff 的加成.
     for (int i = 0; i < 4; i++) {
-        if (bindbuff.isValid[i]) {
-            target->BindBuff(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+        if (bindbuff.isValid[i] && this->targetCurr != nullptr) {
+            this->targetCurr->BindBuff(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
         }
     }
 
@@ -172,6 +179,9 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
             checkbuffCharacter = target;
             checkbuffSrcOwn = true;
             break;
+        }
+        if (checkbuffCharacter == nullptr) {
+            return false; // 检查 buff 的角色不存在, CastSkill 失败
         }
         CharacterBuff::Item *buff = nullptr;
         int nLevelCompareFlag = cond.nLevelCompareFlag;
@@ -284,14 +294,16 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, 1023);
         if (dis(gen) < it->Odds) {
-            Character *caster = it->SkillCaster == EventCT::EventCaster ? self : self->target;
-            Character *target = it->SkillTarget == EventCT::EventTarget ? self->target : self;
-            caster->CastSkillTarget(
-                it->SkillID, it->SkillLevel,
-                target->isPlayer
-                    ? static_cast<int>(ns_framestatic::enumLuaTarget::PLAYER)
-                    : static_cast<int>(ns_framestatic::enumLuaTarget::NPC),
-                target->dwID);
+            Character *caster = it->SkillCaster == EventCT::EventCaster ? self : self->targetCurr;
+            Character *target = it->SkillTarget == EventCT::EventTarget ? self->targetCurr : self;
+            if (caster != nullptr) {
+                caster->CastSkillTarget(
+                    it->SkillID, it->SkillLevel,
+                    target == nullptr  ? 0
+                    : target->isPlayer ? static_cast<int>(ns_framestatic::enumLuaTarget::PLAYER)
+                                       : static_cast<int>(ns_framestatic::enumLuaTarget::NPC),
+                    target == nullptr ? 0 : target->dwID);
+            }
         }
     }
 }
@@ -322,5 +334,6 @@ void Character::Cast(int skillID) {
     if (skillLevel == 0) {
         return;
     }
+    this->targetCurr = this->targetSelect;
     CastSkill(skillID, skillLevel);
 }

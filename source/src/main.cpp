@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     ns_frame::Player player;
     ns_frame::NPC npc;
     player.isPlayer = true;
-    player.target = &npc;
+    player.targetSelect = &npc;
 
     player.LearnSkill(10242, 13); // 焚影圣诀
     player.dwKungfuID = 10242;
@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
     npc.chAttr.atPhysicsShieldBase = 27550;
     npc.chAttr.atMagicShield = 27550;
 
-    player.CastSkill(3960, 18);
+    player.Cast(3960);
     while (ns_frame::Event::run())
         ;
     // while (ns_frame::Event::now() < 1024 * 300) {

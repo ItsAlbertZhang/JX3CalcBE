@@ -26,9 +26,10 @@ class Character {
 public:
     Character(); // 构造函数
 
-    bool isPlayer = false;    // 是否为玩家
-    Character *target = this; // 当前目标
-    bool isOutOfFight = true; // 是否处于战斗状态
+    bool isPlayer = false;             // 是否为玩家
+    Character *targetSelect = nullptr; // 选中的目标
+    Character *targetCurr = nullptr;   // 当前目标
+    bool isOutOfFight = true;          // 是否处于战斗状态
     ns_framestatic::enumLuaSkillKindType atAdaptiveSkillType = ns_framestatic::enumLuaSkillKindType::COUNT;
     int dwKungfuID = 0;
 

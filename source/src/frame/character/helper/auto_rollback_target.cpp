@@ -2,12 +2,11 @@
 
 using namespace ns_frame;
 
-AutoRollbackTarget::AutoRollbackTarget(Character *self, Character *target) {
+AutoRollbackTarget::AutoRollbackTarget(Character *self) {
     this->self = self;
-    this->target = self->target;
-    self->target = target;
+    this->preTarget = self->targetCurr;
 }
 
 AutoRollbackTarget::~AutoRollbackTarget() {
-    self->target = this->target;
+    self->targetCurr = this->preTarget;
 }

@@ -22,7 +22,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
         switch (it.mode) {
 
         case static_cast<int>(enumLuaAttributeEffectMode::EFFECT_TO_SELF_NOT_ROLLBACK): {
-            if (isRollback)
+            if (isRollback) // NOT_ROLLBACK
                 break;
             switch (it.type) {
             case static_cast<int>(enumLuaAttributeType::CAST_SKILL_TARGET_DST):
@@ -179,24 +179,26 @@ void AutoRollbackAttribute::handle(bool isRollback) {
         } break; // EFFECT_TO_SELF_AND_ROLLBACK
 
         case static_cast<int>(enumLuaAttributeEffectMode::EFFECT_TO_DEST_NOT_ROLLBACK): {
-            if (isRollback)
+            if (self->targetCurr == nullptr) // TO_DEST
+                break;
+            if (isRollback) // NOT_ROLLBACK
                 break;
             switch (it.type) {
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT): {
                 std::string paramStr = "scripts/" + it.param1Str;
-                int dwCharacterID = Character::getCharacterID(self->target);
+                int dwCharacterID = Character::getCharacterID(self->targetCurr);
                 int dwSkillSrcID = Character::getCharacterID(self);
                 LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
             } break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
                 std::string paramStr = "scripts/" + it.param1Str;
-                int dwCharacterID = Character::getCharacterID(self->target);
+                int dwCharacterID = Character::getCharacterID(self->targetCurr);
                 int dwSkillSrcID = Character::getCharacterID(self);
                 LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_PHYSICS_DAMAGE): {
                 runtime->dmgPhysics += self->CalcDamage(
-                    self->chAttr, self->target, DamageType::Physics,
+                    self->chAttr, self->targetCurr, DamageType::Physics,
                     runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
                     atPhysicsDamage, atPhysicsDamageRand,
                     static_cast<int>(skill.nChannelInterval),
@@ -204,7 +206,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_SOLAR_DAMAGE): {
                 runtime->dmgSolar += self->CalcDamage(
-                    self->chAttr, self->target, DamageType::Solar,
+                    self->chAttr, self->targetCurr, DamageType::Solar,
                     runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
                     atSolarDamage, atSolarDamageRand,
                     static_cast<int>(skill.nChannelInterval),
@@ -212,7 +214,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_LUNAR_DAMAGE): {
                 runtime->dmgLunar += self->CalcDamage(
-                    self->chAttr, self->target, DamageType::Lunar,
+                    self->chAttr, self->targetCurr, DamageType::Lunar,
                     runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
                     atLunarDamage, atLunarDamageRand,
                     static_cast<int>(skill.nChannelInterval),
@@ -220,7 +222,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_NEUTRAL_DAMAGE): {
                 runtime->dmgNeutral += self->CalcDamage(
-                    self->chAttr, self->target, DamageType::Neutral,
+                    self->chAttr, self->targetCurr, DamageType::Neutral,
                     runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
                     atNeutralDamage, atNeutralDamageRand,
                     static_cast<int>(skill.nChannelInterval),
@@ -228,7 +230,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_POISON_DAMAGE): {
                 runtime->dmgPoison += self->CalcDamage(
-                    self->chAttr, self->target, DamageType::Poison,
+                    self->chAttr, self->targetCurr, DamageType::Poison,
                     runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
                     atPoisonDamage, atPoisonDamageRand,
                     static_cast<int>(skill.nChannelInterval),
@@ -240,6 +242,8 @@ void AutoRollbackAttribute::handle(bool isRollback) {
         } break; // EFFECT_TO_DEST_NOT_ROLLBACK
 
         case static_cast<int>(enumLuaAttributeEffectMode::EFFECT_TO_DEST_AND_ROLLBACK): {
+            if (self->targetCurr == nullptr) // TO_DEST
+                break;
             // switch (it.type) {
             // default:
             LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);

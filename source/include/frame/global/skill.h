@@ -41,6 +41,9 @@ public:
     bool NeedOutOfFight;
     bool TargetTypePlayer;
     bool TargetTypeNpc;
+    bool TargetRelationNone;
+    bool TargetRelationSelf;
+    bool TargetRelationEnemy;
     int RecipeType;
     int SunSubsectionSkillID;
     int SunSubsectionSkillLevel;

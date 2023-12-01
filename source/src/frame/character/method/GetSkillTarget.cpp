@@ -3,5 +3,5 @@
 using namespace ns_frame;
 
 int Character::GetSkillTarget() {
-    return this->target->dwID;
+    return this->targetCurr == nullptr ? 0 : this->targetCurr->dwID;
 }

@@ -41,7 +41,6 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case enumTabAttribute::atCallLunarDamage: {
         // 计算会心
         Character *src = Character::getCharacter(item->dwSkillSrcID);
-
         auto [atCriticalStrike, atCriticalDamagePower] =
             src->CalcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel); // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         std::random_device rd;
@@ -53,7 +52,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
             item->dwCasterSkillID, item->dwCasterSkillLevel,
             isCritical,
             src->CalcDamage(
-                item->attr, src->target, DamageType::Lunar, // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
+                item->attr, self, DamageType::Lunar, // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
                 isCritical, atCriticalDamagePower, 0,
                 attrib.valueAInt, 0,
                 item->nChannelInterval, 0,

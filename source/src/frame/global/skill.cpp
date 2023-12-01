@@ -50,6 +50,9 @@ void SkillManager::add(int skillID, int skillLevel) {
     skill.NeedOutOfFight = skill.tab["NeedOutOfFight"] == "1";
     skill.TargetTypePlayer = skill.tab["TargetTypePlayer"] == "1";
     skill.TargetTypeNpc = skill.tab["TargetTypeNpc"] == "1";
+    skill.TargetRelationNone = skill.tab["TargetRelationNone"] == "1";
+    skill.TargetRelationSelf = skill.tab["TargetRelationSelf"] == "1";
+    skill.TargetRelationEnemy = skill.tab["TargetRelationEnemy"] == "1";
     skill.RecipeType = atoi(skill.tab["RecipeType"].c_str());
     // 执行 GetSkillLevelData
     std::string name = "scripts/skill/" + skill.tab["ScriptFile"];

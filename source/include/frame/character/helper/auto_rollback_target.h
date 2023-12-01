@@ -13,12 +13,12 @@ namespace ns_frame {
  */
 class AutoRollbackTarget {
 public:
-    AutoRollbackTarget(Character *self, Character *target);
+    AutoRollbackTarget(Character *self);
     ~AutoRollbackTarget();
 
 private:
     Character *self;
-    Character *target;
+    Character *preTarget;
 };
 
 } // namespace ns_frame
