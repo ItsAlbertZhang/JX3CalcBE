@@ -1,6 +1,7 @@
 #ifndef FRAME_CHARACTER_PROPERTY_DAMAGE_H_
 #define FRAME_CHARACTER_PROPERTY_DAMAGE_H_
 
+#include <string>
 #include <vector>
 
 namespace ns_frame {

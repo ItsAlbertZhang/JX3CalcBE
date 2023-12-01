@@ -54,6 +54,7 @@ void SkillManager::add(int skillID, int skillLevel) {
     skill.TargetRelationSelf = skill.tab["TargetRelationSelf"] == "1";
     skill.TargetRelationEnemy = skill.tab["TargetRelationEnemy"] == "1";
     skill.RecipeType = atoi(skill.tab["RecipeType"].c_str());
+    skill.SkillName = skill.tab["SkillName"];
     // 执行 GetSkillLevelData
     std::string name = "scripts/skill/" + skill.tab["ScriptFile"];
     bool res = LuaFunc::analysis(LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData);

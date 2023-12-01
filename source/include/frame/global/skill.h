@@ -50,6 +50,7 @@ public:
     int MoonSubsectionSkillID;
     int MoonSubsectionSkillLevel;
 
+    std::string SkillName;
     // ---------- 技能等级 ----------
     int dwSkillID = -1;
     int dwLevel = 1;
