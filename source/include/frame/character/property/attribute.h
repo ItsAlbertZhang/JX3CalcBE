@@ -203,8 +203,9 @@ public:
     int getNeutralShield(int atAllShieldIgnorePercent) const; // 获取混元内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
     int getPoisonShield(int atAllShieldIgnorePercent) const;  // 获取毒性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
 
-    int getStrain() const; // 获取无双. 结果为一个1024分数, 这符合游戏内的实际原理.
-    int getHaste() const;  // 获取加速. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getStrain() const;  // 获取无双. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getHaste() const;   // 获取加速. 结果为一个1024分数, 这符合游戏内的实际原理.
+    int getSurplus() const; // 获取破招. 结果为一个数值, 将其与技能的破招系数相乘可得原始伤害.
 
     int getPhysicsDamageAddPercent() const; // 获取外功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
     int getSolarDamageAddPercent() const;   // 获取阳性内功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.

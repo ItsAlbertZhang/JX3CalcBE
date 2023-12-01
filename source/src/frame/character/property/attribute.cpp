@@ -195,6 +195,10 @@ int CharacterAttr::getHaste() const {
     res = res > 256 ? 256 : res;
     return res + atUnlimitHasteBasePercentAdd;
 }
+// 破招
+int CharacterAttr::getSurplus() const {
+    return static_cast<int>(atSurplusValueBase * GlobalParam::get().fSurplusParam);
+}
 
 // 伤害加成
 int CharacterAttr::getPhysicsDamageAddPercent() const {

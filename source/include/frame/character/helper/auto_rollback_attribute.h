@@ -35,6 +35,7 @@ private:
     int atNeutralDamageRand = 0;
     int atPoisonDamage = 0;
     int atPoisonDamageRand = 0;
+    int atGlobalDamageFactor = 0; // 破招系数
 
     void handle(bool isRollback);
 };

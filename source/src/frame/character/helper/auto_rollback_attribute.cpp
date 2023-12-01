@@ -236,6 +236,46 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     static_cast<int>(skill.nChannelInterval),
                     skill.nWeaponDamagePercent);
             } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_PHYSICS_DAMAGE): {
+                runtime->dmgPhysics += self->CalcDamage(
+                    self->chAttr, self->targetCurr, DamageType::Physics,
+                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
+                    0, 0,
+                    this->atGlobalDamageFactor, 0,
+                    1, 1, true);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_SOLAR_DAMAGE): {
+                runtime->dmgSolar += self->CalcDamage(
+                    self->chAttr, self->targetCurr, DamageType::Solar,
+                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
+                    0, 0,
+                    this->atGlobalDamageFactor, 0,
+                    1, 1, true);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_LUNAR_DAMAGE): {
+                runtime->dmgLunar += self->CalcDamage(
+                    self->chAttr, self->targetCurr, DamageType::Lunar,
+                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
+                    0, 0,
+                    this->atGlobalDamageFactor, 0,
+                    1, 1, true);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_NEUTRAL_DAMAGE): {
+                runtime->dmgNeutral += self->CalcDamage(
+                    self->chAttr, self->targetCurr, DamageType::Neutral,
+                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
+                    0, 0,
+                    this->atGlobalDamageFactor, 0,
+                    1, 1, true);
+            } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_POISON_DAMAGE): {
+                runtime->dmgPoison += self->CalcDamage(
+                    self->chAttr, self->targetCurr, DamageType::Poison,
+                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
+                    0, 0,
+                    this->atGlobalDamageFactor, 0,
+                    1, 1, true);
+            } break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
             }
@@ -244,10 +284,13 @@ void AutoRollbackAttribute::handle(bool isRollback) {
         case static_cast<int>(enumLuaAttributeEffectMode::EFFECT_TO_DEST_AND_ROLLBACK): {
             if (self->targetCurr == nullptr) // TO_DEST
                 break;
-            // switch (it.type) {
-            // default:
-            LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
-            // }
+            switch (it.type) {
+            case static_cast<int>(enumLuaAttributeType::GLOBAL_DAMGAGE_FACTOR):
+                this->atGlobalDamageFactor += it.param1Int * c;
+                break;
+            default:
+                LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+            }
         } break; // EFFECT_TO_DEST_AND_ROLLBACK
 
         } // switch (it.mode)

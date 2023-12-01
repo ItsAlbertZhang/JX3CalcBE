@@ -55,7 +55,11 @@ list_to_create = {
             "MAGIC_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE",
             "CALL_BUFF",
             "GLOBAL_DAMGAGE_FACTOR",
+            "CALL_SURPLUS_PHYSICS_DAMAGE",
             "CALL_SURPLUS_SOLAR_DAMAGE",
+            "CALL_SURPLUS_LUNAR_DAMAGE",
+            "CALL_SURPLUS_NEUTRAL_DAMAGE",
+            "CALL_SURPLUS_POISON_DAMAGE",
         ],
     },
     "TabAttribute": {
@@ -69,6 +73,7 @@ list_to_create = {
             "atLunarCriticalStrikeBaseRate",
             "atSolarCriticalStrikeBaseRate",
             "atMagicCriticalDamagePowerBaseKiloNumRate",
+            "atAllShieldIgnorePercent",
         ],
     },
 }

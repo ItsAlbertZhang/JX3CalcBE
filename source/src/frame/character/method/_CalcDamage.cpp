@@ -41,8 +41,9 @@ std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int 
     return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 }
 
-int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent, int dotInterval, int dotCount) {
+int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent, int dotInterval, int dotCount, bool isSurplus) {
     int atStrain = this->chAttr.getStrain();                                // 类型× 快照
+    int atSurplus = this->chAttr.getSurplus();                              // 类型× 快照
     int atDstNpcDamageCoefficient = this->chAttr.atDstNpcDamageCoefficient; // 类型× 快照
     int atAddDamageByDstMoveState = this->chAttr.atAddDamageByDstMoveState; // 类型× 快照
 
@@ -66,7 +67,7 @@ int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, Dama
         atAttackPower = attrSelf.getPhysicsAttackPower();
         atDamageAddPercent = attrSelf.getPhysicsDamageAddPercent();
         atOvercome = this->chAttr.getPhysicsOvercome();
-        targetShield = target->chAttr.getPhysicsShield(attrSelf.atAllShieldIgnorePercent);
+        targetShield = target->chAttr.getPhysicsShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atPhysicsDamageCoefficient;
         c = 10;
         weaponDamage = attrSelf.atMeleeWeaponDamageBase + attrSelf.atMeleeWeaponDamageRand / 2;
@@ -76,34 +77,37 @@ int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, Dama
         atAttackPower = attrSelf.getSolarAttackPower();
         atDamageAddPercent = attrSelf.getSolarDamageAddPercent();
         atOvercome = this->chAttr.getSolarOvercome();
-        targetShield = target->chAttr.getSolarShield(attrSelf.atAllShieldIgnorePercent);
+        targetShield = target->chAttr.getSolarShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atSolarDamageCoefficient;
         break;
     case DamageType::Lunar:
         atAttackPower = attrSelf.getLunarAttackPower();
         atDamageAddPercent = attrSelf.getLunarDamageAddPercent();
         atOvercome = this->chAttr.getLunarOvercome();
-        targetShield = target->chAttr.getLunarShield(attrSelf.atAllShieldIgnorePercent);
+        targetShield = target->chAttr.getLunarShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atLunarDamageCoefficient;
         break;
     case DamageType::Neutral:
         atAttackPower = attrSelf.getNeutralAttackPower();
         atDamageAddPercent = attrSelf.getNeutralDamageAddPercent();
         atOvercome = this->chAttr.getNeutralOvercome();
-        targetShield = target->chAttr.getNeutralShield(attrSelf.atAllShieldIgnorePercent);
+        targetShield = target->chAttr.getNeutralShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atNeutralDamageCoefficient;
         break;
     case DamageType::Poison:
         atAttackPower = attrSelf.getPoisonAttackPower();
         atDamageAddPercent = attrSelf.getPoisonDamageAddPercent();
         atOvercome = this->chAttr.getPoisonOvercome();
-        targetShield = target->chAttr.getPoisonShield(attrSelf.atAllShieldIgnorePercent);
+        targetShield = target->chAttr.getPoisonShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atPoisonDamageCoefficient;
         break;
     }
 
-    int damage = damageBase + damageRand / 2;
-    damage = damage + atAttackPower * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 + weaponDamage;
+    long long damage = damageBase + damageRand / 2;
+    if (isSurplus)
+        damage = damage + static_cast<long long>(atSurplus) * (nChannelInterval + (1 << 20)) / (1 << 20);
+    else
+        damage = damage + atAttackPower * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 + weaponDamage;
     if (!target->isPlayer) {
         damage = damage * (1024 + atStrain) / 1024;
         damage = damage * (1024 + atDstNpcDamageCoefficient) / 1024;
@@ -122,5 +126,5 @@ int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, Dama
         damage = damage * (1792 + atCriticalDamagePower) / 1024;
     }
 
-    return damage;
+    return static_cast<int>(damage);
 }

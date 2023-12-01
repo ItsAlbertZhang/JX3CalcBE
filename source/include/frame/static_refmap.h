@@ -15,6 +15,10 @@ enum class enumLuaAttributeType {
     CALL_PHYSICS_DAMAGE,
     CALL_POISON_DAMAGE,
     CALL_SOLAR_DAMAGE,
+    CALL_SURPLUS_LUNAR_DAMAGE,
+    CALL_SURPLUS_NEUTRAL_DAMAGE,
+    CALL_SURPLUS_PHYSICS_DAMAGE,
+    CALL_SURPLUS_POISON_DAMAGE,
     CALL_SURPLUS_SOLAR_DAMAGE,
     CAST_SKILL,
     CAST_SKILL_TARGET_DST,
@@ -69,6 +73,10 @@ inline const char *refLuaAttributeType[] = {
     "CALL_PHYSICS_DAMAGE",
     "CALL_POISON_DAMAGE",
     "CALL_SOLAR_DAMAGE",
+    "CALL_SURPLUS_LUNAR_DAMAGE",
+    "CALL_SURPLUS_NEUTRAL_DAMAGE",
+    "CALL_SURPLUS_PHYSICS_DAMAGE",
+    "CALL_SURPLUS_POISON_DAMAGE",
     "CALL_SURPLUS_SOLAR_DAMAGE",
     "CAST_SKILL",
     "CAST_SKILL_TARGET_DST",
@@ -116,6 +124,7 @@ inline const char *refLuaAttributeType[] = {
 
 enum class enumTabAttribute {
     atAllDamageAddPercent,
+    atAllShieldIgnorePercent,
     atCallLunarDamage,
     atExecuteScript,
     atLunarCriticalStrikeBaseRate,
@@ -127,6 +136,7 @@ enum class enumTabAttribute {
 };
 inline const std::string refTabAttribute[] = {
     "atAllDamageAddPercent",
+    "atAllShieldIgnorePercent",
     "atCallLunarDamage",
     "atExecuteScript",
     "atLunarCriticalStrikeBaseRate",
@@ -137,6 +147,7 @@ inline const std::string refTabAttribute[] = {
 };
 inline const std::unordered_map<std::string, enumTabAttribute> mapTabAttribute = {
     {"atAllDamageAddPercent", enumTabAttribute::atAllDamageAddPercent},
+    {"atAllShieldIgnorePercent", enumTabAttribute::atAllShieldIgnorePercent},
     {"atCallLunarDamage", enumTabAttribute::atCallLunarDamage},
     {"atExecuteScript", enumTabAttribute::atExecuteScript},
     {"atLunarCriticalStrikeBaseRate", enumTabAttribute::atLunarCriticalStrikeBaseRate},

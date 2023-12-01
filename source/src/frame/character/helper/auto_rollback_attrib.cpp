@@ -73,6 +73,9 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case enumTabAttribute::atMagicCriticalDamagePowerBaseKiloNumRate:
         self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
         break;
+    case enumTabAttribute::atAllShieldIgnorePercent:
+        self->chAttr.atAllShieldIgnorePercent += attrib.valueAInt * c;
+        break;
     default:
         LOG_ERROR("Undefined: Unknown Attribute: %s\n", refTabAttribute[static_cast<int>(attrib.type)].c_str());
         break;

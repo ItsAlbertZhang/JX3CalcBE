@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
     player.ActiveSkill(34383);
     player.ActiveSkill(34395);
     player.ActiveSkill(34372);
-    player.ActiveSkill(17597);
+    player.ActiveSkill(17567);
     player.ActiveSkill(25166);
     player.ActiveSkill(34378);
     // player.ActiveSkill(34347);
