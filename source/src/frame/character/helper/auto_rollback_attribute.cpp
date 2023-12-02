@@ -4,16 +4,56 @@
 #include "frame/static_ref.h"    // enumLuaAttributeEffectMode
 #include "frame/static_refmap.h" // enumLuaAttributeType
 #include "program/log.h"
+#include <random>
 
 using namespace ns_frame;
 using namespace ns_framestatic;
 
-AutoRollbackAttribute::AutoRollbackAttribute(Character *self, const Skill &skill, int atCriticalStrike, int atCriticalDamagePower, int DamageAddPercent, SkillRuntime *runtime)
-    : self(self), skill(skill), atCriticalStrike(atCriticalStrike), atCriticalDamagePower(atCriticalDamagePower), DamageAddPercent(DamageAddPercent), runtime(runtime) {
+AutoRollbackAttribute::AutoRollbackAttribute(Character *self, SkillRuntime *runtime, const Skill &skill)
+    : self(self), runtime(runtime), skill(skill) {
     handle(false);
 }
 AutoRollbackAttribute::~AutoRollbackAttribute() {
     handle(true);
+}
+
+bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
+    // 计算会心
+    auto [atCriticalStrike, atCriticalDamagePower] = self->CalcCritical(self->chAttr, skill.dwID, skill.dwLevel);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 9999);
+    bool isCritical = dis(gen) < atCriticalStrike;
+    // 计算伤害
+    for (int i = 0; i < static_cast<int>(DamageType::COUNT); i++) {
+        if (callDamage[i]) {
+            self->chDamage.damageList.emplace_back(
+                Event::now(),
+                skill.dwID, skill.dwLevel,
+                isCritical,
+                self->CalcDamage(
+                    self->chAttr, self->targetCurr, static_cast<DamageType>(i),
+                    isCritical, atCriticalDamagePower, DamageAddPercent,
+                    atDamage[i], atDamageRand[i],
+                    static_cast<int>(skill.nChannelInterval),
+                    skill.nWeaponDamagePercent),
+                static_cast<DamageType>(i));
+        }
+        if (callSurplusDamage[i]) {
+            self->chDamage.damageList.emplace_back(
+                Event::now(),
+                skill.dwID, skill.dwLevel,
+                isCritical,
+                self->CalcDamage(
+                    self->chAttr, self->targetCurr, static_cast<DamageType>(i),
+                    isCritical, atCriticalDamagePower, DamageAddPercent,
+                    0, 0,
+                    this->atGlobalDamageFactor, 0,
+                    1, 1, true),
+                static_cast<DamageType>(i));
+        }
+    }
+    return isCritical;
 }
 
 void AutoRollbackAttribute::handle(bool isRollback) {
@@ -26,10 +66,10 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             switch (it.type) {
             case static_cast<int>(enumLuaAttributeType::CAST_SKILL_TARGET_DST):
-                runtime->skillQueue.emplace(it.param1Int, it.param2);
+                runtime->skillQueue.emplace(it.param1Int, it.param2, self, self->targetCurr);
                 break;
             case static_cast<int>(enumLuaAttributeType::CAST_SKILL):
-                runtime->skillQueue.emplace(it.param1Int, it.param2);
+                runtime->skillQueue.emplace(it.param1Int, it.param2, self, self->targetCurr);
                 break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT): {
                 std::string paramStr = "scripts/" + it.param1Str;
@@ -57,34 +97,34 @@ void AutoRollbackAttribute::handle(bool isRollback) {
         case static_cast<int>(enumLuaAttributeEffectMode::EFFECT_TO_SELF_AND_ROLLBACK): {
             switch (it.type) {
             case static_cast<int>(enumLuaAttributeType::SKILL_PHYSICS_DAMAGE):
-                this->atPhysicsDamage += it.param1Int * c;
+                this->atDamage[static_cast<int>(DamageType::Physics)] += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_PHYSICS_DAMAGE_RAND):
-                this->atPhysicsDamageRand += it.param1Int * c;
+                this->atDamageRand[static_cast<int>(DamageType::Physics)] += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_SOLAR_DAMAGE):
-                this->atSolarDamage += it.param1Int * c;
+                this->atDamage[static_cast<int>(DamageType::Solar)] += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_SOLAR_DAMAGE_RAND):
-                this->atSolarDamageRand += it.param1Int * c;
+                this->atDamageRand[static_cast<int>(DamageType::Solar)] += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_LUNAR_DAMAGE):
-                this->atLunarDamage += it.param1Int * c;
+                this->atDamage[static_cast<int>(DamageType::Lunar)] += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_LUNAR_DAMAGE_RAND):
-                this->atLunarDamageRand += it.param1Int * c;
+                this->atDamageRand[static_cast<int>(DamageType::Lunar)] += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_NEUTRAL_DAMAGE):
-                this->atNeutralDamage += it.param1Int * c;
+                this->atDamage[static_cast<int>(DamageType::Neutral)] += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_NEUTRAL_DAMAGE_RAND):
-                this->atNeutralDamageRand += it.param1Int * c;
+                this->atDamageRand[static_cast<int>(DamageType::Neutral)] += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_POISON_DAMAGE):
-                this->atPoisonDamage += it.param1Int * c;
+                this->atDamage[static_cast<int>(DamageType::Poison)] += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_POISON_DAMAGE_RAND):
-                this->atPoisonDamageRand += it.param1Int * c;
+                this->atDamageRand[static_cast<int>(DamageType::Poison)] += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::PHYSICS_ATTACK_POWER_PERCENT):
                 self->chAttr.atPhysicsAttackPowerPercent += it.param1Int * c;
@@ -196,86 +236,36 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 int dwSkillSrcID = Character::getCharacterID(self);
                 LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
             } break;
-            case static_cast<int>(enumLuaAttributeType::CALL_PHYSICS_DAMAGE): {
-                runtime->dmgPhysics += self->CalcDamage(
-                    self->chAttr, self->targetCurr, DamageType::Physics,
-                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
-                    atPhysicsDamage, atPhysicsDamageRand,
-                    static_cast<int>(skill.nChannelInterval),
-                    skill.nWeaponDamagePercent);
-            } break;
-            case static_cast<int>(enumLuaAttributeType::CALL_SOLAR_DAMAGE): {
-                runtime->dmgSolar += self->CalcDamage(
-                    self->chAttr, self->targetCurr, DamageType::Solar,
-                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
-                    atSolarDamage, atSolarDamageRand,
-                    static_cast<int>(skill.nChannelInterval),
-                    skill.nWeaponDamagePercent);
-            } break;
-            case static_cast<int>(enumLuaAttributeType::CALL_LUNAR_DAMAGE): {
-                runtime->dmgLunar += self->CalcDamage(
-                    self->chAttr, self->targetCurr, DamageType::Lunar,
-                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
-                    atLunarDamage, atLunarDamageRand,
-                    static_cast<int>(skill.nChannelInterval),
-                    skill.nWeaponDamagePercent);
-            } break;
-            case static_cast<int>(enumLuaAttributeType::CALL_NEUTRAL_DAMAGE): {
-                runtime->dmgNeutral += self->CalcDamage(
-                    self->chAttr, self->targetCurr, DamageType::Neutral,
-                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
-                    atNeutralDamage, atNeutralDamageRand,
-                    static_cast<int>(skill.nChannelInterval),
-                    skill.nWeaponDamagePercent);
-            } break;
-            case static_cast<int>(enumLuaAttributeType::CALL_POISON_DAMAGE): {
-                runtime->dmgPoison += self->CalcDamage(
-                    self->chAttr, self->targetCurr, DamageType::Poison,
-                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
-                    atPoisonDamage, atPoisonDamageRand,
-                    static_cast<int>(skill.nChannelInterval),
-                    skill.nWeaponDamagePercent);
-            } break;
-            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_PHYSICS_DAMAGE): {
-                runtime->dmgPhysics += self->CalcDamage(
-                    self->chAttr, self->targetCurr, DamageType::Physics,
-                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
-                    0, 0,
-                    this->atGlobalDamageFactor, 0,
-                    1, 1, true);
-            } break;
-            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_SOLAR_DAMAGE): {
-                runtime->dmgSolar += self->CalcDamage(
-                    self->chAttr, self->targetCurr, DamageType::Solar,
-                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
-                    0, 0,
-                    this->atGlobalDamageFactor, 0,
-                    1, 1, true);
-            } break;
-            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_LUNAR_DAMAGE): {
-                runtime->dmgLunar += self->CalcDamage(
-                    self->chAttr, self->targetCurr, DamageType::Lunar,
-                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
-                    0, 0,
-                    this->atGlobalDamageFactor, 0,
-                    1, 1, true);
-            } break;
-            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_NEUTRAL_DAMAGE): {
-                runtime->dmgNeutral += self->CalcDamage(
-                    self->chAttr, self->targetCurr, DamageType::Neutral,
-                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
-                    0, 0,
-                    this->atGlobalDamageFactor, 0,
-                    1, 1, true);
-            } break;
-            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_POISON_DAMAGE): {
-                runtime->dmgPoison += self->CalcDamage(
-                    self->chAttr, self->targetCurr, DamageType::Poison,
-                    runtime->isCritical, atCriticalDamagePower, DamageAddPercent,
-                    0, 0,
-                    this->atGlobalDamageFactor, 0,
-                    1, 1, true);
-            } break;
+            case static_cast<int>(enumLuaAttributeType::CALL_PHYSICS_DAMAGE):
+                this->callDamage[static_cast<int>(DamageType::Physics)] = true;
+                break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SOLAR_DAMAGE):
+                this->callDamage[static_cast<int>(DamageType::Solar)] = true;
+                break;
+            case static_cast<int>(enumLuaAttributeType::CALL_LUNAR_DAMAGE):
+                this->callDamage[static_cast<int>(DamageType::Lunar)] = true;
+                break;
+            case static_cast<int>(enumLuaAttributeType::CALL_NEUTRAL_DAMAGE):
+                this->callDamage[static_cast<int>(DamageType::Neutral)] = true;
+                break;
+            case static_cast<int>(enumLuaAttributeType::CALL_POISON_DAMAGE):
+                this->callDamage[static_cast<int>(DamageType::Poison)] = true;
+                break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_PHYSICS_DAMAGE):
+                this->callSurplusDamage[static_cast<int>(DamageType::Physics)] = true;
+                break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_SOLAR_DAMAGE):
+                this->callSurplusDamage[static_cast<int>(DamageType::Solar)] = true;
+                break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_LUNAR_DAMAGE):
+                this->callSurplusDamage[static_cast<int>(DamageType::Lunar)] = true;
+                break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_NEUTRAL_DAMAGE):
+                this->callSurplusDamage[static_cast<int>(DamageType::Neutral)] = true;
+                break;
+            case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_POISON_DAMAGE):
+                this->callSurplusDamage[static_cast<int>(DamageType::Poison)] = true;
+                break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
             }

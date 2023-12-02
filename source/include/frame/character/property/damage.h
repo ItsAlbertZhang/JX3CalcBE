@@ -13,6 +13,7 @@ enum class DamageType {
     Lunar,
     Neutral,
     Poison,
+    COUNT,
 };
 
 class Damage {

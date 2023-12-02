@@ -15,27 +15,19 @@ namespace ns_frame {
  */
 class AutoRollbackAttribute {
 public:
-    AutoRollbackAttribute(Character *self, const Skill &skill, int atCriticalStrike, int atCriticalDamagePower, int DamageAddPercent, SkillRuntime *runtime);
+    AutoRollbackAttribute(Character *self, SkillRuntime *runtime, const Skill &skill);
     ~AutoRollbackAttribute();
+    bool CallDamage(int DamageAddPercent);
 
 private:
     Character *self;
-    const Skill &skill;
-    const int atCriticalStrike;
-    const int atCriticalDamagePower;
-    const int DamageAddPercent;
     SkillRuntime *runtime;
-    int atPhysicsDamage = 0;
-    int atPhysicsDamageRand = 0;
-    int atSolarDamage = 0;
-    int atSolarDamageRand = 0;
-    int atLunarDamage = 0;
-    int atLunarDamageRand = 0;
-    int atNeutralDamage = 0;
-    int atNeutralDamageRand = 0;
-    int atPoisonDamage = 0;
-    int atPoisonDamageRand = 0;
+    const Skill &skill;
+    int atDamage[static_cast<int>(DamageType::COUNT)] = {0};
+    int atDamageRand[static_cast<int>(DamageType::COUNT)] = {0};
     int atGlobalDamageFactor = 0; // 破招系数
+    bool callDamage[static_cast<int>(DamageType::COUNT)] = {false};
+    bool callSurplusDamage[static_cast<int>(DamageType::COUNT)] = {false};
 
     void handle(bool isRollback);
 };

@@ -105,11 +105,6 @@ void Character::CastSkill(int skillID, int skillLevel) {
     // 处理 SkillEvent: PreCast
     staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
 
-    // 处理 SkillRecipe: skill 的 Attribute. 秘籍加成的双会可以作用于绑定 buff.
-    std::vector<AutoRollbackAttribute> autoRollbackAttributeList;
-    for (const auto &it : recipeskillList) {
-        autoRollbackAttributeList.emplace_back(this, *it, 0, 0, 0, &runtime);
-    }
     // 处理 SkillRecipe: CoolDownAdd 和 DamageAddPercent.
     int DamageAddPercent = 0;
     for (const auto &it : skillrecipeList) {
@@ -127,34 +122,42 @@ void Character::CastSkill(int skillID, int skillLevel) {
         }
     }
 
+    // 自动回滚的魔法属性
+    AutoRollbackAttribute autoRollbackAttribute{this, &runtime, skill};
+
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
-            runtime.skillQueue.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel);
+            runtime.skillQueue.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel, this, this->targetCurr);
         } else { // 不需要再判断, 因为 nSunPowerValue 和 nMoonPowerValue 不可能同时为 0 (那样在前面就 return 了)
-            runtime.skillQueue.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel);
+            runtime.skillQueue.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel, this, this->targetCurr);
         }
     }
 
-    // 计算会心
-    auto [atCriticalStrike, atCriticalDamagePower] = CalcCritical(this->chAttr, skillID, skillLevel);
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, 9999);
-    runtime.isCritical = dis(gen) < atCriticalStrike;
+    // 处理 SkillRecipe: skill 的 Attribute. 秘籍加成的双会可以作用于绑定 buff.
+    std::vector<AutoRollbackAttribute> autoRollbackAttributeList;
+    for (const auto &it : recipeskillList) {
+        autoRollbackAttributeList.emplace_back(this, &runtime, *it);
+    }
 
-    // 自动回滚的魔法属性
-    AutoRollbackAttribute autoRollbackAttribute{this, skill, atCriticalStrike, atCriticalDamagePower, DamageAddPercent, &runtime};
+    // 计算伤害
+    bool isCritical = autoRollbackAttribute.CallDamage(DamageAddPercent);
 
-    // SkillEvent: Cast & Hit
-    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    // 注: 其余的 SkillEvent 尚未实现.
-
-    // 绑定 buff. 其晚于魔法属性, 直观佐证为日斩无法享受其 BindBuff 的加成.
+    // 绑定 buff. 其晚于计算伤害, 直观佐证为日斩无法享受其 BindBuff 的加成.
     for (int i = 0; i < 4; i++) {
         if (bindbuff.isValid[i] && this->targetCurr != nullptr) {
             this->targetCurr->BindBuff(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
         }
+    }
+
+    /* SkillEvent: Cast & Hit. 注:
+    1. SkillEvent 的顺序尚不确定.
+    2. 其余的 SkillEvent 尚未实现.
+    3. 目前 SkillEvent 能够享受 attribute 的加成, 暂时不清楚游戏内是否如此. (因为需要保证 PreCast 的即时插入, 所以 SkillEvent 采取了栈调用的方式)
+    */
+    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    if (isCritical) {
+        staticTriggerSkillEvent(this, this->chSkillEvent.getList(EventType::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     }
 
     // 析构顺序: autoRollbackAttribute (回滚当前技能 lua 的 GetSkillLevelData)
@@ -302,8 +305,8 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
                 caster->CastSkillTarget(
                     it->SkillID, it->SkillLevel,
                     target == nullptr  ? 0
-                    : target->isPlayer ? static_cast<int>(ns_framestatic::enumLuaTarget::PLAYER)
-                                       : static_cast<int>(ns_framestatic::enumLuaTarget::NPC),
+                    : target->isPlayer ? static_cast<int>(CharacterType::PLAYER)
+                                       : static_cast<int>(CharacterType::NPC),
                     target == nullptr ? 0 : target->dwID);
             }
         }
@@ -317,8 +320,8 @@ void Character::ActiveSkill(int skillID) {
     }
     LOG_INFO("\nActiveSkill: %d # %d\n", skillID, skillLevel);
     const Skill &skill = SkillManager::get(skillID, skillLevel);
-    AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, skill, 0, 0, false, 0};
-    // this->chSkill.skillActived[skillID] = CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)};
+    SkillRuntime runtime{this, skillID, skillLevel};
+    AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, &runtime, skill};
     this->chSkill.skillActived.emplace(skillID, CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)});
 }
 

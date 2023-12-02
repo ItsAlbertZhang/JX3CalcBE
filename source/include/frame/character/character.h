@@ -16,6 +16,9 @@
 #include <vector>
 
 namespace ns_frame {
+
+using CharacterType = ns_framestatic::enumLuaTarget;
+
 /**
  * @brief Character 类
  * @note 用于表示游戏中的角色.

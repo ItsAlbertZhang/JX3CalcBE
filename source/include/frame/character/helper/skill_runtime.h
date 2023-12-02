@@ -17,17 +17,14 @@ public:
     Character *self;
     const int skillID;
     const int skillLevel;
-    bool isCritical = false;
-    int dmgPhysics = 0;
-    int dmgSolar = 0;
-    int dmgLunar = 0;
-    int dmgNeutral = 0;
-    int dmgPoison = 0;
 
     // 待执行的技能队列.
     class SkillQueueElement {
     public:
-        SkillQueueElement(int skillID, int skillLevel) : skillID(skillID), skillLevel(skillLevel) {}
+        SkillQueueElement(int skillID, int skillLevel, Character *caster, Character *target)
+            : skillID(skillID), skillLevel(skillLevel), caster(caster), target(target) {}
+        Character *caster;
+        Character *target;
         int skillID;    // 技能 ID
         int skillLevel; // 技能等级
     };
@@ -40,52 +37,6 @@ public:
             auto it = skillQueue.front();
             skillQueue.pop();
             self->CastSkill(it.skillID, it.skillLevel);
-        }
-        // 将伤害添加至 self.chDamage
-        if (dmgPhysics > 0) {
-            self->chDamage.damageList.emplace_back(
-                Event::now(),
-                skillID, skillLevel,
-                isCritical,
-                dmgPhysics,
-                DamageType::Physics);
-            self->isOutOfFight = false;
-        }
-        if (dmgSolar > 0) {
-            self->chDamage.damageList.emplace_back(
-                Event::now(),
-                skillID, skillLevel,
-                isCritical,
-                dmgSolar,
-                DamageType::Solar);
-            self->isOutOfFight = false;
-        }
-        if (dmgLunar > 0) {
-            self->chDamage.damageList.emplace_back(
-                Event::now(),
-                skillID, skillLevel,
-                isCritical,
-                dmgLunar,
-                DamageType::Lunar);
-            self->isOutOfFight = false;
-        }
-        if (dmgNeutral > 0) {
-            self->chDamage.damageList.emplace_back(
-                Event::now(),
-                skillID, skillLevel,
-                isCritical,
-                dmgNeutral,
-                DamageType::Neutral);
-            self->isOutOfFight = false;
-        }
-        if (dmgPoison > 0) {
-            self->chDamage.damageList.emplace_back(
-                Event::now(),
-                skillID, skillLevel,
-                isCritical,
-                dmgPoison,
-                DamageType::Poison);
-            self->isOutOfFight = false;
         }
         // 从技能运行时栈中弹出
         runtimeStack.pop();
