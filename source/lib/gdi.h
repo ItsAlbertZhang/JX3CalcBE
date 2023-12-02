@@ -65,10 +65,11 @@ public:
     /**
      * @brief 执行游戏内 lua 脚本
      * @param filename 脚本路径
+     * @param fileExists 文件是否存在. 如果文件不存在, 那么这个参数会被设置为 false.
      * @warning lua 的执行是线程本地的, 这意味着当前线程调用该函数不会影响其他线程!
      * @return 执行结果
      */
-    static sol::protected_function_result luaExecuteFile(const std::string &filename);
+    static sol::protected_function_result luaExecuteFile(const std::string &filename, bool *fileExists);
 
     /**
      * @brief 获取 lua 函数

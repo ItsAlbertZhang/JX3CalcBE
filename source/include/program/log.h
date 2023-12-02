@@ -31,6 +31,7 @@ public:
             size *= 2;
         }
         curr += snprintf(curr, size - (curr - data), format, args...);
+        // printf(format, args...);
     }
 
     void print() {

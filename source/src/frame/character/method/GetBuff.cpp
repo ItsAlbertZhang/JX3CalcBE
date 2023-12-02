@@ -33,6 +33,7 @@ CharacterBuff::Item *Character::GetBuffWithCompareFlag(int buffID, int buffLevel
         case static_cast<int>(ns_framestatic::enumLuaBuffCompareFlag::EQUAL):
             if (list.second.at(buffID).find(buffLevel) != list.second.at(buffID).end() &&
                 list.second.at(buffID).at(buffLevel).isValid) {
+                list.second.at(buffID).at(buffLevel).flushLeftFrame();
                 return &(list.second.at(buffID).at(buffLevel));
             }
             break;
@@ -43,6 +44,7 @@ CharacterBuff::Item *Character::GetBuffWithCompareFlag(int buffID, int buffLevel
             auto it = list.second.at(buffID).lower_bound(buffLevel);
             while (it != list.second.at(buffID).end()) {
                 if (it->second.isValid) {
+                    it->second.flushLeftFrame();
                     return &(it->second);
                 }
                 it++;
@@ -67,6 +69,7 @@ CharacterBuff::Item *Character::GetBuffByOwnerWithCompareFlag(int buffID, int bu
         if (this->chBuff.buffList.at(sourceID).at(buffID).find(buffLevel) !=
                 this->chBuff.buffList.at(sourceID).at(buffID).end() &&
             this->chBuff.buffList.at(sourceID).at(buffID).at(buffLevel).isValid) {
+            chBuff.buffList.at(sourceID).at(buffID).at(buffLevel).flushLeftFrame();
             return &(chBuff.buffList.at(sourceID).at(buffID).at(buffLevel));
         }
         break;
@@ -77,6 +80,7 @@ CharacterBuff::Item *Character::GetBuffByOwnerWithCompareFlag(int buffID, int bu
         auto it = this->chBuff.buffList.at(sourceID).at(buffID).lower_bound(buffLevel);
         while (it != this->chBuff.buffList.at(sourceID).at(buffID).end()) {
             if (it->second.isValid) {
+                it->second.flushLeftFrame();
                 return &(it->second);
             }
             it++;

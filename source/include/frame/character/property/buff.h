@@ -2,12 +2,11 @@
 #define FRAME_CHARACTER_PROPERTY_BUFF_H_
 
 #include "frame/character/property/attribute.h"
+#include "frame/event.h"
 #include <map>
 #include <unordered_map>
 
 namespace ns_frame {
-
-using event_tick_t = unsigned long long;
 
 class CharacterBuff {
 public:
@@ -26,7 +25,6 @@ public:
         const int rawCount = 0;
 
         int nLeftFrame = 0;
-        int nCustomValue = 0;
         int nStackNum = 0;
 
         bool isValid = false;
@@ -42,7 +40,12 @@ public:
         int dwCasterSkillLevel = 0; // 来源技能等级
         int nChannelInterval = 0;   // 单跳系数
 
-        // OnRemove: nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, [[nBuffIndex, dwCasterID, dwCasterSkillID]] 未实现
+        // ---------- 以下属性确定被 lua 直接访问 ----------
+        int nCustomValue = 0;
+
+        void flushLeftFrame() {
+            nLeftFrame = interval * count - static_cast<int>(Event::now() - tickActive + 63) / 64;
+        }
     };
 
     /**

@@ -32,6 +32,7 @@ public:
     int Interval;
     bool Hide;
     bool Exclude;
+    std::string ScriptFile;
     bool CanCancel;
     int MinInterval;
     int MaxInterval;

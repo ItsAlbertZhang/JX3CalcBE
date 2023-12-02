@@ -21,6 +21,10 @@ public:
     static ns_frame::Character *GetNpc(int nCharacterID);
     static bool IsPlayer(int nCharacterID);
     static void AdditionalAttribute(ns_frame::Skill &skill);
+    static bool IsLangKeXingMap(int mapID);
+    static void ModityCDToUI(ns_frame::Character *character, int skillID, int c, int d);
+    static bool CheckInTongWar(ns_frame::Character *character);
+    static bool IsTreasureBattleFieldMap(int mapID);
 };
 
 } // namespace ns_framestatic

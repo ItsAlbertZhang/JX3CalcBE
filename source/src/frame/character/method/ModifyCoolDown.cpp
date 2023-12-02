@@ -30,3 +30,17 @@ void Character::ModifyCoolDown(int cooldownID, int frame) {
         item->tickOver = Event::add(delay + frame * 1024 / 16, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
     }
 }
+
+void Character::ResetCD(int cooldownID) {
+    ns_frame::CharacterCooldown::Item *item = &this->chCooldown.cooldownList[cooldownID]; // Character. 若不存在, 则会自动创建
+    const ns_frame::Cooldown &cooldown = CooldownManager::get(cooldownID);                // Global
+    if (item->isValid) {
+        // 若该 CD 正在冷却, 则取消 Event
+        Event::cancel(item->tickOver, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
+    }
+    int durationFrame = cooldown.DurationFrame * (1024 - this->chAttr.getHaste()) / 1024;
+    durationFrame = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
+    durationFrame = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
+    item->isValid = true;
+    item->tickOver = Event::add(durationFrame * 1024 / 16, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
+}

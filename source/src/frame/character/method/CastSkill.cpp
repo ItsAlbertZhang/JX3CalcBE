@@ -141,7 +141,7 @@ bool Character::CastSkill(Character *target, int skillID, int skillLevel) {
     // 1. 检查 tab 中的释放条件
 
     // 1.1 检查战斗状态
-    if (skill.NeedOutOfFight && !this->isOutOfFight)
+    if (skill.NeedOutOfFight && this->bFightState)
         return false; // 需要处于非战斗状态, 但当前处于战斗状态, CastSkill 失败
 
     // 1.2 检查目标

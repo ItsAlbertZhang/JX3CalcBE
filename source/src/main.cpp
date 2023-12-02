@@ -143,13 +143,15 @@ int main(int argc, char *argv[]) {
     npc.chAttr.atPhysicsShieldBase = 27550;
     npc.chAttr.atMagicShield = 27550;
 
-    // player.Cast(3960);
-    // while (ns_frame::Event::run())
-    //     ;
-    callbackCastSkill(&player, nullptr);
-    while (ns_frame::Event::now() < 1024 * 45) {
-        ns_frame::Event::run();
-    }
+    player.Cast(3974);
+    while (ns_frame::Event::run())
+        ;
+    std::cout << ns_frame::Event::now() << std::endl;
+
+    // callbackCastSkill(&player, nullptr);
+    // while (ns_frame::Event::now() < 1024 * 45) {
+    //     ns_frame::Event::run();
+    // }
     std::cout << "tick\t"
               << "ID\t"
               << "lv\t"

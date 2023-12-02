@@ -16,11 +16,17 @@ AutoRollbackAttrib::AutoRollbackAttrib(Character *self, CharacterBuff::Item *ite
 }
 
 AutoRollbackAttrib::~AutoRollbackAttrib() {
+    item->flushLeftFrame();
     for (const auto &it : buff.BeginAttrib) {
         handle(it, true);
     }
     for (const auto &it : buff.EndTimeAttrib) {
         handle(it, false);
+    }
+    if (!buff.ScriptFile.empty()) {
+        std::string paramStr = "scripts/skill/" + buff.ScriptFile;
+        LuaFunc::analysis(LuaFunc::getOnRemove(paramStr)(item->nCharacterID, item->BuffID, item->nBuffLevel, item->nLeftFrame, item->nCustomValue, item->dwSkillSrcID, item->nStackNum, 0, 0, item->dwCasterSkillID), paramStr, LuaFunc::Enum::OnRemove);
+        // OnRemove(nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID)
     }
 }
 void AutoRollbackAttrib::active() {
@@ -58,11 +64,15 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
                 item->nChannelInterval, 0,
                 item->rawInterval, item->rawCount),
             DamageType::Lunar);
-        src->isOutOfFight = false;
+        src->bFightState = true;
     } break;
     case enumTabAttribute::atExecuteScript: {
         std::string paramStr = "scripts/" + attrib.valueAStr;
-        LuaFunc::analysis(LuaFunc::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
+        if (isRollback) {
+            LuaFunc::analysis(LuaFunc::getUnApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::UnApply);
+        } else {
+            LuaFunc::analysis(LuaFunc::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
+        }
     } break;
     case enumTabAttribute::atLunarCriticalStrikeBaseRate:
         self->chAttr.atLunarCriticalStrikeBaseRate += attrib.valueAInt * c;
@@ -76,8 +86,42 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case enumTabAttribute::atAllShieldIgnorePercent:
         self->chAttr.atAllShieldIgnorePercent += attrib.valueAInt * c;
         break;
+    case enumTabAttribute::atAddTransparencyValue:
+        // 未做相关实现, 推测为透明度
+        break;
+    case enumTabAttribute::atSetSelectableType:
+        // 未做相关实现, 推测为是否可以选中
+        break;
+    case enumTabAttribute::atSkillEventHandler:
+        if (isRollback) {
+            self->chSkillEvent.remove(attrib.valueAInt);
+        } else {
+            self->chSkillEvent.add(attrib.valueAInt);
+        }
+        break;
+    case enumTabAttribute::atStealth:
+        // 未做相关实现, 推测为隐身
+        break;
+    case enumTabAttribute::atMoveSpeedPercent:
+        // 未做相关实现, 推测为移动速度
+        break;
+    case enumTabAttribute::atKnockedDownRate:
+        // 未做相关实现, 推测为免疫击倒
+        break;
+    case enumTabAttribute::atBeImmunisedStealthEnable:
+        // 未做相关实现
+        break;
+    case enumTabAttribute::atImmunity:
+        // 未做相关实现
+        break;
+    case enumTabAttribute::atImmuneSkillMove:
+        // 未做相关实现
+        break;
+    case enumTabAttribute::atActiveThreatCoefficient:
+        // 未做相关实现, 推测为威胁值
+        break;
     default:
-        LOG_ERROR("Undefined: Unknown Attribute: %s\n", refTabAttribute[static_cast<int>(attrib.type)].c_str());
+        LOG_ERROR("Undefined: Unknown Attribute: %s %d\n", refTabAttribute[static_cast<int>(attrib.type)].c_str(), attrib.valueAInt);
         break;
     }
 }

@@ -89,6 +89,9 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(enumLuaAttributeType::CURRENT_MOON_ENERGY):
                 self->nCurrentMoonEnergy += it.param1Int;
                 break;
+            case static_cast<int>(enumLuaAttributeType::DEL_MULTI_GROUP_BUFF_BY_FUNCTIONTYPE):
+                // 未做相关实现, 推测为解控
+                break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
             }
@@ -151,13 +154,13 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 self->chAttr.atPhysicsShieldBase += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::DROP_DEFENCE):
-                // 未做相关实现
+                // 未做相关实现, 推测为摔落保护
                 break;
             case static_cast<int>(enumLuaAttributeType::ACTIVE_THREAT_COEFFICIENT):
-                // 未做相关实现
+                // 未做相关实现, 推测为威胁值
                 break;
             case static_cast<int>(enumLuaAttributeType::BEAT_BACK_RATE):
-                // 未做相关实现
+                // 未做相关实现, 推测为运功被打退概率
                 break;
             case static_cast<int>(enumLuaAttributeType::SPUNK_TO_SOLAR_AND_LUNAR_ATTACK_POWER_COF):
                 self->chAttr.atSpunkToSolarAndLunarAttackPowerCof += it.param1Int * c;
@@ -172,7 +175,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 self->chAttr.atMaxMoonEnergy += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::MAX_LIFE_PERCENT_ADD):
-                // 未做相关实现
+                // 未做相关实现, 推测为额外最大生命值
                 break;
             case static_cast<int>(enumLuaAttributeType::SOLAR_ATTACK_POWER_BASE):
                 self->chAttr.atSolarAttackPowerBase += it.param1Int * c;
@@ -181,7 +184,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 self->chAttr.atLunarAttackPowerBase += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::MANA_REPLENISH_PERCENT):
-                // 未做相关实现
+                // 未做相关实现, 推测为内力回复
                 break;
             case static_cast<int>(enumLuaAttributeType::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE):
                 self->chAttr.atDecriticalDamagePowerBaseKiloNumRate += it.param1Int * c;
@@ -265,6 +268,9 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_POISON_DAMAGE):
                 this->callSurplusDamage[static_cast<int>(DamageType::Poison)] = true;
+                break;
+            case static_cast<int>(enumLuaAttributeType::CALL_BUFF):
+                target->AddBuff4(self->dwID, self->nLevel, it.param1Int, it.param2);
                 break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);

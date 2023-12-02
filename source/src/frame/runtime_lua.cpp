@@ -46,17 +46,28 @@ void LuaFunc::add(const std::string &filename) {
     filenameMap[filename] = static_cast<int>(filefuncList.size());
     filenameList.emplace_back(filename);
     std::vector<sol::protected_function> &funcs = filefuncList.emplace_back();
-    bool executeSuccess = false;
-    sol::protected_function_result res = gdi::Interface::luaExecuteFile(filename);
+    bool fileExists = true;
+    sol::protected_function_result res = gdi::Interface::luaExecuteFile(filename, &fileExists);
+    if (res.valid() && fileExists) {
+        LOG_INFO("luaExecuteFile success: %s\n", filename.c_str());
+        for (int i = 0; i < static_cast<int>(Enum::COUNT); i++) {
+            /**
+             * 实际上, 此处有可能取到上一个执行文件的函数. (例如, 当前文件没有 OnRemove 函数, 就会取到上一个文件的.)
+             * 但这不会导致实际的问题: 游戏内逻辑不可能调用一个文件中不存在的函数. 因此, 其只会被保存, 而不会被调用.
+             */
+            funcs.emplace_back(gdi::Interface::luaGetFunction(names[i]));
+        }
+        return; // 执行成功, 直接返回
+    }
+    for (int i = 0; i < static_cast<int>(Enum::COUNT); i++) {
+        funcs.emplace_back(gdi::Interface::luaGetFunction("FileNotExistEmptyFunction")); // 名称随意, 取一个空函数即可
+    }
     if (!res.valid()) {
         sol::error err = res;
         LOG_ERROR("luaExecuteFile failed: %s\n%s\n", filename.c_str(), err.what());
-    } else {
-        executeSuccess = true;
-        LOG_INFO("luaExecuteFile success: %s\n", filename.c_str());
     }
-    for (int i = 0; i < static_cast<int>(Enum::COUNT); i++) {
-        funcs.emplace_back(executeSuccess ? gdi::Interface::luaGetFunction(names[i]) : sol::nil);
+    if (!fileExists) {
+        LOG_ERROR("luaExecuteFile failed: %s not exist\n", filename.c_str());
     }
 }
 
@@ -82,6 +93,18 @@ sol::protected_function LuaFunc::getApply(string &filename) {
     std::replace(filename.begin(), filename.end(), '\\', '/');
     int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
     return filefuncList[idx][static_cast<int>(Enum::Apply)];
+}
+
+sol::protected_function LuaFunc::getUnApply(string &filename) {
+    std::replace(filename.begin(), filename.end(), '\\', '/');
+    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
+    return filefuncList[idx][static_cast<int>(Enum::UnApply)];
+}
+
+sol::protected_function LuaFunc::getOnRemove(string &filename) {
+    std::replace(filename.begin(), filename.end(), '\\', '/');
+    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
+    return filefuncList[idx][static_cast<int>(Enum::OnRemove)];
 }
 
 sol::protected_function LuaFunc::getOnTimer(int idx) {

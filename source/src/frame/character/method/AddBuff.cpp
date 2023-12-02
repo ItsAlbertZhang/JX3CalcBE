@@ -10,16 +10,21 @@ static void callbackActiveBuff(void *selfPtr, void *param) {
     Character *self = (Character *)selfPtr;
     CharacterBuff::Item *it = (CharacterBuff::Item *)param;
     ((AutoRollbackAttrib *)it->ptrAttrib)->active(); // ActivateAttrib
-    // TODO: 其他工作, 例如再次注册回调函数, 调整 Count 等
     (it->count)--;
     if (it->count <= 0) {
         self->DelBuffAllStackNum(*it);
     } else {
-        it->tickActive = Event::add(it->interval * 1024 / 16, callbackActiveBuff, self, it); // 重新注册回调函数
+        // 防止在回调函数中被删除, 需要判断其是否存在
+        if (it->isValid) {
+            it->tickActive = Event::add(it->interval * 1024 / 16, callbackActiveBuff, self, it); // 重新注册回调函数
+        }
     }
 }
 
-void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel) {
+void Character::AddBuff4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel) {
+    AddBuff5(buffSourceID, buffSourceLevel, buffID, buffLevel, 1);
+}
+void Character::AddBuff5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int times) {
     const Buff &buff = BuffManager::get(buffID, buffLevel);
     if (this->chBuff.buffList[buffSourceID][buffID].find(buffLevel) == this->chBuff.buffList[buffSourceID][buffID].end()) {
         // 对于 buffSourceID 和 buffID, 直接使用 [] 运算符, 没有则直接创建.
@@ -35,7 +40,7 @@ void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int b
         it.isValid = true;
         it.attr = getCharacter(buffSourceID)->chAttr;           // 调用复制构造函数, 锁面板
         it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
-        it.count = buff.Count;
+        it.count = buff.Count * times;
         // 计算 interval
         it.interval = buff.Interval * (1024 - it.attr.getHaste()) / 1024;
         it.interval = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
@@ -47,7 +52,7 @@ void Character::AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int b
     } else {
         // 当前存在该 buff
         it.attr = getCharacter(buffSourceID)->chAttr; // 锁面板
-        it.count = buff.Count;                        // 重置计数
+        it.count = buff.Count * times;                // 重置计数
         // 重新计算 interval
         it.interval = buff.Interval * (1024 - it.attr.getHaste()) / 1024;
         it.interval = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
@@ -85,10 +90,18 @@ void Character::DelBuffAllStackNum(CharacterBuff::Item &it) {
     Event::cancel(it.tickActive, callbackActiveBuff, this, &it); // 取出回调函数
 }
 
+void Character::DelGroupBuff(int buffID, int buffLevel) {
+    CharacterBuff::Item *ptr = GetBuff(buffID, buffLevel);
+    // 返回的一定是 isValie == true 的 Item.
+    if (nullptr != ptr) {
+        DelBuffAllStackNum(*ptr);
+    }
+}
+
 void Character::BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel) {
     const Skill &skill = SkillManager::get(skillID, skillLevel);
     const Buff &buff = BuffManager::get(buffID, buffLevel);
-    this->AddBuff(buffSourceID, buffSourceLevel, buffID, buffLevel);
+    this->AddBuff4(buffSourceID, buffSourceLevel, buffID, buffLevel);
     CharacterBuff::Item &it = this->chBuff.buffList[buffSourceID][buffID].at(buffLevel);
     it.dwCasterSkillID = skillID;
     it.dwCasterSkillLevel = skillLevel;

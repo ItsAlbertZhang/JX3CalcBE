@@ -20,6 +20,8 @@ public:
         GetSkillLevelData,
         GetSkillRecipeData,
         Apply,
+        UnApply,
+        OnRemove,
         OnTimer,
         COUNT, // 计数用
     };
@@ -32,6 +34,8 @@ public:
     static sol::protected_function getGetSkillLevelData(std::string &filename);
     static sol::protected_function getGetSkillRecipeData(std::string &filename);
     static sol::protected_function getApply(std::string &filename);
+    static sol::protected_function getUnApply(std::string &filename);
+    static sol::protected_function getOnRemove(std::string &filename);
     static sol::protected_function getOnTimer(int idx);
     /**
      * @note 在 MacOS 上, 程序退出时, 类的静态变量析构晚于在 gdi 库中的 lua 状态机(同样是类的静态变量)的析构.
@@ -45,6 +49,8 @@ private:
         "GetSkillLevelData",
         "GetSkillRecipeData",
         "Apply",
+        "UnApply",
+        "OnRemove",
         "OnTimer",
     };
     /**

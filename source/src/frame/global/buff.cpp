@@ -44,6 +44,7 @@ void BuffManager::add(int buffID, int buffLevel) {
     buff.Interval = std::stoi(buff.tab["Interval"]);
     buff.Hide = buff.tab["Hide"] == "1";
     buff.Exclude = buff.tab["Exclude"] == "1";
+    buff.ScriptFile = buff.tab["ScriptFile"];
     buff.CanCancel = buff.tab["CanCancel"] == "1";
     buff.MinInterval = std::stoi(buff.tab["MinInterval"]);
     buff.MaxInterval = std::stoi(buff.tab["MaxInterval"]);

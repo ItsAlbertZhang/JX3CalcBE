@@ -5,6 +5,7 @@
 #include "frame/character/property/buff.h"
 #include "frame/character/property/cooldown.h"
 #include "frame/character/property/damage.h"
+#include "frame/character/property/scene.h"
 #include "frame/character/property/skill.h"
 #include "frame/character/property/skillevent.h"
 #include "frame/character/property/skillrecipe.h"
@@ -32,7 +33,6 @@ public:
     bool isPlayer = false;             // 是否为玩家
     Character *targetSelect = nullptr; // 选中的目标
     Character *targetCurr = nullptr;   // 当前目标
-    bool isOutOfFight = true;          // 是否处于战斗状态
     ns_framestatic::enumLuaSkillKindType atAdaptiveSkillType = ns_framestatic::enumLuaSkillKindType::COUNT;
     int dwKungfuID = 0;
 
@@ -62,12 +62,16 @@ public:
     // ---------- 以下方法直接被 lua 调用 ----------
     bool IsFormationLeader();
     bool IsHaveBuff(int buffID, int buffLevel);
+    bool IsInParty();
     CharacterBuff::Item *GetBuff(int buffID, int buffLevel);
     CharacterBuff::Item *GetBuffByOwner(int buffID, int buffLevel, int sourceID);
+    const CharacterScene &GetScene();
     int GetKungfuMountID();
     int GetSkillLevel(int skillID);
     int GetSkillTarget();
-    void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
+    int GetMapID();
+    void AddBuff4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
+    void AddBuff5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int times);
     void DelBuff(int buffID, int buffLevel);
     void CastSkill2(int skillID, int skillLevel);
     void CastSkill4(int skillID, int skillLevel, int type, int targetID);
@@ -76,6 +80,11 @@ public:
     void SetTimer3(int frame, std::string filename, int targetID);
     void SetTimer4(int frame, std::string filename, int type, int targetID);
     void PlayPublicShadowAnimation(int a, int b, bool c, bool d);
+    void ClearAllNpcThreat();
+    void ClearCDTime(int cooldownID);
+    void DelGroupBuff(int buffID, int buffLevel);
+    void DoAction(int a, int b);
+    void ResetCD(int cooldownID);
 
     //  ---------- 被 lua 调用的属性, 通常以 "n" 开头 ----------
     int dwID;                          // 角色 ID
@@ -87,6 +96,7 @@ public:
     int nMoonPowerValue = 0;           // 满月
     bool bSurplusAutoCast = false;     // 出现于 明教_套路_内功_焚影圣诀.lua
     bool bSurplusAutoReplenish = true; // 出现于 明教_套路_内功_焚影圣诀.lua
+    bool bFightState = false;          // 是否处于战斗状态
 
 private:
     static inline std::mutex mutex;                                  // 互斥锁. 用于保护构造操作.
