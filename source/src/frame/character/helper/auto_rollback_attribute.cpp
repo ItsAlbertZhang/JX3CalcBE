@@ -9,8 +9,8 @@
 using namespace ns_frame;
 using namespace ns_framestatic;
 
-AutoRollbackAttribute::AutoRollbackAttribute(Character *self, SkillRuntime *runtime, const Skill &skill)
-    : self(self), runtime(runtime), skill(skill) {
+AutoRollbackAttribute::AutoRollbackAttribute(Character *self, Character *target, SkillRuntime *runtime, const Skill &skill)
+    : self(self), target(target), runtime(runtime), skill(skill) {
     handle(false);
 }
 AutoRollbackAttribute::~AutoRollbackAttribute() {
@@ -27,12 +27,12 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
     // 计算伤害
     for (int i = 0; i < static_cast<int>(DamageType::COUNT); i++) {
         if (callDamage[i]) {
-            self->chDamage.damageList.emplace_back(
+            runtime->damageList.emplace_back(
                 Event::now(),
                 skill.dwID, skill.dwLevel,
                 isCritical,
                 self->CalcDamage(
-                    self->chAttr, self->targetCurr, static_cast<DamageType>(i),
+                    self->chAttr, target, static_cast<DamageType>(i),
                     isCritical, atCriticalDamagePower, DamageAddPercent,
                     atDamage[i], atDamageRand[i],
                     static_cast<int>(skill.nChannelInterval),
@@ -40,12 +40,12 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
                 static_cast<DamageType>(i));
         }
         if (callSurplusDamage[i]) {
-            self->chDamage.damageList.emplace_back(
+            runtime->damageList.emplace_back(
                 Event::now(),
                 skill.dwID, skill.dwLevel,
                 isCritical,
                 self->CalcDamage(
-                    self->chAttr, self->targetCurr, static_cast<DamageType>(i),
+                    self->chAttr, target, static_cast<DamageType>(i),
                     isCritical, atCriticalDamagePower, DamageAddPercent,
                     0, 0,
                     this->atGlobalDamageFactor, 0,
@@ -66,10 +66,10 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             switch (it.type) {
             case static_cast<int>(enumLuaAttributeType::CAST_SKILL_TARGET_DST):
-                runtime->skillQueue.emplace(it.param1Int, it.param2, self, self->targetCurr);
+                runtime->skillQueue.emplace(it.param1Int, it.param2, self, target);
                 break;
             case static_cast<int>(enumLuaAttributeType::CAST_SKILL):
-                runtime->skillQueue.emplace(it.param1Int, it.param2, self, self->targetCurr);
+                runtime->skillQueue.emplace(it.param1Int, it.param2, self);
                 break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT): {
                 std::string paramStr = "scripts/" + it.param1Str;
@@ -219,20 +219,20 @@ void AutoRollbackAttribute::handle(bool isRollback) {
         } break; // EFFECT_TO_SELF_AND_ROLLBACK
 
         case static_cast<int>(enumLuaAttributeEffectMode::EFFECT_TO_DEST_NOT_ROLLBACK): {
-            if (self->targetCurr == nullptr) // TO_DEST
+            if (target == nullptr) // TO_DEST
                 break;
             if (isRollback) // NOT_ROLLBACK
                 break;
             switch (it.type) {
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT): {
                 std::string paramStr = "scripts/" + it.param1Str;
-                int dwCharacterID = Character::getCharacterID(self->targetCurr);
+                int dwCharacterID = Character::getCharacterID(target);
                 int dwSkillSrcID = Character::getCharacterID(self);
                 LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
             } break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
                 std::string paramStr = "scripts/" + it.param1Str;
-                int dwCharacterID = Character::getCharacterID(self->targetCurr);
+                int dwCharacterID = Character::getCharacterID(target);
                 int dwSkillSrcID = Character::getCharacterID(self);
                 LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
             } break;
@@ -272,7 +272,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
         } break; // EFFECT_TO_DEST_NOT_ROLLBACK
 
         case static_cast<int>(enumLuaAttributeEffectMode::EFFECT_TO_DEST_AND_ROLLBACK): {
-            if (self->targetCurr == nullptr) // TO_DEST
+            if (target == nullptr) // TO_DEST
                 break;
             switch (it.type) {
             case static_cast<int>(enumLuaAttributeType::GLOBAL_DAMGAGE_FACTOR):

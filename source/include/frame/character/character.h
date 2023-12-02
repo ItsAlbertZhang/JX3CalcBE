@@ -51,6 +51,7 @@ public:
     void ActiveSkill(int skillID);
     void DeactiveSkill(int skillID);
     void Cast(int skillID);
+    void CastSkill(Character *target, int skillID, int skillLevel);
     void DelBuffAllStackNum(CharacterBuff::Item &it);
     void BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
     CharacterBuff::Item *GetBuffWithCompareFlag(int buffID, int buffLevel, int flag);
@@ -68,8 +69,8 @@ public:
     int GetSkillTarget();
     void AddBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
     void DelBuff(int buffID, int buffLevel);
-    void CastSkill(int skillID, int skillLevel);
-    void CastSkillTarget(int skillID, int skillLevel, int type, int targetID);
+    void CastSkill2(int skillID, int skillLevel);
+    void CastSkill4(int skillID, int skillLevel, int type, int targetID);
     void CastSkillXYZ(int skillID, int skillLevel, int x, int y, int z);
     void ModifyCoolDown(int cooldownID, int frame);
     void SetTimer3(int frame, std::string filename, int targetID);

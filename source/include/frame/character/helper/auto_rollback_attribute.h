@@ -15,12 +15,13 @@ namespace ns_frame {
  */
 class AutoRollbackAttribute {
 public:
-    AutoRollbackAttribute(Character *self, SkillRuntime *runtime, const Skill &skill);
+    AutoRollbackAttribute(Character *self, Character *target, SkillRuntime *runtime, const Skill &skill);
     ~AutoRollbackAttribute();
     bool CallDamage(int DamageAddPercent);
 
 private:
     Character *self;
+    Character *target;
     SkillRuntime *runtime;
     const Skill &skill;
     int atDamage[static_cast<int>(DamageType::COUNT)] = {0};

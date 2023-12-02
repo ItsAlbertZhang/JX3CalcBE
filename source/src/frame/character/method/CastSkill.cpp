@@ -21,26 +21,22 @@ static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDo
 static inline void staticTriggerCoolDown(Character *self, int nCoolDownID);
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
 
-void Character::CastSkillTarget(int skillID, int skillLevel, int type, int targetID) {
-    AutoRollbackTarget autoRollbackTarget{this}; // 自动回滚的目标切换
-    this->targetCurr = getCharacter(targetID);
-    CastSkill(skillID, skillLevel);
+void Character::CastSkill4(int skillID, int skillLevel, int type, int targetID) {
+    CastSkill(getCharacter(targetID), skillID, skillLevel);
+}
+
+void Character::CastSkill2(int skillID, int skillLevel) {
+    if (this->targetCurr == nullptr)
+        this->targetCurr = this->targetSelect;
+    CastSkill(this->targetCurr, skillID, skillLevel);
 }
 
 void Character::CastSkillXYZ(int skillID, int skillLevel, int x, int y, int z) {
-    /**
-     * 猜测实现:
-     * 现象: 明教在激活奇穴"净身明礼"的情况下, 烈日斩和银月斩会调用 CastSkillXYZ, 与此同时 AddAttribute 中的 CAST_SKILL (武器伤害) 失效.
-     * 推测原因: CastSkillXYZ 会清空上一个 SkillRuntime 的技能队列. (虽然很离谱, 但是似乎没有别的更好的解释)
-     * 因此, 此处将其置空, 以还原类似游戏内的逻辑. 除非更确切地知道了游戏内的实现逻辑, 否则不建议修改此处.
-     */
-    SkillRuntime *ptr = SkillRuntime::runtimeStack.top();
-    std::queue<ns_frame::SkillRuntime::SkillQueueElement> empty;
-    ptr->skillQueue.swap(empty);
-    CastSkill(skillID, skillLevel);
+    CastSkill(this->targetCurr, skillID, skillLevel);
+    this->targetCurr = nullptr;
 }
 
-void Character::CastSkill(int skillID, int skillLevel) {
+void Character::CastSkill(Character *target, int skillID, int skillLevel) {
     LOG_INFO("\nTry to CastSkill: %d # %d\n", skillID, skillLevel);
 
     // 获取技能
@@ -50,23 +46,22 @@ void Character::CastSkill(int skillID, int skillLevel) {
     if (skill.NeedOutOfFight && !this->isOutOfFight)
         return; // 需要处于非战斗状态, 但当前处于战斗状态, CastSkill 失败
 
-    AutoRollbackTarget autoRollbackTarget{this}; // 自动回滚的目标切换
-    if ((this->targetCurr == nullptr && !skill.TargetRelationNone) ||
-        (this->targetCurr != nullptr && this->targetCurr != this && !skill.TargetRelationEnemy)) {
+    if ((target == nullptr && !skill.TargetRelationNone) ||
+        (target != nullptr && target != this && !skill.TargetRelationEnemy)) {
         if (skill.TargetRelationSelf)
-            this->targetCurr = this; // 自动自我运功.
+            target = this; // 自动自我运功.
         else
             return;
     }
-    if (this->targetCurr != nullptr) {
-        if (this->targetCurr->isPlayer && !skill.TargetTypePlayer)
+    if (target != nullptr) {
+        if (target->isPlayer && !skill.TargetTypePlayer)
             return;
-        if (!this->targetCurr->isPlayer && !skill.TargetTypeNpc)
+        if (target->isPlayer && !skill.TargetTypeNpc)
             return;
     }
 
     // 检查 lua 中添加的释放条件
-    if (!staticCheckBuff(this, targetCurr, skill))
+    if (!staticCheckBuff(this, target, skill))
         return;
 
     if (!staticCheckSelfLearntSkill(this, skill))
@@ -123,20 +118,20 @@ void Character::CastSkill(int skillID, int skillLevel) {
     }
 
     // 自动回滚的魔法属性
-    AutoRollbackAttribute autoRollbackAttribute{this, &runtime, skill};
+    AutoRollbackAttribute autoRollbackAttribute{this, target, &runtime, skill};
 
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
-            runtime.skillQueue.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel, this, this->targetCurr);
+            runtime.skillQueue.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel, this, target);
         } else { // 不需要再判断, 因为 nSunPowerValue 和 nMoonPowerValue 不可能同时为 0 (那样在前面就 return 了)
-            runtime.skillQueue.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel, this, this->targetCurr);
+            runtime.skillQueue.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel, this, target);
         }
     }
 
     // 处理 SkillRecipe: skill 的 Attribute. 秘籍加成的双会可以作用于绑定 buff.
     std::vector<AutoRollbackAttribute> autoRollbackAttributeList;
     for (const auto &it : recipeskillList) {
-        autoRollbackAttributeList.emplace_back(this, &runtime, *it);
+        autoRollbackAttributeList.emplace_back(this, target, &runtime, *it);
     }
 
     // 计算伤害
@@ -144,8 +139,8 @@ void Character::CastSkill(int skillID, int skillLevel) {
 
     // 绑定 buff. 其晚于计算伤害, 直观佐证为日斩无法享受其 BindBuff 的加成.
     for (int i = 0; i < 4; i++) {
-        if (bindbuff.isValid[i] && this->targetCurr != nullptr) {
-            this->targetCurr->BindBuff(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+        if (bindbuff.isValid[i] && target != nullptr) {
+            target->BindBuff(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
         }
     }
 
@@ -302,7 +297,7 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
             Character *caster = it->SkillCaster == EventCT::EventCaster ? self : self->targetCurr;
             Character *target = it->SkillTarget == EventCT::EventTarget ? self->targetCurr : self;
             if (caster != nullptr) {
-                caster->CastSkillTarget(
+                caster->CastSkill4(
                     it->SkillID, it->SkillLevel,
                     target == nullptr  ? 0
                     : target->isPlayer ? static_cast<int>(CharacterType::PLAYER)
@@ -321,7 +316,7 @@ void Character::ActiveSkill(int skillID) {
     LOG_INFO("\nActiveSkill: %d # %d\n", skillID, skillLevel);
     const Skill &skill = SkillManager::get(skillID, skillLevel);
     SkillRuntime runtime{this, skillID, skillLevel};
-    AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, &runtime, skill};
+    AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, nullptr, &runtime, skill};
     this->chSkill.skillActived.emplace(skillID, CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)});
 }
 
@@ -340,5 +335,5 @@ void Character::Cast(int skillID) {
         return;
     }
     this->targetCurr = this->targetSelect;
-    CastSkill(skillID, skillLevel);
+    CastSkill2(skillID, skillLevel);
 }

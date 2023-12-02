@@ -113,7 +113,7 @@ bool ns_framestatic::luaInit(sol::state &lua) {
                             "nWeaponDamagePercent", &Skill::nWeaponDamagePercent);
 
     lua.new_usertype<Character>("Skill",
-                                "CastSkill", sol::overload(&Character::CastSkill, &Character::CastSkillTarget),
+                                "CastSkill", sol::overload(&Character::CastSkill2, &Character::CastSkill4),
                                 "AddBuff", &Character::AddBuff,
                                 "DelBuff", &Character::DelBuff,
                                 "IsHaveBuff", &Character::IsHaveBuff,
