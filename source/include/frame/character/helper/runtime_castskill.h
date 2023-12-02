@@ -1,5 +1,5 @@
-#ifndef FRAME_CHARACTER_HELPER_SKILL_RUNTIME_H_
-#define FRAME_CHARACTER_HELPER_SKILL_RUNTIME_H_
+#ifndef FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_
+#define FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_
 
 #include "frame/character/character.h"
 #include "frame/event.h"
@@ -8,9 +8,9 @@
 
 namespace ns_frame {
 
-class SkillRuntime {
+class RuntimeCastSkill {
 public:
-    SkillRuntime(Character *self, int skillID, int skillLevel)
+    RuntimeCastSkill(Character *self, int skillID, int skillLevel)
         : self(self), skillID(skillID), skillLevel(skillLevel) {}
     Character *self;
     const int skillID;
@@ -35,7 +35,7 @@ public:
 
     std::vector<Damage> damageList;
 
-    ~SkillRuntime() {
+    ~RuntimeCastSkill() {
         // 执行技能队列
         while (!skillQueue.empty()) {
             auto it = skillQueue.front();
@@ -52,4 +52,4 @@ public:
 
 } // namespace ns_frame
 
-#endif // FRAME_CHARACTER_HELPER_SKILL_RUNTIME_H_
+#endif // FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_

@@ -2,7 +2,7 @@
 #define FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
 
 #include "frame/character/character.h"
-#include "frame/character/helper/skill_runtime.h"
+#include "frame/character/helper/runtime_castskill.h"
 #include "frame/global/skill.h"
 
 namespace ns_frame {
@@ -15,14 +15,14 @@ namespace ns_frame {
  */
 class AutoRollbackAttribute {
 public:
-    AutoRollbackAttribute(Character *self, Character *target, SkillRuntime *runtime, const Skill &skill);
+    AutoRollbackAttribute(Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill);
     ~AutoRollbackAttribute();
     bool CallDamage(int DamageAddPercent);
 
 private:
     Character *self;
     Character *target;
-    SkillRuntime *runtime;
+    RuntimeCastSkill *runtime;
     const Skill &skill;
     int atDamage[static_cast<int>(DamageType::COUNT)] = {0};
     int atDamageRand[static_cast<int>(DamageType::COUNT)] = {0};

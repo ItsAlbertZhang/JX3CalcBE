@@ -51,7 +51,7 @@ public:
     void ActiveSkill(int skillID);
     void DeactiveSkill(int skillID);
     void Cast(int skillID);
-    void CastSkill(Character *target, int skillID, int skillLevel);
+    bool CastSkill(Character *target, int skillID, int skillLevel);
     void DelBuffAllStackNum(CharacterBuff::Item &it);
     void BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
     CharacterBuff::Item *GetBuffWithCompareFlag(int buffID, int buffLevel, int flag);

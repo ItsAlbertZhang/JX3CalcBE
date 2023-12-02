@@ -9,7 +9,7 @@
 using namespace ns_frame;
 using namespace ns_framestatic;
 
-AutoRollbackAttribute::AutoRollbackAttribute(Character *self, Character *target, SkillRuntime *runtime, const Skill &skill)
+AutoRollbackAttribute::AutoRollbackAttribute(Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill)
     : self(self), target(target), runtime(runtime), skill(skill) {
     handle(false);
 }
