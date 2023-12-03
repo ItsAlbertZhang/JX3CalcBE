@@ -92,6 +92,12 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(enumLuaAttributeType::DEL_MULTI_GROUP_BUFF_BY_FUNCTIONTYPE):
                 // 未做相关实现, 推测为解控
                 break;
+            case static_cast<int>(enumLuaAttributeType::CALL_BUFF):
+                self->AddBuff4(self->dwID, self->nLevel, it.param1Int, it.param2);
+                break;
+            case static_cast<int>(enumLuaAttributeType::DEL_SINGLE_BUFF_BY_ID_AND_LEVEL):
+                self->DelBuff(it.param1Int, it.param2);
+                break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
             }
@@ -216,6 +222,12 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 else
                     self->chSkillEvent.add(it.param1Int);
                 break;
+            case static_cast<int>(enumLuaAttributeType::LUNAR_ATTACK_POWER_PERCENT):
+                self->chAttr.atLunarAttackPowerPercent += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::SOLAR_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE):
+                self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += it.param1Int * c;
+                break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
             }
@@ -271,6 +283,9 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_BUFF):
                 target->AddBuff4(self->dwID, self->nLevel, it.param1Int, it.param2);
+                break;
+            case static_cast<int>(enumLuaAttributeType::DASH):
+                // 未做相关实现, 推测为冲刺
                 break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);

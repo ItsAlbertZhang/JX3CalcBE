@@ -98,6 +98,14 @@ void Character::DelGroupBuff(int buffID, int buffLevel) {
     }
 }
 
+void Character::DelMultiGroupBuffByID(int buffID) {
+    CharacterBuff::Item *ptr = GetBuff(buffID, 0);
+    while (nullptr != ptr) {
+        DelBuffAllStackNum(*ptr);
+        ptr = GetBuff(buffID, 0);
+    }
+}
+
 void Character::BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel) {
     const Skill &skill = SkillManager::get(skillID, skillLevel);
     const Buff &buff = BuffManager::get(buffID, buffLevel);

@@ -3,6 +3,7 @@
 #include "frame/global/skill.h"
 #include "frame/static_ref.h"
 #include "frame/static_refmap.h"
+#include "program/log.h"
 
 using namespace ns_frame;
 
@@ -43,6 +44,9 @@ const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
     "IsInParty",
     "DoAction",
     "ResetCD",
+    "GetSelectCharacter",
+    "IsSkillRecipeActive",
+    "DelMultiGroupBuffByID",
 };
 
 bool ns_framestatic::luaInit(sol::state &lua) {
@@ -127,6 +131,7 @@ bool ns_framestatic::luaInit(sol::state &lua) {
         "AddBuff", sol::overload(&Character::AddBuff4, &Character::AddBuff5),
         "DelBuff", &Character::DelBuff,
         "DelGroupBuff", &Character::DelGroupBuff,
+        "DelMultiGroupBuffByID", &Character::DelMultiGroupBuffByID,
         "IsHaveBuff", &Character::IsHaveBuff,
         "IsInParty", &Character::IsInParty,
         "ModifyCoolDown", &Character::ModifyCoolDown,
@@ -144,6 +149,8 @@ bool ns_framestatic::luaInit(sol::state &lua) {
         "ClearCDTime", &Character::ClearCDTime,
         "DoAction", &Character::DoAction,
         "ResetCD", &Character::ResetCD,
+        "GetSelectCharacter", &Character::GetSelectCharacter,
+        "IsSkillRecipeActive", &Character::IsSkillRecipeActive,
         "dwID", &Character::dwID,
         "nLevel", &Character::nLevel,
         "nX", &Character::nX, "nY", &Character::nY, "nZ", &Character::nZ,
@@ -156,6 +163,7 @@ bool ns_framestatic::luaInit(sol::state &lua) {
 
     lua.new_usertype<CharacterBuff::Item>(
         "Buff",
+        "nStackNum", &CharacterBuff::Item::nStackNum,
         "nCustomValue", &CharacterBuff::Item::nCustomValue);
 
     lua.new_usertype<CharacterScene>(
@@ -171,6 +179,9 @@ bool ns_framestatic::luaInit(sol::state &lua) {
     lua.set_function("ModityCDToUI", LuaGlobalFunction::ModityCDToUI);
     lua.set_function("CheckInTongWar", LuaGlobalFunction::CheckInTongWar);
     lua.set_function("IsTreasureBattleFieldMap", LuaGlobalFunction::IsTreasureBattleFieldMap);
+    lua.set_function("GetValueByBits", LuaGlobalFunction::GetValueByBits);
+    lua.set_function("SetValueByBits", LuaGlobalFunction::SetValueByBits);
+    lua.set_function("RemoteCallToClient", LuaGlobalFunction::RemoteCallToClient);
 
     sol::table AttributeType = lua.create_table();
     for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaAttributeType::COUNT); i++) {
@@ -259,4 +270,76 @@ bool ns_framestatic::LuaGlobalFunction::CheckInTongWar(ns_frame::Character *char
 
 bool ns_framestatic::LuaGlobalFunction::IsTreasureBattleFieldMap(int mapID) {
     return false;
+}
+
+/* ```lua
+-- 函数名	: CustomFunction.GetValueByBit
+-- 函数描述	: 获得数字的某一比特位值
+-- 参数列表	:  nValue：值；nBit：取值范围[0,31]
+-- 返回值	: 1 or 0
+-- 备注		: CustomFunction.GetValueByBit(10, 31)，表示获取数字“10”的第31个Bit位的值。
+function CustomFunction.GetValueByBit(nValue, nBit)
+    if nBit > 31 or nBit < 0 then
+        print(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error")
+        --return nValue
+    end
+    return GetValueByBits(nValue, nBit, 1)
+    --return math.floor(nValue / 2 ^ nBit) % 2
+end
+``` */
+int ns_framestatic::LuaGlobalFunction::GetValueByBits(int nValue, int nBit, int c) {
+    if (nBit > 31 || nBit < 0) {
+        LOG_ERROR(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error\n");
+    }
+    return (nValue >> nBit) & 1;
+}
+
+/* ```lua
+-- 函数名	: CustomFunction.SetValueByBit
+-- 函数描述	: 将某个值的某一比特位值设置为0或者1
+-- 参数列表	:  nValue：值；nBit：取值范围[0,31]；nNewBit：只能为0或者1
+-- 返回值	: 设置完bit之后的新值
+-- 备注		: CustomFunction.SetValueByBit(10,31,1)，表示将数字“10”的第31个Bit位的值置为1
+function CustomFunction.SetValueByBit(nValue, nBit, nNewBitValue)
+    if nNewBitValue > 1 or nNewBitValue < 0 then
+        print(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,")
+        return nValue
+    end
+    if nBit > 31 or nBit < 0 then
+        print(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!BitIndex error")
+        return nValue
+    end
+    return SetValueByBits(nValue, nBit, 1, nNewBitValue)
+    --如果要设置的新值和旧值一样，那么值不变，直接返回
+    --if math.floor(nValue / 2 ^ nBit) % 2 == nNewBitValue then
+        --return nValue
+    --end
+    --如果参数不正确那么
+    --if nNewBitValue > 1 or nNewBitValue < 0 or nBit > 31 or nBit < 0 then
+        --print(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nBit=[] nNewBit Must be 0 or 1,")
+        --return nValue
+    --end
+    --0设成1加值，1变成0减值
+    --print("SetValueByBit="..nNewBitValue)
+    --if nNewBitValue == 1 then
+        --return nValue + 2 ^ nBit
+    --else
+        --return nValue - 2 ^ nBit
+    --end
+end
+``` */
+int ns_framestatic::LuaGlobalFunction::SetValueByBits(int nValue, int nBit, int c, int nNewBitValue) {
+    if (nNewBitValue > 1 || nNewBitValue < 0) {
+        LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,\n");
+        return nValue;
+    }
+    if (nBit > 31 || nBit < 0) {
+        LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!BitIndex error\n");
+        return nValue;
+    }
+    return (nValue & ~(1 << nBit)) | (nNewBitValue << nBit);
+}
+
+void ns_framestatic::LuaGlobalFunction::RemoteCallToClient() {
+    return;
 }

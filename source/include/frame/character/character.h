@@ -47,6 +47,7 @@ public:
     // ---------- 以下方法未被 lua 调用 ----------
     static Character *getCharacter(int nCharacterID);
     static int getCharacterID(Character *character);
+    void CheckSunMoonPower();
     void LearnSkill(int skillID, int skillLevel);
     void ActiveSkill(int skillID);
     void DeactiveSkill(int skillID);
@@ -63,12 +64,14 @@ public:
     bool IsFormationLeader();
     bool IsHaveBuff(int buffID, int buffLevel);
     bool IsInParty();
+    bool IsSkillRecipeActive(int RecipeID, int RecipeLevel);
     CharacterBuff::Item *GetBuff(int buffID, int buffLevel);
     CharacterBuff::Item *GetBuffByOwner(int buffID, int buffLevel, int sourceID);
     const CharacterScene &GetScene();
     int GetKungfuMountID();
     int GetSkillLevel(int skillID);
     int GetSkillTarget();
+    Character *GetSelectCharacter();
     int GetMapID();
     void AddBuff4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
     void AddBuff5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int times);
@@ -83,6 +86,7 @@ public:
     void ClearAllNpcThreat();
     void ClearCDTime(int cooldownID);
     void DelGroupBuff(int buffID, int buffLevel);
+    void DelMultiGroupBuffByID(int buffID);
     void DoAction(int a, int b);
     void ResetCD(int cooldownID);
 

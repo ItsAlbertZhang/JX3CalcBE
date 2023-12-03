@@ -61,6 +61,9 @@ list_to_create = {
             "CALL_SURPLUS_NEUTRAL_DAMAGE",
             "CALL_SURPLUS_POISON_DAMAGE",
             "DEL_MULTI_GROUP_BUFF_BY_FUNCTIONTYPE",
+            "DEL_SINGLE_BUFF_BY_ID_AND_LEVEL",
+            "SOLAR_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE",
+            "LUNAR_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE",
         ],
     },
     "TabAttribute": {
@@ -85,6 +88,10 @@ list_to_create = {
             "atImmunity",
             "atImmuneSkillMove",
             "atActiveThreatCoefficient",
+            "atHalt",
+            "atNoLimitChangeSkillIcon",
+            "atSetTalentRecipe",
+            "atAllMagicDamageAddPercent",
         ],
     },
 }

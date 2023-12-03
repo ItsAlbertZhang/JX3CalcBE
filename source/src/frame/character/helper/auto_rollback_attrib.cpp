@@ -11,17 +11,17 @@ using namespace ns_framestatic;
 AutoRollbackAttrib::AutoRollbackAttrib(Character *self, CharacterBuff::Item *item, const Buff &buff)
     : self(self), item(item), buff(buff) {
     for (const auto &it : buff.BeginAttrib) {
-        handle(it, false);
+        handle(item->BuffID, item->nBuffLevel, it, false);
     }
 }
 
 AutoRollbackAttrib::~AutoRollbackAttrib() {
     item->flushLeftFrame();
     for (const auto &it : buff.BeginAttrib) {
-        handle(it, true);
+        handle(item->BuffID, item->nBuffLevel, it, true);
     }
     for (const auto &it : buff.EndTimeAttrib) {
-        handle(it, false);
+        handle(item->BuffID, item->nBuffLevel, it, false);
     }
     if (!buff.ScriptFile.empty()) {
         std::string paramStr = "scripts/skill/" + buff.ScriptFile;
@@ -31,11 +31,11 @@ AutoRollbackAttrib::~AutoRollbackAttrib() {
 }
 void AutoRollbackAttrib::active() {
     for (const auto &it : buff.ActiveAttrib) {
-        handle(it, false);
+        handle(item->BuffID, item->nBuffLevel, it, false);
     }
 }
 
-void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
+void AutoRollbackAttrib::handle(int buffID, int buffLevel, const Buff::Attrib &attrib, bool isRollback) {
     int c = isRollback ? -1 : 1;
     switch (attrib.type) {
     case enumTabAttribute::atLunarDamageCoefficient:
@@ -120,8 +120,24 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case enumTabAttribute::atActiveThreatCoefficient:
         // 未做相关实现, 推测为威胁值
         break;
+    case enumTabAttribute::atHalt:
+        // 未做相关实现, 推测为禁止移动
+        break;
+    case enumTabAttribute::atNoLimitChangeSkillIcon:
+        // 未做相关实现, 推测为技能图标替换
+        break;
+    case enumTabAttribute::atSetTalentRecipe:
+        if (isRollback) {
+            self->chSkillRecipe.remove(attrib.valueAInt, attrib.valueBInt);
+        } else {
+            self->chSkillRecipe.add(attrib.valueAInt, attrib.valueBInt);
+        }
+        break;
+    case enumTabAttribute::atAllMagicDamageAddPercent:
+        self->chAttr.atAllMagicDamageAddPercent += attrib.valueAInt * c;
+        break;
     default:
-        LOG_ERROR("Undefined: Unknown Attribute: %s %d\n", refTabAttribute[static_cast<int>(attrib.type)].c_str(), attrib.valueAInt);
+        LOG_ERROR("Undefined: %d %d Unknown Attribute: %s %d\n", buffID, buffLevel, refTabAttribute[static_cast<int>(attrib.type)].c_str(), attrib.valueAInt);
         break;
     }
 }

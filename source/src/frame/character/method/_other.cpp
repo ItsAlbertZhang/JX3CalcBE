@@ -1,4 +1,5 @@
 #include "frame/character/character.h"
+#include "frame/event.h"
 #include "frame/global/skill.h"
 
 using namespace ns_frame;
@@ -55,4 +56,26 @@ bool Character::IsInParty() {
 
 void Character::DoAction(int a, int b) {
     return;
+}
+
+static void staticCheckSunMoonPower(void *self, void *param) {
+    Character *character = (Character *)self;
+    if (character->nMoonPowerValue == 1 || character->nSunPowerValue == 1)
+        return;
+    if (character->nCurrentMoonEnergy >= 10000)
+        character->nMoonPowerValue = 1;
+    else if (character->nCurrentSunEnergy >= 10000)
+        character->nSunPowerValue = 1;
+}
+void Character::CheckSunMoonPower() {
+    staticCheckSunMoonPower(this, nullptr);
+    // Event::add(1024, staticCheckSunMoonPower, this, nullptr);
+}
+
+Character *Character::GetSelectCharacter() {
+    return targetSelect;
+}
+
+bool Character::IsSkillRecipeActive(int RecipeID, int RecipeLevel) {
+    return chSkillRecipe.isActive(RecipeID, RecipeLevel);
 }

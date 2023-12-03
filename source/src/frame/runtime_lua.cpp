@@ -5,10 +5,13 @@
 using namespace ns_frame;
 using namespace std;
 
-int LuaFunc::getIndex(string &filename) {
+int LuaFunc::getIndex(string &filename, bool reload) {
     std::replace(filename.begin(), filename.end(), '\\', '/');
     if (filenameMap.find(filename) == filenameMap.end()) {
         add(filename);
+    } else if (reload) {
+        bool fileExists = true;
+        gdi::Interface::luaExecuteFile(filename, &fileExists);
     }
     return filenameMap[filename];
 }
@@ -79,13 +82,13 @@ void LuaFunc::clear() {
 
 sol::protected_function LuaFunc::getGetSkillLevelData(string &filename) {
     std::replace(filename.begin(), filename.end(), '\\', '/');
-    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
+    int idx = getIndex(filename, true); // 执行 getIndex 后, 一定存在
     return filefuncList[idx][static_cast<int>(Enum::GetSkillLevelData)];
 }
 
 sol::protected_function LuaFunc::getGetSkillRecipeData(string &filename) {
     std::replace(filename.begin(), filename.end(), '\\', '/');
-    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
+    int idx = getIndex(filename, true); // 执行 getIndex 后, 一定存在
     return filefuncList[idx][static_cast<int>(Enum::GetSkillRecipeData)];
 }
 

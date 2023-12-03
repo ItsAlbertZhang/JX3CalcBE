@@ -1,5 +1,6 @@
 #include "frame/character/character.h"
 #include "frame/event.h"
+#include "frame/global/skill.h"
 #include "frame/runtime_lua.h"
 #include "frame/static_lua.h"
 #include "gdi.h"
@@ -13,6 +14,7 @@
 
 void callbackCastSkill(void *self, void *param) {
     ns_frame::Character *player = static_cast<ns_frame::Character *>(self);
+    player->Cast(3967);
     player->Cast(3963);
     player->Cast(3960);
     ns_frame::Event::add(20, callbackCastSkill, self, nullptr);
@@ -110,33 +112,33 @@ int main(int argc, char *argv[]) {
     // player.DeactiveSkill(10242);
 
     player.chAttr.atHasteBase = 95;
-    player.chAttr.atSpunkBase = 7155;
+    player.chAttr.atSpunkBase = 6380;
 
     player.chAttr.atPhysicsAttackPowerBase = 6;
-    player.chAttr.atSolarAttackPowerBase = 23075;
-    player.chAttr.atLunarAttackPowerBase = 23075;
-    player.chAttr.atNeutralAttackPowerBase = 13020;
-    player.chAttr.atPoisonAttackPowerBase = 13020;
+    player.chAttr.atSolarAttackPowerBase = 19308;
+    player.chAttr.atLunarAttackPowerBase = 19308;
+    player.chAttr.atNeutralAttackPowerBase = 12721;
+    player.chAttr.atPoisonAttackPowerBase = 12721;
 
     player.chAttr.atPhysicsCriticalStrike = 8325;
-    player.chAttr.atSolarCriticalStrike = 19224;
-    player.chAttr.atLunarCriticalStrike = 19224;
-    player.chAttr.atNeutralCriticalStrike = 8325;
-    player.chAttr.atPoisonCriticalStrike = 8325;
+    player.chAttr.atSolarCriticalStrike = 15048;
+    player.chAttr.atLunarCriticalStrike = 15048;
+    player.chAttr.atNeutralCriticalStrike = 8715;
+    player.chAttr.atPoisonCriticalStrike = 8715;
 
     player.chAttr.atPhysicsCriticalDamagePowerBase = 0;
-    player.chAttr.atSolarCriticalDamagePowerBase = 1445;
-    player.chAttr.atLunarCriticalDamagePowerBase = 1445;
-    player.chAttr.atNeutralCriticalDamagePowerBase = 975;
-    player.chAttr.atPoisonCriticalDamagePowerBase = 975;
+    player.chAttr.atSolarCriticalDamagePowerBase = 188;
+    player.chAttr.atLunarCriticalDamagePowerBase = 188;
+    player.chAttr.atNeutralCriticalDamagePowerBase = 0;
+    player.chAttr.atPoisonCriticalDamagePowerBase = 0;
 
     player.chAttr.atPhysicsOvercomeBase = 12;
-    player.chAttr.atMagicOvercome = 19393;
+    player.chAttr.atMagicOvercome = 20360;
 
-    player.chAttr.atStrainBase = 26748;
+    player.chAttr.atStrainBase = 21855;
     player.chAttr.atSurplusValueBase = 9536;
-    player.chAttr.atMeleeWeaponDamageBase = 1574;
-    player.chAttr.atMeleeWeaponDamageRand = 1049;
+    player.chAttr.atMeleeWeaponDamageBase = 240;
+    player.chAttr.atMeleeWeaponDamageRand = 160;
 
     npc.nLevel = 124;
     npc.chAttr.atLevel = 124;
@@ -144,22 +146,26 @@ int main(int argc, char *argv[]) {
     npc.chAttr.atMagicShield = 27550;
 
     player.Cast(3974);
-    while (ns_frame::Event::run())
-        ;
-    std::cout << ns_frame::Event::now() << std::endl;
+    player.CheckSunMoonPower();
 
-    // callbackCastSkill(&player, nullptr);
-    // while (ns_frame::Event::now() < 1024 * 45) {
-    //     ns_frame::Event::run();
-    // }
+    // while (ns_frame::Event::run())
+    //     ;
+    // std::cout << ns_frame::Event::now() << std::endl;
+
+    callbackCastSkill(&player, nullptr);
+    while (ns_frame::Event::now() < 1024 * 15) {
+        ns_frame::Event::run();
+    }
     std::cout << "tick\t"
               << "ID\t"
               << "lv\t"
               << "cri\t"
               << "dmg\t"
-              << "type" << std::endl;
+              << "type\t"
+              << "name" << std::endl;
     for (auto &it : player.chDamage.damageList) {
-        std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s\t" << it.skillID << "\t" << it.skillLevel << "\t" << it.isCritical << "\t" << it.damage << "\t" << static_cast<int>(it.damageType) << std::endl;
+        const ns_frame::Skill &skill = ns_frame::SkillManager::get(it.skillID, it.skillLevel);
+        std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s\t" << it.skillID << "\t" << it.skillLevel << "\t" << it.isCritical << "\t" << it.damage << "\t" << static_cast<int>(it.damageType) << "\t" << skill.tab.at("SkillName") << std::endl;
     }
 
     // // 测试用例 3

@@ -24,3 +24,9 @@ std::set<const SkillRecipe *> CharacterSkillRecipe::getList(int SkillID, int Ski
     }
     return emptySet;
 }
+
+bool CharacterSkillRecipe::isActive(int RecipeID, int RecipeLevel) {
+    const SkillRecipe &skillrecipe = SkillRecipeManager::get(RecipeID, RecipeLevel);
+    return SkillRecipeTypeMap[skillrecipe.SkillRecipeType].find(&skillrecipe) != SkillRecipeTypeMap[skillrecipe.SkillRecipeType].end() ||
+           SkillIDMap[skillrecipe.SkillID].find(&skillrecipe) != SkillIDMap[skillrecipe.SkillID].end();
+}

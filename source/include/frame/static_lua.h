@@ -25,6 +25,9 @@ public:
     static void ModityCDToUI(ns_frame::Character *character, int skillID, int c, int d);
     static bool CheckInTongWar(ns_frame::Character *character);
     static bool IsTreasureBattleFieldMap(int mapID);
+    static int GetValueByBits(int nValue, int nBit, int c);
+    static int SetValueByBits(int nValue, int nBit, int c, int nNewBitValue);
+    static void RemoteCallToClient();
 };
 
 } // namespace ns_framestatic

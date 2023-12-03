@@ -155,7 +155,7 @@ bool Character::CastSkill(Character *target, int skillID, int skillLevel) {
     if (target != nullptr) {
         if (target->isPlayer && !skill.TargetTypePlayer)
             return false;
-        if (target->isPlayer && !skill.TargetTypeNpc)
+        if (!target->isPlayer && !skill.TargetTypeNpc)
             return false;
     }
 
@@ -230,8 +230,10 @@ bool Character::CastSkill(Character *target, int skillID, int skillLevel) {
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
             runtime.skillQueue.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel, this, target);
-        } else { // 不需要再判断, 因为 nSunPowerValue 和 nMoonPowerValue 不可能同时为 0 (那样在前面就 return 了)
+            this->nSunPowerValue = 0;
+        } else if (this->nMoonPowerValue) {
             runtime.skillQueue.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel, this, target);
+            this->nMoonPowerValue = 0;
         }
     }
 
@@ -407,12 +409,7 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
             Character *caster = it->SkillCaster == EventCT::EventCaster ? self : self->targetCurr;
             Character *target = it->SkillTarget == EventCT::EventTarget ? self->targetCurr : self;
             if (caster != nullptr) {
-                caster->CastSkill4(
-                    it->SkillID, it->SkillLevel,
-                    target == nullptr  ? 0
-                    : target->isPlayer ? static_cast<int>(CharacterType::PLAYER)
-                                       : static_cast<int>(CharacterType::NPC),
-                    target == nullptr ? 0 : target->dwID);
+                caster->CastSkill(target, it->SkillID, it->SkillLevel);
             }
         }
     }
