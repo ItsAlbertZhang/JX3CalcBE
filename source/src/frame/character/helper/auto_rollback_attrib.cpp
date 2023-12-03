@@ -10,32 +10,34 @@ using namespace ns_framestatic;
 
 AutoRollbackAttrib::AutoRollbackAttrib(Character *self, CharacterBuff::Item *item, const Buff &buff)
     : self(self), item(item), buff(buff) {
+    // item->flushLeftFrame();
     for (const auto &it : buff.BeginAttrib) {
-        handle(item->BuffID, item->nBuffLevel, it, false);
+        handle(item, it, false);
     }
 }
 
 AutoRollbackAttrib::~AutoRollbackAttrib() {
     item->flushLeftFrame();
     for (const auto &it : buff.BeginAttrib) {
-        handle(item->BuffID, item->nBuffLevel, it, true);
+        handle(item, it, true);
     }
     for (const auto &it : buff.EndTimeAttrib) {
-        handle(item->BuffID, item->nBuffLevel, it, false);
+        handle(item, it, false);
     }
     if (!buff.ScriptFile.empty()) {
         std::string paramStr = "scripts/skill/" + buff.ScriptFile;
-        LuaFunc::analysis(LuaFunc::getOnRemove(paramStr)(item->nCharacterID, item->BuffID, item->nBuffLevel, item->nLeftFrame, item->nCustomValue, item->dwSkillSrcID, item->nStackNum, 0, 0, item->dwCasterSkillID), paramStr, LuaFunc::Enum::OnRemove);
+        LuaFunc::analysis(LuaFunc::getOnRemove(paramStr)(item->nCharacterID, item->BuffID, item->nLevel, item->nLeftFrame, item->nCustomValue, item->dwSkillSrcID, item->nStackNum, 0, 0, item->dwCasterSkillID), paramStr, LuaFunc::Enum::OnRemove);
         // OnRemove(nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID)
     }
 }
 void AutoRollbackAttrib::active() {
+    item->flushLeftFrame();
     for (const auto &it : buff.ActiveAttrib) {
-        handle(item->BuffID, item->nBuffLevel, it, false);
+        handle(item, it, false);
     }
 }
 
-void AutoRollbackAttrib::handle(int buffID, int buffLevel, const Buff::Attrib &attrib, bool isRollback) {
+void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &attrib, bool isRollback) {
     int c = isRollback ? -1 : 1;
     switch (attrib.type) {
     case enumTabAttribute::atLunarDamageCoefficient:
@@ -44,6 +46,28 @@ void AutoRollbackAttrib::handle(int buffID, int buffLevel, const Buff::Attrib &a
     case enumTabAttribute::atSolarDamageCoefficient:
         self->chAttr.atSolarDamageCoefficient += attrib.valueAInt * c;
         break;
+    case enumTabAttribute::atCallSolarDamage: {
+        // 计算会心
+        Character *src = Character::getCharacter(item->dwSkillSrcID);
+        auto [atCriticalStrike, atCriticalDamagePower] =
+            src->CalcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel); // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, 9999);
+        bool isCritical = dis(gen) < atCriticalStrike;
+        src->chDamage.damageList.emplace_back(
+            Event::now(),
+            item->dwCasterSkillID, item->dwCasterSkillLevel,
+            isCritical,
+            src->CalcDamage(
+                item->attr, self, DamageType::Solar, // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
+                isCritical, atCriticalDamagePower, 0,
+                attrib.valueAInt, 0,
+                item->nChannelInterval, 0,
+                item->rawInterval, item->rawCount),
+            DamageType::Solar);
+        src->bFightState = true;
+    } break;
     case enumTabAttribute::atCallLunarDamage: {
         // 计算会心
         Character *src = Character::getCharacter(item->dwSkillSrcID);
@@ -136,8 +160,17 @@ void AutoRollbackAttrib::handle(int buffID, int buffLevel, const Buff::Attrib &a
     case enumTabAttribute::atAllMagicDamageAddPercent:
         self->chAttr.atAllMagicDamageAddPercent += attrib.valueAInt * c;
         break;
+    case enumTabAttribute::atBeTherapyCoefficient:
+        self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c;
+        break;
+    case enumTabAttribute::atCallBuff:
+        self->AddBuff4(0, 99, attrib.valueAInt, attrib.valueBInt);
+        break;
+    case enumTabAttribute::atKnockedOffRate:
+        // 未做相关实现, 推测为免疫击退
+        break;
     default:
-        LOG_ERROR("Undefined: %d %d Unknown Attribute: %s %d\n", buffID, buffLevel, refTabAttribute[static_cast<int>(attrib.type)].c_str(), attrib.valueAInt);
+        LOG_ERROR("Undefined: %d %d Unknown Attribute: %s %d\n", item->BuffID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)].c_str(), attrib.valueAInt);
         break;
     }
 }

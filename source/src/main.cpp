@@ -14,9 +14,20 @@
 
 void callbackCastSkill(void *self, void *param) {
     ns_frame::Character *player = static_cast<ns_frame::Character *>(self);
-    player->Cast(3967);
-    player->Cast(3963);
-    player->Cast(3960);
+    if (player->GetBuff(25721, 0) == nullptr)
+        player->Cast(3967); // 净世破魔击
+    if (player->GetBuff(25716, 0) != nullptr) {
+        player->Cast(3974); // 暗尘弥散
+        player->Cast(3969); // 光明相
+    }
+
+    player->Cast(22890); // 诛邪镇魔
+    player->Cast(34347); // 悬象著明
+    player->Cast(3966);  // 生死劫
+    player->Cast(3967);  // 净世破魔击
+    player->Cast(3979);  // 驱夜断愁
+    player->Cast(3963);  // 烈日斩
+    player->Cast(3960);  // 银月斩
     ns_frame::Event::add(20, callbackCastSkill, self, nullptr);
 }
 
@@ -86,6 +97,7 @@ int main(int argc, char *argv[]) {
     player.LearnSkill(5972, 1);  // 腾焰飞芒
     player.LearnSkill(18279, 1); // 净身明礼
     player.LearnSkill(22888, 1); // 诛邪镇魔
+    player.LearnSkill(22890, 1); // 诛邪镇魔, 主动
     player.LearnSkill(6717, 1);  // 无明业火
     player.LearnSkill(34383, 1); // 明光恒照
     player.LearnSkill(34395, 1); // 日月同辉
@@ -144,6 +156,8 @@ int main(int argc, char *argv[]) {
     npc.chAttr.atLevel = 124;
     npc.chAttr.atPhysicsShieldBase = 27550;
     npc.chAttr.atMagicShield = 27550;
+    npc.fMaxLife64 = 1e+10;
+    npc.fCurrentLife64 = 1e+10;
 
     player.Cast(3974);
     player.CheckSunMoonPower();
@@ -153,7 +167,7 @@ int main(int argc, char *argv[]) {
     // std::cout << ns_frame::Event::now() << std::endl;
 
     callbackCastSkill(&player, nullptr);
-    while (ns_frame::Event::now() < 1024 * 15) {
+    while (ns_frame::Event::now() < 1024 * 30) {
         ns_frame::Event::run();
     }
     std::cout << "tick\t"

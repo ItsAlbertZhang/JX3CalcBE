@@ -74,9 +74,11 @@ public:
     Character *GetSelectCharacter();
     int GetMapID();
     void AddBuff4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
-    void AddBuff5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int times);
+    void AddBuff5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count);
+    void AddBuff7(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum);
     void DelBuff(int buffID, int buffLevel);
     void CastSkill2(int skillID, int skillLevel);
+    void CastSkill3(int skillID, int skillLevel, int targetID);
     void CastSkill4(int skillID, int skillLevel, int type, int targetID);
     void CastSkillXYZ(int skillID, int skillLevel, int x, int y, int z);
     void ModifyCoolDown(int cooldownID, int frame);
@@ -89,8 +91,12 @@ public:
     void DelMultiGroupBuffByID(int buffID);
     void DoAction(int a, int b);
     void ResetCD(int cooldownID);
+    void DestroyPublicShadow(int a, bool b);
+    void CreatePublicShadow(int a, int roletype, int dwID, int nX, int nY, int nZ, bool b);
+    void SetBuffLeftActiveCount(int buffIndex, int count);
+    void SetBuffNextActiveFrame(int buffIndex, int nextActiveFrame);
 
-    //  ---------- 被 lua 调用的属性, 通常以 "n" 开头 ----------
+    //  ---------- 被 lua 调用的属性, 通常以类型标志开头 ----------
     int dwID;                          // 角色 ID
     int nLevel = chAttr.atLevel;       // 等级, 这是唯一一个同时存在于此处和 chAttr 内部的属性
     int nX, nY, nZ;                    // 坐标
@@ -98,9 +104,12 @@ public:
     int nCurrentMoonEnergy = 0;        // 当前月魂
     int nSunPowerValue = 0;            // 满日
     int nMoonPowerValue = 0;           // 满月
+    int nRoleType = 0;                 // 角色体型
     bool bSurplusAutoCast = false;     // 出现于 明教_套路_内功_焚影圣诀.lua
     bool bSurplusAutoReplenish = true; // 出现于 明教_套路_内功_焚影圣诀.lua
     bool bFightState = false;          // 是否处于战斗状态
+    double fMaxLife64 = 0;             // 最大生命值
+    double fCurrentLife64 = 0;         // 当前生命值
 
 private:
     static inline std::mutex mutex;                                  // 互斥锁. 用于保护构造操作.

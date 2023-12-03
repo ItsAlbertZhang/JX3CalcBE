@@ -79,3 +79,12 @@ Character *Character::GetSelectCharacter() {
 bool Character::IsSkillRecipeActive(int RecipeID, int RecipeLevel) {
     return chSkillRecipe.isActive(RecipeID, RecipeLevel);
 }
+
+void Character::DestroyPublicShadow(int a, bool b) {
+    return;
+}
+
+void Character::CreatePublicShadow(int a, int roletype, int dwID, int nX, int nY, int nZ, bool b) {
+    return;
+}
+

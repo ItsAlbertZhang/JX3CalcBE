@@ -19,38 +19,38 @@ AutoRollbackAttribute::~AutoRollbackAttribute() {
 
 bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
     // 计算会心
-    auto [atCriticalStrike, atCriticalDamagePower] = self->CalcCritical(self->chAttr, skill.dwID, skill.dwLevel);
+    auto [atCriticalStrike, atCriticalDamagePower] = self->CalcCritical(self->chAttr, skill.dwSkillID, skill.dwLevel);
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 9999);
     bool isCritical = dis(gen) < atCriticalStrike;
     // 计算伤害
-    for (int i = 0; i < static_cast<int>(DamageType::COUNT); i++) {
-        if (callDamage[i]) {
+    for (int idxType = 0; idxType < static_cast<int>(DamageType::COUNT); idxType++) {
+        for (int idxTime = 0; idxTime < callDamage[idxType]; idxTime++) {
             runtime->damageList.emplace_back(
                 Event::now(),
-                skill.dwID, skill.dwLevel,
+                skill.dwSkillID, skill.dwLevel,
                 isCritical,
                 self->CalcDamage(
-                    self->chAttr, target, static_cast<DamageType>(i),
+                    self->chAttr, target, static_cast<DamageType>(idxType),
                     isCritical, atCriticalDamagePower, DamageAddPercent,
-                    atDamage[i], atDamageRand[i],
+                    atDamage[idxType], atDamageRand[idxType],
                     static_cast<int>(skill.nChannelInterval),
                     skill.nWeaponDamagePercent),
-                static_cast<DamageType>(i));
+                static_cast<DamageType>(idxType));
         }
-        if (callSurplusDamage[i]) {
+        for (int idxTime = 0; idxTime < callSurplusDamage[idxType]; idxTime++) {
             runtime->damageList.emplace_back(
                 Event::now(),
-                skill.dwID, skill.dwLevel,
+                skill.dwSkillID, skill.dwLevel,
                 isCritical,
                 self->CalcDamage(
-                    self->chAttr, target, static_cast<DamageType>(i),
+                    self->chAttr, target, static_cast<DamageType>(idxType),
                     isCritical, atCriticalDamagePower, DamageAddPercent,
                     0, 0,
                     this->atGlobalDamageFactor, 0,
                     1, 1, true),
-                static_cast<DamageType>(i));
+                static_cast<DamageType>(idxType));
         }
     }
     return isCritical;
@@ -97,6 +97,21 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             case static_cast<int>(enumLuaAttributeType::DEL_SINGLE_BUFF_BY_ID_AND_LEVEL):
                 self->DelBuff(it.param1Int, it.param2);
+                break;
+            case static_cast<int>(enumLuaAttributeType::DEL_MULTI_GROUP_BUFF_BY_ID):
+                self->DelMultiGroupBuffByID(it.param1Int);
+                break;
+            case static_cast<int>(enumLuaAttributeType::SUN_POWER_VALUE):
+                self->nSunPowerValue = it.param1Int;
+                break;
+            case static_cast<int>(enumLuaAttributeType::MOON_POWER_VALUE):
+                self->nMoonPowerValue = it.param1Int;
+                break;
+            case static_cast<int>(enumLuaAttributeType::STOP):
+                // 未做相关实现, 推测为停止, 用于解除击飞
+                break;
+            case static_cast<int>(enumLuaAttributeType::DO_ACTION):
+                // 未做相关实现, 推测为动作
                 break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
@@ -252,34 +267,44 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_PHYSICS_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Physics)] = true;
+                this->callDamage[static_cast<int>(DamageType::Physics)] += 1;
+                this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_SOLAR_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Solar)] = true;
+                this->callDamage[static_cast<int>(DamageType::Solar)] += 1;
+                this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_LUNAR_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Lunar)] = true;
+                this->callDamage[static_cast<int>(DamageType::Lunar)] += 1;
+                this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_NEUTRAL_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Neutral)] = true;
+                this->callDamage[static_cast<int>(DamageType::Neutral)] += 1;
+                this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_POISON_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Poison)] = true;
+                this->callDamage[static_cast<int>(DamageType::Poison)] += 1;
+                this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_PHYSICS_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Physics)] = true;
+                this->callSurplusDamage[static_cast<int>(DamageType::Physics)] += 1;
+                this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_SOLAR_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Solar)] = true;
+                this->callSurplusDamage[static_cast<int>(DamageType::Solar)] += 1;
+                this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_LUNAR_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Lunar)] = true;
+                this->callSurplusDamage[static_cast<int>(DamageType::Lunar)] += 1;
+                this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_NEUTRAL_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Neutral)] = true;
+                this->callSurplusDamage[static_cast<int>(DamageType::Neutral)] += 1;
+                this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_SURPLUS_POISON_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Poison)] = true;
+                this->callSurplusDamage[static_cast<int>(DamageType::Poison)] += 1;
+                this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_BUFF):
                 target->AddBuff4(self->dwID, self->nLevel, it.param1Int, it.param2);

@@ -23,7 +23,7 @@ private:
     CharacterBuff::Item *item;
     const Buff &buff;
 
-    void handle(int buffID, int buffLevel, const Buff::Attrib &attrib, bool isRollback);
+    void handle(CharacterBuff::Item *item, const Buff::Attrib &attrib, bool isRollback);
 };
 
 } // namespace ns_frame

@@ -167,6 +167,8 @@ public:
     int atNeutralOvercomeAdd = 0; // 混元内功额外破防等级
     int atPoisonOvercomeAdd = 0;  // 毒性内功额外破防等级
 
+    int atBeTherapyCoefficient = 0; // 受到治疗效果提升1024分数
+
     int getVitality() const; // 体质
     int getStrength() const; // 力道
     int getAgility() const;  // 身法

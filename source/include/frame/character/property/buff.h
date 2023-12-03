@@ -5,6 +5,7 @@
 #include "frame/event.h"
 #include <map>
 #include <unordered_map>
+#include <vector>
 
 namespace ns_frame {
 
@@ -15,22 +16,19 @@ public:
      */
     class Item {
     public:
-        Item(int nCharacterID, int dwSkillSrcID, int BuffID, int nBuffLevel, int rawInterval, int rawCount)
-            : nCharacterID(nCharacterID), dwSkillSrcID(dwSkillSrcID), BuffID(BuffID), nBuffLevel(nBuffLevel), rawInterval(rawInterval), rawCount(rawCount) {}
+        Item(int nCharacterID, int dwSkillSrcID, int BuffID, int nLevel, int nIndex, int rawInterval, int rawCount)
+            : nCharacterID(nCharacterID), dwSkillSrcID(dwSkillSrcID), BuffID(BuffID), nLevel(nLevel), nIndex(nIndex), rawInterval(rawInterval), rawCount(rawCount) {}
         const int nCharacterID = 0; // 角色 ID
         const int dwSkillSrcID = 0; // 来源角色 ID, 注意不是技能 ID
         const int BuffID = 0;
-        const int nBuffLevel = 0;
         const int rawInterval = 0;
         const int rawCount = 0;
 
         int nLeftFrame = 0;
-        int nStackNum = 0;
 
         bool isValid = false;
         event_tick_t tickActive = 0; // 下一次生效的 tick
         int interval = 0;            // 生效间隔 (单位: 帧). 该属性非必要, 因其可以通过 attr 计算得出. 但为了避免每次 active 时都需要调用 BuffManager::get(), 故在此保存一份.
-        int count = 0;               // 剩余生效次数
 
         void *ptrAttrib = nullptr; // 自动回滚的 buff 属性, 用于处理 buff 的 BeginAttrib, ActiveAttrib, EndTimeAttrib
         CharacterAttr attr;        // 保存一份属性的副本, 用于快照
@@ -41,10 +39,16 @@ public:
         int nChannelInterval = 0;   // 单跳系数
 
         // ---------- 以下属性确定被 lua 直接访问 ----------
-        int nCustomValue = 0;
+        const int nLevel = 0;
+        const int nIndex = 0;
+        int nStackNum = 0;        // 层数
+        int nLeftActiveCount = 0; // 剩余生效次数
+        int nCustomValue = 0;     // 自定义值
+        int nNextActiveFrame = 0; // 下一次生效的帧数
 
         void flushLeftFrame() {
-            nLeftFrame = interval * count - static_cast<int>(Event::now() - tickActive + 63) / 64;
+            nLeftFrame = interval * nLeftActiveCount + static_cast<int>(tickActive - Event::now() + 63) / 64;
+            nNextActiveFrame = static_cast<int>(tickActive - Event::now() + 63) / 64;
         }
     };
 
@@ -52,8 +56,10 @@ public:
      * @brief buff 列表
      * @note key 为三层嵌套: sourceID -> buffID -> buffLevel
      * @note 为最大化查找效率, 使用此结构.
+     * @note 第三层使用 map 而非 unordered_map 是因为 GetBuffWithCompareFlag 中需要使用 lower_bound 方法.
      */
-    std::unordered_map<int, std::unordered_map<int, std::map<int, Item>>> buffList;
+    std::unordered_map<int, std::unordered_map<int, std::map<int, Item>>> buffMap;
+    std::vector<Item *> buffList;
 
     /**
      * @brief 按插入时间排序的 buff 列表

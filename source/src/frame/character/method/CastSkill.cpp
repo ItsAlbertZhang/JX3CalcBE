@@ -19,8 +19,13 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
 static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDown &cooldown);
 static inline void staticTriggerCoolDown(Character *self, int nCoolDownID);
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
+static void callbackDelaySubSkill(void *self, void *item);
 
 void Character::CastSkill4(int skillID, int skillLevel, int type, int targetID) {
+    CastSkill(getCharacter(targetID), skillID, skillLevel);
+}
+
+void Character::CastSkill3(int skillID, int skillLevel, int targetID) {
     CastSkill(getCharacter(targetID), skillID, skillLevel);
 }
 
@@ -226,7 +231,9 @@ bool Character::CastSkill(Character *target, int skillID, int skillLevel) {
     // 构造技能运行时资源: AutoRollbackAttribute
     AutoRollbackAttribute autoRollbackAttribute{this, target, &runtime, skill};
 
-    // 5. 处理魔法属性之后的技能队列
+    // 5. 处理其他
+
+    // 5.1 处理日月豆子技能
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
             runtime.skillQueue.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel, this, target);
@@ -235,6 +242,11 @@ bool Character::CastSkill(Character *target, int skillID, int skillLevel) {
             runtime.skillQueue.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel, this, target);
             this->nMoonPowerValue = 0;
         }
+    }
+
+    // 5.2 处理延迟子技能
+    for (auto &it : skill.attrDelaySubSkill) {
+        Event::add(it.delay * 1024 / 16, callbackDelaySubSkill, this, static_cast<void *>(const_cast<Skill::DelaySubSkill *>(&it)));
     }
 
     // 6. 处理 SkillRecipe: ScriptFile
@@ -340,13 +352,12 @@ static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue)
 
 static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skill) {
     for (const auto &it : skill.attrCheckSelfLearntSkill) {
-        auto skillLearned = self->chSkill.skillLearned.find(it.dwSkillID);
-        if (skillLearned == self->chSkill.skillLearned.end()) {
-            return false; // 找不到符合要求的技能, CastSkill 失败
-        } else {
-            if (!staticCheckSelfLearntSkillCompare(it.nLevelCompareFlag, it.dwSkillLevel, skillLearned->second)) {
-                return false; // 技能比较不符合要求, CastSkill 失败
-            }
+        int skillValue = 0; // 技能等级为 0 代表没有学习该技能
+        if (self->chSkill.skillLearned.find(it.dwSkillID) != self->chSkill.skillLearned.end()) {
+            skillValue = self->chSkill.skillLearned.at(it.dwSkillID); // 获取技能等级
+        }
+        if (!staticCheckSelfLearntSkillCompare(it.nLevelCompareFlag, it.dwSkillLevel, skillValue)) {
+            return false; // 技能比较不符合要求, CastSkill 失败
         }
     }
     return true;
@@ -355,7 +366,7 @@ static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skil
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue) {
     switch (flag) {
     case static_cast<int>(enumLuaSkillCompareFlag::EQUAL):
-        return skillValue == luaValue;
+        return skillValue == luaValue; // 其中包含 EQUAL 0 的情况
         break;
     case static_cast<int>(enumLuaSkillCompareFlag::GREATER):
         return skillValue > luaValue;
@@ -413,6 +424,12 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
             }
         }
     }
+}
+
+static void callbackDelaySubSkill(void *self, void *item) {
+    Character *ptrSelf = static_cast<Character *>(self);
+    const Skill::DelaySubSkill *ptrItem = static_cast<const Skill::DelaySubSkill *>(item);
+    ptrSelf->CastSkill2(ptrItem->skillID, ptrItem->skillLevel);
 }
 
 void Character::ActiveSkill(int skillID) {

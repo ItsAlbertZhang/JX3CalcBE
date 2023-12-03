@@ -9,6 +9,7 @@ using namespace ns_frame;
 
 const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
     // Skill
+    "SetDelaySubSkill",
     "AddAttribute",
     "AddSlowCheckSelfBuff",
     "AddSlowCheckDestBuff",
@@ -29,6 +30,7 @@ const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
     "IsHaveBuff",
     "ModifyCoolDown",
     "GetBuff",
+    "GetBuffByOwner",
     "GetSkillLevel",
     "SetTimer",
     "GetSkillTarget",
@@ -47,14 +49,20 @@ const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
     "GetSelectCharacter",
     "IsSkillRecipeActive",
     "DelMultiGroupBuffByID",
+    "DestroyPublicShadow",
+    "CreatePublicShadow",
+    "SetBuffLeftActiveCount",
+    "SetBuffNextActiveFrame",
 };
 
 bool ns_framestatic::luaInit(sol::state &lua) {
     lua.new_usertype<Skill>(
         "Skill",
+        "dwSkillID", &Skill::dwSkillID,
         "dwLevel", &Skill::dwLevel,
         "nChannelInterval", &Skill::nChannelInterval,
 
+        "SetDelaySubSkill", &Skill::SetDelaySubSkill,
         "AddAttribute", sol::overload(&Skill::AddAttribute_iiii, &Skill::AddAttribute_iisi, &Skill::AddAttribute_iidi),
 
         "AddSlowCheckSelfBuff", &Skill::AddSlowCheckSelfBuff,
@@ -127,8 +135,8 @@ bool ns_framestatic::luaInit(sol::state &lua) {
 
     lua.new_usertype<Character>(
         "Skill",
-        "CastSkill", sol::overload(&Character::CastSkill2, &Character::CastSkill4),
-        "AddBuff", sol::overload(&Character::AddBuff4, &Character::AddBuff5),
+        "CastSkill", sol::overload(&Character::CastSkill2, &Character::CastSkill3, &Character::CastSkill4),
+        "AddBuff", sol::overload(&Character::AddBuff4, &Character::AddBuff5, &Character::AddBuff7),
         "DelBuff", &Character::DelBuff,
         "DelGroupBuff", &Character::DelGroupBuff,
         "DelMultiGroupBuffByID", &Character::DelMultiGroupBuffByID,
@@ -136,6 +144,7 @@ bool ns_framestatic::luaInit(sol::state &lua) {
         "IsInParty", &Character::IsInParty,
         "ModifyCoolDown", &Character::ModifyCoolDown,
         "GetBuff", &Character::GetBuff,
+        "GetBuffByOwner", &Character::GetBuffByOwner,
         "GetSkillLevel", &Character::GetSkillLevel,
         "GetMapID", &Character::GetMapID,
         "GetScene", &Character::GetScene,
@@ -151,19 +160,31 @@ bool ns_framestatic::luaInit(sol::state &lua) {
         "ResetCD", &Character::ResetCD,
         "GetSelectCharacter", &Character::GetSelectCharacter,
         "IsSkillRecipeActive", &Character::IsSkillRecipeActive,
+        "DestroyPublicShadow", &Character::DestroyPublicShadow,
+        "CreatePublicShadow", &Character::CreatePublicShadow,
+        "SetBuffLeftActiveCount", &Character::SetBuffLeftActiveCount,
+        "SetBuffNextActiveFrame", &Character::SetBuffNextActiveFrame,
         "dwID", &Character::dwID,
         "nLevel", &Character::nLevel,
         "nX", &Character::nX, "nY", &Character::nY, "nZ", &Character::nZ,
+        "nRoleType", &Character::nRoleType,
         "nCurrentSunEnergy", &Character::nCurrentSunEnergy,
         "nCurrentMoonEnergy", &Character::nCurrentMoonEnergy,
         "nSunPowerValue", &Character::nSunPowerValue,
         "nMoonPowerValue", &Character::nMoonPowerValue,
         "bSurplusAutoCast", &Character::bSurplusAutoCast,
-        "bSurplusAutoReplenish", &Character::bSurplusAutoReplenish);
+        "bSurplusAutoReplenish", &Character::bSurplusAutoReplenish,
+        "bFightState", &Character::bFightState,
+        "fMaxLife64", &Character::fMaxLife64,
+        "fCurrentLife64", &Character::fCurrentLife64);
 
     lua.new_usertype<CharacterBuff::Item>(
         "Buff",
+        "nLevel", &CharacterBuff::Item::nLevel,
+        "nIndex", &CharacterBuff::Item::nIndex,
         "nStackNum", &CharacterBuff::Item::nStackNum,
+        "nLeftActiveCount", &CharacterBuff::Item::nLeftActiveCount,
+        "nNextActiveFrame", &CharacterBuff::Item::nNextActiveFrame,
         "nCustomValue", &CharacterBuff::Item::nCustomValue);
 
     lua.new_usertype<CharacterScene>(
@@ -224,6 +245,12 @@ bool ns_framestatic::luaInit(sol::state &lua) {
         MOVE_STATE[ns_framestatic::refLuaMoveState[i]] = i;
     }
     lua["MOVE_STATE"] = MOVE_STATE;
+
+    sol::table ROLE_TYPE = lua.create_table();
+    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaRoleType::COUNT); i++) {
+        ROLE_TYPE[ns_framestatic::refLuaRoleType[i]] = i;
+    }
+    lua["ROLE_TYPE"] = ROLE_TYPE;
 
     lua["CONSUME_BASE"] = 100;
     lua["LENGTH_BASE"] = 64;

@@ -51,7 +51,7 @@ public:
     int MoonSubsectionSkillLevel;
 
     // ---------- 技能等级 ----------
-    int dwID = -1;
+    int dwSkillID = -1;
     int dwLevel = 1;
 
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性类 ----------
@@ -152,6 +152,15 @@ public:
         }
     };
 
+    class DelaySubSkill {
+    public:
+        DelaySubSkill(int delay, int skillID, int skillLevel)
+            : delay(delay), skillID(skillID), skillLevel(skillLevel) {}
+        int delay = 0;
+        int skillID = 0;
+        int skillLevel = 0;
+    };
+
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性 ----------
 
     std::vector<SkillAttribute> attrAttributes;                      // AddAttribute 添加的属性列表
@@ -159,8 +168,10 @@ public:
     std::vector<SkillCheckSelfLearntSkill> attrCheckSelfLearntSkill; // 需要检查的自身技能
     SkillBindBuff attrBindBuff;                                      // 需要绑定的 buff
     SkillCoolDown attrCoolDown;                                      // 需要绑定的 CD
+    std::vector<DelaySubSkill> attrDelaySubSkill;                    // 需要延迟的子技能
 
     // ---------- GetSkillLevelData 中操作的属性 ----------
+    void SetDelaySubSkill(int a, int b, int c);
 
     void AddAttribute_iiii(int a, int b, int c, int d);
     void AddAttribute_iisi(int a, int b, std::string c, int d);

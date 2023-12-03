@@ -89,6 +89,20 @@ inline const char *refLuaMoveState[] = {
     "ON_REPULSED",
 };
 
+enum class enumLuaRoleType {
+    LITTLE_BOY,
+    STANDARD_MALE,
+    LITTLE_GIRL,
+    STANDARD_FEMALE,
+    COUNT,
+};
+inline const char *refLuaRoleType[] = {
+    "LITTLE_BOY",
+    "STANDARD_MALE",
+    "LITTLE_GIRL",
+    "STANDARD_FEMALE",
+};
+
 } // namespace ns_framestatic
 
 #endif // FRAME_STATIC_REF_H_

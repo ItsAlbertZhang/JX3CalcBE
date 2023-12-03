@@ -27,7 +27,7 @@ void SkillManager::add(int skillID, int skillLevel) {
     }
     // 初始化技能
     Skill skill;
-    skill.dwID = skillID;
+    skill.dwSkillID = skillID;
     skill.dwLevel = skillLevel;
     // 获取 tab
     if (data.find(skillID) == data.end()) {
@@ -61,6 +61,10 @@ void SkillManager::add(int skillID, int skillLevel) {
         // 成功执行, 将技能存入缓存
         data[skillID][skillLevel] = std::move(skill);
     }
+}
+
+void Skill::SetDelaySubSkill(int a, int b, int c) {
+    attrDelaySubSkill.emplace_back(a, b, c);
 }
 
 void Skill::AddAttribute_iiii(int a, int b, int c, int d) {
