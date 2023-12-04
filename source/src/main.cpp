@@ -1,6 +1,7 @@
 #include "frame/character/character.h"
 #include "frame/event.h"
-#include "frame/global/skill.h"
+#include "frame/global/uibuff.h"
+#include "frame/global/uiskill.h"
 #include "frame/runtime_lua.h"
 #include "frame/static_lua.h"
 #include "gdi.h"
@@ -178,9 +179,29 @@ int main(int argc, char *argv[]) {
               << "type\t"
               << "name" << std::endl;
     for (auto &it : player.chDamage.damageList) {
-        const ns_frame::Skill &skill = ns_frame::SkillManager::get(it.skillID, it.skillLevel);
-        std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s\t" << it.skillID << "\t" << it.skillLevel << "\t" << it.isCritical << "\t" << it.damage << "\t" << static_cast<int>(it.damageType) << "\t" << skill.tab.at("SkillName") << std::endl;
+        std::string name;
+        switch (it.source) {
+        case ns_frame::DamageSource::skill: {
+            const ns_frame::UISkill &skill = ns_frame::UISkillManager::get(it.id, it.level);
+            name = skill.Name;
+        } break;
+        case ns_frame::DamageSource::buff: {
+            const ns_frame::UIBuff &buff = ns_frame::UIBuffManager::get(it.id, it.level);
+            name = buff.Name;
+        } break;
+        }
+        std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s\t"
+                  << it.id << "\t" << it.level << "\t" << it.isCritical << "\t"
+                  << it.damage << "\t" << static_cast<int>(it.damageType) << "\t"
+                  << name << std::endl;
     }
+
+    // for (auto &it : player.chDamage.damageList) {
+    //     auto skill = ns_frame::SkillManager::get(it.skillID, it.skillLevel);
+    //     /* FIXME: Replace this after proper implementation of damage source */
+    //     ns_frame::DamageSource source = ns_frame::DamageSource::Skill;
+    //     std::cout << (source == ns_frame::DamageSource::Skill ? ns_frame::UISkillManager::representDamage(it) : ns_frame::UIBuffManager::representDamage(it));
+    // }
 
     // // 测试用例 3
     // class MyClass {

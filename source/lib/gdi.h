@@ -26,6 +26,8 @@ enum class Tab {
     cooldown,
     skillrecipe,
     skillevent,
+    ui_skill,
+    ui_buff,
     COUNT, // 用于计数, 请勿使用
 };
 

@@ -28,7 +28,7 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
     for (int idxType = 0; idxType < static_cast<int>(DamageType::COUNT); idxType++) {
         for (int idxTime = 0; idxTime < callDamage[idxType]; idxTime++) {
             runtime->damageList.emplace_back(
-                Event::now(),
+                Event::now(), DamageSource::skill,
                 skill.dwSkillID, skill.dwLevel,
                 isCritical,
                 self->CalcDamage(
@@ -41,7 +41,7 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
         }
         for (int idxTime = 0; idxTime < callSurplusDamage[idxType]; idxTime++) {
             runtime->damageList.emplace_back(
-                Event::now(),
+                Event::now(), DamageSource::skill,
                 skill.dwSkillID, skill.dwLevel,
                 isCritical,
                 self->CalcDamage(
