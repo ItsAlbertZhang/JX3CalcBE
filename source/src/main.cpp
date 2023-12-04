@@ -2,6 +2,8 @@
 #include "frame/character/property/damage.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
+#include "frame/global/uiskill.h"
+#include "frame/global/uibuff.h"
 #include "frame/runtime_lua.h"
 #include "frame/static_lua.h"
 #include "gdi.h"
@@ -31,26 +33,6 @@ void callbackCastSkill(void *self, void *param) {
   player->Cast(3963);  // 烈日斩
   player->Cast(3960);  // 银月斩
   ns_frame::Event::add(20, callbackCastSkill, self, nullptr);
-}
-
-using ns_frame::DamageType;
-
-inline std::string DamageToString(int damage, DamageType damageType) {
-  switch (damageType) {
-  case DamageType::Physics:
-    return "\033[37m" + std::to_string(damage) + "点外功\033[0m"; // White
-  case DamageType::Solar:
-    return "\033[31m" + std::to_string(damage) + "点阳性内功\033[0m"; // Red
-  case DamageType::Lunar:
-    return "\033[94m" + std::to_string(damage) + "点阴性内功\033[0m"; // Blue
-  case DamageType::Neutral:
-    return "\033[33m" + std::to_string(damage) +
-           "点混元性内功\033[0m"; // Yellow
-  case DamageType::Poison:
-    return "\033[35m" + std::to_string(damage) + "点毒性内功\033[0m"; // Magenta
-  default:
-    return "Unknown";
-  }
 }
 
 int main(int argc, char *argv[]) {
@@ -211,11 +193,9 @@ int main(int argc, char *argv[]) {
 
   for (auto &it : player.chDamage.damageList) {
     auto skill = ns_frame::SkillManager::get(it.skillID, it.skillLevel);
-    std::cout << "[" << std::fixed << std::setprecision(2) << it.tick / 1024.0
-              << "s][雨轩]的[" << skill.SkillName
-              << (it.isCritical ? "(会心)" : "") << "]对[雨轩的木桩]造成了"
-              << DamageToString(it.damage, it.damageType) << "伤害。"
-              << std::endl;
+    /* FIXME: Replace this after proper implementation of damage source */
+    ns_frame::DamageSource source = ns_frame::DamageSource::Skill;
+    std::cout << (source == ns_frame::DamageSource::Skill ? ns_frame::UISkillManager::representDamage(it) : ns_frame::UIBuffManager::representDamage(it));
   }
   // // 测试用例 3
   // class MyClass {

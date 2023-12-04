@@ -17,6 +17,12 @@ enum class DamageType {
     COUNT,
 };
 
+enum class DamageSource {
+    Skill,
+    Buff,
+    COUNT,
+};
+
 class Damage {
 public:
     Damage(event_tick_t tick, int skillID, int skillLevel, bool isCritical, int damage, DamageType damageType)
