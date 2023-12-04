@@ -1,7 +1,6 @@
 #ifndef FRAME_CHARACTER_PROPERTY_DAMAGE_H_
 #define FRAME_CHARACTER_PROPERTY_DAMAGE_H_
 
-#include <string>
 #include <vector>
 
 namespace ns_frame {
@@ -18,18 +17,19 @@ enum class DamageType {
 };
 
 enum class DamageSource {
-    Skill,
-    Buff,
+    skill,
+    buff,
     COUNT,
 };
 
 class Damage {
 public:
-    Damage(event_tick_t tick, int skillID, int skillLevel, bool isCritical, int damage, DamageType damageType)
-        : tick(tick), skillID(skillID), skillLevel(skillLevel), isCritical(isCritical), damage(damage), damageType(damageType) {}
+    Damage(event_tick_t tick, DamageSource source, int id, int level, bool isCritical, int damage, DamageType damageType)
+        : tick(tick), source(source), id(id), level(level), isCritical(isCritical), damage(damage), damageType(damageType) {}
     event_tick_t tick;
-    int skillID;
-    int skillLevel;
+    DamageSource source;
+    int id;
+    int level;
     bool isCritical;
     int damage;
     DamageType damageType;

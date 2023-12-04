@@ -56,8 +56,8 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
         std::uniform_int_distribution<> dis(0, 9999);
         bool isCritical = dis(gen) < atCriticalStrike;
         src->chDamage.damageList.emplace_back(
-            Event::now(),
-            item->dwCasterSkillID, item->dwCasterSkillLevel,
+            Event::now(), DamageSource::buff,
+            item->BuffID, item->nLevel,
             isCritical,
             src->CalcDamage(
                 item->attr, self, DamageType::Solar, // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
@@ -78,8 +78,8 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
         std::uniform_int_distribution<> dis(0, 9999);
         bool isCritical = dis(gen) < atCriticalStrike;
         src->chDamage.damageList.emplace_back(
-            Event::now(),
-            item->dwCasterSkillID, item->dwCasterSkillLevel,
+            Event::now(), DamageSource::buff,
+            item->BuffID, item->nLevel,
             isCritical,
             src->CalcDamage(
                 item->attr, self, DamageType::Lunar, // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
