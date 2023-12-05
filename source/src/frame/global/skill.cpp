@@ -101,9 +101,9 @@ void Skill::AddCheckSelfLearntSkill(int a, int b, int c) {
 
 void Skill::BindBuff(int a, int b, int c) {
     attrBindBuff.used = true;
-    attrBindBuff.isValid[a] = true;
-    attrBindBuff.nBuffID[a] = b;
-    attrBindBuff.nBuffLevel[a] = c;
+    attrBindBuff.isValid[a - 1] = true;
+    attrBindBuff.nBuffID[a - 1] = b;
+    attrBindBuff.nBuffLevel[a - 1] = c;
 }
 
 void Skill::SetPublicCoolDown(int a) {
@@ -114,14 +114,14 @@ void Skill::SetPublicCoolDown(int a) {
 
 void Skill::SetNormalCoolDown(int a, int b) {
     attrCoolDown.used = true;
-    attrCoolDown.isValidNormalCoolDown[a] = true;
-    attrCoolDown.nNormalCoolDownID[a] = b;
+    attrCoolDown.isValidNormalCoolDown[a - 1] = true;
+    attrCoolDown.nNormalCoolDownID[a - 1] = b;
 }
 
 void Skill::SetCheckCoolDown(int a, int b) {
     attrCoolDown.used = true;
-    attrCoolDown.isValidCheckCoolDown[a] = true;
-    attrCoolDown.nCheckCoolDownID[a] = b;
+    attrCoolDown.isValidCheckCoolDown[a - 1] = true;
+    attrCoolDown.nCheckCoolDownID[a - 1] = b;
 }
 
 void Skill::SetSubsectionSkill(int a, int b, int c, int d) {

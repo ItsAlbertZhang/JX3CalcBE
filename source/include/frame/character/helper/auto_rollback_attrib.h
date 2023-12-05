@@ -15,6 +15,10 @@ namespace ns_frame {
 class AutoRollbackAttrib {
 public:
     AutoRollbackAttrib(Character *self, CharacterBuff::Item *item, const Buff &buff);
+    AutoRollbackAttrib(const AutoRollbackAttrib &) = delete;
+    AutoRollbackAttrib &operator=(const AutoRollbackAttrib &) = delete;
+    AutoRollbackAttrib(AutoRollbackAttrib &&) = delete;
+    AutoRollbackAttrib &operator=(AutoRollbackAttrib &&) = delete;
     ~AutoRollbackAttrib();
     void active();
 

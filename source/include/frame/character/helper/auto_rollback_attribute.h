@@ -16,6 +16,10 @@ namespace ns_frame {
 class AutoRollbackAttribute {
 public:
     AutoRollbackAttribute(Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill);
+    AutoRollbackAttribute(const AutoRollbackAttribute &) = delete;
+    AutoRollbackAttribute &operator=(const AutoRollbackAttribute &) = delete;
+    AutoRollbackAttribute(AutoRollbackAttribute &&) = delete;
+    AutoRollbackAttribute &operator=(AutoRollbackAttribute &&) = delete;
     ~AutoRollbackAttribute();
     bool CallDamage(int DamageAddPercent);
 

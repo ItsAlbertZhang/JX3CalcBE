@@ -123,6 +123,7 @@ public:
         int nPublicCoolDown = 0;
         bool isValidNormalCoolDown[3] = {false, false, false};
         int nNormalCoolDownID[3] = {0, 0, 0};
+        int nNormalCoolDownAdd[3] = {0, 0, 0};
         bool isValidCheckCoolDown[3] = {false, false, false};
         int nCheckCoolDownID[3] = {0, 0, 0};
         void overload(const SkillCoolDown &other) {
@@ -144,11 +145,9 @@ public:
             }
         }
         void add(int CoolDownAdd1, int CoolDownAdd2, int CoolDownAdd3) {
-            for (int i = 0; i < 3; i++) {
-                if (isValidNormalCoolDown[i]) {
-                    nNormalCoolDownID[i] += CoolDownAdd1;
-                }
-            }
+            nNormalCoolDownAdd[0] += CoolDownAdd1;
+            nNormalCoolDownAdd[1] += CoolDownAdd2;
+            nNormalCoolDownAdd[2] += CoolDownAdd3;
         }
     };
 

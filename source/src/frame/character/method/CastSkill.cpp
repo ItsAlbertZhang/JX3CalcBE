@@ -17,7 +17,7 @@ static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue)
 static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
 static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDown &cooldown);
-static inline void staticTriggerCoolDown(Character *self, int nCoolDownID);
+static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int nCoolDownAdd);
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
 static void callbackDelaySubSkill(void *self, void *item);
 
@@ -219,11 +219,11 @@ bool Character::CastSkill(Character *target, int skillID, int skillLevel) {
 
     // 3. 触发 CD
     if (cooldown.isValidPublicCoolDown) {
-        staticTriggerCoolDown(this, cooldown.nPublicCoolDown);
+        staticTriggerCoolDown(this, cooldown.nPublicCoolDown, 0);
     }
     for (int i = 0; i < 3; i++) {
         if (cooldown.isValidNormalCoolDown[i]) {
-            staticTriggerCoolDown(this, cooldown.nNormalCoolDownID[i]);
+            staticTriggerCoolDown(this, cooldown.nNormalCoolDownID[i], cooldown.nNormalCoolDownAdd[i]);
         }
     }
 
@@ -250,10 +250,11 @@ bool Character::CastSkill(Character *target, int skillID, int skillLevel) {
     }
 
     // 6. 处理 SkillRecipe: ScriptFile
-    // 构造技能运行时资源: vector<AutoRollbackAttribute>
-    std::vector<AutoRollbackAttribute> autoRollbackAttributeList;
+    // 构造技能运行时资源: vector<unique_ptr<AutoRollbackAttribute>>
+    std::vector<std::unique_ptr<AutoRollbackAttribute>> autoRollbackAttributeList;
+    autoRollbackAttributeList.reserve(recipeskillList.size());
     for (const auto &it : recipeskillList) {
-        autoRollbackAttributeList.emplace_back(this, target, &runtime, *it);
+        autoRollbackAttributeList.emplace_back(new AutoRollbackAttribute{this, target, &runtime, *it});
     }
 
     // 7. 计算伤害
@@ -403,11 +404,12 @@ static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDo
     return true;
 }
 
-static inline void staticTriggerCoolDown(Character *self, int cooldownID) {
+static inline void staticTriggerCoolDown(Character *self, int cooldownID, int cooldownAdd) {
     const Cooldown &cooldown = CooldownManager::get(cooldownID);
     int durationFrame = cooldown.DurationFrame * (1024 - self->chAttr.getHaste()) / 1024;
     durationFrame = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
     durationFrame = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
+    durationFrame += cooldownAdd;
     self->ModifyCoolDown(cooldownID, durationFrame);
 }
 

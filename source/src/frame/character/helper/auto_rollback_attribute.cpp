@@ -115,6 +115,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                break;
             }
         } break; // EFFECT_TO_SELF_NOT_ROLLBACK
 
@@ -210,11 +211,20 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(enumLuaAttributeType::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE):
                 self->chAttr.atDecriticalDamagePowerBaseKiloNumRate += it.param1Int * c;
                 break;
+            case static_cast<int>(enumLuaAttributeType::PHYSICS_CRITICAL_STRIKE_BASE_RATE):
+                self->chAttr.atPhysicsCriticalStrikeBaseRate += it.param1Int * c;
+                break;
             case static_cast<int>(enumLuaAttributeType::SOLAR_CRITICAL_STRIKE_BASE_RATE):
                 self->chAttr.atSolarCriticalStrikeBaseRate += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::LUNAR_CRITICAL_STRIKE_BASE_RATE):
                 self->chAttr.atLunarCriticalStrikeBaseRate += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::NEUTRAL_CRITICAL_STRIKE_BASE_RATE):
+                self->chAttr.atNeutralCriticalStrikeBaseRate += it.param1Int * c;
+                break;
+            case static_cast<int>(enumLuaAttributeType::POISON_CRITICAL_STRIKE_BASE_RATE):
+                self->chAttr.atPoisonCriticalStrikeBaseRate += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::MAGIC_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE):
                 self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += it.param1Int * c;
@@ -243,8 +253,13 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(enumLuaAttributeType::SOLAR_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE):
                 self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += it.param1Int * c;
                 break;
+            case static_cast<int>(enumLuaAttributeType::ADD_DAMAGE_BY_DST_MOVE_STATE):
+                // param1Int 为目标移动状态. 暂时不对其进行处理, 统一直接使用 param2 进行增伤.
+                self->chAttr.atAddDamageByDstMoveState += it.param2 * c;
+                break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                break;
             }
         } break; // EFFECT_TO_SELF_AND_ROLLBACK
 
@@ -314,6 +329,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                break;
             }
         } break; // EFFECT_TO_DEST_NOT_ROLLBACK
 
@@ -326,8 +342,12 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             default:
                 LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                break;
             }
         } break; // EFFECT_TO_DEST_AND_ROLLBACK
+
+        default:
+            break;
 
         } // switch (it.mode)
     }

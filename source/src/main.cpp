@@ -7,29 +7,88 @@
 #include "gdi.h"
 #include "program/init.h"
 #include "program/log.h"
+#include <chrono>
 #include <filesystem>
 #include <iostream>
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 
+void callbackSwitchMacro(void *ptrIdx, void *value) {
+    int *ptr = static_cast<int *>(ptrIdx);
+    *ptr = static_cast<int>(reinterpret_cast<intptr_t>(value));
+}
+
 void callbackCastSkill(void *self, void *param) {
     ns_frame::Character *player = static_cast<ns_frame::Character *>(self);
-    if (player->GetBuff(25721, 0) == nullptr)
-        player->Cast(3967); // 净世破魔击
-    if (player->GetBuff(25716, 0) != nullptr) {
+    static int macroIdx = 0;
+    static int cnt = 0;
+    static bool switched = false;
+    switch (macroIdx) {
+
+    case 0: {
+        if (player->nCurrentMoonEnergy >= 10000 || player->nCurrentMoonEnergy <= 2000)
+            player->Cast(3967); // 净世破魔击
+
+        player->Cast(3979); // 驱夜断愁
+        player->Cast(3963); // 烈日斩
+        if (!switched && player->nCurrentSunEnergy >= 10000 && player->nCurrentMoonEnergy == 8000) {
+            int delay = 900;
+            if (cnt == 0)
+                delay = 300;
+            // else if (cnt == 1)
+            //     delay = 1900;
+            ns_frame::Event::add(delay, callbackSwitchMacro, &macroIdx, reinterpret_cast<void *>(1));
+            switched = true;
+            // std::cout << "switched to 1:" << ns_frame::Event::now() << std::endl;
+        }
+    } break;
+
+    case 1: {
         player->Cast(3974); // 暗尘弥散
-        player->Cast(3969); // 光明相
+        // buff:日月齐光·叁 && nobuff:悬象著明 && moon>=100
+        if (player->GetBuff(25721, 3) != nullptr && player->GetBuff(25716, 0) == nullptr && player->nCurrentMoonEnergy >= 10000)
+            player->Cast(3969); // 光明相
+        player->Cast(34347);    // 悬象著明
+        player->Cast(3966);     // 生死劫
+        if (player->nCurrentMoonEnergy <= 4000)
+            player->Cast(22890); // 诛邪镇魔
+        player->Cast(3967);      // 净世破魔击
+        if (player->nCurrentMoonEnergy <= 4000)
+            player->Cast(3979); // 驱夜断愁
+        player->Cast(3960);     // 银月斩
+        player->Cast(3963);     // 烈日斩
+
+        if (player->nCurrentSunEnergy >= 10000 && player->nCurrentMoonEnergy >= 10000) {
+            switched = false;
+            macroIdx = 2;
+            cnt++;
+            // std::cout << "switched to 2:" << ns_frame::Event::now() << std::endl;
+        }
+    } break;
+
+    case 2: {
+        if (player->nCurrentMoonEnergy >= 6000)
+            player->Cast(22890); // 诛邪镇魔
+        if (player->nCurrentSunEnergy >= 10000)
+            player->Cast(3966); // 生死劫
+        player->Cast(3967);     // 净世破魔击
+        player->Cast(3960);     // 银月斩
+        if (player->nCurrentMoonEnergy >= 6000 || player->nCurrentSunEnergy >= 6000)
+            player->Cast(3963); // 烈日斩
+        if (player->nCurrentSunEnergy == 4000 && player->nCurrentMoonEnergy == 6000)
+            player->Cast(3962); // 赤日轮
+        // cast [nobuff:日月齐光 && moon>=100 && sun<100] switch 0
+        if (player->GetBuff(25721, 0) == nullptr && player->nCurrentMoonEnergy >= 10000 && player->nCurrentSunEnergy < 10000) {
+            macroIdx = 0;
+            // std::cout << "switched to 0:" << ns_frame::Event::now() << std::endl;
+        }
     }
 
-    player->Cast(22890); // 诛邪镇魔
-    player->Cast(34347); // 悬象著明
-    player->Cast(3966);  // 生死劫
-    player->Cast(3967);  // 净世破魔击
-    player->Cast(3979);  // 驱夜断愁
-    player->Cast(3963);  // 烈日斩
-    player->Cast(3960);  // 银月斩
-    ns_frame::Event::add(20, callbackCastSkill, self, nullptr);
+    default:
+        break;
+    }
+    ns_frame::Event::add(60, callbackCastSkill, self, nullptr);
 }
 
 int main(int argc, char *argv[]) {
@@ -38,7 +97,7 @@ int main(int argc, char *argv[]) {
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
 #endif
-    std::cout << "你好, 世界!" << std::endl;
+    // std::cout << "你好, 世界!" << std::endl;
 
     bool ret;
 
@@ -46,22 +105,22 @@ int main(int argc, char *argv[]) {
     ns_program::Init::init(argc, argv);
     // 初始化接口
     ret = gdi::Interface::initGameData(ns_program::Config::pJX3, ns_program::Config::pUnpack);
-    std::cout << "initGameData = " << ret << std::endl;
+    // std::cout << "initGameData = " << ret << std::endl;
     if (!ret)
         return 0;
 
     ret = gdi::Interface::initLua(ns_framestatic::luaInit, ns_framestatic::luaFuncStaticToDynamic);
-    std::cout << "initLua  = " << ret << std::endl;
+    // std::cout << "initLua  = " << ret << std::endl;
     if (!ret)
         return 0;
 
     ret = gdi::Interface::initTab(static_cast<int>(gdi::Tab::COUNT));
-    std::cout << "initTab  = " << ret << std::endl;
+    // std::cout << "initTab  = " << ret << std::endl;
     if (!ret)
         return 0;
 
     // 如果成功加载 GameDataFetcher, current_path 会发生改变.
-    std::cout << std::filesystem::current_path() << std::endl;
+    // std::cout << std::filesystem::current_path() << std::endl;
 
     // // 测试用例 1
     // sol::state lua;
@@ -122,6 +181,43 @@ int main(int argc, char *argv[]) {
     // player.ActiveSkill(34347);
     player.ActiveSkill(34370);
 
+    player.chSkillRecipe.add(1005, 1); // 赤日轮, 会心提高4%
+    player.chSkillRecipe.add(999, 1);  // 赤日轮, 伤害提高3%
+    player.chSkillRecipe.add(1000, 1); // 赤日轮, 伤害提高4%
+    player.chSkillRecipe.add(1001, 1); // 赤日轮, 伤害提高5%
+
+    player.chSkillRecipe.add(1011, 1); // 烈日斩, 会心提高4%
+    player.chSkillRecipe.add(1008, 1); // 烈日斩, 伤害提高4%
+    player.chSkillRecipe.add(1009, 1); // 烈日斩, 伤害提高5%
+    player.chSkillRecipe.add(1013, 1); // 烈日斩, 对原地静止的目标伤害提升10%
+
+    player.chSkillRecipe.add(1621, 1); // 生死劫, 伤害提高3%
+    player.chSkillRecipe.add(1622, 1); // 生死劫, 伤害提高4%
+    player.chSkillRecipe.add(1623, 1); // 生死劫, 伤害提高5%
+
+    player.chSkillRecipe.add(1019, 1); // 净世破魔击, 会心提高5%
+    player.chSkillRecipe.add(1015, 1); // 净世破魔击, 伤害提高4%
+    player.chSkillRecipe.add(1016, 1); // 净世破魔击, 伤害提高5%
+    player.chSkillRecipe.add(5206, 1); // 焚影圣诀心法下净世破魔击·月命中后回复20点月魂
+
+    player.chSkillRecipe.add(989, 1); // 幽月轮, 会心提高4%
+    player.chSkillRecipe.add(990, 1); // 幽月轮, 会心提高5%
+    player.chSkillRecipe.add(984, 1); // 幽月轮, 伤害提高3%
+    player.chSkillRecipe.add(985, 1); // 幽月轮, 伤害提高4%
+
+    player.chSkillRecipe.add(992, 1); // 银月斩, 会心提高3%
+    player.chSkillRecipe.add(993, 1); // 银月斩, 会心提高4%
+    player.chSkillRecipe.add(994, 1); // 银月斩, 会心提高5%
+
+    player.chSkillRecipe.add(1029, 1); // 光明相, 调息时间减少10秒
+    player.chSkillRecipe.add(1030, 1); // 光明相, 调息时间减少10秒
+    player.chSkillRecipe.add(1031, 1); // 光明相, 调息时间减少10秒
+
+    player.chSkillRecipe.add(1055, 1); // 驱夜断愁, 会心提高4%
+    player.chSkillRecipe.add(1056, 1); // 驱夜断愁, 会心提高5%
+    player.chSkillRecipe.add(1052, 1); // 驱夜断愁, 伤害提高4%
+    player.chSkillRecipe.add(1053, 1); // 驱夜断愁, 伤害提高5%
+
     // player.DeactiveSkill(10242);
 
     player.chAttr.atHasteBase = 95;
@@ -160,6 +256,8 @@ int main(int argc, char *argv[]) {
     npc.fMaxLife64 = 1e+10;
     npc.fCurrentLife64 = 1e+10;
 
+    auto start = std::chrono::steady_clock::now();
+
     player.Cast(3974);
     player.CheckSunMoonPower();
 
@@ -168,9 +266,12 @@ int main(int argc, char *argv[]) {
     // std::cout << ns_frame::Event::now() << std::endl;
 
     callbackCastSkill(&player, nullptr);
-    while (ns_frame::Event::now() < 1024 * 30) {
+    while (ns_frame::Event::now() < 1024 * 300) {
         ns_frame::Event::run();
     }
+
+    auto end = std::chrono::steady_clock::now();
+
     std::cout << "tick\t"
               << "ID\t"
               << "lv\t"
@@ -178,6 +279,7 @@ int main(int argc, char *argv[]) {
               << "dmg\t"
               << "type\t"
               << "name" << std::endl;
+    ns_frame::event_tick_t presentCurr = 0;
     for (auto &it : player.chDamage.damageList) {
         std::string name;
         switch (it.source) {
@@ -190,11 +292,18 @@ int main(int argc, char *argv[]) {
             name = buff.Name;
         } break;
         }
+        if (it.tick != presentCurr) {
+            presentCurr = it.tick;
+            std::cout << std::endl;
+        }
         std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s\t"
                   << it.id << "\t" << it.level << "\t" << it.isCritical << "\t"
                   << it.damage << "\t" << static_cast<int>(it.damageType) << "\t"
                   << name << std::endl;
     }
+
+    std::cout << "Elapsed time in milliseconds: "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
 
     // for (auto &it : player.chDamage.damageList) {
     //     auto skill = ns_frame::SkillManager::get(it.skillID, it.skillLevel);
