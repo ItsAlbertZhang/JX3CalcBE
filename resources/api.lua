@@ -188,7 +188,7 @@ function Macro2(player)
     end
     player:Cast(3967);     -- 净世破魔击
     player:Cast(3960);     -- 银月斩
-    if player.nCurrentMoonEnergy >= 6000 and player.nCurrentSunEnergy >= 6000 then
+    if player.nCurrentMoonEnergy >= 6000 or player.nCurrentSunEnergy >= 6000 then
         player:Cast(3963); -- 烈日斩
     end
     if player.nCurrentMoonEnergy == 6000 and player.nCurrentSunEnergy == 4000 then
