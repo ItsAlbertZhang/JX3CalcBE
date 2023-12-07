@@ -8,87 +8,41 @@
 #include "program/init.h"
 #include "program/log.h"
 #include <chrono>
+#include <cstdlib> //  std::rand()
 #include <filesystem>
 #include <iostream>
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 
-void callbackSwitchMacro(void *ptrIdx, void *value) {
-    int *ptr = static_cast<int *>(ptrIdx);
-    *ptr = static_cast<int>(reinterpret_cast<intptr_t>(value));
+std::vector<sol::protected_function> macro;
+bool set_by_lua = false;
+int lua_delay = 0;
+
+void SetNextMacroActive(int delay) {
+    set_by_lua = true;
+    lua_delay = delay;
 }
 
 void callbackCastSkill(void *self, void *param) {
     ns_frame::Character *player = static_cast<ns_frame::Character *>(self);
-    static int macroIdx = 0;
-    static int cnt = 0;
-    static bool switched = false;
-    switch (macroIdx) {
-
-    case 0: {
-        if (player->nCurrentMoonEnergy >= 10000 || player->nCurrentMoonEnergy <= 2000)
-            player->Cast(3967); // 净世破魔击
-
-        player->Cast(3979); // 驱夜断愁
-        player->Cast(3963); // 烈日斩
-        if (!switched && player->nCurrentSunEnergy >= 10000 && player->nCurrentMoonEnergy == 8000) {
-            int delay = 900;
-            if (cnt == 0)
-                delay = 300;
-            // else if (cnt == 1)
-            //     delay = 1900;
-            ns_frame::Event::add(delay, callbackSwitchMacro, &macroIdx, reinterpret_cast<void *>(1));
-            switched = true;
-            // std::cout << "switched to 1:" << ns_frame::Event::now() << std::endl;
-        }
-    } break;
-
-    case 1: {
-        player->Cast(3974); // 暗尘弥散
-        // buff:日月齐光·叁 && nobuff:悬象著明 && moon>=100
-        if (player->GetBuff(25721, 3) != nullptr && player->GetBuff(25716, 0) == nullptr && player->nCurrentMoonEnergy >= 10000)
-            player->Cast(3969); // 光明相
-        player->Cast(34347);    // 悬象著明
-        player->Cast(3966);     // 生死劫
-        if (player->nCurrentMoonEnergy <= 4000)
-            player->Cast(22890); // 诛邪镇魔
-        player->Cast(3967);      // 净世破魔击
-        if (player->nCurrentMoonEnergy <= 4000)
-            player->Cast(3979); // 驱夜断愁
-        player->Cast(3960);     // 银月斩
-        player->Cast(3963);     // 烈日斩
-
-        if (player->nCurrentSunEnergy >= 10000 && player->nCurrentMoonEnergy >= 10000) {
-            switched = false;
-            macroIdx = 2;
-            cnt++;
-            // std::cout << "switched to 2:" << ns_frame::Event::now() << std::endl;
-        }
-    } break;
-
-    case 2: {
-        if (player->nCurrentMoonEnergy >= 6000)
-            player->Cast(22890); // 诛邪镇魔
-        if (player->nCurrentSunEnergy >= 10000)
-            player->Cast(3966); // 生死劫
-        player->Cast(3967);     // 净世破魔击
-        player->Cast(3960);     // 银月斩
-        if (player->nCurrentMoonEnergy >= 6000 || player->nCurrentSunEnergy >= 6000)
-            player->Cast(3963); // 烈日斩
-        if (player->nCurrentSunEnergy == 4000 && player->nCurrentMoonEnergy == 6000)
-            player->Cast(3962); // 赤日轮
-        // cast [nobuff:日月齐光 && moon>=100 && sun<100] switch 0
-        if (player->GetBuff(25721, 0) == nullptr && player->nCurrentMoonEnergy >= 10000 && player->nCurrentSunEnergy < 10000) {
-            macroIdx = 0;
-            // std::cout << "switched to 0:" << ns_frame::Event::now() << std::endl;
-        }
+    sol::protected_function_result res = macro[player->macroIdx](player);
+    if (!res.valid()) {
+        sol::error err = res;
+        std::cout << "Lua error: " << err.what() << std::endl;
     }
-
-    default:
-        break;
+    ns_frame::event_tick_t delay;
+    if (!set_by_lua) {
+        ns_frame::event_tick_t publicCooldownOver = player->chCooldown.cooldownList.at(player->publicCooldownID).tickOver;
+        ns_frame::event_tick_t now = ns_frame::Event::now();
+        delay = publicCooldownOver > now ? publicCooldownOver - now : 0; // 当前无技能可放
+    } else {
+        set_by_lua = false;
+        delay = lua_delay;
     }
-    ns_frame::Event::add(60, callbackCastSkill, self, nullptr);
+    delay += player->delayBase;
+    delay += std::rand() % player->delayRand;
+    ns_frame::Event::add(delay, callbackCastSkill, self, nullptr);
 }
 
 int main(int argc, char *argv[]) {
@@ -135,143 +89,169 @@ int main(int argc, char *argv[]) {
     // std::cout << "Foo2 call: " << int(foo2()) << std::endl;
 
     // 测试用例 2
-    ns_frame::Player player;
-    ns_frame::NPC npc;
+    std::filesystem::path pAPI = ns_program::Config::pExeDir / "api.lua";
+    sol::state lua;
+    lua.open_libraries(sol::lib::base);
+    ns_framestatic::luaInit(lua);
+    lua.script_file(pAPI.string());
+
+    ns_frame::Character player;
+    ns_frame::Character npc;
     player.isPlayer = true;
     player.targetSelect = &npc;
 
-    player.LearnSkill(10242, 13); // 焚影圣诀
-    player.dwKungfuID = 10242;
-    player.ActiveSkill(10242);
+    lua.set_function("SetNextMacroActive", SetNextMacroActive);
 
-    player.LearnSkill(3962, 33); // 赤日轮
-    player.LearnSkill(3963, 32); // 烈日斩
-    player.LearnSkill(3966, 1);  // 生死劫
-    player.LearnSkill(3967, 32); // 净世破魔击
-    player.LearnSkill(3959, 24); // 幽月轮
-    player.LearnSkill(3960, 18); // 银月斩
-    player.LearnSkill(3969, 1);  // 光明相
-    player.LearnSkill(3974, 1);  // 暗尘弥散
-    player.LearnSkill(3979, 29); // 驱夜断愁
+    sol::protected_function_result res = lua["Init"](player, npc);
+    if (!res.valid()) {
+        sol::error err = res;
+        std::cout << "Lua error: " << err.what() << std::endl;
+    }
+    for (int i = 0; i < player.macroNum; i++) {
+        macro.push_back(lua["Macro" + std::to_string(i)]);
+    }
 
-    player.LearnSkill(5972, 1);  // 腾焰飞芒
-    player.LearnSkill(18279, 1); // 净身明礼
-    player.LearnSkill(22888, 1); // 诛邪镇魔
-    player.LearnSkill(22890, 1); // 诛邪镇魔, 主动
-    player.LearnSkill(6717, 1);  // 无明业火
-    player.LearnSkill(34383, 1); // 明光恒照
-    player.LearnSkill(34395, 1); // 日月同辉
-    player.LearnSkill(34372, 1); // 靡业报劫
-    player.LearnSkill(17567, 1); // 用晦而明
-    player.LearnSkill(25166, 1); // 净体不畏
-    player.LearnSkill(34378, 1); // 降灵尊
-    player.LearnSkill(34347, 1); // 悬象著明
-    player.LearnSkill(34370, 1); // 日月齐光
+    res = lua["Ready"](player);
+    if (!res.valid()) {
+        sol::error err = res;
+        std::cout << "Lua error: " << err.what() << std::endl;
+    }
 
-    player.ActiveSkill(5972);
-    player.ActiveSkill(18279);
-    player.ActiveSkill(22888);
-    player.ActiveSkill(6717);
-    player.ActiveSkill(34383);
-    player.ActiveSkill(34395);
-    player.ActiveSkill(34372);
-    player.ActiveSkill(17567);
-    player.ActiveSkill(25166);
-    player.ActiveSkill(34378);
-    // player.ActiveSkill(34347);
-    player.ActiveSkill(34370);
+    // player.LearnSkill(10242, 13); // 焚影圣诀
+    // player.dwKungfuID = 10242;
+    // player.ActiveSkill(10242);
 
-    player.chSkillRecipe.add(1005, 1); // 赤日轮, 会心提高4%
-    player.chSkillRecipe.add(999, 1);  // 赤日轮, 伤害提高3%
-    player.chSkillRecipe.add(1000, 1); // 赤日轮, 伤害提高4%
-    player.chSkillRecipe.add(1001, 1); // 赤日轮, 伤害提高5%
+    // player.LearnSkill(3962, 33); // 赤日轮
+    // player.LearnSkill(3963, 32); // 烈日斩
+    // player.LearnSkill(3966, 1);  // 生死劫
+    // player.LearnSkill(3967, 32); // 净世破魔击
+    // player.LearnSkill(3959, 24); // 幽月轮
+    // player.LearnSkill(3960, 18); // 银月斩
+    // player.LearnSkill(3969, 1);  // 光明相
+    // player.LearnSkill(3974, 1);  // 暗尘弥散
+    // player.LearnSkill(3979, 29); // 驱夜断愁
 
-    player.chSkillRecipe.add(1011, 1); // 烈日斩, 会心提高4%
-    player.chSkillRecipe.add(1008, 1); // 烈日斩, 伤害提高4%
-    player.chSkillRecipe.add(1009, 1); // 烈日斩, 伤害提高5%
-    player.chSkillRecipe.add(1013, 1); // 烈日斩, 对原地静止的目标伤害提升10%
+    // player.LearnSkill(5972, 1);  // 腾焰飞芒
+    // player.LearnSkill(18279, 1); // 净身明礼
+    // player.LearnSkill(22888, 1); // 诛邪镇魔
+    // player.LearnSkill(22890, 1); // 诛邪镇魔, 主动
+    // player.LearnSkill(6717, 1);  // 无明业火
+    // player.LearnSkill(34383, 1); // 明光恒照
+    // player.LearnSkill(34395, 1); // 日月同辉
+    // player.LearnSkill(34372, 1); // 靡业报劫
+    // player.LearnSkill(17567, 1); // 用晦而明
+    // player.LearnSkill(25166, 1); // 净体不畏
+    // player.LearnSkill(34378, 1); // 降灵尊
+    // player.LearnSkill(34347, 1); // 悬象著明
+    // player.LearnSkill(34370, 1); // 日月齐光
 
-    player.chSkillRecipe.add(1621, 1); // 生死劫, 伤害提高3%
-    player.chSkillRecipe.add(1622, 1); // 生死劫, 伤害提高4%
-    player.chSkillRecipe.add(1623, 1); // 生死劫, 伤害提高5%
+    // player.ActiveSkill(5972);
+    // player.ActiveSkill(18279);
+    // player.ActiveSkill(22888);
+    // player.ActiveSkill(6717);
+    // player.ActiveSkill(34383);
+    // player.ActiveSkill(34395);
+    // player.ActiveSkill(34372);
+    // player.ActiveSkill(17567);
+    // player.ActiveSkill(25166);
+    // player.ActiveSkill(34378);
+    // // player.ActiveSkill(34347);
+    // player.ActiveSkill(34370);
 
-    player.chSkillRecipe.add(1019, 1); // 净世破魔击, 会心提高5%
-    player.chSkillRecipe.add(1015, 1); // 净世破魔击, 伤害提高4%
-    player.chSkillRecipe.add(1016, 1); // 净世破魔击, 伤害提高5%
-    player.chSkillRecipe.add(5206, 1); // 焚影圣诀心法下净世破魔击·月命中后回复20点月魂
+    // player.chSkillRecipe.add(1005, 1); // 赤日轮, 会心提高4%
+    // player.chSkillRecipe.add(999, 1);  // 赤日轮, 伤害提高3%
+    // player.chSkillRecipe.add(1000, 1); // 赤日轮, 伤害提高4%
+    // player.chSkillRecipe.add(1001, 1); // 赤日轮, 伤害提高5%
 
-    player.chSkillRecipe.add(989, 1); // 幽月轮, 会心提高4%
-    player.chSkillRecipe.add(990, 1); // 幽月轮, 会心提高5%
-    player.chSkillRecipe.add(984, 1); // 幽月轮, 伤害提高3%
-    player.chSkillRecipe.add(985, 1); // 幽月轮, 伤害提高4%
+    // player.chSkillRecipe.add(1011, 1); // 烈日斩, 会心提高4%
+    // player.chSkillRecipe.add(1008, 1); // 烈日斩, 伤害提高4%
+    // player.chSkillRecipe.add(1009, 1); // 烈日斩, 伤害提高5%
+    // player.chSkillRecipe.add(1013, 1); // 烈日斩, 对原地静止的目标伤害提升10%
 
-    player.chSkillRecipe.add(992, 1); // 银月斩, 会心提高3%
-    player.chSkillRecipe.add(993, 1); // 银月斩, 会心提高4%
-    player.chSkillRecipe.add(994, 1); // 银月斩, 会心提高5%
+    // player.chSkillRecipe.add(1621, 1); // 生死劫, 伤害提高3%
+    // player.chSkillRecipe.add(1622, 1); // 生死劫, 伤害提高4%
+    // player.chSkillRecipe.add(1623, 1); // 生死劫, 伤害提高5%
 
-    player.chSkillRecipe.add(1029, 1); // 光明相, 调息时间减少10秒
-    player.chSkillRecipe.add(1030, 1); // 光明相, 调息时间减少10秒
-    player.chSkillRecipe.add(1031, 1); // 光明相, 调息时间减少10秒
+    // player.chSkillRecipe.add(1019, 1); // 净世破魔击, 会心提高5%
+    // player.chSkillRecipe.add(1015, 1); // 净世破魔击, 伤害提高4%
+    // player.chSkillRecipe.add(1016, 1); // 净世破魔击, 伤害提高5%
+    // player.chSkillRecipe.add(5206, 1); // 焚影圣诀心法下净世破魔击·月命中后回复20点月魂
 
-    player.chSkillRecipe.add(1055, 1); // 驱夜断愁, 会心提高4%
-    player.chSkillRecipe.add(1056, 1); // 驱夜断愁, 会心提高5%
-    player.chSkillRecipe.add(1052, 1); // 驱夜断愁, 伤害提高4%
-    player.chSkillRecipe.add(1053, 1); // 驱夜断愁, 伤害提高5%
+    // player.chSkillRecipe.add(989, 1); // 幽月轮, 会心提高4%
+    // player.chSkillRecipe.add(990, 1); // 幽月轮, 会心提高5%
+    // player.chSkillRecipe.add(984, 1); // 幽月轮, 伤害提高3%
+    // player.chSkillRecipe.add(985, 1); // 幽月轮, 伤害提高4%
 
-    // player.DeactiveSkill(10242);
+    // player.chSkillRecipe.add(992, 1); // 银月斩, 会心提高3%
+    // player.chSkillRecipe.add(993, 1); // 银月斩, 会心提高4%
+    // player.chSkillRecipe.add(994, 1); // 银月斩, 会心提高5%
 
-    player.chAttr.atHasteBase = 95;
-    player.chAttr.atSpunkBase = 6380;
+    // player.chSkillRecipe.add(1029, 1); // 光明相, 调息时间减少10秒
+    // player.chSkillRecipe.add(1030, 1); // 光明相, 调息时间减少10秒
+    // player.chSkillRecipe.add(1031, 1); // 光明相, 调息时间减少10秒
 
-    player.chAttr.atPhysicsAttackPowerBase = 6;
-    player.chAttr.atSolarAttackPowerBase = 19308;
-    player.chAttr.atLunarAttackPowerBase = 19308;
-    player.chAttr.atNeutralAttackPowerBase = 12721;
-    player.chAttr.atPoisonAttackPowerBase = 12721;
+    // player.chSkillRecipe.add(1055, 1); // 驱夜断愁, 会心提高4%
+    // player.chSkillRecipe.add(1056, 1); // 驱夜断愁, 会心提高5%
+    // player.chSkillRecipe.add(1052, 1); // 驱夜断愁, 伤害提高4%
+    // player.chSkillRecipe.add(1053, 1); // 驱夜断愁, 伤害提高5%
 
-    player.chAttr.atPhysicsCriticalStrike = 8325;
-    player.chAttr.atSolarCriticalStrike = 15048;
-    player.chAttr.atLunarCriticalStrike = 15048;
-    player.chAttr.atNeutralCriticalStrike = 8715;
-    player.chAttr.atPoisonCriticalStrike = 8715;
+    // // player.DeactiveSkill(10242);
 
-    player.chAttr.atPhysicsCriticalDamagePowerBase = 0;
-    player.chAttr.atSolarCriticalDamagePowerBase = 188;
-    player.chAttr.atLunarCriticalDamagePowerBase = 188;
-    player.chAttr.atNeutralCriticalDamagePowerBase = 0;
-    player.chAttr.atPoisonCriticalDamagePowerBase = 0;
+    // player.chAttr.atHasteBase = 95;
+    // player.chAttr.atSpunkBase = 6380;
 
-    player.chAttr.atPhysicsOvercomeBase = 12;
-    player.chAttr.atMagicOvercome = 20360;
+    // player.chAttr.atPhysicsAttackPowerBase = 6;
+    // player.chAttr.atSolarAttackPowerBase = 19308;
+    // player.chAttr.atLunarAttackPowerBase = 19308;
+    // player.chAttr.atNeutralAttackPowerBase = 12721;
+    // player.chAttr.atPoisonAttackPowerBase = 12721;
 
-    player.chAttr.atStrainBase = 21855;
-    player.chAttr.atSurplusValueBase = 9536;
-    player.chAttr.atMeleeWeaponDamageBase = 240;
-    player.chAttr.atMeleeWeaponDamageRand = 160;
+    // player.chAttr.atPhysicsCriticalStrike = 8325;
+    // player.chAttr.atSolarCriticalStrike = 15048;
+    // player.chAttr.atLunarCriticalStrike = 15048;
+    // player.chAttr.atNeutralCriticalStrike = 8715;
+    // player.chAttr.atPoisonCriticalStrike = 8715;
 
-    npc.nLevel = 124;
-    npc.chAttr.atLevel = 124;
-    npc.chAttr.atPhysicsShieldBase = 27550;
-    npc.chAttr.atMagicShield = 27550;
-    npc.fMaxLife64 = 1e+10;
-    npc.fCurrentLife64 = 1e+10;
+    // player.chAttr.atPhysicsCriticalDamagePowerBase = 0;
+    // player.chAttr.atSolarCriticalDamagePowerBase = 188;
+    // player.chAttr.atLunarCriticalDamagePowerBase = 188;
+    // player.chAttr.atNeutralCriticalDamagePowerBase = 0;
+    // player.chAttr.atPoisonCriticalDamagePowerBase = 0;
+
+    // player.chAttr.atPhysicsOvercomeBase = 12;
+    // player.chAttr.atMagicOvercome = 20360;
+
+    // player.chAttr.atStrainBase = 21855;
+    // player.chAttr.atSurplusValueBase = 9536;
+    // player.chAttr.atMeleeWeaponDamageBase = 240;
+    // player.chAttr.atMeleeWeaponDamageRand = 160;
+
+    // npc.nLevel = 124;
+    // npc.chAttr.atLevel = 124;
+    // npc.chAttr.atPhysicsShieldBase = 27550;
+    // npc.chAttr.atMagicShield = 27550;
+    // npc.fMaxLife64 = 1e+10;
+    // npc.fCurrentLife64 = 1e+10;
 
     auto start = std::chrono::steady_clock::now();
 
-    player.Cast(3974);
-    player.CheckSunMoonPower();
+    // player.Cast(3974);
+    // player.CheckSunMoonPower();
 
     // while (ns_frame::Event::run())
     //     ;
     // std::cout << ns_frame::Event::now() << std::endl;
 
+    int fighttime = 300;
+
     callbackCastSkill(&player, nullptr);
-    while (ns_frame::Event::now() < 1024 * 300) {
+    while (ns_frame::Event::now() < 1024 * fighttime) {
         ns_frame::Event::run();
     }
 
     auto end = std::chrono::steady_clock::now();
 
+    unsigned long long totalDamage = 0;
     std::cout << "tick\t"
               << "ID\t"
               << "lv\t"
@@ -300,10 +280,12 @@ int main(int argc, char *argv[]) {
                   << it.id << "\t" << it.level << "\t" << it.isCritical << "\t"
                   << it.damage << "\t" << static_cast<int>(it.damageType) << "\t"
                   << name << std::endl;
+        totalDamage += it.damage;
     }
 
-    std::cout << "Elapsed time in milliseconds: "
+    std::cout << "\n计算花费时间: "
               << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    std::cout << "DPS: " << totalDamage / fighttime << std::endl;
 
     // for (auto &it : player.chDamage.damageList) {
     //     auto skill = ns_frame::SkillManager::get(it.skillID, it.skillLevel);
@@ -341,6 +323,7 @@ int main(int argc, char *argv[]) {
     //     printf("%d\n", obj.b);
     // }
 
+    macro.clear();
     ns_frame::LuaFunc::clear();
 
 #ifdef DEBUG

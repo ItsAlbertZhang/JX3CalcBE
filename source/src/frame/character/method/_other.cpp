@@ -88,3 +88,6 @@ void Character::CreatePublicShadow(int a, int roletype, int dwID, int nX, int nY
     return;
 }
 
+void Character::SetSkillRecipe(int recipeID, int recipeLevel) {
+    chSkillRecipe.add(recipeID, recipeLevel);
+}

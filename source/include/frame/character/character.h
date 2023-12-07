@@ -36,7 +36,7 @@ public:
     ns_framestatic::enumLuaSkillKindType atAdaptiveSkillType = ns_framestatic::enumLuaSkillKindType::COUNT;
     int dwKungfuID = 0;
 
-    CharacterAttr chAttr;               // 角色属性
+    CharacterAttr chAttr;               // 角色属性. 这一属性暂时被 api.lua 调用.
     CharacterBuff chBuff;               // 角色 buff
     CharacterCooldown chCooldown;       // 角色冷却
     CharacterDamage chDamage;           // 角色伤害
@@ -47,11 +47,7 @@ public:
     // ---------- 以下方法未被 lua 调用 ----------
     static Character *getCharacter(int nCharacterID);
     static int getCharacterID(Character *character);
-    void CheckSunMoonPower();
-    void LearnSkill(int skillID, int skillLevel);
-    void ActiveSkill(int skillID);
     void DeactiveSkill(int skillID);
-    void Cast(int skillID);
     bool CastSkill(Character *target, int skillID, int skillLevel);
     void DelBuffAllStackNum(CharacterBuff::Item &it);
     void BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
@@ -59,6 +55,18 @@ public:
     CharacterBuff::Item *GetBuffByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
     std::tuple<int, int> CalcCritical(const CharacterAttr &attrSelf, int skillID, int skillLevel);
     int CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent, int dotInterval = 1, int dotCount = 1, bool isSurplus = false);
+
+    // ---------- 以下属性和方法暂时被 api.lua 调用 ----------
+    void SetSkillRecipe(int recipeID, int recipeLevel);
+    void LearnSkill(int skillID, int skillLevel);
+    void ActiveSkill(int skillID);
+    void Cast(int skillID);
+    void CheckSunMoonPower();
+    int publicCooldownID = 0;
+    int macroNum = 0;
+    int macroIdx = 0;
+    int delayBase = 0;
+    int delayRand = 0;
 
     // ---------- 以下方法直接被 lua 调用 ----------
     bool IsFormationLeader();

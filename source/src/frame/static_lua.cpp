@@ -131,10 +131,67 @@ bool ns_framestatic::luaInit(sol::state &lua) {
         "nBreakRate", &Skill::nBreakRate,
         "nDismountingRate", &Skill::nDismountingRate,
 
-        "nWeaponDamagePercent", &Skill::nWeaponDamagePercent);
+        "nWeaponDamagePercent", &Skill::nWeaponDamagePercent
+
+        // lua.new_usertype<Skill> end
+    );
+
+    // 暂时将 CharacterAttr 暴露给 lua, 以便 api.lua 调用.
+    lua.new_usertype<CharacterAttr>(
+        "CharacterAttr",
+
+        "atLevel", &CharacterAttr::atLevel,
+
+        "atVitalityBase", &CharacterAttr::atVitalityBase,
+        "atStrengthBase", &CharacterAttr::atStrengthBase,
+        "atAgilityBase", &CharacterAttr::atAgilityBase,
+        "atSpiritBase", &CharacterAttr::atSpiritBase,
+        "atSpunkBase", &CharacterAttr::atSpunkBase,
+
+        "atPhysicsAttackPowerBase", &CharacterAttr::atPhysicsAttackPowerBase,
+        "atMagicAttackPowerBase", &CharacterAttr::atMagicAttackPowerBase,
+        "atSolarAttackPowerBase", &CharacterAttr::atSolarAttackPowerBase,
+        "atLunarAttackPowerBase", &CharacterAttr::atLunarAttackPowerBase,
+        "atNeutralAttackPowerBase", &CharacterAttr::atNeutralAttackPowerBase,
+        "atPoisonAttackPowerBase", &CharacterAttr::atPoisonAttackPowerBase,
+
+        "atAllTypeCriticalStrike", &CharacterAttr::atAllTypeCriticalStrike,
+        "atPhysicsCriticalStrike", &CharacterAttr::atPhysicsCriticalStrike,
+        "atMagicCriticalStrike", &CharacterAttr::atMagicCriticalStrike,
+        "atSolarCriticalStrike", &CharacterAttr::atSolarCriticalStrike,
+        "atLunarCriticalStrike", &CharacterAttr::atLunarCriticalStrike,
+        "atNeutralCriticalStrike", &CharacterAttr::atNeutralCriticalStrike,
+        "atPoisonCriticalStrike", &CharacterAttr::atPoisonCriticalStrike,
+
+        "atAllTypeCriticalDamagePowerBase", &CharacterAttr::atAllTypeCriticalDamagePowerBase,
+        "atPhysicsCriticalDamagePowerBase", &CharacterAttr::atPhysicsCriticalDamagePowerBase,
+        "atMagicCriticalDamagePowerBase", &CharacterAttr::atMagicCriticalDamagePowerBase,
+        "atSolarCriticalDamagePowerBase", &CharacterAttr::atSolarCriticalDamagePowerBase,
+        "atLunarCriticalDamagePowerBase", &CharacterAttr::atLunarCriticalDamagePowerBase,
+        "atNeutralCriticalDamagePowerBase", &CharacterAttr::atNeutralCriticalDamagePowerBase,
+        "atPoisonCriticalDamagePowerBase", &CharacterAttr::atPoisonCriticalDamagePowerBase,
+
+        "atPhysicsOvercomeBase", &CharacterAttr::atPhysicsOvercomeBase,
+        "atMagicOvercome", &CharacterAttr::atMagicOvercome,
+
+        "atSurplusValueBase", &CharacterAttr::atSurplusValueBase,
+        "atStrainBase", &CharacterAttr::atStrainBase,
+
+        "atHasteBase", &CharacterAttr::atHasteBase,
+
+        "atPhysicsShieldBase", &CharacterAttr::atPhysicsShieldBase,
+        "atMagicShield", &CharacterAttr::atMagicShield,
+
+        "atMeleeWeaponDamageBase", &CharacterAttr::atMeleeWeaponDamageBase,
+        "atMeleeWeaponDamageRand", &CharacterAttr::atMeleeWeaponDamageRand,
+        "atAllDamageAddPercent", &CharacterAttr::atAllDamageAddPercent,
+        "atAllShieldIgnorePercent", &CharacterAttr::atAllShieldIgnorePercent
+
+        // lua.new_usertype<CharacterAttr> end
+    );
 
     lua.new_usertype<Character>(
-        "Skill",
+        "Character",
         "CastSkill", sol::overload(&Character::CastSkill2, &Character::CastSkill3, &Character::CastSkill4),
         "AddBuff", sol::overload(&Character::AddBuff4, &Character::AddBuff5, &Character::AddBuff7),
         "DelBuff", &Character::DelBuff,
@@ -176,7 +233,22 @@ bool ns_framestatic::luaInit(sol::state &lua) {
         "bSurplusAutoReplenish", &Character::bSurplusAutoReplenish,
         "bFightState", &Character::bFightState,
         "fMaxLife64", &Character::fMaxLife64,
-        "fCurrentLife64", &Character::fCurrentLife64);
+        "fCurrentLife64", &Character::fCurrentLife64,
+        // 以下是暂时暴露给 lua 的属性, 以便 api.lua 调用.
+        "dwKungfuID", &Character::dwKungfuID,
+        "chAttr", &Character::chAttr,
+        "SetSkillRecipe", &Character::SetSkillRecipe,
+        "LearnSkill", &Character::LearnSkill,
+        "ActiveSkill", &Character::ActiveSkill,
+        "Cast", &Character::Cast,
+        "CheckSunMoonPower", &Character::CheckSunMoonPower,
+        "publicCooldownID", &Character::publicCooldownID,
+        "macroNum", &Character::macroNum,
+        "macroIdx", &Character::macroIdx,
+        "delayBase", &Character::delayBase,
+        "delayRand", &Character::delayRand
+        // lua.new_usertype<Character> end
+    );
 
     lua.new_usertype<CharacterBuff::Item>(
         "Buff",
