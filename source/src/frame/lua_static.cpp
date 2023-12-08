@@ -1,13 +1,13 @@
-#include "frame/static_lua.h"
+#include "frame/lua_static.h"
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
-#include "frame/static_ref.h"
-#include "frame/static_refmap.h"
+#include "frame/ref/lua_attribute_type.h"
+#include "frame/ref/lua_other.h"
 #include "program/log.h"
 
 using namespace ns_frame;
 
-const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
+const std::vector<std::string> ns_frame::luaFuncStaticToDynamic = {
     // Skill
     "SetDelaySubSkill",
     "AddAttribute",
@@ -55,7 +55,7 @@ const std::vector<std::string> ns_framestatic::luaFuncStaticToDynamic = {
     "SetBuffNextActiveFrame",
 };
 
-bool ns_framestatic::luaInit(sol::state &lua) {
+bool ns_frame::luaInit(sol::state &lua) {
     lua.new_usertype<Skill>(
         "Skill",
         "dwSkillID", &Skill::dwSkillID,
@@ -237,11 +237,11 @@ bool ns_framestatic::luaInit(sol::state &lua) {
         // 以下是暂时暴露给 lua 的属性, 以便 api.lua 调用.
         "dwKungfuID", &Character::dwKungfuID,
         "chAttr", &Character::chAttr,
-        "SetSkillRecipe", &Character::SetSkillRecipe,
-        "LearnSkill", &Character::LearnSkill,
-        "ActiveSkill", &Character::ActiveSkill,
-        "Cast", &Character::Cast,
-        "CheckSunMoonPower", &Character::CheckSunMoonPower,
+        "skillrecipeAdd", &Character::skillrecipeAdd,
+        "skillLearn", &Character::skillLearn,
+        "skillActive", &Character::skillActive,
+        "cast", &Character::cast,
+        "vCheckSunMoonPower", &Character::vCheckSunMoonPower,
         "publicCooldownID", &Character::publicCooldownID,
         "macroNum", &Character::macroNum,
         "macroIdx", &Character::macroIdx,
@@ -277,50 +277,50 @@ bool ns_framestatic::luaInit(sol::state &lua) {
     lua.set_function("RemoteCallToClient", LuaGlobalFunction::RemoteCallToClient);
 
     sol::table AttributeType = lua.create_table();
-    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaAttributeType::COUNT); i++) {
-        AttributeType[ns_framestatic::refLuaAttributeType[i]] = i;
+    for (int i = 0; i < static_cast<int>(ref::enumLuaAttributeType::COUNT); i++) {
+        AttributeType[ref::refLuaAttributeType[i]] = i;
     }
     lua["ATTRIBUTE_TYPE"] = AttributeType;
 
     sol::table AttributeEffectMode = lua.create_table();
-    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaAttributeEffectMode::COUNT); i++) {
-        AttributeEffectMode[ns_framestatic::refLuaAttributeEffectMode[i]] = i;
+    for (int i = 0; i < static_cast<int>(ref::enumLuaAttributeEffectMode::COUNT); i++) {
+        AttributeEffectMode[ref::refLuaAttributeEffectMode[i]] = i;
     }
     lua["ATTRIBUTE_EFFECT_MODE"] = AttributeEffectMode;
 
     sol::table BuffCompareFlag = lua.create_table();
-    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaBuffCompareFlag::COUNT); i++) {
-        BuffCompareFlag[ns_framestatic::refLuaBuffCompareFlag[i]] = i;
+    for (int i = 0; i < static_cast<int>(ref::enumLuaBuffCompareFlag::COUNT); i++) {
+        BuffCompareFlag[ref::refLuaBuffCompareFlag[i]] = i;
     }
     lua["BUFF_COMPARE_FLAG"] = BuffCompareFlag;
 
     sol::table SKILL_COMPARE_FLAG = lua.create_table();
-    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaSkillCompareFlag::COUNT); i++) {
-        SKILL_COMPARE_FLAG[ns_framestatic::refLuaSkillCompareFlag[i]] = i;
+    for (int i = 0; i < static_cast<int>(ref::enumLuaSkillCompareFlag::COUNT); i++) {
+        SKILL_COMPARE_FLAG[ref::refLuaSkillCompareFlag[i]] = i;
     }
     lua["SKILL_COMPARE_FLAG"] = SKILL_COMPARE_FLAG;
 
     sol::table TARGET = lua.create_table();
-    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaTarget::COUNT); i++) {
-        TARGET[ns_framestatic::refLuaTarget[i]] = i;
+    for (int i = 0; i < static_cast<int>(ref::enumLuaTarget::COUNT); i++) {
+        TARGET[ref::refLuaTarget[i]] = i;
     }
     lua["TARGET"] = TARGET;
 
     sol::table SKILL_KIND_TYPE = lua.create_table();
-    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaSkillKindType::COUNT); i++) {
-        SKILL_KIND_TYPE[ns_framestatic::refLuaSkillKindType[i]] = i;
+    for (int i = 0; i < static_cast<int>(ref::enumLuaSkillKindType::COUNT); i++) {
+        SKILL_KIND_TYPE[ref::refLuaSkillKindType[i]] = i;
     }
     lua["SKILL_KIND_TYPE"] = SKILL_KIND_TYPE;
 
     sol::table MOVE_STATE = lua.create_table();
-    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaMoveState::COUNT); i++) {
-        MOVE_STATE[ns_framestatic::refLuaMoveState[i]] = i;
+    for (int i = 0; i < static_cast<int>(ref::enumLuaMoveState::COUNT); i++) {
+        MOVE_STATE[ref::refLuaMoveState[i]] = i;
     }
     lua["MOVE_STATE"] = MOVE_STATE;
 
     sol::table ROLE_TYPE = lua.create_table();
-    for (int i = 0; i < static_cast<int>(ns_framestatic::enumLuaRoleType::COUNT); i++) {
-        ROLE_TYPE[ns_framestatic::refLuaRoleType[i]] = i;
+    for (int i = 0; i < static_cast<int>(ref::enumLuaRoleType::COUNT); i++) {
+        ROLE_TYPE[ref::refLuaRoleType[i]] = i;
     }
     lua["ROLE_TYPE"] = ROLE_TYPE;
 
@@ -330,44 +330,44 @@ bool ns_framestatic::luaInit(sol::state &lua) {
     return true;
 }
 
-void ns_framestatic::LuaGlobalFunction::Include(const std::string &filename) {
+void LuaGlobalFunction::Include(const std::string &filename) {
     return;
 }
 
-Character *ns_framestatic::LuaGlobalFunction::GetPlayer(int nCharacterID) {
-    return Character::getCharacter(nCharacterID);
+Character *LuaGlobalFunction::GetPlayer(int nCharacterID) {
+    return Character::characterGet(nCharacterID);
 }
 
-Character *ns_framestatic::LuaGlobalFunction::GetNpc(int nCharacterID) {
-    return Character::getCharacter(nCharacterID);
+Character *LuaGlobalFunction::GetNpc(int nCharacterID) {
+    return Character::characterGet(nCharacterID);
 }
 
-bool ns_framestatic::LuaGlobalFunction::IsPlayer(int nCharacterID) {
-    return Character::getCharacter(nCharacterID)->isPlayer;
+bool LuaGlobalFunction::IsPlayer(int nCharacterID) {
+    return Character::characterGet(nCharacterID)->isPlayer;
 }
 
-void ns_framestatic::LuaGlobalFunction::AdditionalAttribute(Skill &skill) {
+void LuaGlobalFunction::AdditionalAttribute(Skill &skill) {
     // 出现于 Skill.lh, 其本应被 Include 包含. 但 Include 实际上置空, 因此在此处实现相关逻辑.
     skill.AddAttribute_iiii(
-        static_cast<int>(enumLuaAttributeEffectMode::EFFECT_TO_SELF_AND_ROLLBACK),
-        static_cast<int>(enumLuaAttributeType::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE),
+        static_cast<int>(ref::enumLuaAttributeEffectMode::EFFECT_TO_SELF_AND_ROLLBACK),
+        static_cast<int>(ref::enumLuaAttributeType::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE),
         100,
         0);
 }
 
-bool ns_framestatic::LuaGlobalFunction::IsLangKeXingMap(int mapID) {
+bool LuaGlobalFunction::IsLangKeXingMap(int mapID) {
     return false;
 }
 
-void ns_framestatic::LuaGlobalFunction::ModityCDToUI(ns_frame::Character *character, int skillID, int c, int d) {
+void LuaGlobalFunction::ModityCDToUI(ns_frame::Character *character, int skillID, int c, int d) {
     return;
 }
 
-bool ns_framestatic::LuaGlobalFunction::CheckInTongWar(ns_frame::Character *character) {
+bool LuaGlobalFunction::CheckInTongWar(ns_frame::Character *character) {
     return false;
 }
 
-bool ns_framestatic::LuaGlobalFunction::IsTreasureBattleFieldMap(int mapID) {
+bool LuaGlobalFunction::IsTreasureBattleFieldMap(int mapID) {
     return false;
 }
 
@@ -386,7 +386,7 @@ function CustomFunction.GetValueByBit(nValue, nBit)
     --return math.floor(nValue / 2 ^ nBit) % 2
 end
 ``` */
-int ns_framestatic::LuaGlobalFunction::GetValueByBits(int nValue, int nBit, int c) {
+int LuaGlobalFunction::GetValueByBits(int nValue, int nBit, int c) {
     if (nBit > 31 || nBit < 0) {
         LOG_ERROR(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error\n%s", "");
     }
@@ -427,7 +427,7 @@ function CustomFunction.SetValueByBit(nValue, nBit, nNewBitValue)
     --end
 end
 ``` */
-int ns_framestatic::LuaGlobalFunction::SetValueByBits(int nValue, int nBit, int c, int nNewBitValue) {
+int LuaGlobalFunction::SetValueByBits(int nValue, int nBit, int c, int nNewBitValue) {
     if (nNewBitValue > 1 || nNewBitValue < 0) {
         LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,\n%s", "");
         return nValue;
@@ -439,6 +439,6 @@ int ns_framestatic::LuaGlobalFunction::SetValueByBits(int nValue, int nBit, int 
     return (nValue & ~(1 << nBit)) | (nNewBitValue << nBit);
 }
 
-void ns_framestatic::LuaGlobalFunction::RemoteCallToClient() {
+void LuaGlobalFunction::RemoteCallToClient() {
     return;
 }

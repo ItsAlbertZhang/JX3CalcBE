@@ -12,7 +12,7 @@ const Buff &BuffManager::get(int buffID, int buffLevel) {
     return data[std::make_tuple(buffID, buffLevel)];
 }
 
-static inline void addAttribute(std::vector<ns_frame::Buff::Attrib> &attrib, ns_framestatic::enumTabAttribute type, const std::string &valueA, const std::string &valueB) {
+static inline void addAttribute(std::vector<ns_frame::Buff::Attrib> &attrib, ref::enumTabAttribute type, const std::string &valueA, const std::string &valueB) {
     auto &it = attrib.emplace_back(type, valueA, valueB);
     // 尝试将 valueA 和 value B 转换为数字形态. 若转换失败, 则其会被置为 0, 且不会引发报错.
     it.valueAInt = atoi(valueA.c_str());
@@ -60,19 +60,19 @@ void BuffManager::add(int buffID, int buffLevel) {
             std::string valueA = buff.tab[attribName[attribIdx] + "Value" + std::to_string(i) + "A"]; // BeginValue1A, BeginValue2A, ...
             std::string valueB = buff.tab[attribName[attribIdx] + "Value" + std::to_string(i) + "B"]; // BeginValue1B, BeginValue2B, ...
 
-            if (ns_framestatic::mapTabAttribute.find(name) == ns_framestatic::mapTabAttribute.end()) {
+            if (ref::mapTabAttribute.find(name) == ref::mapTabAttribute.end()) {
                 LOG_ERROR("BuffManager::add: %d Unknown Attribute: %s\n", attribIdx, name.c_str());
                 continue;
             }
             switch (attribIdx) {
             case 0:
-                addAttribute(buff.BeginAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
+                addAttribute(buff.BeginAttrib, ref::mapTabAttribute.at(name), valueA, valueB);
                 break;
             case 1:
-                addAttribute(buff.ActiveAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
+                addAttribute(buff.ActiveAttrib, ref::mapTabAttribute.at(name), valueA, valueB);
                 break;
             case 2:
-                addAttribute(buff.EndTimeAttrib, ns_framestatic::mapTabAttribute.at(name), valueA, valueB);
+                addAttribute(buff.EndTimeAttrib, ref::mapTabAttribute.at(name), valueA, valueB);
                 break;
             }
         }

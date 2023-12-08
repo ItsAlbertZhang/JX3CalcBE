@@ -1,12 +1,12 @@
 #include "frame/character/helper/auto_rollback_attrib.h"
 #include "frame/event.h"
-#include "frame/runtime_lua.h"
-#include "frame/static_refmap.h" // enumTabAttribute
+#include "frame/lua_runtime.h"
+#include "frame/ref/tab_attribute.h" // enumTabAttribute
 #include "program/log.h"
 #include <random>
 
 using namespace ns_frame;
-using namespace ns_framestatic;
+using namespace ns_frame::ref;
 
 AutoRollbackAttrib::AutoRollbackAttrib(Character *self, CharacterBuff::Item *item, const Buff &buff)
     : self(self), item(item), buff(buff) {
@@ -48,9 +48,9 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
         break;
     case enumTabAttribute::atCallSolarDamage: {
         // 计算会心
-        Character *src = Character::getCharacter(item->dwSkillSrcID);
+        Character *src = Character::characterGet(item->dwSkillSrcID);
         auto [atCriticalStrike, atCriticalDamagePower] =
-            src->CalcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel); // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
+            src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel); // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, 9999);
@@ -59,7 +59,7 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
             Event::now(), DamageSource::buff,
             item->BuffID, item->nLevel,
             isCritical,
-            src->CalcDamage(
+            src->calcDamage(
                 item->attr, self, DamageType::Solar, // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
                 isCritical, atCriticalDamagePower, 0,
                 attrib.valueAInt, 0,
@@ -70,9 +70,9 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
     } break;
     case enumTabAttribute::atCallLunarDamage: {
         // 计算会心
-        Character *src = Character::getCharacter(item->dwSkillSrcID);
+        Character *src = Character::characterGet(item->dwSkillSrcID);
         auto [atCriticalStrike, atCriticalDamagePower] =
-            src->CalcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel); // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
+            src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel); // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         std::random_device rd;
         std::mt19937 gen(rd());
         std::uniform_int_distribution<> dis(0, 9999);
@@ -81,7 +81,7 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
             Event::now(), DamageSource::buff,
             item->BuffID, item->nLevel,
             isCritical,
-            src->CalcDamage(
+            src->calcDamage(
                 item->attr, self, DamageType::Lunar, // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
                 isCritical, atCriticalDamagePower, 0,
                 attrib.valueAInt, 0,

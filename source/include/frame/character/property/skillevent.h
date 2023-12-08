@@ -11,7 +11,7 @@ class CharacterSkillEvent {
 public:
     void add(int ID);
     void remove(int ID);
-    std::set<const SkillEvent *> getList(EventType type, int EventSkillID, uint32_t EventMask1, uint32_t EventMask2);
+    std::set<const SkillEvent *> getList(ref::enumSkilleventEventtype type, int EventSkillID, uint32_t EventMask1, uint32_t EventMask2);
 
 private:
     class ItemType {
@@ -20,7 +20,7 @@ private:
         std::set<const SkillEvent *> EventMask1[32];                        // 用于快速查找指定 EventMask1 的 SkillEvent
         std::set<const SkillEvent *> EventMask2[32];                        // 用于快速查找指定 EventMask2 的 SkillEvent
     };
-    ItemType data[static_cast<int>(EventType::COUNT)];
+    ItemType data[static_cast<int>(ref::enumSkilleventEventtype::COUNT)];
 };
 
 } // namespace ns_frame

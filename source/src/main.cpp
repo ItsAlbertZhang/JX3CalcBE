@@ -2,8 +2,8 @@
 #include "frame/event.h"
 #include "frame/global/uibuff.h"
 #include "frame/global/uiskill.h"
-#include "frame/runtime_lua.h"
-#include "frame/static_lua.h"
+#include "frame/lua_runtime.h"
+#include "frame/lua_static.h"
 #include "gdi.h"
 #include "program/init.h"
 #include "program/log.h"
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
     if (!ret)
         return 0;
 
-    ret = gdi::Interface::initLua(ns_framestatic::luaInit, ns_framestatic::luaFuncStaticToDynamic);
+    ret = gdi::Interface::initLua(ns_frame::luaInit, ns_frame::luaFuncStaticToDynamic);
     // std::cout << "initLua  = " << ret << std::endl;
     if (!ret)
         return 0;
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
     std::filesystem::path pAPI = ns_program::Config::pExeDir / "api.lua";
     sol::state lua;
     lua.open_libraries(sol::lib::base);
-    ns_framestatic::luaInit(lua);
+    ns_frame::luaInit(lua);
     lua.script_file(pAPI.string());
 
     ns_frame::Character player;
@@ -117,46 +117,46 @@ int main(int argc, char *argv[]) {
         std::cout << "Lua error: " << err.what() << std::endl;
     }
 
-    // player.LearnSkill(10242, 13); // 焚影圣诀
+    // player.skillLearn(10242, 13); // 焚影圣诀
     // player.dwKungfuID = 10242;
-    // player.ActiveSkill(10242);
+    // player.skillActive(10242);
 
-    // player.LearnSkill(3962, 33); // 赤日轮
-    // player.LearnSkill(3963, 32); // 烈日斩
-    // player.LearnSkill(3966, 1);  // 生死劫
-    // player.LearnSkill(3967, 32); // 净世破魔击
-    // player.LearnSkill(3959, 24); // 幽月轮
-    // player.LearnSkill(3960, 18); // 银月斩
-    // player.LearnSkill(3969, 1);  // 光明相
-    // player.LearnSkill(3974, 1);  // 暗尘弥散
-    // player.LearnSkill(3979, 29); // 驱夜断愁
+    // player.skillLearn(3962, 33); // 赤日轮
+    // player.skillLearn(3963, 32); // 烈日斩
+    // player.skillLearn(3966, 1);  // 生死劫
+    // player.skillLearn(3967, 32); // 净世破魔击
+    // player.skillLearn(3959, 24); // 幽月轮
+    // player.skillLearn(3960, 18); // 银月斩
+    // player.skillLearn(3969, 1);  // 光明相
+    // player.skillLearn(3974, 1);  // 暗尘弥散
+    // player.skillLearn(3979, 29); // 驱夜断愁
 
-    // player.LearnSkill(5972, 1);  // 腾焰飞芒
-    // player.LearnSkill(18279, 1); // 净身明礼
-    // player.LearnSkill(22888, 1); // 诛邪镇魔
-    // player.LearnSkill(22890, 1); // 诛邪镇魔, 主动
-    // player.LearnSkill(6717, 1);  // 无明业火
-    // player.LearnSkill(34383, 1); // 明光恒照
-    // player.LearnSkill(34395, 1); // 日月同辉
-    // player.LearnSkill(34372, 1); // 靡业报劫
-    // player.LearnSkill(17567, 1); // 用晦而明
-    // player.LearnSkill(25166, 1); // 净体不畏
-    // player.LearnSkill(34378, 1); // 降灵尊
-    // player.LearnSkill(34347, 1); // 悬象著明
-    // player.LearnSkill(34370, 1); // 日月齐光
+    // player.skillLearn(5972, 1);  // 腾焰飞芒
+    // player.skillLearn(18279, 1); // 净身明礼
+    // player.skillLearn(22888, 1); // 诛邪镇魔
+    // player.skillLearn(22890, 1); // 诛邪镇魔, 主动
+    // player.skillLearn(6717, 1);  // 无明业火
+    // player.skillLearn(34383, 1); // 明光恒照
+    // player.skillLearn(34395, 1); // 日月同辉
+    // player.skillLearn(34372, 1); // 靡业报劫
+    // player.skillLearn(17567, 1); // 用晦而明
+    // player.skillLearn(25166, 1); // 净体不畏
+    // player.skillLearn(34378, 1); // 降灵尊
+    // player.skillLearn(34347, 1); // 悬象著明
+    // player.skillLearn(34370, 1); // 日月齐光
 
-    // player.ActiveSkill(5972);
-    // player.ActiveSkill(18279);
-    // player.ActiveSkill(22888);
-    // player.ActiveSkill(6717);
-    // player.ActiveSkill(34383);
-    // player.ActiveSkill(34395);
-    // player.ActiveSkill(34372);
-    // player.ActiveSkill(17567);
-    // player.ActiveSkill(25166);
-    // player.ActiveSkill(34378);
-    // // player.ActiveSkill(34347);
-    // player.ActiveSkill(34370);
+    // player.skillActive(5972);
+    // player.skillActive(18279);
+    // player.skillActive(22888);
+    // player.skillActive(6717);
+    // player.skillActive(34383);
+    // player.skillActive(34395);
+    // player.skillActive(34372);
+    // player.skillActive(17567);
+    // player.skillActive(25166);
+    // player.skillActive(34378);
+    // // player.skillActive(34347);
+    // player.skillActive(34370);
 
     // player.chSkillRecipe.add(1005, 1); // 赤日轮, 会心提高4%
     // player.chSkillRecipe.add(999, 1);  // 赤日轮, 伤害提高3%
@@ -235,8 +235,8 @@ int main(int argc, char *argv[]) {
 
     auto start = std::chrono::steady_clock::now();
 
-    // player.Cast(3974);
-    // player.CheckSunMoonPower();
+    // player.cast(3974);
+    // player.vCheckSunMoonPower();
 
     // while (ns_frame::Event::run())
     //     ;

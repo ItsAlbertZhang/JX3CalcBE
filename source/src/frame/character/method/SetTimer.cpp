@@ -1,6 +1,6 @@
 #include "frame/character/character.h"
 #include "frame/event.h"
-#include "frame/runtime_lua.h"
+#include "frame/lua_runtime.h"
 #include "program/log.h"
 
 using namespace ns_frame;
@@ -16,7 +16,7 @@ static void callbackSetTimer(void *self, void *param) {
 }
 
 void Character::SetTimer3(int frame, std::string filename, int targetID) {
-    this->SetTimer4(frame, filename, getCharacter(targetID)->isPlayer ? 1 : 0, targetID);
+    this->SetTimer4(frame, filename, characterGet(targetID)->isPlayer ? 1 : 0, targetID);
 }
 
 void Character::SetTimer4(int frame, std::string filename, int type, int targetID) {

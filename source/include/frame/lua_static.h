@@ -1,5 +1,5 @@
-#ifndef FRAME_STATIC_LUA_H_
-#define FRAME_STATIC_LUA_H_
+#ifndef FRAME_LUA_STATIC_H_
+#define FRAME_LUA_STATIC_H_
 
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace ns_framestatic {
+namespace ns_frame {
 
 bool luaInit(sol::state &lua);
 
@@ -30,6 +30,6 @@ public:
     static void RemoteCallToClient();
 };
 
-} // namespace ns_framestatic
+} // namespace ns_frame
 
-#endif // FRAME_STATIC_LUA_H_
+#endif // FRAME_LUA_STATIC_H_

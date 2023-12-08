@@ -1,5 +1,5 @@
-#ifndef FRAME_RUNTIME_LUA_H_
-#define FRAME_RUNTIME_LUA_H_
+#ifndef FRAME_LUA_RUNTIME_H_
+#define FRAME_LUA_RUNTIME_H_
 
 #include <sol2/sol.hpp>
 #include <string>
@@ -65,4 +65,4 @@ private:
 
 } // namespace ns_frame
 
-#endif // FRAME_RUNTIME_LUA_H_
+#endif // FRAME_LUA_RUNTIME_H_

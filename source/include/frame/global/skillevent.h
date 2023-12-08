@@ -1,41 +1,13 @@
 #ifndef FRAME_GLOBAL_SKILLEVENT_H_
 #define FRAME_GLOBAL_SKILLEVENT_H_
 
+#include "frame/ref/global_skillevent.h"
 #include <cstdint>
 #include <mutex>
 #include <string>
 #include <unordered_map>
 
 namespace ns_frame {
-
-enum class EventType {
-    BeCast,
-    BeCriticalStrike,
-    BeDodge,
-    BeHit,
-    BeHitOTAction,
-    BeKill,
-    BeMiss,
-    BeOverHeal,
-    BlockLongRange,
-    Cast,
-    CriticalStrike,
-    Dodge,
-    Hit,
-    HitOTAction,
-    Kill,
-    Miss,
-    OverHeal,
-    Parry,
-    PreCast,
-    COUNT, // 用于计数以及表明出错
-};
-
-enum class EventCT {
-    EventCaster,
-    EventTarget,
-    COUNT, // 用于计数以及表明出错
-};
 
 /**
  * @brief SkillEvent 类
@@ -51,12 +23,12 @@ public:
 
     // 初始化时拿出一些数据, 降低使用开销
     int ID;
-    EventType type = EventType::COUNT;
+    ref::enumSkilleventEventtype type = ref::enumSkilleventEventtype::COUNT;
     int Odds;
     int SkillID;
     int SkillLevel;
-    EventCT SkillCaster = EventCT::COUNT;
-    EventCT SkillTarget = EventCT::COUNT;
+    ref::enumSkilleventCastertarget SkillCaster = ref::enumSkilleventCastertarget::COUNT;
+    ref::enumSkilleventCastertarget SkillTarget = ref::enumSkilleventCastertarget::COUNT;
     uint32_t EventMask1;
     uint32_t EventMask2;
     int EventSkillID;
@@ -91,32 +63,6 @@ private:
      * @param ID
      */
     static void add(int ID);
-
-    static inline const std::unordered_map<std::string, EventType> EventTypeMap = {
-        {"BeCast", EventType::BeCast},
-        {"BeCriticalStrike", EventType::BeCriticalStrike},
-        {"BeDodge", EventType::BeDodge},
-        {"BeHit", EventType::BeHit},
-        {"BeHitOTAction", EventType::BeHitOTAction},
-        {"BeKill", EventType::BeKill},
-        {"BeMiss", EventType::BeMiss},
-        {"BeOverHeal", EventType::BeOverHeal},
-        {"BlockLongRange", EventType::BlockLongRange},
-        {"Cast", EventType::Cast},
-        {"CriticalStrike", EventType::CriticalStrike},
-        {"Dodge", EventType::Dodge},
-        {"Hit", EventType::Hit},
-        {"HitOTAction", EventType::HitOTAction},
-        {"Kill", EventType::Kill},
-        {"Miss", EventType::Miss},
-        {"OverHeal", EventType::OverHeal},
-        {"Parry", EventType::Parry},
-        {"PreCast", EventType::PreCast},
-    };
-    static inline const std::unordered_map<std::string, EventCT> EventCTMap = {
-        {"EventCaster", EventCT::EventCaster},
-        {"EventTarget", EventCT::EventTarget},
-    };
 };
 
 } // namespace ns_frame

@@ -28,9 +28,9 @@ void CharacterSkillEvent::remove(int ID) {
     }
 }
 
-std::set<const SkillEvent *> CharacterSkillEvent::getList(EventType type, int EventSkillID, uint32_t EventMask1, uint32_t EventMask2) {
+std::set<const SkillEvent *> CharacterSkillEvent::getList(ref::enumSkilleventEventtype type, int EventSkillID, uint32_t EventMask1, uint32_t EventMask2) {
     std::set<const SkillEvent *> emptySet;
-    if (type == EventType::COUNT) {
+    if (type == ref::enumSkilleventEventtype::COUNT) {
         return emptySet;
     }
     if (EventSkillID != 0) {

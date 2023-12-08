@@ -29,12 +29,12 @@ void SkillEventManager::add(int ID) {
     gdi::Interface::tabSelect(gdi::Tab::skillevent, arg);
     skillevent.tab = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    skillevent.type = EventTypeMap.find(skillevent.tab["EventType"]) != EventTypeMap.end() ? EventTypeMap.at(skillevent.tab["EventType"]) : EventType::COUNT;
+    skillevent.type = ref::mapSkilleventEventtype.find(skillevent.tab["EventType"]) != ref::mapSkilleventEventtype.end() ? ref::mapSkilleventEventtype.at(skillevent.tab["EventType"]) : ref::enumSkilleventEventtype::COUNT;
     skillevent.Odds = std::stoi(skillevent.tab["Odds"]);
     skillevent.SkillID = std::stoi(skillevent.tab["SkillID"]);
     skillevent.SkillLevel = std::stoi(skillevent.tab["SkillLevel"]);
-    skillevent.SkillCaster = EventCTMap.find(skillevent.tab["SkillCaster"]) != EventCTMap.end() ? EventCTMap.at(skillevent.tab["SkillCaster"]) : EventCT::COUNT;
-    skillevent.SkillTarget = EventCTMap.find(skillevent.tab["SkillTarget"]) != EventCTMap.end() ? EventCTMap.at(skillevent.tab["SkillTarget"]) : EventCT::COUNT;
+    skillevent.SkillCaster = ref::mapSkilleventCastertarget.find(skillevent.tab["SkillCaster"]) != ref::mapSkilleventCastertarget.end() ? ref::mapSkilleventCastertarget.at(skillevent.tab["SkillCaster"]) : ref::enumSkilleventCastertarget::COUNT;
+    skillevent.SkillTarget = ref::mapSkilleventCastertarget.find(skillevent.tab["SkillTarget"]) != ref::mapSkilleventCastertarget.end() ? ref::mapSkilleventCastertarget.at(skillevent.tab["SkillTarget"]) : ref::enumSkilleventCastertarget::COUNT;
     skillevent.EventMask1 = std::stoi(skillevent.tab["EventMask1"]);
     skillevent.EventMask2 = std::stoi(skillevent.tab["EventMask2"]);
     skillevent.EventSkillID = std::stoi(skillevent.tab["EventSkillID"]);

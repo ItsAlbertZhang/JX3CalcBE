@@ -4,12 +4,12 @@
 
 using namespace ns_frame;
 
-void Character::LearnSkill(int skillID, int skillLevel) {
+void Character::skillLearn(int skillID, int skillLevel) {
     this->chSkill.skillLearned[skillID] = skillLevel;
     SkillManager::get(skillID, skillLevel);
 }
 
-Character *Character::getCharacter(int nCharacterID) {
+Character *Character::characterGet(int nCharacterID) {
     if (nCharacterID < 0 || nCharacterID >= characterList.size()) {
         return nullptr;
     } else {
@@ -17,7 +17,7 @@ Character *Character::getCharacter(int nCharacterID) {
     }
 }
 
-int Character::getCharacterID(Character *character) {
+int Character::characterGetID(Character *character) {
     if (characterMap.find(character) == characterMap.end()) {
         return -1;
     } else {
@@ -41,9 +41,8 @@ void Character::PlayPublicShadowAnimation(int a, int b, bool c, bool d) {
     return;
 }
 
-const CharacterScene &Character::GetScene() {
-    static thread_local CharacterScene scene{};
-    return scene;
+CharacterScene *Character::GetScene() {
+    return &(this->chScene);
 }
 
 void Character::ClearAllNpcThreat() {
@@ -67,7 +66,7 @@ static void staticCheckSunMoonPower(void *self, void *param) {
     else if (character->nCurrentSunEnergy >= 10000)
         character->nSunPowerValue = 1;
 }
-void Character::CheckSunMoonPower() {
+void Character::vCheckSunMoonPower() {
     staticCheckSunMoonPower(this, nullptr);
     // Event::add(1024, staticCheckSunMoonPower, this, nullptr);
 }
@@ -88,6 +87,6 @@ void Character::CreatePublicShadow(int a, int roletype, int dwID, int nX, int nY
     return;
 }
 
-void Character::SetSkillRecipe(int recipeID, int recipeLevel) {
+void Character::skillrecipeAdd(int recipeID, int recipeLevel) {
     chSkillRecipe.add(recipeID, recipeLevel);
 }

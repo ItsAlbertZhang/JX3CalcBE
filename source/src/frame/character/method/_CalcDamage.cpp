@@ -4,7 +4,7 @@
 
 using namespace ns_frame;
 
-std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int skillID, int skillLevel) {
+std::tuple<int, int> Character::calcCritical(const CharacterAttr &attrSelf, int skillID, int skillLevel) {
     // TODO: 目标御劲降低会心率和会心效果.
     int atCriticalStrike = 0;
     int atCriticalDamagePower = 0;
@@ -13,23 +13,23 @@ std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int 
         return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 
     switch (skill.KindType) {
-    case SkillType::Physics:
+    case ref::enumSkillKindtype::Physics:
         atCriticalStrike = attrSelf.getPhysicsCriticalStrike();
         atCriticalDamagePower = attrSelf.getPhysicsCriticalDamagePower();
         break;
-    case SkillType::SolarMagic:
+    case ref::enumSkillKindtype::SolarMagic:
         atCriticalStrike = attrSelf.getSolarCriticalStrike();
         atCriticalDamagePower = attrSelf.getSolarCriticalDamagePower();
         break;
-    case SkillType::LunarMagic:
+    case ref::enumSkillKindtype::LunarMagic:
         atCriticalStrike = attrSelf.getLunarCriticalStrike();
         atCriticalDamagePower = attrSelf.getLunarCriticalDamagePower();
         break;
-    case SkillType::NeutralMagic:
+    case ref::enumSkillKindtype::NeutralMagic:
         atCriticalStrike = attrSelf.getNeutralCriticalStrike();
         atCriticalDamagePower = attrSelf.getNeutralCriticalDamagePower();
         break;
-    case SkillType::Poison:
+    case ref::enumSkillKindtype::Poison:
         atCriticalStrike = attrSelf.getPoisonCriticalStrike();
         atCriticalDamagePower = attrSelf.getPoisonCriticalDamagePower();
         break;
@@ -41,7 +41,7 @@ std::tuple<int, int> Character::CalcCritical(const CharacterAttr &attrSelf, int 
     return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 }
 
-int Character::CalcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent, int dotInterval, int dotCount, bool isSurplus) {
+int Character::calcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent, int dotInterval, int dotCount, bool isSurplus) {
     int atStrain = this->chAttr.getStrain();                                // 类型× 快照
     int atSurplus = this->chAttr.getSurplus();                              // 类型× 快照
     int atDstNpcDamageCoefficient = this->chAttr.atDstNpcDamageCoefficient; // 类型× 快照

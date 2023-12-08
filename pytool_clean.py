@@ -1,3 +1,4 @@
+# encoding: utf-8
 """清理生成"""
 from pathlib import Path
 import shutil

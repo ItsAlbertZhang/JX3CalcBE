@@ -56,7 +56,7 @@ public:
      * @brief buff 列表
      * @note key 为三层嵌套: sourceID -> buffID -> buffLevel
      * @note 为最大化查找效率, 使用此结构.
-     * @note 第三层使用 map 而非 unordered_map 是因为 GetBuffWithCompareFlag 中需要使用 lower_bound 方法.
+     * @note 第三层使用 map 而非 unordered_map 是因为 buffGetWithCompareFlag 中需要使用 lower_bound 方法.
      */
     std::unordered_map<int, std::unordered_map<int, std::map<int, Item>>> buffMap;
     std::vector<Item *> buffList;

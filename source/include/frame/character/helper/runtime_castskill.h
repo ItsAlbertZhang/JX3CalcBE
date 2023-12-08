@@ -41,9 +41,9 @@ public:
             auto it = skillQueue.front();
             skillQueue.pop();
             if (it.hasTarget) {
-                it.caster->CastSkill(it.target, it.skillID, it.skillLevel);
+                it.caster->skillCast(it.target, it.skillID, it.skillLevel);
             } else {
-                it.caster->CastSkill(it.caster->targetCurr, it.skillID, it.skillLevel);
+                it.caster->skillCast(it.caster->targetCurr, it.skillID, it.skillLevel);
             }
         }
         self->chDamage.damageList.insert(self->chDamage.damageList.end(), damageList.begin(), damageList.end());

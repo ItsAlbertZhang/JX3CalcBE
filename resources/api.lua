@@ -37,85 +37,85 @@ function InitAttr(player)
 end
 
 function Init(player, target)
-    player:LearnSkill(10242, 13);  -- 焚影圣诀
+    player:skillLearn(10242, 13);  -- 焚影圣诀
     player.dwKungfuID = 10242;
     player.publicCooldownID = 503; -- GCD
-    player:ActiveSkill(10242);     -- 激活心法加成
+    player:skillActive(10242);     -- 激活心法加成
 
-    player:LearnSkill(3962, 33);   -- 赤日轮
-    player:LearnSkill(3963, 32);   -- 烈日斩
-    player:LearnSkill(3966, 1);    -- 生死劫
-    player:LearnSkill(3967, 32);   -- 净世破魔击
-    player:LearnSkill(3959, 24);   -- 幽月轮
-    player:LearnSkill(3960, 18);   -- 银月斩
-    player:LearnSkill(3969, 1);    -- 光明相
-    player:LearnSkill(3974, 1);    -- 暗尘弥散
-    player:LearnSkill(3979, 29);   -- 驱夜断愁
+    player:skillLearn(3962, 33);   -- 赤日轮
+    player:skillLearn(3963, 32);   -- 烈日斩
+    player:skillLearn(3966, 1);    -- 生死劫
+    player:skillLearn(3967, 32);   -- 净世破魔击
+    player:skillLearn(3959, 24);   -- 幽月轮
+    player:skillLearn(3960, 18);   -- 银月斩
+    player:skillLearn(3969, 1);    -- 光明相
+    player:skillLearn(3974, 1);    -- 暗尘弥散
+    player:skillLearn(3979, 29);   -- 驱夜断愁
 
-    player:LearnSkill(5972, 1);    -- 腾焰飞芒
-    player:LearnSkill(18279, 1);   -- 净身明礼
-    player:LearnSkill(22888, 1);   -- 诛邪镇魔
-    player:LearnSkill(22890, 1);   -- 诛邪镇魔, 主动
-    player:LearnSkill(6717, 1);    -- 无明业火
-    player:LearnSkill(34383, 1);   -- 明光恒照
-    player:LearnSkill(34395, 1);   -- 日月同辉
-    player:LearnSkill(34372, 1);   -- 靡业报劫
-    player:LearnSkill(17567, 1);   -- 用晦而明
-    player:LearnSkill(25166, 1);   -- 净体不畏
-    player:LearnSkill(34378, 1);   -- 降灵尊
-    player:LearnSkill(34347, 1);   -- 悬象著明, 主动
-    player:LearnSkill(34370, 1);   -- 日月齐光
+    player:skillLearn(5972, 1);    -- 腾焰飞芒
+    player:skillLearn(18279, 1);   -- 净身明礼
+    player:skillLearn(22888, 1);   -- 诛邪镇魔
+    player:skillLearn(22890, 1);   -- 诛邪镇魔, 主动
+    player:skillLearn(6717, 1);    -- 无明业火
+    player:skillLearn(34383, 1);   -- 明光恒照
+    player:skillLearn(34395, 1);   -- 日月同辉
+    player:skillLearn(34372, 1);   -- 靡业报劫
+    player:skillLearn(17567, 1);   -- 用晦而明
+    player:skillLearn(25166, 1);   -- 净体不畏
+    player:skillLearn(34378, 1);   -- 降灵尊
+    player:skillLearn(34347, 1);   -- 悬象著明, 主动
+    player:skillLearn(34370, 1);   -- 日月齐光
 
-    player:ActiveSkill(5972);
-    player:ActiveSkill(18279);
-    player:ActiveSkill(22888);
-    -- player:ActiveSkill(22890); -- 主动技能不需要激活
-    player:ActiveSkill(6717);
-    player:ActiveSkill(34383);
-    player:ActiveSkill(34395);
-    player:ActiveSkill(34372);
-    player:ActiveSkill(17567);
-    player:ActiveSkill(25166);
-    player:ActiveSkill(34378);
-    -- player:ActiveSkill(34347); -- 主动技能不需要激活
-    player:ActiveSkill(34370);
+    player:skillActive(5972);
+    player:skillActive(18279);
+    player:skillActive(22888);
+    -- player:skillActive(22890); -- 主动技能不需要激活
+    player:skillActive(6717);
+    player:skillActive(34383);
+    player:skillActive(34395);
+    player:skillActive(34372);
+    player:skillActive(17567);
+    player:skillActive(25166);
+    player:skillActive(34378);
+    -- player:skillActive(34347); -- 主动技能不需要激活
+    player:skillActive(34370);
 
-    player:SetSkillRecipe(1005, 1); -- 赤日轮, 会心提高4%
-    player:SetSkillRecipe(999, 1);  -- 赤日轮, 伤害提高3%
-    player:SetSkillRecipe(1000, 1); -- 赤日轮, 伤害提高4%
-    player:SetSkillRecipe(1001, 1); -- 赤日轮, 伤害提高5%
+    player:skillrecipeAdd(1005, 1); -- 赤日轮, 会心提高4%
+    player:skillrecipeAdd(999, 1);  -- 赤日轮, 伤害提高3%
+    player:skillrecipeAdd(1000, 1); -- 赤日轮, 伤害提高4%
+    player:skillrecipeAdd(1001, 1); -- 赤日轮, 伤害提高5%
 
-    player:SetSkillRecipe(1011, 1); -- 烈日斩, 会心提高4%
-    player:SetSkillRecipe(1008, 1); -- 烈日斩, 伤害提高4%
-    player:SetSkillRecipe(1009, 1); -- 烈日斩, 伤害提高5%
-    player:SetSkillRecipe(1013, 1); -- 烈日斩, 对原地静止的目标伤害提升10%
+    player:skillrecipeAdd(1011, 1); -- 烈日斩, 会心提高4%
+    player:skillrecipeAdd(1008, 1); -- 烈日斩, 伤害提高4%
+    player:skillrecipeAdd(1009, 1); -- 烈日斩, 伤害提高5%
+    player:skillrecipeAdd(1013, 1); -- 烈日斩, 对原地静止的目标伤害提升10%
 
-    player:SetSkillRecipe(1621, 1); -- 生死劫, 伤害提高3%
-    player:SetSkillRecipe(1622, 1); -- 生死劫, 伤害提高4%
-    player:SetSkillRecipe(1623, 1); -- 生死劫, 伤害提高5%
+    player:skillrecipeAdd(1621, 1); -- 生死劫, 伤害提高3%
+    player:skillrecipeAdd(1622, 1); -- 生死劫, 伤害提高4%
+    player:skillrecipeAdd(1623, 1); -- 生死劫, 伤害提高5%
 
-    player:SetSkillRecipe(1019, 1); -- 净世破魔击, 会心提高5%
-    player:SetSkillRecipe(1015, 1); -- 净世破魔击, 伤害提高4%
-    player:SetSkillRecipe(1016, 1); -- 净世破魔击, 伤害提高5%
-    player:SetSkillRecipe(5206, 1); -- 焚影圣诀心法下净世破魔击·月命中后回复20点月魂
+    player:skillrecipeAdd(1019, 1); -- 净世破魔击, 会心提高5%
+    player:skillrecipeAdd(1015, 1); -- 净世破魔击, 伤害提高4%
+    player:skillrecipeAdd(1016, 1); -- 净世破魔击, 伤害提高5%
+    player:skillrecipeAdd(5206, 1); -- 焚影圣诀心法下净世破魔击·月命中后回复20点月魂
 
-    player:SetSkillRecipe(989, 1);  -- 幽月轮, 会心提高4%
-    player:SetSkillRecipe(990, 1);  -- 幽月轮, 会心提高5%
-    player:SetSkillRecipe(984, 1);  -- 幽月轮, 伤害提高3%
-    player:SetSkillRecipe(985, 1);  -- 幽月轮, 伤害提高4%
+    player:skillrecipeAdd(989, 1);  -- 幽月轮, 会心提高4%
+    player:skillrecipeAdd(990, 1);  -- 幽月轮, 会心提高5%
+    player:skillrecipeAdd(984, 1);  -- 幽月轮, 伤害提高3%
+    player:skillrecipeAdd(985, 1);  -- 幽月轮, 伤害提高4%
 
-    player:SetSkillRecipe(992, 1);  -- 银月斩, 会心提高3%
-    player:SetSkillRecipe(993, 1);  -- 银月斩, 会心提高4%
-    player:SetSkillRecipe(994, 1);  -- 银月斩, 会心提高5%
+    player:skillrecipeAdd(992, 1);  -- 银月斩, 会心提高3%
+    player:skillrecipeAdd(993, 1);  -- 银月斩, 会心提高4%
+    player:skillrecipeAdd(994, 1);  -- 银月斩, 会心提高5%
 
-    player:SetSkillRecipe(1029, 1); -- 光明相, 调息时间减少10秒
-    player:SetSkillRecipe(1030, 1); -- 光明相, 调息时间减少10秒
-    player:SetSkillRecipe(1031, 1); -- 光明相, 调息时间减少10秒
+    player:skillrecipeAdd(1029, 1); -- 光明相, 调息时间减少10秒
+    player:skillrecipeAdd(1030, 1); -- 光明相, 调息时间减少10秒
+    player:skillrecipeAdd(1031, 1); -- 光明相, 调息时间减少10秒
 
-    player:SetSkillRecipe(1055, 1); -- 驱夜断愁, 会心提高4%
-    player:SetSkillRecipe(1056, 1); -- 驱夜断愁, 会心提高5%
-    player:SetSkillRecipe(1052, 1); -- 驱夜断愁, 伤害提高4%
-    player:SetSkillRecipe(1053, 1); -- 驱夜断愁, 伤害提高5%
+    player:skillrecipeAdd(1055, 1); -- 驱夜断愁, 会心提高4%
+    player:skillrecipeAdd(1056, 1); -- 驱夜断愁, 会心提高5%
+    player:skillrecipeAdd(1052, 1); -- 驱夜断愁, 伤害提高4%
+    player:skillrecipeAdd(1053, 1); -- 驱夜断愁, 伤害提高5%
 
     InitAttr(player);
 
@@ -128,18 +128,18 @@ function Init(player, target)
 end
 
 function Ready(player)
-    player:Cast(3974);
-    player:CheckSunMoonPower();
+    player:cast(3974);
+    player:vCheckSunMoonPower();
 end
 
 FirstSwitch = true;
 
 function Macro0(player)
     if player.nCurrentMoonEnergy >= 10000 or player.nCurrentMoonEnergy <= 2000 then
-        player:Cast(3967);           -- 净世破魔击
+        player:cast(3967);           -- 净世破魔击
     end
-    player:Cast(3979);               -- 驱夜断愁
-    player:Cast(3963);               -- 烈日斩
+    player:cast(3979);               -- 驱夜断愁
+    player:cast(3963);               -- 烈日斩
     if player.nCurrentSunEnergy >= 10000 and player.nCurrentMoonEnergy == 8000 then
         player.macroIdx = 1;         -- 切换至 1 号宏
         if FirstSwitch then
@@ -159,40 +159,40 @@ function Macro1(player)
         -- 在开头进行判断的原因是, 导致切换条件 (sun>=100&moon>=100) 的事件 (日月齐光·叁结束) 是发生在 GCD 中的, 而不是发生在宏内的. 因此, 无法在宏结束时进行判断.
     end
 
-    player:Cast(3974); -- 暗尘弥散
+    player:cast(3974); -- 暗尘弥散
     if player:GetBuff(25721, 3) and player.nCurrentMoonEnergy >= 10000 then
         local buff = player:GetBuff(25716, 0);
         if not buff then
-            player:Cast(3969); -- 光明相
+            player:cast(3969); -- 光明相
         end
     end
-    player:Cast(34347);     -- 悬象著明
-    player:Cast(3966);      -- 生死劫
+    player:cast(34347);     -- 悬象著明
+    player:cast(3966);      -- 生死劫
     if player.nCurrentMoonEnergy <= 4000 then
-        player:Cast(22890); -- 诛邪镇魔
+        player:cast(22890); -- 诛邪镇魔
     end
-    player:Cast(3967);      -- 净世破魔击
+    player:cast(3967);      -- 净世破魔击
     if player.nCurrentMoonEnergy <= 4000 then
-        player:Cast(3979);  -- 驱夜断愁
+        player:cast(3979);  -- 驱夜断愁
     end
-    player:Cast(3960);      -- 银月斩
-    player:Cast(3963);      -- 烈日斩
+    player:cast(3960);      -- 银月斩
+    player:cast(3963);      -- 烈日斩
 end
 
 function Macro2(player)
     if player.nCurrentMoonEnergy >= 6000 then
-        player:Cast(22890); -- 诛邪镇魔
+        player:cast(22890); -- 诛邪镇魔
     end
     if player.nCurrentSunEnergy >= 10000 then
-        player:Cast(3966); -- 生死劫
+        player:cast(3966); -- 生死劫
     end
-    player:Cast(3967);     -- 净世破魔击
-    player:Cast(3960);     -- 银月斩
+    player:cast(3967);     -- 净世破魔击
+    player:cast(3960);     -- 银月斩
     if player.nCurrentMoonEnergy >= 6000 or player.nCurrentSunEnergy >= 6000 then
-        player:Cast(3963); -- 烈日斩
+        player:cast(3963); -- 烈日斩
     end
     if player.nCurrentMoonEnergy == 6000 and player.nCurrentSunEnergy == 4000 then
-        player:Cast(3962); -- 赤日轮
+        player:cast(3962); -- 赤日轮
     end
     if player.nCurrentMoonEnergy >= 10000 and player.nCurrentSunEnergy < 10000 then
         local buff = player:GetBuff(25721, 0);

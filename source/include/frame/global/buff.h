@@ -1,7 +1,7 @@
 #ifndef FRAME_GLOBAL_BUFF_H_
 #define FRAME_GLOBAL_BUFF_H_
 
-#include "frame/static_refmap.h"
+#include "frame/ref/tab_attribute.h" // ref::enumTabAttribute
 #include <mutex>
 #include <string>
 #include <tuple>
@@ -39,8 +39,8 @@ public:
 
     class Attrib {
     public:
-        Attrib(ns_framestatic::enumTabAttribute type, const std::string &valueA, const std::string &valueB) : type(type), valueAStr(valueA), valueBStr(valueB) {}
-        ns_framestatic::enumTabAttribute type = ns_framestatic::enumTabAttribute::COUNT;
+        Attrib(ref::enumTabAttribute type, const std::string &valueA, const std::string &valueB) : type(type), valueAStr(valueA), valueBStr(valueB) {}
+        ref::enumTabAttribute type = ref::enumTabAttribute::COUNT;
         std::string valueAStr = "";
         std::string valueBStr = "";
         int valueAInt = 0;

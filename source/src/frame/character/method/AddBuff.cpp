@@ -12,7 +12,7 @@ static void callbackActiveBuff(void *selfPtr, void *param) {
     ((AutoRollbackAttrib *)it->ptrAttrib)->active(); // ActivateAttrib
     (it->nLeftActiveCount)--;
     if (it->nLeftActiveCount <= 0) {
-        self->DelBuffAllStackNum(*it);
+        self->buffDelAllStackNum(*it);
     } else {
         // 防止在回调函数中被删除, 需要判断其是否存在
         if (it->isValid) {
@@ -45,7 +45,7 @@ void Character::AddBuff7(int buffSourceID, int buffSourceLevel, int buffID, int 
     if (!it.isValid) {
         // 当前不存在 buff
         it.isValid = true;
-        it.attr = getCharacter(buffSourceID)->chAttr;           // 调用复制构造函数, 锁面板
+        it.attr = characterGet(buffSourceID)->chAttr;           // 调用复制构造函数, 锁面板
         it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
         it.nLeftActiveCount = buff.Count * count;
         // 计算 interval
@@ -58,7 +58,7 @@ void Character::AddBuff7(int buffSourceID, int buffSourceLevel, int buffID, int 
         it.nStackNum = stacknum; // 将层数设置为 1
     } else {
         // 当前存在该 buff
-        it.attr = getCharacter(buffSourceID)->chAttr; // 锁面板
+        it.attr = characterGet(buffSourceID)->chAttr; // 锁面板
         it.nLeftActiveCount = buff.Count * count;     // 重置计数
         // 重新计算 interval
         it.interval = buff.Interval * (1024 - it.attr.getHaste()) / 1024;
@@ -85,12 +85,12 @@ void Character::DelBuff(int buffID, int buffLevel) {
             ptr->nStackNum--;
         } else {
             // 层数等于 1, 则删除该 buff
-            DelBuffAllStackNum(*ptr);
+            buffDelAllStackNum(*ptr);
         }
     }
 }
 
-void Character::DelBuffAllStackNum(CharacterBuff::Item &it) {
+void Character::buffDelAllStackNum(CharacterBuff::Item &it) {
     it.isValid = false;
     delete (AutoRollbackAttrib *)it.ptrAttrib; // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
     it.ptrAttrib = nullptr;
@@ -101,19 +101,19 @@ void Character::DelGroupBuff(int buffID, int buffLevel) {
     CharacterBuff::Item *ptr = GetBuff(buffID, buffLevel);
     // 返回的一定是 isValie == true 的 Item.
     if (nullptr != ptr) {
-        DelBuffAllStackNum(*ptr);
+        buffDelAllStackNum(*ptr);
     }
 }
 
 void Character::DelMultiGroupBuffByID(int buffID) {
     CharacterBuff::Item *ptr = GetBuff(buffID, 0);
     while (nullptr != ptr) {
-        DelBuffAllStackNum(*ptr);
+        buffDelAllStackNum(*ptr);
         ptr = GetBuff(buffID, 0);
     }
 }
 
-void Character::BindBuff(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel) {
+void Character::buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel) {
     const Skill &skill = SkillManager::get(skillID, skillLevel);
     const Buff &buff = BuffManager::get(buffID, buffLevel);
     this->AddBuff4(buffSourceID, buffSourceLevel, buffID, buffLevel);

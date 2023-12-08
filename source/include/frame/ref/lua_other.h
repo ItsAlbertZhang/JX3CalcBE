@@ -1,7 +1,8 @@
-#ifndef FRAME_STATIC_REF_H_
-#define FRAME_STATIC_REF_H_
+#ifndef FRAME_REF_LUA_OTHER_H_
+#define FRAME_REF_LUA_OTHER_H_
 
-namespace ns_framestatic {
+namespace ns_frame {
+namespace ref {
 
 enum class enumLuaAttributeEffectMode {
     EFFECT_TO_SELF_NOT_ROLLBACK,
@@ -67,7 +68,8 @@ inline const char *refLuaSkillKindType[] = {
     "POISON_MAGIC",
 };
 
-enum class enumLuaMoveState { // 不全, 出现在 明教/明教_暗尘弥散.lua
+// 不全, 出现在 明教/明教_暗尘弥散.lua
+enum class enumLuaMoveState {
     ON_ENTRAP,
     ON_FREEZE,
     ON_HALT,
@@ -103,6 +105,7 @@ inline const char *refLuaRoleType[] = {
     "STANDARD_FEMALE",
 };
 
-} // namespace ns_framestatic
+} // namespace ref
+} // namespace ns_frame
 
-#endif // FRAME_STATIC_REF_H_
+#endif // FRAME_REF_LUA_OTHER_H_

@@ -1,6 +1,7 @@
 #ifndef FRAME_GLOBAL_SKILL_H_
 #define FRAME_GLOBAL_SKILL_H_
 
+#include "frame/ref/global_skill.h"
 #include <cstdint>
 #include <mutex>
 #include <string>
@@ -8,18 +9,6 @@
 #include <vector>
 
 namespace ns_frame {
-
-enum class SkillType {
-    None,
-    Physics,
-    SolarMagic,
-    LunarMagic,
-    NeutralMagic,
-    Poison,
-    Leap,
-    Adaptive,
-    COUNT, // 用于计数以及表明出错
-};
 
 /**
  * @brief 技能类
@@ -34,7 +23,7 @@ public:
     // ---------- 数据存放区 ----------
     std::unordered_map<std::string, std::string> tab; // skills.tab 中的数据
 
-    SkillType KindType;
+    ref::enumSkillKindtype KindType;
     bool HasCriticalStrike;
     uint32_t SkillEventMask1;
     uint32_t SkillEventMask2;
@@ -292,17 +281,6 @@ private:
      * @param skillLevel
      */
     static void add(int skillID, int skillLevel);
-
-    static inline const std::unordered_map<std::string, SkillType> SkillTypeMap = {
-        {"None", SkillType::None},
-        {"Physics", SkillType::Physics},
-        {"SolarMagic", SkillType::SolarMagic},
-        {"LunarMagic", SkillType::LunarMagic},
-        {"NeutralMagic", SkillType::NeutralMagic},
-        {"Poison", SkillType::Poison},
-        {"Leap", SkillType::Leap},
-        {"Adaptive", SkillType::Adaptive},
-    };
 };
 
 } // namespace ns_frame
