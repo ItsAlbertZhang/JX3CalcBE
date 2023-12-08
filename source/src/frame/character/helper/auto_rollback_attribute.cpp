@@ -93,13 +93,13 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 // 未做相关实现, 推测为解控
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_BUFF):
-                self->AddBuff4(self->dwID, self->nLevel, it.param1Int, it.param2);
+                self->buffAdd4(self->dwID, self->nLevel, it.param1Int, it.param2);
                 break;
             case static_cast<int>(enumLuaAttributeType::DEL_SINGLE_BUFF_BY_ID_AND_LEVEL):
-                self->DelBuff(it.param1Int, it.param2);
+                self->buffDel(it.param1Int, it.param2);
                 break;
             case static_cast<int>(enumLuaAttributeType::DEL_MULTI_GROUP_BUFF_BY_ID):
-                self->DelMultiGroupBuffByID(it.param1Int);
+                self->buffDelMultiGroupByID(it.param1Int);
                 break;
             case static_cast<int>(enumLuaAttributeType::SUN_POWER_VALUE):
                 self->nSunPowerValue = it.param1Int;
@@ -237,15 +237,15 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             case static_cast<int>(enumLuaAttributeType::SET_TALENT_RECIPE):
                 if (isRollback)
-                    self->chSkillRecipe.remove(it.param1Int, it.param2);
+                    self->skillrecipeRemove(it.param1Int, it.param2);
                 else
-                    self->chSkillRecipe.add(it.param1Int, it.param2);
+                    self->skillrecipeAdd(it.param1Int, it.param2);
                 break;
             case static_cast<int>(enumLuaAttributeType::SKILL_EVENT_HANDLER):
                 if (isRollback)
-                    self->chSkillEvent.remove(it.param1Int);
+                    self->skilleventRemove(it.param1Int);
                 else
-                    self->chSkillEvent.add(it.param1Int);
+                    self->skilleventAdd(it.param1Int);
                 break;
             case static_cast<int>(enumLuaAttributeType::LUNAR_ATTACK_POWER_PERCENT):
                 self->chAttr.atLunarAttackPowerPercent += it.param1Int * c;
@@ -322,7 +322,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_BUFF):
-                target->AddBuff4(self->dwID, self->nLevel, it.param1Int, it.param2);
+                target->buffAdd4(self->dwID, self->nLevel, it.param1Int, it.param2);
                 break;
             case static_cast<int>(enumLuaAttributeType::DASH):
                 // 未做相关实现, 推测为冲刺

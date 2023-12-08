@@ -1,7 +1,6 @@
 #include "frame/character/character.h"
 #include "frame/event.h"
 #include "frame/lua_runtime.h"
-#include "program/log.h"
 
 using namespace ns_frame;
 
@@ -15,11 +14,11 @@ static void callbackSetTimer(void *self, void *param) {
     LuaFunc::analysis(LuaFunc::getOnTimer(idx)(selfPtr, type, targetID), idx, LuaFunc::Enum::OnTimer);
 }
 
-void Character::SetTimer3(int frame, std::string filename, int targetID) {
-    this->SetTimer4(frame, filename, characterGet(targetID)->isPlayer ? 1 : 0, targetID);
+void Character::timerSet3(int frame, std::string filename, int targetID) {
+    this->timerSet4(frame, filename, characterGet(targetID)->isPlayer ? 1 : 0, targetID);
 }
 
-void Character::SetTimer4(int frame, std::string filename, int type, int targetID) {
+void Character::timerSet4(int frame, std::string filename, int type, int targetID) {
     int *data = new int[3];
     data[0] = LuaFunc::getIndex(filename);
     data[1] = type;

@@ -3,9 +3,9 @@
 #include "frame/character/helper/runtime_castskill.h"
 #include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
+#include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"
 #include "frame/lua_runtime.h"
-#include "frame/ref/lua_other.h"
 #include "program/log.h"
 #include <random>
 
@@ -20,15 +20,15 @@ static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int n
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
 static void callbackDelaySubSkill(void *self, void *item);
 
-void Character::CastSkill4(int skillID, int skillLevel, int type, int targetID) {
+void Character::skillCast4(int skillID, int skillLevel, int type, int targetID) {
     skillCast(characterGet(targetID), skillID, skillLevel);
 }
 
-void Character::CastSkill3(int skillID, int skillLevel, int targetID) {
+void Character::skillCast3(int skillID, int skillLevel, int targetID) {
     skillCast(characterGet(targetID), skillID, skillLevel);
 }
 
-void Character::CastSkill2(int skillID, int skillLevel) {
+void Character::skillCast2(int skillID, int skillLevel) {
     if (skillCast(this->targetCurr, skillID, skillLevel)) {
         return;
     }
@@ -39,7 +39,7 @@ void Character::CastSkill2(int skillID, int skillLevel) {
     }
 }
 
-void Character::CastSkillXYZ(int skillID, int skillLevel, int x, int y, int z) {
+void Character::skillCastXYZ(int skillID, int skillLevel, int x, int y, int z) {
     skillCast(this->targetCurr, skillID, skillLevel);
     // 关于此逻辑, 详见下方注释
     this->targetCurr = nullptr;
@@ -184,7 +184,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     Skill::SkillBindBuff bindbuff = skill.attrBindBuff;
 
     // 2.4.1 准备 SkillRecipe (后续的 2.5 步需要用到该资源)
-    std::set<const SkillRecipe *> skillrecipeList = this->chSkillRecipe.getList(skillID, skill.RecipeType);
+    std::set<const SkillRecipe *> skillrecipeList = this->skillrecipeGet(skillID, skill.RecipeType);
     std::vector<const Skill *> recipeskillList;
     for (const auto &it : skillrecipeList) {
         const Skill *ptrSkill = SkillRecipeManager::getSkill(it);
@@ -207,7 +207,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     RuntimeCastSkill runtime{this, skillID, skillLevel};
 
     // 1. 执行 SkillEvent: PreCast
-    staticTriggerSkillEvent(this, this->chSkillEvent.getList(ref::enumSkilleventEventtype::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
 
     // 2. 处理 SkillRecipe: CoolDownAdd. 顺便处理 DamageAddPercent.
     int DamageAddPercent = 0;
@@ -272,10 +272,10 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
         2. 其余的 SkillEvent 尚未实现.
         3. 目前 SkillEvent 能够享受 attribute 的加成, 暂时不清楚游戏内是否如此. (因为需要保证 PreCast 的即时插入, 所以 SkillEvent 采取了栈调用的方式)
     */
-    staticTriggerSkillEvent(this, this->chSkillEvent.getList(ref::enumSkilleventEventtype::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    staticTriggerSkillEvent(this, this->chSkillEvent.getList(ref::enumSkilleventEventtype::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     if (isCritical) {
-        staticTriggerSkillEvent(this, this->chSkillEvent.getList(ref::enumSkilleventEventtype::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+        staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     }
 
     return true;
@@ -409,7 +409,7 @@ static inline void staticTriggerCoolDown(Character *self, int cooldownID, int co
     durationFrame = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
     durationFrame = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
     durationFrame += cooldownAdd;
-    self->ModifyCoolDown(cooldownID, durationFrame);
+    self->cooldownModify(cooldownID, durationFrame);
 }
 
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent) {
@@ -430,35 +430,5 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
 static void callbackDelaySubSkill(void *self, void *item) {
     Character *ptrSelf = static_cast<Character *>(self);
     const Skill::DelaySubSkill *ptrItem = static_cast<const Skill::DelaySubSkill *>(item);
-    ptrSelf->CastSkill2(ptrItem->skillID, ptrItem->skillLevel);
-}
-
-void Character::skillActive(int skillID) {
-    int skillLevel = GetSkillLevel(skillID);
-    if (skillLevel == 0) {
-        return;
-    }
-    LOG_INFO("\nActiveSkill: %d # %d\n", skillID, skillLevel);
-    const Skill &skill = SkillManager::get(skillID, skillLevel);
-    RuntimeCastSkill runtime{this, skillID, skillLevel};
-    AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, nullptr, &runtime, skill};
-    this->chSkill.skillActived.emplace(skillID, CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)});
-}
-
-void Character::skillDeactive(int skillID) {
-    LOG_INFO("\nDeactiveSkill: %d\n", skillID);
-    auto it = this->chSkill.skillActived.find(skillID);
-    if (it != this->chSkill.skillActived.end()) {
-        delete static_cast<AutoRollbackAttribute *>(it->second.attribute);
-        this->chSkill.skillActived.erase(it);
-    }
-}
-
-void Character::cast(int skillID) {
-    int skillLevel = GetSkillLevel(skillID);
-    if (skillLevel == 0) {
-        return;
-    }
-    this->targetCurr = this->targetSelect;
-    CastSkill2(skillID, skillLevel);
+    ptrSelf->skillCast2(ptrItem->skillID, ptrItem->skillLevel);
 }

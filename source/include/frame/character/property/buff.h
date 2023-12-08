@@ -2,12 +2,13 @@
 #define FRAME_CHARACTER_PROPERTY_BUFF_H_
 
 #include "frame/character/property/attribute.h"
-#include "frame/event.h"
 #include <map>
 #include <unordered_map>
 #include <vector>
 
 namespace ns_frame {
+
+using event_tick_t = unsigned long long;
 
 class CharacterBuff {
 public:
@@ -45,11 +46,6 @@ public:
         int nLeftActiveCount = 0; // 剩余生效次数
         int nCustomValue = 0;     // 自定义值
         int nNextActiveFrame = 0; // 下一次生效的帧数
-
-        void flushLeftFrame() {
-            nLeftFrame = interval * nLeftActiveCount + static_cast<int>(tickActive - Event::now() + 63) / 64;
-            nNextActiveFrame = static_cast<int>(tickActive - Event::now() + 63) / 64;
-        }
     };
 
     /**

@@ -23,7 +23,7 @@ using CharacterType = ref::enumLuaTarget;
  * @brief Character 类
  * @note 用于表示游戏中的角色.
  * @warning #### 关于线程安全:
- * @warning 在构造实例时, 使用线程锁确保线程安全.
+ * @warning 在构造实例时, 使用 thread_local 确保线程安全.
  */
 class Character {
 public:
@@ -44,22 +44,34 @@ public:
     CharacterScene chScene;             // 角色场景
 
     // ---------- 以下方法未被 lua 调用 ----------
+
+    // character
     static Character *characterGet(int nCharacterID);
     static int characterGetID(Character *character);
-    void skillDeactive(int skillID);
-    bool skillCast(Character *target, int skillID, int skillLevel);
-    void buffDelAllStackNum(CharacterBuff::Item &it);
+    // buff
     void buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
+    void buffFlushLeftFrame(CharacterBuff::Item *item);
     CharacterBuff::Item *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
     CharacterBuff::Item *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
+    // calc
     std::tuple<int, int> calcCritical(const CharacterAttr &attrSelf, int skillID, int skillLevel);
     int calcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent, int dotInterval = 1, int dotCount = 1, bool isSurplus = false);
+    // skill
+    bool skillCast(Character *target, int skillID, int skillLevel);
+    void skillDeactive(int skillID);
+    // skillrecipe
+    void skillrecipeRemove(int recipeID, int recipeLevel);
+    std::set<const SkillRecipe *> skillrecipeGet(int skillID, int skillrecipeType);
+    // skillevent
+    void skilleventAdd(int eventID);
+    void skilleventRemove(int eventID);
+    std::set<const SkillEvent *> skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2);
 
-    // ---------- 以下属性和方法暂时被 api.lua 调用 ----------
-    void skillrecipeAdd(int recipeID, int recipeLevel);
+    // ---------- 以下属性和方法暂时被 api.lua 调用. 这些函数在 lua 内的名称和此处是相同的. ----------
     void skillLearn(int skillID, int skillLevel);
     void skillActive(int skillID);
     void cast(int skillID);
+    void skillrecipeAdd(int recipeID, int recipeLevel);
     void vCheckSunMoonPower();
     int dwKungfuID = 0;
     int publicCooldownID = 0;
@@ -68,43 +80,52 @@ public:
     int delayBase = 0;
     int delayRand = 0;
 
-    // ---------- 以下方法直接被 lua 调用 ----------
-    bool IsFormationLeader();
-    bool IsHaveBuff(int buffID, int buffLevel);
-    bool IsInParty();
-    bool IsSkillRecipeActive(int RecipeID, int RecipeLevel);
-    Character *GetSelectCharacter();
-    CharacterBuff::Item *GetBuff(int buffID, int buffLevel);
-    CharacterBuff::Item *GetBuffByOwner(int buffID, int buffLevel, int sourceID);
-    CharacterScene *GetScene();
-    int GetKungfuMountID();
-    int GetSkillLevel(int skillID);
-    int GetSkillTarget();
-    int GetMapID();
-    void AddBuff4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
-    void AddBuff5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count);
-    void AddBuff7(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum);
-    void ClearAllNpcThreat();
-    void ClearCDTime(int cooldownID);
-    void CastSkill2(int skillID, int skillLevel);
-    void CastSkill3(int skillID, int skillLevel, int targetID);
-    void CastSkill4(int skillID, int skillLevel, int type, int targetID);
-    void CastSkillXYZ(int skillID, int skillLevel, int x, int y, int z);
-    void CreatePublicShadow(int a, int roletype, int dwID, int nX, int nY, int nZ, bool b);
-    void DelBuff(int buffID, int buffLevel);
-    void DelGroupBuff(int buffID, int buffLevel);
-    void DelMultiGroupBuffByID(int buffID);
-    void DestroyPublicShadow(int a, bool b);
-    void DoAction(int a, int b);
-    void ModifyCoolDown(int cooldownID, int frame);
-    void PlayPublicShadowAnimation(int a, int b, bool c, bool d);
-    void ResetCD(int cooldownID);
-    void SetBuffLeftActiveCount(int buffIndex, int count);
-    void SetBuffNextActiveFrame(int buffIndex, int nextActiveFrame);
-    void SetTimer3(int frame, std::string filename, int targetID);
-    void SetTimer4(int frame, std::string filename, int type, int targetID);
+    // ---------- 以下方法直接被 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua_static.cpp ----------
 
-    //  ---------- 被 lua 调用的属性, 通常以类型标志开头 ----------
+    // character
+    Character *characterGetSelect();
+    int characterGetTargetID();
+    // cooldown
+    void cooldownClearTime(int cooldownID);
+    void cooldownModify(int cooldownID, int frame);
+    void cooldownReset(int cooldownID);
+    // buff
+    bool buffExist(int buffID, int buffLevel);
+    CharacterBuff::Item *buffGet(int buffID, int buffLevel);
+    CharacterBuff::Item *buffGetByOwner(int buffID, int buffLevel, int sourceID);
+    void buffAdd4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
+    void buffAdd5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count);
+    void buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum);
+    void buffDel(int buffID, int buffLevel);
+    void buffDelGroup(int buffID, int buffLevel);
+    void buffDelMultiGroupByID(int buffID);
+    void buffSetLeftActiveCount(int buffIndex, int count);
+    void buffSetNextActiveFrame(int buffIndex, int nextActiveFrame);
+    // skill
+    int skillGetLevel(int skillID);
+    void skillCast2(int skillID, int skillLevel);
+    void skillCast3(int skillID, int skillLevel, int targetID);
+    void skillCast4(int skillID, int skillLevel, int type, int targetID);
+    void skillCastXYZ(int skillID, int skillLevel, int x, int y, int z);
+    // skillrecipe
+    bool skillrecipeExist(int RecipeID, int RecipeLevel);
+    // scene
+    CharacterScene *sceneGet();
+    // timer
+    void timerSet3(int frame, std::string filename, int targetID);
+    void timerSet4(int frame, std::string filename, int type, int targetID);
+    // other
+    bool otherIsFormationLeader();
+    bool otherIsInParty();
+    int otherGetKungfuMountID();
+    int otherGetMapID();
+    void otherClearAllNpcThreat();
+    void otherCreatePublicShadow(int a, int roletype, int dwID, int nX, int nY, int nZ, bool b);
+    void otherDestroyPublicShadow(int a, bool b);
+    void otherDoAction(int a, int b);
+    void otherPlayPublicShadowAnimation(int a, int b, bool c, bool d);
+
+    //  ---------- 被 lua 调用的属性, 通常为匈牙利命名法 ----------
     int dwID;                          // 角色 ID
     int nLevel = chAttr.atLevel;       // 等级, 这是唯一一个同时存在于此处和 chAttr 内部的属性
     int nX, nY, nZ;                    // 坐标

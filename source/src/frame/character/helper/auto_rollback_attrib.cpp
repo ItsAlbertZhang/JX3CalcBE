@@ -17,7 +17,7 @@ AutoRollbackAttrib::AutoRollbackAttrib(Character *self, CharacterBuff::Item *ite
 }
 
 AutoRollbackAttrib::~AutoRollbackAttrib() {
-    item->flushLeftFrame();
+    self->buffFlushLeftFrame(item);
     for (const auto &it : buff.BeginAttrib) {
         handle(item, it, true);
     }
@@ -31,7 +31,7 @@ AutoRollbackAttrib::~AutoRollbackAttrib() {
     }
 }
 void AutoRollbackAttrib::active() {
-    item->flushLeftFrame();
+    self->buffFlushLeftFrame(item);
     for (const auto &it : buff.ActiveAttrib) {
         handle(item, it, false);
     }
@@ -118,9 +118,9 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
         break;
     case enumTabAttribute::atSkillEventHandler:
         if (isRollback) {
-            self->chSkillEvent.remove(attrib.valueAInt);
+            self->skilleventRemove(attrib.valueAInt);
         } else {
-            self->chSkillEvent.add(attrib.valueAInt);
+            self->skilleventAdd(attrib.valueAInt);
         }
         break;
     case enumTabAttribute::atStealth:
@@ -152,9 +152,9 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
         break;
     case enumTabAttribute::atSetTalentRecipe:
         if (isRollback) {
-            self->chSkillRecipe.remove(attrib.valueAInt, attrib.valueBInt);
+            self->skillrecipeRemove(attrib.valueAInt, attrib.valueBInt);
         } else {
-            self->chSkillRecipe.add(attrib.valueAInt, attrib.valueBInt);
+            self->skillrecipeAdd(attrib.valueAInt, attrib.valueBInt);
         }
         break;
     case enumTabAttribute::atAllMagicDamageAddPercent:
@@ -164,7 +164,7 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
         self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c;
         break;
     case enumTabAttribute::atCallBuff:
-        self->AddBuff4(0, 99, attrib.valueAInt, attrib.valueBInt);
+        self->buffAdd4(0, 99, attrib.valueAInt, attrib.valueBInt);
         break;
     case enumTabAttribute::atKnockedOffRate:
         // 未做相关实现, 推测为免疫击退

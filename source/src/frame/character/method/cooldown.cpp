@@ -1,7 +1,6 @@
+#include "frame/global/cooldown.h"
 #include "frame/character/character.h"
 #include "frame/event.h"
-#include "frame/global/cooldown.h"
-#include <cstdint>
 
 using namespace ns_frame;
 
@@ -11,7 +10,19 @@ static void callbackModifyCoolDown(void *selfPtr, void *cooldownID) {
     int ID = static_cast<int>(reinterpret_cast<intptr_t>(cooldownID));
     self->chCooldown.cooldownList[ID].isValid = false;
 }
-void Character::ModifyCoolDown(int cooldownID, int frame) {
+
+void Character::cooldownClearTime(int cooldownID) {
+    if (this->chCooldown.cooldownList.find(cooldownID) == this->chCooldown.cooldownList.end()) {
+        return;
+    }
+    CharacterCooldown::Item &item = this->chCooldown.cooldownList.at(cooldownID);
+    if (item.isValid) {
+        int frame = static_cast<int>((Event::now() - item.tickOver) / 64 + 1);
+        this->cooldownModify(cooldownID, frame);
+    }
+}
+
+void Character::cooldownModify(int cooldownID, int frame) {
     if (0 == frame) {
         return;
     }
@@ -31,7 +42,7 @@ void Character::ModifyCoolDown(int cooldownID, int frame) {
     }
 }
 
-void Character::ResetCD(int cooldownID) {
+void Character::cooldownReset(int cooldownID) {
     ns_frame::CharacterCooldown::Item *item = &this->chCooldown.cooldownList[cooldownID]; // Character. 若不存在, 则会自动创建
     const ns_frame::Cooldown &cooldown = CooldownManager::get(cooldownID);                // Global
     if (item->isValid) {

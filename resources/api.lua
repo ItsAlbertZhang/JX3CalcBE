@@ -160,11 +160,8 @@ function Macro1(player)
     end
 
     player:cast(3974); -- 暗尘弥散
-    if player:GetBuff(25721, 3) and player.nCurrentMoonEnergy >= 10000 then
-        local buff = player:GetBuff(25716, 0);
-        if not buff then
-            player:cast(3969); -- 光明相
-        end
+    if player:IsHaveBuff(25721, 3) and not player:IsHaveBuff(25716, 0) and player.nCurrentMoonEnergy >= 10000 then
+        player:cast(3969); -- 光明相
     end
     player:cast(34347);     -- 悬象著明
     player:cast(3966);      -- 生死劫
@@ -194,11 +191,8 @@ function Macro2(player)
     if player.nCurrentMoonEnergy == 6000 and player.nCurrentSunEnergy == 4000 then
         player:cast(3962); -- 赤日轮
     end
-    if player.nCurrentMoonEnergy >= 10000 and player.nCurrentSunEnergy < 10000 then
-        local buff = player:GetBuff(25721, 0);
-        if not buff then
-            player.macroIdx = 0; -- 切换至 0 号宏
-            -- 在结尾进行判断的原因时, 导致切换条件 (moon>=100 & sun<100 & nobuff:25721) 的事件 (银月斩的释放) 是发生在宏内的. 因此, 可以在宏结束时进行判断.
-        end
+    if player.nCurrentMoonEnergy >= 10000 and player.nCurrentSunEnergy < 10000 and not player:IsHaveBuff(25721, 0) then
+        player.macroIdx = 0; -- 切换至 0 号宏
+        -- 在结尾进行判断的原因时, 导致切换条件 (moon>=100 & sun<100 & nobuff:25721) 的事件 (银月斩的释放) 是发生在宏内的. 因此, 可以在宏结束时进行判断.
     end
 end
