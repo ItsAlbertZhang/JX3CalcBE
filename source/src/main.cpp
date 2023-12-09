@@ -48,16 +48,15 @@ int main(int argc, char *argv[]) {
 #endif
 
     // std::filesystem::path pAPI = ns_program::Config::pExeDir / "api.lua";
+    int fighttime = 300;
 
+    auto start = std::chrono::steady_clock::now();
     ns_concrete::ChPlyMjFysj fysj;
     ns_concrete::ChNpc124 npc124;
     ns_frame::Player &player = fysj;
     ns_frame::NPC &npc = npc124;
     player.targetSelect = &npc;
     player.attrImport(""); // TODO: temp
-
-    auto start = std::chrono::steady_clock::now();
-    int fighttime = 300;
     player.macroRun();
     while (ns_frame::Event::now() < 1024 * fighttime) {
         ret = ns_frame::Event::run();
@@ -101,16 +100,15 @@ int main(int argc, char *argv[]) {
     unsigned long long damageAvg = 0;
     std::chrono::milliseconds timeAvg = std::chrono::milliseconds(0);
     for (int i = 0; i < 50; i++) {
-        ns_concrete::ChPlyMjFysj fysj_2;
-        ns_concrete::ChNpc124 npc124_2;
-        ns_frame::Player &player_2 = fysj_2;
-        ns_frame::NPC &npc_2 = npc124_2;
-        player_2.targetSelect = &npc_2;
-        player_2.attrImport(""); // TODO: temp
-        ns_frame::Event::clear();
-
         start = std::chrono::steady_clock::now();
-        player_2.macroRun();
+        ns_concrete::ChPlyMjFysj fysj;
+        ns_concrete::ChNpc124 npc124;
+        ns_frame::Player &player = fysj;
+        ns_frame::NPC &npc = npc124;
+        player.targetSelect = &npc;
+        player.attrImport(""); // TODO: temp
+        ns_frame::Event::clear();
+        player.macroRun();
         while (ns_frame::Event::now() < 1024 * fighttime) {
             ret = ns_frame::Event::run();
             if (!ret)
@@ -119,7 +117,7 @@ int main(int argc, char *argv[]) {
         end = std::chrono::steady_clock::now();
 
         unsigned long long sumDamage = 0;
-        for (auto &it : player_2.chDamage.damageList) {
+        for (auto &it : player.chDamage.damageList) {
             sumDamage += it.damage;
         }
         std::cout << sumDamage / fighttime << "\t" << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;

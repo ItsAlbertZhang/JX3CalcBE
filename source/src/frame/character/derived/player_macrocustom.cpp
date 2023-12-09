@@ -13,7 +13,7 @@ MacroCustom::MacroCustom(const std::string &script) {
 
 MacroCustom::MacroCustom(const std::filesystem::path &scriptfile) {
     constructorBefore(this);
-    lua.script_file(scriptfile);
+    lua.script_file(scriptfile.string());
     constructorAfter(this);
 }
 
