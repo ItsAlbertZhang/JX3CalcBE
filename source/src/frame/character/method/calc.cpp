@@ -34,7 +34,7 @@ std::tuple<int, int> Character::calcCritical(const CharacterAttr &attrSelf, int 
         atCriticalDamagePower = attrSelf.getPoisonCriticalDamagePower();
         break;
     default:
-        LOG_ERROR("Unknown skill KindType: %d", static_cast<int>(skill.KindType));
+        LOG_ERROR("Unknown skill KindType: {}", static_cast<int>(skill.KindType));
         break;
     }
 

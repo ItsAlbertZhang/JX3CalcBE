@@ -123,6 +123,10 @@ file(GLOB EXTERNAL_SOURCES
      "${CMAKE_SOURCE_DIR}/external/lib/${directory_lib}/*")
 target_link_libraries(jx3calc PRIVATE ${EXTERNAL_SOURCES}) # 将第三方库链接至 main
 
+if(APPLE OR UNIX)
+  target_link_libraries(jx3calc PRIVATE fmt) # 链接fmt库
+endif()
+
 # ########## 处理资源 ##########
 set(RESOURCE_DIRECTORY "${CMAKE_SOURCE_DIR}/resources/") # 资源文件
 file(COPY ${RESOURCE_DIRECTORY} DESTINATION ${OUTPUT_DIRECTORY}) # 复制资源文件到输出目录

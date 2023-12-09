@@ -61,7 +61,7 @@ void BuffManager::add(int buffID, int buffLevel) {
             std::string valueB = buff.tab[attribName[attribIdx] + "Value" + std::to_string(i) + "B"]; // BeginValue1B, BeginValue2B, ...
 
             if (ref::mapTabAttribute.find(name) == ref::mapTabAttribute.end()) {
-                LOG_ERROR("BuffManager::add: %d Unknown Attribute: %s\n", attribIdx, name.c_str());
+                LOG_ERROR("BuffManager::add: {} Unknown Attribute: {}", attribIdx, name);
                 continue;
             }
             switch (attribIdx) {

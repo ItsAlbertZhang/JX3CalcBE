@@ -135,7 +135,7 @@ end
 */
 
 bool Character::skillCast(Character *target, int skillID, int skillLevel) {
-    LOG_INFO("\nTry to CastSkill: %d # %d\n", skillID, skillLevel);
+    LOG_INFO("Try to CastSkill: {} # {}", skillID, skillLevel);
 
     // 获取技能
     const Skill &skill = SkillManager::get(skillID, skillLevel);
@@ -201,7 +201,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
         return false;
 
     // ---------- 检查完毕, 释放技能 ----------
-    LOG_INFO("%d # %d cast successfully!\n", skillID, skillLevel);
+    LOG_INFO("{} # {} cast successfully!", skillID, skillLevel);
 
     // 构造技能运行时资源: RuntimeCastSkill
     RuntimeCastSkill runtime{this, skillID, skillLevel};

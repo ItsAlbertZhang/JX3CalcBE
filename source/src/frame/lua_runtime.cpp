@@ -24,10 +24,10 @@ bool LuaFunc::analysis(sol::protected_function_result res, std::string &filename
     std::replace(filename.begin(), filename.end(), '\\', '/');
     if (!res.valid()) {
         sol::error err = res;
-        LOG_ERROR("%s %s() failed: \n%s\n", filename.c_str(), names[static_cast<int>(func)].c_str(), err.what());
+        LOG_ERROR("{} {}() failed: \n{}", filename, names[static_cast<int>(func)], err.what());
         return false;
     } else {
-        LOG_INFO("%s %s() success\n", filename.c_str(), names[static_cast<int>(func)].c_str());
+        LOG_INFO("{} {}() success.", filename, names[static_cast<int>(func)]);
         return true;
     }
 }
@@ -36,10 +36,10 @@ bool LuaFunc::analysis(sol::protected_function_result res, int idx, Enum func) {
     // 传入的 idx 是先前通过 getIndex 获取的, 一定存在
     if (!res.valid()) {
         sol::error err = res;
-        LOG_ERROR("%s %s() failed: \n%s\n", filenameList[idx].c_str(), names[static_cast<int>(func)].c_str(), err.what());
+        LOG_ERROR("{} {}() failed: \n{}", filenameList[idx], names[static_cast<int>(func)], err.what());
         return false;
     } else {
-        LOG_INFO("%s %s() success\n", filenameList[idx].c_str(), names[static_cast<int>(func)].c_str());
+        LOG_INFO("{} {}() success.", filenameList[idx], names[static_cast<int>(func)]);
         return true;
     }
 }
@@ -52,7 +52,7 @@ void LuaFunc::add(const std::string &filename) {
     bool fileExists = true;
     sol::protected_function_result res = gdi::Interface::luaExecuteFile(filename, &fileExists);
     if (res.valid() && fileExists) {
-        LOG_INFO("luaExecuteFile success: %s\n", filename.c_str());
+        LOG_INFO("luaExecuteFile success: {}.", filename);
         for (int i = 0; i < static_cast<int>(Enum::COUNT); i++) {
             /**
              * 实际上, 此处有可能取到上一个执行文件的函数. (例如, 当前文件没有 OnRemove 函数, 就会取到上一个文件的.)
@@ -67,10 +67,10 @@ void LuaFunc::add(const std::string &filename) {
     }
     if (!res.valid()) {
         sol::error err = res;
-        LOG_ERROR("luaExecuteFile failed: %s\n%s\n", filename.c_str(), err.what());
+        LOG_ERROR("luaExecuteFile failed: {}\n{}", filename, err.what());
     }
     if (!fileExists) {
-        LOG_ERROR("luaExecuteFile failed: %s not exist\n", filename.c_str());
+        LOG_ERROR("luaExecuteFile failed: {} not exist.", filename);
     }
 }
 

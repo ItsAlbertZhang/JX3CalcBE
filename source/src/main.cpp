@@ -73,6 +73,15 @@ int main(int argc, char *argv[]) {
     if (!ret)
         return 0;
 
+#ifdef DEBUG
+    ns_program::log_error.printLast = true;
+    if (argc > 1) {
+        if (strcmp(argv[1], "--log=info") == 0) {
+            ns_program::log_info.printImmediately = true;
+        }
+    }
+#endif
+
     // 如果成功加载 GameDataFetcher, current_path 会发生改变.
     // std::cout << std::filesystem::current_path() << std::endl;
 
@@ -326,14 +335,6 @@ int main(int argc, char *argv[]) {
     macro.clear();
     ns_frame::LuaFunc::clear();
 
-#ifdef DEBUG
-    ns_program::log_error.print();
-    if (argc > 1) {
-        if (strcmp(argv[1], "--log=info") == 0) {
-            ns_program::log_info.print();
-        }
-    }
-#endif
     return 0;
 }
 

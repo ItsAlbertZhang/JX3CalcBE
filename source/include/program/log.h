@@ -10,40 +10,15 @@ namespace ns_program {
 
 class Log {
 public:
-    Log(const std::string &name) : name(name) {
-        data = new char[size];
-        curr = data;
-        memset(data, 0, size);
-    }
-
-    ~Log() {
-        delete[] data;
-    }
-
-    template <typename... Args>
-    void operator()(const char *format, Args... args) {
-        if (static_cast<size_t>(curr - data + 1024) > size) {
-            char *tmp = new char[size * 2];
-            memcpy(tmp, data, size);
-            delete[] data;
-            curr = tmp + (curr - data);
-            data = tmp;
-            size *= 2;
-        }
-        curr += snprintf(curr, size - (curr - data), format, args...);
-        // printf(format, args...);
-    }
-
-    void print() {
-        std::cout << "\nLog (" << name << "):\n"
-                  << data << std::endl;
-    }
-
-private:
+    Log(const std::string &name) : name(name) {}
     std::string name;
-    size_t size = 1024 * 1024;
-    char *curr = nullptr;
-    char *data = nullptr;
+    std::string data;
+    bool printImmediately = false;
+    bool printLast = false;
+    ~Log() {
+        if (printLast)
+            std::cout << data << std::endl;
+    }
 };
 
 inline Log log_info{"info"};
@@ -51,13 +26,30 @@ inline Log log_error{"error"};
 
 } // namespace ns_program
 
-#define LOG_INFO(format, ...) \
-    ns_program::log_info(format, __VA_ARGS__);
-
-#define LOG_ERROR(format, ...) \
-    ns_program::log_error("%s:%d: " format, __FILE__, __LINE__, __VA_ARGS__);
-
+#ifdef _WIN32
+#include <format>
+using fmt = std;
 #else
+#include <fmt/core.h>
+#endif
+
+#define LOG_INFO(str, ...)                                                                   \
+    {                                                                                        \
+        std::string newdata = fmt::format("\n{}:{}: " str, __FILE__, __LINE__, __VA_ARGS__); \
+        ns_program::log_info.data.append(newdata);                                           \
+        if (ns_program::log_info.printImmediately)                                           \
+            std::cout << newdata << std::endl;                                               \
+    }
+
+#define LOG_ERROR(str, ...)                                                                  \
+    {                                                                                        \
+        std::string newdata = fmt::format("\n{}:{}: " str, __FILE__, __LINE__, __VA_ARGS__); \
+        ns_program::log_error.data.append(newdata);                                          \
+        if (ns_program::log_error.printImmediately)                                          \
+            std::cout << newdata << std::endl;                                               \
+    }
+
+#else // DEBUG
 
 #define LOG_INFO(format, ...)
 #define LOG_ERROR(format, ...)

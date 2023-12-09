@@ -114,7 +114,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 // 未做相关实现, 推测为动作
                 break;
             default:
-                LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
                 break;
             }
         } break; // EFFECT_TO_SELF_NOT_ROLLBACK
@@ -258,7 +258,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 self->chAttr.atAddDamageByDstMoveState += it.param2 * c;
                 break;
             default:
-                LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
                 break;
             }
         } break; // EFFECT_TO_SELF_AND_ROLLBACK
@@ -328,7 +328,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 // 未做相关实现, 推测为冲刺
                 break;
             default:
-                LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
                 break;
             }
         } break; // EFFECT_TO_DEST_NOT_ROLLBACK
@@ -341,7 +341,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 this->atGlobalDamageFactor += it.param1Int * c;
                 break;
             default:
-                LOG_ERROR("Undefined: %s, %s: %d %d, rollback=%d\n", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
                 break;
             }
         } break; // EFFECT_TO_DEST_AND_ROLLBACK

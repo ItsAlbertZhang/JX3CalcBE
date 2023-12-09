@@ -16,7 +16,7 @@ void Character::skillActive(int skillID) {
     if (skillLevel == 0) {
         return;
     }
-    LOG_INFO("\nActiveSkill: %d # %d\n", skillID, skillLevel);
+    LOG_INFO("ActiveSkill: {} # {}", skillID, skillLevel);
     const Skill &skill = SkillManager::get(skillID, skillLevel);
     RuntimeCastSkill runtime{this, skillID, skillLevel};
     AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, nullptr, &runtime, skill};
@@ -24,7 +24,7 @@ void Character::skillActive(int skillID) {
 }
 
 void Character::skillDeactive(int skillID) {
-    LOG_INFO("\nDeactiveSkill: %d\n", skillID);
+    LOG_INFO("DeactiveSkill: {}", skillID);
     auto it = this->chSkill.skillActived.find(skillID);
     if (it != this->chSkill.skillActived.end()) {
         delete static_cast<AutoRollbackAttribute *>(it->second.attribute);

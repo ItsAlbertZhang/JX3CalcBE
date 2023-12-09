@@ -388,7 +388,7 @@ end
 ``` */
 int LuaGlobalFunction::GetValueByBits(int nValue, int nBit, int c) {
     if (nBit > 31 || nBit < 0) {
-        LOG_ERROR(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error\n%s", "");
+        LOG_ERROR(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error{}", "");
     }
     return (nValue >> nBit) & 1;
 }
@@ -429,11 +429,11 @@ end
 ``` */
 int LuaGlobalFunction::SetValueByBits(int nValue, int nBit, int c, int nNewBitValue) {
     if (nNewBitValue > 1 || nNewBitValue < 0) {
-        LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,\n%s", "");
+        LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,{}", "");
         return nValue;
     }
     if (nBit > 31 || nBit < 0) {
-        LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!BitIndex error\n%s", "");
+        LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!BitIndex error{}", "");
         return nValue;
     }
     return (nValue & ~(1 << nBit)) | (nNewBitValue << nBit);

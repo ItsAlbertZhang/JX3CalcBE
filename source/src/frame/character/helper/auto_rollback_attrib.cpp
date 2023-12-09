@@ -170,7 +170,7 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
         // 未做相关实现, 推测为免疫击退
         break;
     default:
-        LOG_ERROR("Undefined: %d %d Unknown Attribute: %s %d\n", item->BuffID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)].c_str(), attrib.valueAInt);
+        LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->BuffID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;
     }
 }
