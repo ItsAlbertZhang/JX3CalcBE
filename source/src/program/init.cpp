@@ -1,4 +1,5 @@
 #include "program/init.h"
+#include <cstring>
 #include <fstream>
 
 using namespace ns_program;

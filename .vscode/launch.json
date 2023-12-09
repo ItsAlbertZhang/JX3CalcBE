@@ -1,29 +1,41 @@
 {
     "configurations": [
         {
-            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3fycalc.exe", "args": [ ],
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc.exe", "args": [ ],
             "name": "windows_debug",
             "type": "cppvsdbg",
             "preLaunchTask": "windows_debug_build",
             "console": "integratedTerminal",
         },
         {
-            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3fycalc.exe", "args": [ ],
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc.exe", "args": [ ],
             "name": "windows_release",
             "type": "cppvsdbg",
             "preLaunchTask": "windows_release_build",
             "console": "integratedTerminal",
         },
         {
-            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3fycalc", "args": [ ],
-            "name": "unix_debug",
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc", "args": [ ],
+            "name": "macos_debug",
             "type": "lldb",
             "preLaunchTask": "unix_debug_build",
         },
         {
-            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3fycalc", "args": [ ],
-            "name": "unix_release",
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc", "args": [ ],
+            "name": "macos_release",
             "type": "lldb",
+            "preLaunchTask": "unix_release_build",
+        },
+        {
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc", "args": [ ],
+            "name": "linux_debug",
+            "type": "cppdbg",
+            "preLaunchTask": "unix_debug_build",
+        },
+        {
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc", "args": [ ],
+            "name": "linux_release",
+            "type": "cppdbg",
             "preLaunchTask": "unix_release_build",
         },
     ],

@@ -71,7 +71,7 @@ elseif(WIN32)
 endif()
 
 # ########## 构建目标 ##########
-project(jx3fycalc)
+project(jx3calc)
 
 # 指定头文件目录
 include_directories("${CMAKE_SOURCE_DIR}/source/lib") # 动态库头文件目录
@@ -92,21 +92,21 @@ endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 
 # main
 file(GLOB_RECURSE MAIN_SOURCES "${CMAKE_SOURCE_DIR}/source/src/*.cpp")
-add_executable(jx3fycalc ${MAIN_SOURCES}) # 编译为可执行文件
-target_include_directories(
-  jx3fycalc PRIVATE "${CMAKE_SOURCE_DIR}/source/include") # 指定 main 的头文件目录
+add_executable(jx3calc ${MAIN_SOURCES}) # 编译为可执行文件
+target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/source/include"
+)# 指定 main 的头文件目录
 
 # Game Data Interface
 if(EXISTS "${CMAKE_SOURCE_DIR}/JX3CalcBEgdi")
   add_subdirectory(JX3CalcBEgdi) # 若子目录存在, 则构建 gdi
-  target_link_libraries(jx3fycalc PRIVATE gdi) # 将 gdi 链接至 main
+  target_link_libraries(jx3calc PRIVATE gdi) # 将 gdi 链接至 main
 else()
   target_link_libraries(
-    jx3fycalc
+    jx3calc
     PRIVATE "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_link}"
   )# 将 gdi 链接至 main
   add_custom_command(
-    TARGET jx3fycalc
+    TARGET jx3calc
     POST_BUILD
     COMMAND
       ${CMAKE_COMMAND} -E copy
@@ -121,7 +121,7 @@ endif()
 # 第三方库
 file(GLOB EXTERNAL_SOURCES
      "${CMAKE_SOURCE_DIR}/external/lib/${directory_lib}/*")
-target_link_libraries(jx3fycalc PRIVATE ${EXTERNAL_SOURCES}) # 将第三方库链接至 main
+target_link_libraries(jx3calc PRIVATE ${EXTERNAL_SOURCES}) # 将第三方库链接至 main
 
 # ########## 处理资源 ##########
 set(RESOURCE_DIRECTORY "${CMAKE_SOURCE_DIR}/resources/") # 资源文件

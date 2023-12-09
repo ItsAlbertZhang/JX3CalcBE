@@ -2,6 +2,7 @@
 #define FRAME_EVENT_H_
 
 #include <set>
+#include <tuple>
 
 namespace ns_frame {
 
