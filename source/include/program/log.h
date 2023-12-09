@@ -28,7 +28,7 @@ inline Log log_error{"error"};
 
 #ifdef _WIN32
 #include <format>
-using fmt = std;
+namespace fmt = std;
 #else
 #include <fmt/core.h>
 #endif

@@ -8,9 +8,9 @@
 #include "program/init.h"
 #include "program/log.h"
 #include <chrono>
-#include <cstdlib> //  std::rand()
 #include <filesystem>
 #include <iostream>
+#include <random> //  std::rand()
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -41,7 +41,10 @@ void callbackCastSkill(void *self, void *param) {
         delay = lua_delay;
     }
     delay += player->delayBase;
-    delay += std::rand() % player->delayRand;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, player->delayRand);
+    delay += dis(gen);
     ns_frame::Event::add(delay, callbackCastSkill, self, nullptr);
 }
 
