@@ -136,91 +136,37 @@ bool ns_frame::luaInit(sol::state &lua) {
         // lua.new_usertype<Skill> end
     );
 
-    // 暂时将 CharacterAttr 暴露给 lua, 以便 api.lua 调用.
-    lua.new_usertype<CharacterAttr>(
-        "CharacterAttr",
-
-        "atLevel", &CharacterAttr::atLevel,
-
-        "atVitalityBase", &CharacterAttr::atVitalityBase,
-        "atStrengthBase", &CharacterAttr::atStrengthBase,
-        "atAgilityBase", &CharacterAttr::atAgilityBase,
-        "atSpiritBase", &CharacterAttr::atSpiritBase,
-        "atSpunkBase", &CharacterAttr::atSpunkBase,
-
-        "atPhysicsAttackPowerBase", &CharacterAttr::atPhysicsAttackPowerBase,
-        "atMagicAttackPowerBase", &CharacterAttr::atMagicAttackPowerBase,
-        "atSolarAttackPowerBase", &CharacterAttr::atSolarAttackPowerBase,
-        "atLunarAttackPowerBase", &CharacterAttr::atLunarAttackPowerBase,
-        "atNeutralAttackPowerBase", &CharacterAttr::atNeutralAttackPowerBase,
-        "atPoisonAttackPowerBase", &CharacterAttr::atPoisonAttackPowerBase,
-
-        "atAllTypeCriticalStrike", &CharacterAttr::atAllTypeCriticalStrike,
-        "atPhysicsCriticalStrike", &CharacterAttr::atPhysicsCriticalStrike,
-        "atMagicCriticalStrike", &CharacterAttr::atMagicCriticalStrike,
-        "atSolarCriticalStrike", &CharacterAttr::atSolarCriticalStrike,
-        "atLunarCriticalStrike", &CharacterAttr::atLunarCriticalStrike,
-        "atNeutralCriticalStrike", &CharacterAttr::atNeutralCriticalStrike,
-        "atPoisonCriticalStrike", &CharacterAttr::atPoisonCriticalStrike,
-
-        "atAllTypeCriticalDamagePowerBase", &CharacterAttr::atAllTypeCriticalDamagePowerBase,
-        "atPhysicsCriticalDamagePowerBase", &CharacterAttr::atPhysicsCriticalDamagePowerBase,
-        "atMagicCriticalDamagePowerBase", &CharacterAttr::atMagicCriticalDamagePowerBase,
-        "atSolarCriticalDamagePowerBase", &CharacterAttr::atSolarCriticalDamagePowerBase,
-        "atLunarCriticalDamagePowerBase", &CharacterAttr::atLunarCriticalDamagePowerBase,
-        "atNeutralCriticalDamagePowerBase", &CharacterAttr::atNeutralCriticalDamagePowerBase,
-        "atPoisonCriticalDamagePowerBase", &CharacterAttr::atPoisonCriticalDamagePowerBase,
-
-        "atPhysicsOvercomeBase", &CharacterAttr::atPhysicsOvercomeBase,
-        "atMagicOvercome", &CharacterAttr::atMagicOvercome,
-
-        "atSurplusValueBase", &CharacterAttr::atSurplusValueBase,
-        "atStrainBase", &CharacterAttr::atStrainBase,
-
-        "atHasteBase", &CharacterAttr::atHasteBase,
-
-        "atPhysicsShieldBase", &CharacterAttr::atPhysicsShieldBase,
-        "atMagicShield", &CharacterAttr::atMagicShield,
-
-        "atMeleeWeaponDamageBase", &CharacterAttr::atMeleeWeaponDamageBase,
-        "atMeleeWeaponDamageRand", &CharacterAttr::atMeleeWeaponDamageRand,
-        "atAllDamageAddPercent", &CharacterAttr::atAllDamageAddPercent,
-        "atAllShieldIgnorePercent", &CharacterAttr::atAllShieldIgnorePercent
-
-        // lua.new_usertype<CharacterAttr> end
-    );
-
     lua.new_usertype<Character>(
         "Character",
-        "CastSkill", sol::overload(&Character::skillCast2, &Character::skillCast3, &Character::skillCast4),
+        "GetSelectCharacter", &Character::characterGetSelect,
+        "GetSkillTarget", &Character::characterGetTargetID,
+        "IsHaveBuff", &Character::buffExist,
+        "GetBuff", &Character::buffGet,
+        "GetBuffByOwner", &Character::buffGetByOwner,
         "AddBuff", sol::overload(&Character::buffAdd4, &Character::buffAdd5, &Character::buffAdd7),
         "DelBuff", &Character::buffDel,
         "DelGroupBuff", &Character::buffDelGroup,
         "DelMultiGroupBuffByID", &Character::buffDelMultiGroupByID,
-        "IsHaveBuff", &Character::buffExist,
-        "IsInParty", &Character::otherIsInParty,
-        "ModifyCoolDown", &Character::cooldownModify,
-        "GetBuff", &Character::buffGet,
-        "GetBuffByOwner", &Character::buffGetByOwner,
-        "GetSkillLevel", &Character::skillGetLevel,
-        "GetMapID", &Character::otherGetMapID,
-        "GetScene", &Character::sceneGet,
-        "SetTimer", sol::overload(&Character::timerSet3, &Character::timerSet4),
-        "GetSkillTarget", &Character::characterGetTargetID,
-        "GetKungfuMountID", &Character::otherGetKungfuMountID,
-        "IsFormationLeader", &Character::otherIsFormationLeader,
-        "CastSkillXYZ", &Character::skillCastXYZ,
-        "PlayPublicShadowAnimation", &Character::otherPlayPublicShadowAnimation,
-        "ClearAllNpcThreat", &Character::otherClearAllNpcThreat,
-        "ClearCDTime", &Character::cooldownClearTime,
-        "DoAction", &Character::otherDoAction,
-        "ResetCD", &Character::cooldownReset,
-        "GetSelectCharacter", &Character::characterGetSelect,
-        "IsSkillRecipeActive", &Character::skillrecipeExist,
-        "DestroyPublicShadow", &Character::otherDestroyPublicShadow,
-        "CreatePublicShadow", &Character::otherCreatePublicShadow,
         "SetBuffLeftActiveCount", &Character::buffSetLeftActiveCount,
         "SetBuffNextActiveFrame", &Character::buffSetNextActiveFrame,
+        "ClearCDTime", &Character::cooldownClearTime,
+        "ModifyCoolDown", &Character::cooldownModify,
+        "ResetCD", &Character::cooldownReset,
+        "GetSkillLevel", &Character::skillGetLevel,
+        "CastSkill", sol::overload(&Character::skillCast2, &Character::skillCast3, &Character::skillCast4),
+        "CastSkillXYZ", &Character::skillCastXYZ,
+        "IsSkillRecipeActive", &Character::skillrecipeExist,
+        "GetScene", &Character::sceneGet,
+        "SetTimer", sol::overload(&Character::timerSet3, &Character::timerSet4),
+        "IsFormationLeader", &Character::otherIsFormationLeader,
+        "IsInParty", &Character::otherIsInParty,
+        "GetKungfuMountID", &Character::otherGetKungfuMountID,
+        "GetMapID", &Character::otherGetMapID,
+        "ClearAllNpcThreat", &Character::otherClearAllNpcThreat,
+        "CreatePublicShadow", &Character::otherCreatePublicShadow,
+        "DestroyPublicShadow", &Character::otherDestroyPublicShadow,
+        "DoAction", &Character::otherDoAction,
+        "PlayPublicShadowAnimation", &Character::otherPlayPublicShadowAnimation,
         "dwID", &Character::dwID,
         "nLevel", &Character::nLevel,
         "nX", &Character::nX, "nY", &Character::nY, "nZ", &Character::nZ,
@@ -233,20 +179,7 @@ bool ns_frame::luaInit(sol::state &lua) {
         "bSurplusAutoReplenish", &Character::bSurplusAutoReplenish,
         "bFightState", &Character::bFightState,
         "fMaxLife64", &Character::fMaxLife64,
-        "fCurrentLife64", &Character::fCurrentLife64,
-        // 以下是暂时暴露给 lua 的属性, 以便 api.lua 调用.
-        "dwKungfuID", &Character::dwKungfuID,
-        "chAttr", &Character::chAttr,
-        "skillrecipeAdd", &Character::skillrecipeAdd,
-        "skillLearn", &Character::skillLearn,
-        "skillActive", &Character::skillActive,
-        "cast", &Character::cast,
-        "vCheckSunMoonPower", &Character::vCheckSunMoonPower,
-        "publicCooldownID", &Character::publicCooldownID,
-        "macroNum", &Character::macroNum,
-        "macroIdx", &Character::macroIdx,
-        "delayBase", &Character::delayBase,
-        "delayRand", &Character::delayRand
+        "fCurrentLife64", &Character::fCurrentLife64
         // lua.new_usertype<Character> end
     );
 

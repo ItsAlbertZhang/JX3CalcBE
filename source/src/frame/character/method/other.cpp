@@ -34,20 +34,6 @@ void Character::otherDoAction(int a, int b) {
     return;
 }
 
-static void staticCheckSunMoonPower(void *self, void *param) {
-    Character *character = (Character *)self;
-    if (character->nMoonPowerValue == 1 || character->nSunPowerValue == 1)
-        return;
-    if (character->nCurrentMoonEnergy >= 10000)
-        character->nMoonPowerValue = 1;
-    else if (character->nCurrentSunEnergy >= 10000)
-        character->nSunPowerValue = 1;
-}
-void Character::vCheckSunMoonPower() {
-    staticCheckSunMoonPower(this, nullptr);
-    // Event::add(1024, staticCheckSunMoonPower, this, nullptr);
-}
-
 void Character::otherDestroyPublicShadow(int a, bool b) {
     return;
 }

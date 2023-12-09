@@ -26,3 +26,8 @@ event_tick_t Event::cancel(event_tick_t tick, event_func_t func, void *self, voi
 event_tick_t Event::now() {
     return tick;
 }
+
+void Event::clear() {
+    eventList.clear();
+    tick = 0;
+}

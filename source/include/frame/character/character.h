@@ -28,6 +28,7 @@ using CharacterType = ref::enumLuaTarget;
 class Character {
 public:
     Character(); // 构造函数, 线程安全通过 thread_local 保证
+    virtual ~Character();
 
     bool isPlayer = false;             // 是否为玩家
     Character *targetSelect = nullptr; // 选中的目标
@@ -43,11 +44,13 @@ public:
     CharacterSkillEvent chSkillEvent;   // 角色技能事件
     CharacterScene chScene;             // 角色场景
 
-    // ---------- 以下方法未被 lua 调用 ----------
-
+    // ---------- 以下属性和方法未被游戏 lua 调用 ----------
+    int dwKungfuID = 0;
     // character
     static Character *characterGet(int nCharacterID);
     static int characterGetID(Character *character);
+    // attr
+    void attrImport(const std::string &attr);
     // buff
     void buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
     void buffFlushLeftFrame(CharacterBuff::Item *item);
@@ -57,9 +60,13 @@ public:
     std::tuple<int, int> calcCritical(const CharacterAttr &attrSelf, int skillID, int skillLevel);
     int calcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent, int dotInterval = 1, int dotCount = 1, bool isSurplus = false);
     // skill
+    void cast(int skillID);
     bool skillCast(Character *target, int skillID, int skillLevel);
+    void skillActive(int skillID);
     void skillDeactive(int skillID);
+    void skillLearn(int skillID, int skillLevel);
     // skillrecipe
+    void skillrecipeAdd(int recipeID, int recipeLevel);
     void skillrecipeRemove(int recipeID, int recipeLevel);
     std::set<const SkillRecipe *> skillrecipeGet(int skillID, int skillrecipeType);
     // skillevent
@@ -67,28 +74,11 @@ public:
     void skilleventRemove(int eventID);
     std::set<const SkillEvent *> skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2);
 
-    // ---------- 以下属性和方法暂时被 api.lua 调用. 这些函数在 lua 内的名称和此处是相同的. ----------
-    void skillLearn(int skillID, int skillLevel);
-    void skillActive(int skillID);
-    void cast(int skillID);
-    void skillrecipeAdd(int recipeID, int recipeLevel);
-    void vCheckSunMoonPower();
-    int dwKungfuID = 0;
-    int publicCooldownID = 0;
-    int macroNum = 0;
-    int macroIdx = 0;
-    int delayBase = 0;
-    int delayRand = 0;
-
-    // ---------- 以下方法直接被 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua_static.cpp ----------
+    // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua_static.cpp ----------
 
     // character
     Character *characterGetSelect();
     int characterGetTargetID();
-    // cooldown
-    void cooldownClearTime(int cooldownID);
-    void cooldownModify(int cooldownID, int frame);
-    void cooldownReset(int cooldownID);
     // buff
     bool buffExist(int buffID, int buffLevel);
     CharacterBuff::Item *buffGet(int buffID, int buffLevel);
@@ -101,6 +91,10 @@ public:
     void buffDelMultiGroupByID(int buffID);
     void buffSetLeftActiveCount(int buffIndex, int count);
     void buffSetNextActiveFrame(int buffIndex, int nextActiveFrame);
+    // cooldown
+    void cooldownClearTime(int cooldownID);
+    void cooldownModify(int cooldownID, int frame);
+    void cooldownReset(int cooldownID);
     // skill
     int skillGetLevel(int skillID);
     void skillCast2(int skillID, int skillLevel);
@@ -125,7 +119,7 @@ public:
     void otherDoAction(int a, int b);
     void otherPlayPublicShadowAnimation(int a, int b, bool c, bool d);
 
-    //  ---------- 被 lua 调用的属性, 通常为匈牙利命名法 ----------
+    //  ---------- 被游戏 lua 调用的属性, 通常为匈牙利命名法 ----------
     int dwID;                          // 角色 ID
     int nLevel = chAttr.atLevel;       // 等级, 这是唯一一个同时存在于此处和 chAttr 内部的属性
     int nX, nY, nZ;                    // 坐标
@@ -143,12 +137,6 @@ public:
 private:
     static inline thread_local std::vector<Character *> characterList;            // 角色列表
     static inline thread_local std::unordered_map<Character *, int> characterMap; // 角色表
-};
-
-class Player : public Character {
-};
-
-class NPC : public Character {
 };
 
 } // namespace ns_frame

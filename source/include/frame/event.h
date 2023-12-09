@@ -45,6 +45,11 @@ public:
      */
     static event_tick_t now();
 
+    /**
+     * @brief 清空事件列表
+     */
+    static void clear();
+
 private:
     static inline thread_local event_tick_t tick;
 
