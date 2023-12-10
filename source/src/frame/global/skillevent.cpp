@@ -23,10 +23,10 @@ void SkillEventManager::add(int ID) {
     SkillEvent skillevent;
     skillevent.ID = ID;
     // 获取 tab
-    gdi::TabSelectType arg;
+    gdi::select_t arg;
     arg.emplace_back();
     arg[0]["ID"] = std::to_string(ID);
-    gdi::Interface::tabSelect(gdi::Tab::skillevent, arg);
+    gdi::tabSelect(gdi::Tab::skillevent, arg);
     skillevent.tab = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     skillevent.type = ref::mapSkilleventEventtype.find(skillevent.tab["EventType"]) != ref::mapSkilleventEventtype.end() ? ref::mapSkilleventEventtype.at(skillevent.tab["EventType"]) : ref::enumSkilleventEventtype::COUNT;

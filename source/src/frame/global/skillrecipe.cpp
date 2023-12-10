@@ -25,11 +25,11 @@ void SkillRecipeManager::add(int RecipeID, int RecipeLevel) {
     skillrecipe.RecipeID = RecipeID;
     skillrecipe.RecipeLevel = RecipeLevel;
     // 获取 tab
-    gdi::TabSelectType arg;
+    gdi::select_t arg;
     arg.emplace_back();
     arg[0]["RecipeID"] = std::to_string(RecipeID);
     arg[0]["RecipeLevel"] = std::to_string(RecipeLevel);
-    gdi::Interface::tabSelect(gdi::Tab::skillrecipe, arg);
+    gdi::tabSelect(gdi::Tab::skillrecipe, arg);
     skillrecipe.tab = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     skillrecipe.SkillRecipeType = atoi(skillrecipe.tab["SkillRecipeType"].c_str());

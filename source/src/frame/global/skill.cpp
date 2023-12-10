@@ -32,10 +32,10 @@ void SkillManager::add(int skillID, int skillLevel) {
     // 获取 tab
     if (data.find(skillID) == data.end()) {
         // 如果没有该技能 ID, 则先获取 tab
-        gdi::TabSelectType arg;
+        gdi::select_t arg;
         arg.emplace_back();
         arg[0]["SkillID"] = std::to_string(skillID);
-        gdi::Interface::tabSelect(gdi::Tab::skills, arg);
+        gdi::tabSelect(gdi::Tab::skills, arg);
         skill.tab = std::move(arg[0]);
     } else {
         // 如果该技能 ID 已存在, 则复用同 ID 技能的 tab

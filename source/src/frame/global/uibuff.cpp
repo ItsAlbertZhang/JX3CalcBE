@@ -47,19 +47,15 @@ void UIBuffManager::add(int buffID, int buffLevel) {
     buff.Level = buffLevel;
 
     // 获取 tab
-    gdi::TabSelectType arg;
+    gdi::select_t arg;
     arg.emplace_back();
     /* Precise select first */
     arg[0]["BuffID"] = std::to_string(buffID);
     arg[0]["Level"] = std::to_string(buffLevel);
-    gdi::Interface::tabSelect(gdi::Tab::ui_buff, arg);
-    if (arg.size() == 0) {
-        /* Fuzzy select */
-        arg.emplace_back();
-        arg[0]["BuffID"] = std::to_string(buffID);
-        arg[0]["Level"] = "0";
-        gdi::Interface::tabSelect(gdi::Tab::ui_buff, arg);
-    }
+    arg.emplace_back();
+    arg[1]["BuffID"] = std::to_string(buffID);
+    arg[1]["Level"] = "0";
+    gdi::tabSelect(gdi::Tab::ui_buff, arg);
     buff.tab = std::move(arg[0]);
 
     buff.Name = buff.tab["Name"];

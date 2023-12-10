@@ -23,10 +23,10 @@ void CooldownManager::add(int ID) {
     Cooldown cooldown;
     cooldown.ID = ID;
     // 获取 tab
-    gdi::TabSelectType arg;
+    gdi::select_t arg;
     arg.emplace_back();
     arg[0]["ID"] = std::to_string(ID);
-    gdi::Interface::tabSelect(gdi::Tab::cooldown, arg);
+    gdi::tabSelect(gdi::Tab::cooldown, arg);
     cooldown.tab = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     cooldown.DurationFrame = static_cast<int>(std::stod(cooldown.tab["Duration"]) * 16 + 0.5);

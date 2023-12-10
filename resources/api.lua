@@ -44,7 +44,7 @@ function AttrInit(player)
 end
 
 FightTime = 300;
-FightCount = 1000;
+FightCount = 300;
 UseCustomMacro = false; -- 是否使用自定义宏. 如果为 false, 则以下的所有设置均不会生效, 且会使用内置宏以提高计算速度.
 -- 除非你确切地知道自己在干什么, 否则不要修改此项及以下的内容.
 

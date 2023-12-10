@@ -28,8 +28,6 @@ public:
     Config() = delete;
     // 加载配置文件
     static void load();
-    // 保存配置文件
-    static bool save();
 };
 
 }; // namespace ns_program

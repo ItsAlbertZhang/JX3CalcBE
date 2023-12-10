@@ -31,11 +31,11 @@ void BuffManager::add(int buffID, int buffLevel) {
     buff.ID = buffID;
     buff.Level = buffLevel;
     // 获取 tab
-    gdi::TabSelectType arg;
+    gdi::select_t arg;
     arg.emplace_back();
     arg[0]["ID"] = std::to_string(buffID);
     arg[0]["Level"] = std::to_string(buffLevel);
-    gdi::Interface::tabSelect(gdi::Tab::buff, arg);
+    gdi::tabSelect(gdi::Tab::buff, arg);
     buff.tab = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     buff.IsStackable = buff.tab["IsStackable"] == "1";

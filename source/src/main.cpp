@@ -27,15 +27,7 @@ int main(int argc, char *argv[]) {
     // 初始化程序
     ns_program::Init::init(argc, argv);
     // 初始化接口
-    ret = gdi::Interface::initGameData(ns_program::Config::pJX3, ns_program::Config::pUnpack);
-    if (!ret)
-        return 0;
-
-    ret = gdi::Interface::initLua(ns_frame::luaInit, ns_frame::luaFuncStaticToDynamic);
-    if (!ret)
-        return 0;
-
-    ret = gdi::Interface::initTab(static_cast<int>(gdi::Tab::COUNT));
+    ret = gdi::init(ns_program::Config::pJX3, ns_program::Config::pUnpack, ns_frame::luaInit, ns_frame::luaFuncStaticToDynamic, static_cast<int>(gdi::Tab::COUNT));
     if (!ret)
         return 0;
 

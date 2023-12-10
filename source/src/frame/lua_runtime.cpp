@@ -10,8 +10,7 @@ int LuaFunc::getIndex(string &filename, bool reload) {
     if (filenameMap.find(filename) == filenameMap.end()) {
         add(filename);
     } else if (reload) {
-        bool fileExists = true;
-        gdi::Interface::luaExecuteFile(filename, &fileExists);
+        gdi::luaExecuteFile(filename);
     }
     return filenameMap[filename];
 }
@@ -49,29 +48,21 @@ void LuaFunc::add(const std::string &filename) {
     filenameMap[filename] = static_cast<int>(filefuncList.size());
     filenameList.emplace_back(filename);
     std::vector<sol::protected_function> &funcs = filefuncList.emplace_back();
-    bool fileExists = true;
-    sol::protected_function_result res = gdi::Interface::luaExecuteFile(filename, &fileExists);
-    if (res.valid() && fileExists) {
+    if (gdi::luaExecuteFile(filename)) {
         LOG_INFO("luaExecuteFile success: {}.", filename);
         for (int i = 0; i < static_cast<int>(Enum::COUNT); i++) {
             /**
              * 实际上, 此处有可能取到上一个执行文件的函数. (例如, 当前文件没有 OnRemove 函数, 就会取到上一个文件的.)
              * 但这不会导致实际的问题: 游戏内逻辑不可能调用一个文件中不存在的函数. 因此, 其只会被保存, 而不会被调用.
              */
-            funcs.emplace_back(gdi::Interface::luaGetFunction(names[i]));
+            funcs.emplace_back(gdi::luaGetFunction(names[i]));
         }
         return; // 执行成功, 直接返回
     }
     for (int i = 0; i < static_cast<int>(Enum::COUNT); i++) {
-        funcs.emplace_back(gdi::Interface::luaGetFunction("FileNotExistEmptyFunction")); // 名称随意, 取一个空函数即可
+        funcs.emplace_back(gdi::luaGetFunction("FileNotExistEmptyFunction")); // 名称随意, 取一个空函数即可
     }
-    if (!res.valid()) {
-        sol::error err = res;
-        LOG_ERROR("luaExecuteFile failed: {}\n{}", filename, err.what());
-    }
-    if (!fileExists) {
-        LOG_ERROR("luaExecuteFile failed: {} not exist.", filename);
-    }
+    LOG_ERROR("luaExecuteFile failed: {}.", filename);
 }
 
 void LuaFunc::clear() {
