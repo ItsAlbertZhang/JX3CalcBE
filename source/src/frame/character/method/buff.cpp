@@ -11,7 +11,7 @@ static void staticDelBuff(Character *self, CharacterBuff::Item *it);
 static void callbackActiveBuff(void *selfPtr, void *param) {
     Character *self = (Character *)selfPtr;
     CharacterBuff::Item *it = (CharacterBuff::Item *)param;
-    ((AutoRollbackAttrib *)it->ptrAttrib)->active(); // ActivateAttrib
+    static_cast<AutoRollbackAttrib *>(it->ptrAttrib)->active(); // ActivateAttrib
     (it->nLeftActiveCount)--;
     if (it->nLeftActiveCount <= 0) {
         staticDelBuff(self, it);
@@ -26,6 +26,7 @@ static void callbackActiveBuff(void *selfPtr, void *param) {
 static void staticDelBuff(Character *self, CharacterBuff::Item *it) {
     it->isValid = false;
     delete static_cast<AutoRollbackAttrib *>(it->ptrAttrib); // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
+    self->autoRollbackAttribList.erase(static_cast<AutoRollbackAttrib *>(it->ptrAttrib));
     it->ptrAttrib = nullptr;
     Event::cancel(it->tickActive, callbackActiveBuff, self, it); // 取出回调函数
 }
@@ -56,6 +57,7 @@ void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int 
         it.isValid = true;
         it.attr = characterGet(buffSourceID)->chAttr;           // 调用复制构造函数, 锁面板
         it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
+        this->autoRollbackAttribList.emplace(static_cast<AutoRollbackAttrib *>(it.ptrAttrib));
         it.nLeftActiveCount = buff.Count * count;
         // 计算 interval
         it.interval = buff.Interval * (1024 - it.attr.getHaste()) / 1024;

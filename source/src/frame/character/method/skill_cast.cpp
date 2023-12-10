@@ -7,6 +7,7 @@
 #include "frame/global/skillrecipe.h"
 #include "frame/lua_runtime.h"
 #include "program/log.h"
+#include <memory> // std::unique_ptr
 #include <random>
 
 using namespace ns_frame;

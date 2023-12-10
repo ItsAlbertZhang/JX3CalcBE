@@ -1,11 +1,13 @@
 #ifndef FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
 #define FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
 
-#include "frame/character/character.h"
-#include "frame/character/helper/runtime_castskill.h"
+#include "frame/character/property/damage.h"
 #include "frame/global/skill.h"
 
 namespace ns_frame {
+
+class Character;
+class RuntimeCastSkill;
 
 /**
  * @brief 自动回滚的魔法属性

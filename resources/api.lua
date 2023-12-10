@@ -1,138 +1,68 @@
-function InitAttr(player)
+function AttrInit(player)
     -- 注: 1 tick = 1/1024 秒. 数字不大的情况下, 可以近似将其视作 1ms.
+    player.delayBase = 45; -- 网络延迟, 单位为 tick
+    player.delayRand = 20; -- 按键延迟, 单位为 tick
 
-    player.delayBase = 45;                              -- 网络延迟, 单位为 tick
-    player.delayRand = 20;                              -- 按键延迟, 单位为 tick
+    -- 以下两种方法仅应当使用其中一种.
 
-    player.chAttr.atHasteBase = 95;                     -- 急速
-    player.chAttr.atSpunkBase = 6380;                   -- 元气
+    -- 方法 1: 从 JX3BOX 导入属性
+    player:attrImportFromJX3BOX(787136);
 
-    player.chAttr.atPhysicsAttackPowerBase = 6;         -- 外功基础攻击
-    player.chAttr.atSolarAttackPowerBase = 19308;       -- 阳性内功基础攻击
-    player.chAttr.atLunarAttackPowerBase = 19308;       -- 阴性内功基础攻击
-    player.chAttr.atNeutralAttackPowerBase = 12721;     -- 混元内功基础攻击
-    player.chAttr.atPoisonAttackPowerBase = 12721;      -- 毒性内功基础攻击
+    -- 方法 2: 手动输入属性 (默认被注释)
 
-    player.chAttr.atPhysicsCriticalStrike = 8325;       -- 外功会心等级
-    player.chAttr.atSolarCriticalStrike = 15048;        -- 阳性内功会心等级
-    player.chAttr.atLunarCriticalStrike = 15048;        -- 阴性内功会心等级
-    player.chAttr.atNeutralCriticalStrike = 8715;       -- 混元内功会心等级
-    player.chAttr.atPoisonCriticalStrike = 8715;        -- 毒性内功会心等级
+    -- player.chAttr.atHasteBase = 95;                     -- 急速
+    -- player.chAttr.atSpunkBase = 6380;                   -- 元气
 
-    player.chAttr.atPhysicsCriticalDamagePowerBase = 0; -- 外功会心效果等级
-    player.chAttr.atSolarCriticalDamagePowerBase = 188; -- 阳性内功会心效果等级
-    player.chAttr.atLunarCriticalDamagePowerBase = 188; -- 阴性内功会心效果等级
-    player.chAttr.atNeutralCriticalDamagePowerBase = 0; -- 混元内功会心效果等级
-    player.chAttr.atPoisonCriticalDamagePowerBase = 0;  -- 毒性内功会心效果等级
+    -- player.chAttr.atPhysicsAttackPowerBase = 6;         -- 外功基础攻击
+    -- player.chAttr.atSolarAttackPowerBase = 19308;       -- 阳性内功基础攻击
+    -- player.chAttr.atLunarAttackPowerBase = 19308;       -- 阴性内功基础攻击
+    -- player.chAttr.atNeutralAttackPowerBase = 12721;     -- 混元内功基础攻击
+    -- player.chAttr.atPoisonAttackPowerBase = 12721;      -- 毒性内功基础攻击
 
-    player.chAttr.atPhysicsOvercomeBase = 12;           -- 外功破防等级
-    player.chAttr.atMagicOvercome = 20360;              -- 内功破防等级
+    -- player.chAttr.atPhysicsCriticalStrike = 8325;       -- 外功会心等级
+    -- player.chAttr.atSolarCriticalStrike = 15048;        -- 阳性内功会心等级
+    -- player.chAttr.atLunarCriticalStrike = 15048;        -- 阴性内功会心等级
+    -- player.chAttr.atNeutralCriticalStrike = 8715;       -- 混元内功会心等级
+    -- player.chAttr.atPoisonCriticalStrike = 8715;        -- 毒性内功会心等级
 
-    player.chAttr.atStrainBase = 21855;                 -- 无双等级
-    player.chAttr.atSurplusValueBase = 9536;            -- 破招
-    player.chAttr.atMeleeWeaponDamageBase = 240;        -- 武器伤害(基础, 数值上等于最小)
-    player.chAttr.atMeleeWeaponDamageRand = 160;        -- 武器伤害(浮动, 数值上等于最大减去最小)
+    -- player.chAttr.atPhysicsCriticalDamagePowerBase = 0; -- 外功会心效果等级
+    -- player.chAttr.atSolarCriticalDamagePowerBase = 188; -- 阳性内功会心效果等级
+    -- player.chAttr.atLunarCriticalDamagePowerBase = 188; -- 阴性内功会心效果等级
+    -- player.chAttr.atNeutralCriticalDamagePowerBase = 0; -- 混元内功会心效果等级
+    -- player.chAttr.atPoisonCriticalDamagePowerBase = 0;  -- 毒性内功会心效果等级
 
-    player.macroNum = 3;                                -- 宏数量. 除非你确切地知道自己在干什么, 否则不要修改此项.
+    -- player.chAttr.atPhysicsOvercomeBase = 12;           -- 外功破防等级
+    -- player.chAttr.atSolarOvercomeBase = 20360;          -- 阳性内功破防等级
+    -- player.chAttr.atLunarOvercomeBase = 20360;          -- 阴性内功破防等级
+    -- player.chAttr.atNeutralOvercomeBase = 13390;        -- 混元内功破防等级
+    -- player.chAttr.atPoisonOvercomeBase = 13390;         -- 毒性内功破防等级
+
+    -- player.chAttr.atStrainBase = 21855;                 -- 无双等级
+    -- player.chAttr.atSurplusValueBase = 9536;            -- 破招
+    -- player.chAttr.atMeleeWeaponDamageBase = 240;        -- 武器伤害(基础, 数值上等于最小)
+    -- player.chAttr.atMeleeWeaponDamageRand = 160;        -- 武器伤害(浮动, 数值上等于最大减去最小)
 end
 
-function Init(player, target)
-    player:skillLearn(10242, 13);  -- 焚影圣诀
-    player.dwKungfuID = 10242;
-    player.publicCooldownID = 503; -- GCD
-    player:skillActive(10242);     -- 激活心法加成
+FightTime = 300;
+FightCount = 1000;
+UseCustomMacro = false; -- 是否使用自定义宏. 如果为 false, 则以下的所有设置均不会生效, 且会使用内置宏以提高计算速度.
+-- 除非你确切地知道自己在干什么, 否则不要修改此项及以下的内容.
 
-    player:skillLearn(3962, 33);   -- 赤日轮
-    player:skillLearn(3963, 32);   -- 烈日斩
-    player:skillLearn(3966, 1);    -- 生死劫
-    player:skillLearn(3967, 32);   -- 净世破魔击
-    player:skillLearn(3959, 24);   -- 幽月轮
-    player:skillLearn(3960, 18);   -- 银月斩
-    player:skillLearn(3969, 1);    -- 光明相
-    player:skillLearn(3974, 1);    -- 暗尘弥散
-    player:skillLearn(3979, 29);   -- 驱夜断愁
-
-    player:skillLearn(5972, 1);    -- 腾焰飞芒
-    player:skillLearn(18279, 1);   -- 净身明礼
-    player:skillLearn(22888, 1);   -- 诛邪镇魔
-    player:skillLearn(22890, 1);   -- 诛邪镇魔, 主动
-    player:skillLearn(6717, 1);    -- 无明业火
-    player:skillLearn(34383, 1);   -- 明光恒照
-    player:skillLearn(34395, 1);   -- 日月同辉
-    player:skillLearn(34372, 1);   -- 靡业报劫
-    player:skillLearn(17567, 1);   -- 用晦而明
-    player:skillLearn(25166, 1);   -- 净体不畏
-    player:skillLearn(34378, 1);   -- 降灵尊
-    player:skillLearn(34347, 1);   -- 悬象著明, 主动
-    player:skillLearn(34370, 1);   -- 日月齐光
-
-    player:skillActive(5972);
-    player:skillActive(18279);
-    player:skillActive(22888);
-    -- player:skillActive(22890); -- 主动技能不需要激活
-    player:skillActive(6717);
-    player:skillActive(34383);
-    player:skillActive(34395);
-    player:skillActive(34372);
-    player:skillActive(17567);
-    player:skillActive(25166);
-    player:skillActive(34378);
-    -- player:skillActive(34347); -- 主动技能不需要激活
-    player:skillActive(34370);
-
-    player:skillrecipeAdd(1005, 1); -- 赤日轮, 会心提高4%
-    player:skillrecipeAdd(999, 1);  -- 赤日轮, 伤害提高3%
-    player:skillrecipeAdd(1000, 1); -- 赤日轮, 伤害提高4%
-    player:skillrecipeAdd(1001, 1); -- 赤日轮, 伤害提高5%
-
-    player:skillrecipeAdd(1011, 1); -- 烈日斩, 会心提高4%
-    player:skillrecipeAdd(1008, 1); -- 烈日斩, 伤害提高4%
-    player:skillrecipeAdd(1009, 1); -- 烈日斩, 伤害提高5%
-    player:skillrecipeAdd(1013, 1); -- 烈日斩, 对原地静止的目标伤害提升10%
-
-    player:skillrecipeAdd(1621, 1); -- 生死劫, 伤害提高3%
-    player:skillrecipeAdd(1622, 1); -- 生死劫, 伤害提高4%
-    player:skillrecipeAdd(1623, 1); -- 生死劫, 伤害提高5%
-
-    player:skillrecipeAdd(1019, 1); -- 净世破魔击, 会心提高5%
-    player:skillrecipeAdd(1015, 1); -- 净世破魔击, 伤害提高4%
-    player:skillrecipeAdd(1016, 1); -- 净世破魔击, 伤害提高5%
-    player:skillrecipeAdd(5206, 1); -- 焚影圣诀心法下净世破魔击·月命中后回复20点月魂
-
-    player:skillrecipeAdd(989, 1);  -- 幽月轮, 会心提高4%
-    player:skillrecipeAdd(990, 1);  -- 幽月轮, 会心提高5%
-    player:skillrecipeAdd(984, 1);  -- 幽月轮, 伤害提高3%
-    player:skillrecipeAdd(985, 1);  -- 幽月轮, 伤害提高4%
-
-    player:skillrecipeAdd(992, 1);  -- 银月斩, 会心提高3%
-    player:skillrecipeAdd(993, 1);  -- 银月斩, 会心提高4%
-    player:skillrecipeAdd(994, 1);  -- 银月斩, 会心提高5%
-
-    player:skillrecipeAdd(1029, 1); -- 光明相, 调息时间减少10秒
-    player:skillrecipeAdd(1030, 1); -- 光明相, 调息时间减少10秒
-    player:skillrecipeAdd(1031, 1); -- 光明相, 调息时间减少10秒
-
-    player:skillrecipeAdd(1055, 1); -- 驱夜断愁, 会心提高4%
-    player:skillrecipeAdd(1056, 1); -- 驱夜断愁, 会心提高5%
-    player:skillrecipeAdd(1052, 1); -- 驱夜断愁, 伤害提高4%
-    player:skillrecipeAdd(1053, 1); -- 驱夜断愁, 伤害提高5%
-
-    InitAttr(player);
-
-    target.nLevel = 124;
-    target.chAttr.atLevel = 124;
-    target.chAttr.atPhysicsShieldBase = 27550;
-    target.chAttr.atMagicShield = 27550;
-    target.fMaxLife64 = 1e+10;     -- 用于靡业报劫
-    target.fCurrentLife64 = 1e+10; -- 用于驱夜断愁
-end
-
-function Ready(player)
-    player:cast(3974);
-    player:vCheckSunMoonPower();
-end
+MacroNum = 3; -- 自定义宏数量.
 
 FirstSwitch = true;
+function MacroPrepare(player)
+    -- print("here")
+    player:cast(3974);
+    if player.nMoonPowerValue == 0 and player.nSunPowerValue == 0 then
+        if player.nCurrentMoonEnergy >= 10000 then
+            player.nMoonPowerValue = 1;
+        elseif player.nCurrentSunEnergy >= 10000 then
+            player.nSunPowerValue = 1;
+        end
+    end
+    FirstSwitch = true;
+end
 
 function Macro0(player)
     if player.nCurrentMoonEnergy >= 10000 or player.nCurrentMoonEnergy <= 2000 then
@@ -144,9 +74,9 @@ function Macro0(player)
         player.macroIdx = 1; -- 切换至 1 号宏
         if FirstSwitch then
             -- 起手时, 早一些释放暗尘弥散, 以避免第二轮卡隐身CD
-            SetNextMacroActive(300); -- 将下一次释放宏的时机设置至 300 tick 后
+            player.delayCustom = 300; -- 将下一次释放宏的时机设置至 300 tick 后
             -- 如果不进行设置, 那么下一次释放宏的时机会是 GCD 结束后 + 网络延迟 + 随机按键延迟.
-            FirstSwitch = false;     -- 将起手标记置为 false
+            FirstSwitch = false;      -- 将起手标记置为 false
         end
     end
 end
@@ -160,13 +90,13 @@ function Macro1(player)
     end
 
     player:cast(3974);     -- 暗尘弥散
-    if player:IsHaveBuff(25721, 3) and not player:IsHaveBuff(25716, 0) and player.nCurrentMoonEnergy >= 10000 then
+    if player:buffExist(25721, 3) and not player:buffExist(25716, 0) and player.nCurrentMoonEnergy >= 10000 then
         player:cast(3969); -- 光明相
     end
     player:cast(34347);    -- 悬象著明
     player:cast(3966);     -- 生死劫
     -- 避免生死劫卡CD
-    if not player:IsHaveBuff(25721, 1) then
+    if not player:buffExist(25721, 1) then
         if player.nCurrentMoonEnergy <= 4000 then
             player:cast(22890); -- 诛邪镇魔
         end
@@ -194,7 +124,7 @@ function Macro2(player)
     if player.nCurrentMoonEnergy == 6000 and player.nCurrentSunEnergy == 4000 then
         player:cast(3962); -- 赤日轮
     end
-    if player.nCurrentMoonEnergy >= 10000 and player.nCurrentSunEnergy < 10000 and not player:IsHaveBuff(25721, 0) then
+    if player.nCurrentMoonEnergy >= 10000 and player.nCurrentSunEnergy < 10000 and not player:buffExist(25721, 0) then
         player.macroIdx = 0; -- 切换至 0 号宏
         -- 在结尾进行判断的原因时, 导致切换条件 (moon>=100 & sun<100 & nobuff:25721) 的事件 (银月斩的释放) 是发生在宏内的. 因此, 可以在宏结束时进行判断.
     end

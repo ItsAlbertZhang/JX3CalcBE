@@ -4,14 +4,19 @@
 
 using namespace ns_frame;
 
+union Data {
+    struct {
+        uint16_t idx;
+        uint16_t type;
+        uint32_t targetID;
+    } data;
+    void *param; // 3202 年了, 希望不会有人还在用 32 位系统.
+};
+
 static void callbackSetTimer(void *self, void *param) {
     Character *selfPtr = (Character *)self;
-    int *data = (int *)param;
-    int idx = data[0];
-    int type = data[1];
-    int targetID = data[2];
-    delete[] data;
-    LuaFunc::analysis(LuaFunc::getOnTimer(idx)(selfPtr, type, targetID), idx, LuaFunc::Enum::OnTimer);
+    Data data{.param = param};
+    LuaFunc::analysis(LuaFunc::getOnTimer(data.data.idx)(selfPtr, data.data.type, data.data.targetID), data.data.idx, LuaFunc::Enum::OnTimer);
 }
 
 void Character::timerSet3(int frame, std::string filename, int targetID) {
@@ -19,9 +24,6 @@ void Character::timerSet3(int frame, std::string filename, int targetID) {
 }
 
 void Character::timerSet4(int frame, std::string filename, int type, int targetID) {
-    int *data = new int[3];
-    data[0] = LuaFunc::getIndex(filename);
-    data[1] = type;
-    data[2] = targetID;
-    Event::add(frame * 1024 / 16, callbackSetTimer, this, data);
+    Data data{.data = {static_cast<uint16_t>(LuaFunc::getIndex(filename)), static_cast<uint16_t>(type), static_cast<uint32_t>(targetID)}};
+    Event::add(frame * 1024 / 16, callbackSetTimer, this, data.param);
 }

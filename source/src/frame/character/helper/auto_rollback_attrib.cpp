@@ -1,4 +1,5 @@
 #include "frame/character/helper/auto_rollback_attrib.h"
+#include "frame/character/character.h"
 #include "frame/event.h"
 #include "frame/lua_runtime.h"
 #include "frame/ref/tab_attribute.h" // enumTabAttribute

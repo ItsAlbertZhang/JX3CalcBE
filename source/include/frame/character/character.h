@@ -10,12 +10,16 @@
 #include "frame/character/property/skillevent.h"
 #include "frame/character/property/skillrecipe.h"
 #include "frame/ref/lua_other.h"
+#include <set>
 #include <string>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
 
 namespace ns_frame {
+
+class AutoRollbackAttrib;
+class AutoRollbackAttribute;
 
 using CharacterType = ref::enumLuaTarget;
 
@@ -44,13 +48,18 @@ public:
     CharacterSkillEvent chSkillEvent;   // 角色技能事件
     CharacterScene chScene;             // 角色场景
 
+    std::set<AutoRollbackAttrib *> autoRollbackAttribList;       // 自动回滚的 buff 属性列表
+    std::set<AutoRollbackAttribute *> autoRollbackAttributeList; // 自动回滚的魔法属性列表
+
     // ---------- 以下属性和方法未被游戏 lua 调用 ----------
     int dwKungfuID = 0;
     // character
     static Character *characterGet(int nCharacterID);
     static int characterGetID(Character *character);
     // attr
-    void attrImport(const std::string &attr);
+    void attrImportFromJX3BOX(int pzID);
+    void attrImportFromBackup(const CharacterAttr &attr);
+    CharacterAttr attrExport();
     // buff
     void buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
     void buffFlushLeftFrame(CharacterBuff::Item *item);

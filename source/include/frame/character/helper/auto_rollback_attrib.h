@@ -1,10 +1,12 @@
 #ifndef FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIB_H_
 #define FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIB_H_
 
-#include "frame/character/character.h"
+#include "frame/character/property/buff.h"
 #include "frame/global/buff.h"
 
 namespace ns_frame {
+
+class Character;
 
 /**
  * @brief 自动回滚的 buff 属性

@@ -1,12 +1,14 @@
 #ifndef FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_
 #define FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_
 
-#include "frame/character/character.h"
+#include "frame/character/property/damage.h"
 #include "frame/event.h"
 #include <queue>
 #include <vector>
 
 namespace ns_frame {
+
+class Character;
 
 class RuntimeCastSkill {
 public:
@@ -35,19 +37,7 @@ public:
 
     std::vector<Damage> damageList;
 
-    ~RuntimeCastSkill() {
-        // 执行技能队列
-        while (!skillQueue.empty()) {
-            auto it = skillQueue.front();
-            skillQueue.pop();
-            if (it.hasTarget) {
-                it.caster->skillCast(it.target, it.skillID, it.skillLevel);
-            } else {
-                it.caster->skillCast(it.caster->targetCurr, it.skillID, it.skillLevel);
-            }
-        }
-        self->chDamage.damageList.insert(self->chDamage.damageList.end(), damageList.begin(), damageList.end());
-    }
+    ~RuntimeCastSkill();
 };
 
 } // namespace ns_frame

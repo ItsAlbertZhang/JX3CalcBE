@@ -18,4 +18,4 @@ public:
 
 } // namespace ns_concrete
 
-#endif
+#endif // FRAME_CONCRETE_CHARACTER_PLAYER_MJFYSJ_H_

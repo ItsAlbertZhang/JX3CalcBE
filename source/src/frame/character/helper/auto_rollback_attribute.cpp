@@ -1,4 +1,6 @@
 #include "frame/character/helper/auto_rollback_attribute.h"
+#include "frame/character/character.h"
+#include "frame/character/helper/runtime_castskill.h"
 #include "frame/event.h"
 #include "frame/lua_runtime.h"            // LuaFunc
 #include "frame/ref/lua_attribute_type.h" // enumLuaAttributeType

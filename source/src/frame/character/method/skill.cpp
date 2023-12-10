@@ -20,6 +20,7 @@ void Character::skillActive(int skillID) {
     const Skill &skill = SkillManager::get(skillID, skillLevel);
     RuntimeCastSkill runtime{this, skillID, skillLevel};
     AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, nullptr, &runtime, skill};
+    autoRollbackAttributeList.emplace(ptr);
     this->chSkill.skillActived.emplace(skillID, CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)});
 }
 
@@ -28,6 +29,7 @@ void Character::skillDeactive(int skillID) {
     auto it = this->chSkill.skillActived.find(skillID);
     if (it != this->chSkill.skillActived.end()) {
         delete static_cast<AutoRollbackAttribute *>(it->second.attribute);
+        autoRollbackAttributeList.erase(static_cast<AutoRollbackAttribute *>(it->second.attribute));
         this->chSkill.skillActived.erase(it);
     }
 }

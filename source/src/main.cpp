@@ -10,6 +10,7 @@
 #include "program/log.h"
 #include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <iostream>
 #include <random> //  std::rand()
 #ifdef _WIN32
@@ -47,16 +48,27 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-    // std::filesystem::path pAPI = ns_program::Config::pExeDir / "api.lua";
-    int fighttime = 300;
+    std::filesystem::path pAPI = ns_program::Config::pExeDir / "api.lua";
+    std::filesystem::path pRES = ns_program::Config::pExeDir / "res.txt";
+    ns_frame::MacroCustom macroCustom(pAPI);
+    bool useCustomMacro = macroCustom.lua["UseCustomMacro"].get<bool>();
+    ns_frame::MacroCustom *ptr = useCustomMacro ? &macroCustom : nullptr;
+    int fighttime = macroCustom.lua["FightTime"].get<int>();
+    if (fighttime <= 0)
+        fighttime = 300;
+    int fightcount = macroCustom.lua["FightCount"].get<int>();
+    if (fightcount <= 0)
+        fightcount = 100;
 
-    auto start = std::chrono::steady_clock::now();
     ns_concrete::ChPlyMjFysj fysj;
     ns_concrete::ChNpc124 npc124;
     ns_frame::Player &player = fysj;
     ns_frame::NPC &npc = npc124;
     player.targetSelect = &npc;
-    player.attrImport(""); // TODO: temp
+    player.macroCustom = ptr;
+    macroCustom.attrInit(player);
+    ns_frame::CharacterAttr attrBackup = player.attrExport();
+    auto start = std::chrono::steady_clock::now();
     player.macroRun();
     while (ns_frame::Event::now() < 1024 * fighttime) {
         ret = ns_frame::Event::run();
@@ -66,13 +78,8 @@ int main(int argc, char *argv[]) {
     auto end = std::chrono::steady_clock::now();
 
     unsigned long long totalDamage = 0;
-    std::cout << "tick\t"
-              << "ID\t"
-              << "lv\t"
-              << "cri\t"
-              << "dmg\t"
-              << "type\t"
-              << "name" << std::endl;
+    std::ofstream ofs(pRES);
+    ofs << "tick\tID\tlv\tcri\tdmg\ttype\tname\n";
     ns_frame::event_tick_t presentCurr = 0;
     for (auto &it : player.chDamage.damageList) {
         std::string name;
@@ -88,25 +95,27 @@ int main(int argc, char *argv[]) {
         }
         if (it.tick != presentCurr) {
             presentCurr = it.tick;
-            std::cout << std::endl;
+            ofs << "\n";
         }
-        std::cout << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s\t"
-                  << it.id << "\t" << it.level << "\t" << it.isCritical << "\t"
-                  << it.damage << "\t" << static_cast<int>(it.damageType) << "\t"
-                  << name << std::endl;
+        ofs << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s\t"
+            << it.id << "\t" << it.level << "\t" << it.isCritical << "\t"
+            << it.damage << "\t" << static_cast<int>(it.damageType) << "\t"
+            << name << "\n";
         totalDamage += it.damage;
     }
+    ofs.close();
 
     unsigned long long damageAvg = 0;
     std::chrono::milliseconds timeAvg = std::chrono::milliseconds(0);
-    for (int i = 0; i < 50; i++) {
-        start = std::chrono::steady_clock::now();
+    for (int i = 0; i < fightcount; i++) {
+        auto start = std::chrono::steady_clock::now();
         ns_concrete::ChPlyMjFysj fysj;
         ns_concrete::ChNpc124 npc124;
         ns_frame::Player &player = fysj;
         ns_frame::NPC &npc = npc124;
         player.targetSelect = &npc;
-        player.attrImport(""); // TODO: temp
+        player.macroCustom = ptr;
+        player.attrImportFromBackup(attrBackup);
         ns_frame::Event::clear();
         player.macroRun();
         while (ns_frame::Event::now() < 1024 * fighttime) {
@@ -114,7 +123,7 @@ int main(int argc, char *argv[]) {
             if (!ret)
                 break;
         }
-        end = std::chrono::steady_clock::now();
+        auto end = std::chrono::steady_clock::now();
 
         unsigned long long sumDamage = 0;
         for (auto &it : player.chDamage.damageList) {
@@ -126,8 +135,8 @@ int main(int argc, char *argv[]) {
     }
 
     std::cout << "第一次计算花费时间: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-    std::cout << "平均 DPS: " << damageAvg / 50 << std::endl;
-    std::cout << "平均计算时间: " << timeAvg.count() / 50 << "ms" << std::endl;
+    std::cout << "平均 DPS: " << damageAvg / fightcount << std::endl;
+    std::cout << "平均计算时间: " << timeAvg.count() / fightcount << "ms" << std::endl;
 
     ns_frame::LuaFunc::clear();
     return 0;

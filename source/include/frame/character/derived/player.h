@@ -13,6 +13,7 @@ public:
     MacroCustom(const std::string &script);
     MacroCustom(const std::filesystem::path &scriptfile);
     sol::state lua; // lua 状态机
+    sol::protected_function attrInit;
     sol::protected_function macroPrepare;
     std::vector<sol::protected_function> macroRuntime;
 };

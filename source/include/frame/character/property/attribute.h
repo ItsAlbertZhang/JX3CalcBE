@@ -15,6 +15,10 @@ public:
     CharacterAttr(const CharacterAttr &obj) {
         memcpy(this, &obj, sizeof(CharacterAttr));
     }
+    CharacterAttr &operator=(const CharacterAttr &obj) {
+        memcpy(this, &obj, sizeof(CharacterAttr));
+        return *this;
+    }
 
     int atLevel = 120; // 等级
 
