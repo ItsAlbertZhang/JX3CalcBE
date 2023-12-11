@@ -13,11 +13,11 @@ public:
     Log(const std::string &name) : name(name) {}
     std::string name;
     std::string data;
-    bool printImmediately = false;
-    bool printLast = false;
-    ~Log() {
-        if (printLast)
-            std::cout << data << std::endl;
+    bool record = false;
+    bool realtime = false;
+    void print() {
+        std::cout << data << std::endl;
+        data.clear();
     }
 };
 
@@ -36,16 +36,18 @@ namespace fmt = std;
 #define LOG_INFO(str, ...)                                                                   \
     {                                                                                        \
         std::string newdata = fmt::format("\n{}:{}: " str, __FILE__, __LINE__, __VA_ARGS__); \
-        ns_program::log_info.data.append(newdata);                                           \
-        if (ns_program::log_info.printImmediately)                                           \
+        if (ns_program::log_info.record)                                                     \
+            ns_program::log_info.data.append(newdata);                                       \
+        if (ns_program::log_info.realtime)                                                   \
             std::cout << newdata << std::endl;                                               \
     }
 
 #define LOG_ERROR(str, ...)                                                                  \
     {                                                                                        \
         std::string newdata = fmt::format("\n{}:{}: " str, __FILE__, __LINE__, __VA_ARGS__); \
-        ns_program::log_error.data.append(newdata);                                          \
-        if (ns_program::log_error.printImmediately)                                          \
+        if (ns_program::log_info.record)                                                     \
+            ns_program::log_error.data.append(newdata);                                      \
+        if (ns_program::log_error.realtime)                                                  \
             std::cout << newdata << std::endl;                                               \
     }
 

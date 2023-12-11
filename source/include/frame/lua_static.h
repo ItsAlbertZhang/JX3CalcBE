@@ -28,6 +28,7 @@ public:
     static int GetValueByBits(int nValue, int nBit, int c);
     static int SetValueByBits(int nValue, int nBit, int c, int nNewBitValue);
     static void RemoteCallToClient();
+    static int GetDistanceSq(int pX, int pY, int pZ, int tX, int tY, int tZ);
 };
 
 } // namespace ns_frame

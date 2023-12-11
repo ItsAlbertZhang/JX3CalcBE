@@ -32,12 +32,8 @@ int main(int argc, char *argv[]) {
         return 0;
 
 #ifdef DEBUG
-    ns_program::log_error.printLast = true;
-    if (argc > 1) {
-        if (strcmp(argv[1], "--log=info") == 0) {
-            ns_program::log_info.printImmediately = true;
-        }
-    }
+    ns_program::log_info.record = true;
+    ns_program::log_error.realtime = true;
 #endif
 
     std::filesystem::path pAPI = ns_program::Config::pExeDir / "api.lua";
@@ -68,6 +64,16 @@ int main(int argc, char *argv[]) {
             break;
     }
     auto end = std::chrono::steady_clock::now();
+
+#ifdef DEBUG
+    if (argc > 1) {
+        if (strcmp(argv[1], "--log=info") == 0) {
+            ns_program::log_info.print();
+        }
+    }
+    ns_program::log_info.record = false;
+    ns_program::log_error.realtime = false;
+#endif
 
     unsigned long long totalDamage = 0;
     std::ofstream ofs(pRES);

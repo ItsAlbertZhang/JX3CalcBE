@@ -171,6 +171,7 @@ bool ns_frame::luaInit(sol::state &lua) {
         "nLevel", &Character::nLevel,
         "nX", &Character::nX, "nY", &Character::nY, "nZ", &Character::nZ,
         "nRoleType", &Character::nRoleType,
+        "nTouchRange", &Character::nTouchRange,
         "nCurrentSunEnergy", &Character::nCurrentSunEnergy,
         "nCurrentMoonEnergy", &Character::nCurrentMoonEnergy,
         "nSunPowerValue", &Character::nSunPowerValue,
@@ -208,6 +209,7 @@ bool ns_frame::luaInit(sol::state &lua) {
     lua.set_function("GetValueByBits", LuaGlobalFunction::GetValueByBits);
     lua.set_function("SetValueByBits", LuaGlobalFunction::SetValueByBits);
     lua.set_function("RemoteCallToClient", LuaGlobalFunction::RemoteCallToClient);
+    lua.set_function("GetDistanceSq", LuaGlobalFunction::GetDistanceSq);
 
     sol::table AttributeType = lua.create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaAttributeType::COUNT); i++) {
@@ -374,4 +376,8 @@ int LuaGlobalFunction::SetValueByBits(int nValue, int nBit, int c, int nNewBitVa
 
 void LuaGlobalFunction::RemoteCallToClient() {
     return;
+}
+
+int LuaGlobalFunction::GetDistanceSq(int pX, int pY, int pZ, int tX, int tY, int tZ) {
+    return (pX - tX) * (pX - tX) + (pY - tY) * (pY - tY) + (pZ - tZ) * (pZ - tZ);
 }

@@ -137,6 +137,7 @@ public:
     int nSunPowerValue = 0;            // 满日
     int nMoonPowerValue = 0;           // 满月
     int nRoleType = 0;                 // 角色体型
+    int nTouchRange = 0;               // 距离补偿
     bool bSurplusAutoCast = false;     // 出现于 明教_套路_内功_焚影圣诀.lua
     bool bSurplusAutoReplenish = true; // 出现于 明教_套路_内功_焚影圣诀.lua
     bool bFightState = false;          // 是否处于战斗状态
