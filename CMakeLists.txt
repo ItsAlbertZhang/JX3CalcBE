@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.10) # 最低版本要求
 set(CMAKE_CXX_STANDARD 20) # 设置 C++ 标准为 C++20
 set(CMAKE_CXX_STANDARD_REQUIRED ON) # 设置 C++ 标准为必须
 set(CMAKE_CXX_EXTENSIONS OFF) # 设置 C++ 编译器不使用扩展特性
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # 生成编译命令, 用于 clangd
 set(CMAKE_BUILD_TYPE ${BUILD_MODE}) # Debug / Release
 # CMAKE_BUILD_TYPE 会作用于 clang 编译器. msvc 编译器则由 tasks.json 中的 make 指令控制.
 
@@ -29,8 +30,12 @@ if(APPLE)
   set(CMAKE_INSTALL_RPATH "@executable_path/")
 
 elseif(UNIX)
-  set(CMAKE_C_COMPILER "gcc")
-  set(CMAKE_CXX_COMPILER "g++") # 设置编译器为 clang
+  set(CMAKE_C_COMPILER "clang")
+  set(CMAKE_CXX_COMPILER "clang++") # 设置编译器为 clang
+  add_compile_options(
+    "-fcolor-diagnostics" "-fansi-escape-codes" # 彩色输出诊断信息
+    "-Wno-unknown-warning-option" # 禁用 clang 编译器下 sol 库一些烦人的警告
+  )
   # 设置 RPATH 为可执行文件所在目录
   set(CMAKE_SKIP_BUILD_RPATH FALSE)
   set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)

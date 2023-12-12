@@ -16,26 +16,14 @@
         },
         {
             "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc", "args": [ ],
-            "name": "macos_debug",
+            "name": "unix_debug",
             "type": "lldb",
             "preLaunchTask": "unix_debug_build",
         },
         {
             "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc", "args": [ ],
-            "name": "macos_release",
+            "name": "unix_release",
             "type": "lldb",
-            "preLaunchTask": "unix_release_build",
-        },
-        {
-            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc", "args": [ ],
-            "name": "linux_debug",
-            "type": "cppdbg",
-            "preLaunchTask": "unix_debug_build",
-        },
-        {
-            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc", "args": [ ],
-            "name": "linux_release",
-            "type": "cppdbg",
             "preLaunchTask": "unix_release_build",
         },
     ],

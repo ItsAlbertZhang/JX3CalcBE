@@ -12,7 +12,6 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <random> //  std::rand()
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -96,6 +95,8 @@ int main(int argc, char *argv[]) {
             const ns_frame::UIBuff &buff = ns_frame::UIBuffManager::get(it.id, it.level);
             name                         = buff.Name;
         } break;
+        default:
+            break;
         }
         if (it.tick != presentCurr) {
             presentCurr = it.tick;

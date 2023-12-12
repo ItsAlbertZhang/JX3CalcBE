@@ -1,8 +1,5 @@
 #include "frame/global/uibuff.h"
-#include "frame/global/buff.h"
-#include "frame/global/skill.h"
 #include "gdi.h"
-#include "program/log.h"
 
 using namespace ns_frame;
 

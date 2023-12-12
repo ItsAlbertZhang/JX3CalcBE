@@ -1,7 +1,5 @@
 #include "frame/global/uiskill.h"
-#include "frame/global/skill.h"
 #include "gdi.h"
-#include "program/log.h"
 
 using namespace ns_frame;
 

@@ -8,48 +8,12 @@
                 "${workspaceFolder}/source/lib",
                 "${workspaceFolder}/JX3CalcBEgdi/include"
             ],
-            "defines": [ ],
+            "defines": [],
             "compilerPath": "cl.exe",
             "cStandard": "c17",
             "cppStandard": "c++20",
             "intelliSenseMode": "windows-msvc-x64",
-            "compilerArgs": [
-                "-DDEBUG"
-            ]
-        },
-        {
-            "name": "Mac",
-            "includePath": [
-                "${workspaceFolder}/external/include",
-                "${workspaceFolder}/source/include",
-                "${workspaceFolder}/source/lib",
-                "${workspaceFolder}/JX3CalcBEgdi/include"
-            ],
-            "defines": [ ],
-            "compilerPath": "/usr/bin/clang++",
-            "cStandard": "c17",
-            "cppStandard": "c++20",
-            "intelliSenseMode": "macos-clang-arm64",
-            "compilerArgs": [
-                "-DDEBUG"
-            ]
-        },
-        {
-            "name": "Linux",
-            "includePath": [
-                "${workspaceFolder}/external/include",
-                "${workspaceFolder}/source/include",
-                "${workspaceFolder}/source/lib",
-                "${workspaceFolder}/JX3CalcBEgdi/include"
-            ],
-            "defines": [ ],
-            "compilerPath": "/usr/bin/g++",
-            "cStandard": "c17",
-            "cppStandard": "c++20",
-            "intelliSenseMode": "linux-gcc-x64",
-            "compilerArgs": [
-                "-DDEBUG"
-            ]
+            "compilerArgs": ["-DDEBUG"]
         }
     ],
     "version": 4

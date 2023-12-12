@@ -38,10 +38,13 @@ enum class Tab {
  * @param tabCount              表的数量
  * @warning 这个函数只需要在主线程中调用一次!
  */
+using luaInit_t = bool (*)(sol::state &);
 bool init(
-    const std::filesystem::path &dataPathJX3, const std::filesystem::path &dataPathUnpacked, // init data
-    bool (*luaInit)(sol::state &), const std::vector<std::string> &luaFuncNeedConvert,       // init lua
-    int tabCount                                                                             // init tab
+    const std::filesystem::path    &dataPathJX3,
+    const std::filesystem::path    &dataPathUnpacked,
+    luaInit_t                       luaInit,
+    const std::vector<std::string> &luaFuncNeedConvert,
+    int                             tabCount
 );
 
 /**
