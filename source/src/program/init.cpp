@@ -15,7 +15,7 @@ void Config::load() { // 加载配置文件
     if (!fs::exists(pathConfig)) {
         return;
     }
-    std::ifstream fileConfig(pathConfig);
+    std::ifstream  fileConfig(pathConfig);
     nlohmann::json j;
     fileConfig >> j;
     if (j.contains("JX3Dir")) {

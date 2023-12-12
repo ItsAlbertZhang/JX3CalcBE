@@ -15,7 +15,7 @@ union Data {
 
 static void callbackSetTimer(void *self, void *param) {
     Character *selfPtr = (Character *)self;
-    Data data{.param = param};
+    Data       data{.param = param};
     LuaFunc::analysis(LuaFunc::getOnTimer(data.data.idx)(selfPtr, data.data.type, data.data.targetID), data.data.idx, LuaFunc::Enum::OnTimer);
 }
 
@@ -24,6 +24,8 @@ void Character::timerSet3(int frame, std::string filename, int targetID) {
 }
 
 void Character::timerSet4(int frame, std::string filename, int type, int targetID) {
-    Data data{.data = {static_cast<uint16_t>(LuaFunc::getIndex(filename)), static_cast<uint16_t>(type), static_cast<uint32_t>(targetID)}};
+    Data data{
+        .data = {static_cast<uint16_t>(LuaFunc::getIndex(filename)), static_cast<uint16_t>(type), static_cast<uint32_t>(targetID)}
+    };
     Event::add(frame * 1024 / 16, callbackSetTimer, this, data.param);
 }

@@ -28,7 +28,7 @@ void SkillManager::add(int skillID, int skillLevel) {
     // 初始化技能
     Skill skill;
     skill.dwSkillID = skillID;
-    skill.dwLevel = skillLevel;
+    skill.dwLevel   = skillLevel;
     // 获取 tab
     if (data.find(skillID) == data.end()) {
         // 如果没有该技能 ID, 则先获取 tab
@@ -39,24 +39,24 @@ void SkillManager::add(int skillID, int skillLevel) {
         skill.tab = std::move(arg[0]);
     } else {
         // 如果该技能 ID 已存在, 则复用同 ID 技能的 tab
-        auto it = data[skillID].begin();
+        auto it   = data[skillID].begin();
         skill.tab = it->second.tab;
     }
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    skill.KindType = ref::mapSkillKindtype.find(skill.tab["KindType"]) != ref::mapSkillKindtype.end() ? ref::mapSkillKindtype.at(skill.tab["KindType"]) : ref::enumSkillKindtype::COUNT;
-    skill.HasCriticalStrike = skill.tab["HasCriticalStrike"] == "1";
-    skill.SkillEventMask1 = atoi(skill.tab["SkillEventMask1"].c_str());
-    skill.SkillEventMask2 = atoi(skill.tab["SkillEventMask2"].c_str());
-    skill.NeedOutOfFight = skill.tab["NeedOutOfFight"] == "1";
-    skill.TargetTypePlayer = skill.tab["TargetTypePlayer"] == "1";
-    skill.TargetTypeNpc = skill.tab["TargetTypeNpc"] == "1";
-    skill.TargetRelationNone = skill.tab["TargetRelationNone"] == "1";
-    skill.TargetRelationSelf = skill.tab["TargetRelationSelf"] == "1";
+    skill.KindType            = ref::mapSkillKindtype.find(skill.tab["KindType"]) != ref::mapSkillKindtype.end() ? ref::mapSkillKindtype.at(skill.tab["KindType"]) : ref::enumSkillKindtype::COUNT;
+    skill.HasCriticalStrike   = skill.tab["HasCriticalStrike"] == "1";
+    skill.SkillEventMask1     = atoi(skill.tab["SkillEventMask1"].c_str());
+    skill.SkillEventMask2     = atoi(skill.tab["SkillEventMask2"].c_str());
+    skill.NeedOutOfFight      = skill.tab["NeedOutOfFight"] == "1";
+    skill.TargetTypePlayer    = skill.tab["TargetTypePlayer"] == "1";
+    skill.TargetTypeNpc       = skill.tab["TargetTypeNpc"] == "1";
+    skill.TargetRelationNone  = skill.tab["TargetRelationNone"] == "1";
+    skill.TargetRelationSelf  = skill.tab["TargetRelationSelf"] == "1";
     skill.TargetRelationEnemy = skill.tab["TargetRelationEnemy"] == "1";
-    skill.RecipeType = atoi(skill.tab["RecipeType"].c_str());
+    skill.RecipeType          = atoi(skill.tab["RecipeType"].c_str());
     // 执行 GetSkillLevelData
     std::string name = "scripts/skill/" + skill.tab["ScriptFile"];
-    bool res = LuaFunc::analysis(LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData);
+    bool        res  = LuaFunc::analysis(LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData);
     if (res) {
         // 成功执行, 将技能存入缓存
         data[skillID][skillLevel] = std::move(skill);
@@ -100,28 +100,28 @@ void Skill::AddCheckSelfLearntSkill(int a, int b, int c) {
 }
 
 void Skill::BindBuff(int a, int b, int c) {
-    attrBindBuff.used = true;
-    attrBindBuff.isValid[a - 1] = true;
-    attrBindBuff.nBuffID[a - 1] = b;
+    attrBindBuff.used              = true;
+    attrBindBuff.isValid[a - 1]    = true;
+    attrBindBuff.nBuffID[a - 1]    = b;
     attrBindBuff.nBuffLevel[a - 1] = c;
 }
 
 void Skill::SetPublicCoolDown(int a) {
-    attrCoolDown.used = true;
+    attrCoolDown.used                  = true;
     attrCoolDown.isValidPublicCoolDown = true;
-    attrCoolDown.nPublicCoolDown = a;
+    attrCoolDown.nPublicCoolDown       = a;
 }
 
 void Skill::SetNormalCoolDown(int a, int b) {
-    attrCoolDown.used = true;
+    attrCoolDown.used                         = true;
     attrCoolDown.isValidNormalCoolDown[a - 1] = true;
-    attrCoolDown.nNormalCoolDownID[a - 1] = b;
+    attrCoolDown.nNormalCoolDownID[a - 1]     = b;
 }
 
 void Skill::SetCheckCoolDown(int a, int b) {
-    attrCoolDown.used = true;
+    attrCoolDown.used                        = true;
     attrCoolDown.isValidCheckCoolDown[a - 1] = true;
-    attrCoolDown.nCheckCoolDownID[a - 1] = b;
+    attrCoolDown.nCheckCoolDownID[a - 1]     = b;
 }
 
 void Skill::SetSubsectionSkill(int a, int b, int c, int d) {
@@ -129,11 +129,11 @@ void Skill::SetSubsectionSkill(int a, int b, int c, int d) {
 }
 
 void Skill::SetSunSubsectionSkill(int a, int b, int c, int d) {
-    SunSubsectionSkillID = c;
+    SunSubsectionSkillID    = c;
     SunSubsectionSkillLevel = d;
 }
 
 void Skill::SetMoonSubsectionSkill(int a, int b, int c, int d) {
-    MoonSubsectionSkillID = c;
+    MoonSubsectionSkillID    = c;
     MoonSubsectionSkillLevel = d;
 }

@@ -22,32 +22,32 @@ void SkillRecipeManager::add(int RecipeID, int RecipeLevel) {
 
     // 初始化 Cooldown
     SkillRecipe skillrecipe;
-    skillrecipe.RecipeID = RecipeID;
+    skillrecipe.RecipeID    = RecipeID;
     skillrecipe.RecipeLevel = RecipeLevel;
     // 获取 tab
     gdi::select_t arg;
     arg.emplace_back();
-    arg[0]["RecipeID"] = std::to_string(RecipeID);
+    arg[0]["RecipeID"]    = std::to_string(RecipeID);
     arg[0]["RecipeLevel"] = std::to_string(RecipeLevel);
     gdi::tabSelect(gdi::Tab::skillrecipe, arg);
     skillrecipe.tab = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    skillrecipe.SkillRecipeType = atoi(skillrecipe.tab["SkillRecipeType"].c_str());
-    skillrecipe.SkillID = atoi(skillrecipe.tab["SkillID"].c_str());
-    skillrecipe.CoolDownAdd1 = atoi(skillrecipe.tab["CoolDownAdd1"].c_str());
-    skillrecipe.CoolDownAdd2 = atoi(skillrecipe.tab["CoolDownAdd2"].c_str());
-    skillrecipe.CoolDownAdd3 = atoi(skillrecipe.tab["CoolDownAdd3"].c_str());
+    skillrecipe.SkillRecipeType  = atoi(skillrecipe.tab["SkillRecipeType"].c_str());
+    skillrecipe.SkillID          = atoi(skillrecipe.tab["SkillID"].c_str());
+    skillrecipe.CoolDownAdd1     = atoi(skillrecipe.tab["CoolDownAdd1"].c_str());
+    skillrecipe.CoolDownAdd2     = atoi(skillrecipe.tab["CoolDownAdd2"].c_str());
+    skillrecipe.CoolDownAdd3     = atoi(skillrecipe.tab["CoolDownAdd3"].c_str());
     skillrecipe.DamageAddPercent = atoi(skillrecipe.tab["DamageAddPercent"].c_str());
     // 将 Cooldown 存入缓存
     data[std::make_tuple(RecipeID, RecipeLevel)] = std::move(skillrecipe);
-    SkillRecipe *curr = &data[std::make_tuple(RecipeID, RecipeLevel)];
+    SkillRecipe *curr                            = &data[std::make_tuple(RecipeID, RecipeLevel)];
 
     Skill skill;
     // 执行 GetSkillRecipeData
     std::string path = curr->tab["ScriptFile"];
     if (!path.empty()) {
         std::string name = "scripts/skill/" + path;
-        bool res = LuaFunc::analysis(LuaFunc::getGetSkillRecipeData(name)(skill, RecipeID, RecipeLevel), name, LuaFunc::Enum::GetSkillRecipeData);
+        bool        res  = LuaFunc::analysis(LuaFunc::getGetSkillRecipeData(name)(skill, RecipeID, RecipeLevel), name, LuaFunc::Enum::GetSkillRecipeData);
         if (res) {
             // 成功执行, 将技能添加到 ScriptSkill 中
             ScriptSkill[curr] = std::move(skill);

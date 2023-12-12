@@ -19,14 +19,14 @@ enum class enumSkillKindtype {
     COUNT,
 };
 inline const std::unordered_map<std::string, enumSkillKindtype> mapSkillKindtype = {
-    {"None", enumSkillKindtype::None},
-    {"Physics", enumSkillKindtype::Physics},
-    {"SolarMagic", enumSkillKindtype::SolarMagic},
-    {"LunarMagic", enumSkillKindtype::LunarMagic},
+    {"None",         enumSkillKindtype::None        },
+    {"Physics",      enumSkillKindtype::Physics     },
+    {"SolarMagic",   enumSkillKindtype::SolarMagic  },
+    {"LunarMagic",   enumSkillKindtype::LunarMagic  },
     {"NeutralMagic", enumSkillKindtype::NeutralMagic},
-    {"Poison", enumSkillKindtype::Poison},
-    {"Leap", enumSkillKindtype::Leap},
-    {"Adaptive", enumSkillKindtype::Adaptive},
+    {"Poison",       enumSkillKindtype::Poison      },
+    {"Leap",         enumSkillKindtype::Leap        },
+    {"Adaptive",     enumSkillKindtype::Adaptive    },
 };
 
 } // namespace ref

@@ -5,11 +5,12 @@
 
 namespace ns_concrete {
 
-class ChPlyMjFysj : public ns_frame::Player {
+class MjFysj : public ns_frame::Player {
 public:
-    ChPlyMjFysj();
+    MjFysj();
     virtual void macroPrepareDefault() override;
     virtual void macroRuntimeDefault() override;
+
     bool macroSwitchedOnce = false;
     void macroDefault0();
     void macroDefault1();

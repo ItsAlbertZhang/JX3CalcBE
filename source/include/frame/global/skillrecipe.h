@@ -47,7 +47,7 @@ public:
      * @return SkillRecipe&
      */
     static const SkillRecipe &get(int RecipeID, int RecipeLevel);
-    static const Skill *getSkill(const SkillRecipe *skillrecipe);
+    static const Skill       *getSkill(const SkillRecipe *skillrecipe);
 
 private:
     static inline std::mutex mutex; // 互斥锁. 用于保护 add 操作.
@@ -65,7 +65,7 @@ private:
      * @brief SkillRecipe 缓存数据
      */
     static inline std::unordered_map<std::tuple<int, int>, SkillRecipe, tuple_hash> data;
-    static inline std::unordered_map<const SkillRecipe *, Skill> ScriptSkill; // 用于保存 ScriptFile 作用的 Skill 对象
+    static inline std::unordered_map<const SkillRecipe *, Skill>                    ScriptSkill; // 用于保存 ScriptFile 作用的 Skill 对象
 
     /**
      * @brief 初始化 SkillRecipe. 将指定 ID 的 SkillRecipe 数据存至缓存.

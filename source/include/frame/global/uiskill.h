@@ -23,8 +23,8 @@ public:
     std::unordered_map<std::string, std::string> tab; // skills.txt 中的数据
 
     // 初始化时拿出一些数据, 降低使用开销
-    int ID;
-    int Level;
+    int         ID;
+    int         Level;
     std::string Name;
 };
 

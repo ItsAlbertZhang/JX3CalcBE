@@ -16,20 +16,21 @@ class Character;
  */
 class AutoRollbackAttrib {
 public:
-    AutoRollbackAttrib(Character *self, CharacterBuff::Item *item, const Buff &buff);
-    AutoRollbackAttrib(const AutoRollbackAttrib &) = delete;
+    AutoRollbackAttrib(Character *self, BuffItem *item, const Buff &buff);
+    AutoRollbackAttrib(const AutoRollbackAttrib &)            = delete;
     AutoRollbackAttrib &operator=(const AutoRollbackAttrib &) = delete;
-    AutoRollbackAttrib(AutoRollbackAttrib &&) = delete;
-    AutoRollbackAttrib &operator=(AutoRollbackAttrib &&) = delete;
+    AutoRollbackAttrib(AutoRollbackAttrib &&)                 = delete;
+    AutoRollbackAttrib &operator=(AutoRollbackAttrib &&)      = delete;
     ~AutoRollbackAttrib();
+
     void active();
 
 private:
-    Character *self;
-    CharacterBuff::Item *item;
+    Character  *self;
+    BuffItem   *item;
     const Buff &buff;
 
-    void handle(CharacterBuff::Item *item, const Buff::Attrib &attrib, bool isRollback);
+    void handle(BuffItem *item, const Buff::Attrib &attrib, bool isRollback);
 };
 
 } // namespace ns_frame

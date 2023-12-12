@@ -4,33 +4,33 @@
 
 using namespace ns_frame;
 
-std::tuple<int, int> Character::calcCritical(const CharacterAttr &attrSelf, int skillID, int skillLevel) {
+std::tuple<int, int> Character::calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel) {
     // TODO: 目标御劲降低会心率和会心效果.
-    int atCriticalStrike = 0;
-    int atCriticalDamagePower = 0;
-    const Skill &skill = SkillManager::get(skillID, skillLevel);
+    int          atCriticalStrike      = 0;
+    int          atCriticalDamagePower = 0;
+    const Skill &skill                 = SkillManager::get(skillID, skillLevel);
     if (!skill.HasCriticalStrike)
         return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 
     switch (skill.KindType) {
     case ref::enumSkillKindtype::Physics:
-        atCriticalStrike = attrSelf.getPhysicsCriticalStrike();
+        atCriticalStrike      = attrSelf.getPhysicsCriticalStrike();
         atCriticalDamagePower = attrSelf.getPhysicsCriticalDamagePower();
         break;
     case ref::enumSkillKindtype::SolarMagic:
-        atCriticalStrike = attrSelf.getSolarCriticalStrike();
+        atCriticalStrike      = attrSelf.getSolarCriticalStrike();
         atCriticalDamagePower = attrSelf.getSolarCriticalDamagePower();
         break;
     case ref::enumSkillKindtype::LunarMagic:
-        atCriticalStrike = attrSelf.getLunarCriticalStrike();
+        atCriticalStrike      = attrSelf.getLunarCriticalStrike();
         atCriticalDamagePower = attrSelf.getLunarCriticalDamagePower();
         break;
     case ref::enumSkillKindtype::NeutralMagic:
-        atCriticalStrike = attrSelf.getNeutralCriticalStrike();
+        atCriticalStrike      = attrSelf.getNeutralCriticalStrike();
         atCriticalDamagePower = attrSelf.getNeutralCriticalDamagePower();
         break;
     case ref::enumSkillKindtype::Poison:
-        atCriticalStrike = attrSelf.getPoisonCriticalStrike();
+        atCriticalStrike      = attrSelf.getPoisonCriticalStrike();
         atCriticalDamagePower = attrSelf.getPoisonCriticalDamagePower();
         break;
     default:
@@ -41,64 +41,78 @@ std::tuple<int, int> Character::calcCritical(const CharacterAttr &attrSelf, int 
     return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 }
 
-int Character::calcDamage(const CharacterAttr &attrSelf, Character *target, DamageType typeDamage, bool isCritical, int atCriticalDamagePower, int DamageAddPercent, int damageBase, int damageRand, int nChannelInterval, int nWeaponDamagePercent, int dotInterval, int dotCount, bool isSurplus) {
-    int atStrain = this->chAttr.getStrain();                                // 类型× 快照
-    int atSurplus = this->chAttr.getSurplus();                              // 类型× 快照
+int Character::calcDamage(
+    const ChAttr &attrSelf,
+    Character    *target,
+    DamageType    typeDamage,
+    bool          isCritical,
+    int           atCriticalDamagePower,
+    int           DamageAddPercent,
+    int           damageBase,
+    int           damageRand,
+    int           nChannelInterval,
+    int           nWeaponDamagePercent,
+    int           dotInterval,
+    int           dotCount,
+    bool          isSurplus
+) {
+    int atStrain                  = this->chAttr.getStrain();               // 类型× 快照
+    int atSurplus                 = this->chAttr.getSurplus();              // 类型× 快照
     int atDstNpcDamageCoefficient = this->chAttr.atDstNpcDamageCoefficient; // 类型× 快照
     int atAddDamageByDstMoveState = this->chAttr.atAddDamageByDstMoveState; // 类型× 快照
 
-    int atAttackPower = 0;           // 类型√ 快照
-    int atDamageAddPercent = 0;      // 类型√ 快照
-    int atOvercome = 0;              // 类型√ 自身实时
-    int targetShield = 0;            // 类型√ 目标实时
+    int atAttackPower           = 0; // 类型√ 快照
+    int atDamageAddPercent      = 0; // 类型√ 快照
+    int atOvercome              = 0; // 类型√ 自身实时
+    int targetShield            = 0; // 类型√ 目标实时
     int targetDamageCoefficient = 0; // 类型√ 目标实时
 
     int levelCof = 100 - (target->chAttr.atLevel - attrSelf.atLevel) * 5; // 等级压制, 注意仅对 NPC 有效
 
-    int c = 12;
+    int c            = 12;
     int weaponDamage = 0;
 
-    int coeffCount = dotCount;
+    int coeffCount    = dotCount;
     int coeffInterval = dotInterval * dotCount / 12;
-    coeffInterval = coeffInterval > 16 ? coeffInterval : 16;
+    coeffInterval     = coeffInterval > 16 ? coeffInterval : 16;
 
     switch (typeDamage) {
     case DamageType::Physics:
-        atAttackPower = attrSelf.getPhysicsAttackPower();
-        atDamageAddPercent = attrSelf.getPhysicsDamageAddPercent();
-        atOvercome = this->chAttr.getPhysicsOvercome();
-        targetShield = target->chAttr.getPhysicsShield(this->chAttr.atAllShieldIgnorePercent);
+        atAttackPower           = attrSelf.getPhysicsAttackPower();
+        atDamageAddPercent      = attrSelf.getPhysicsDamageAddPercent();
+        atOvercome              = this->chAttr.getPhysicsOvercome();
+        targetShield            = target->chAttr.getPhysicsShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atPhysicsDamageCoefficient;
-        c = 10;
-        weaponDamage = attrSelf.atMeleeWeaponDamageBase + attrSelf.atMeleeWeaponDamageRand / 2;
-        weaponDamage = weaponDamage * nWeaponDamagePercent / 1024;
+        c                       = 10;
+        weaponDamage            = attrSelf.atMeleeWeaponDamageBase + attrSelf.atMeleeWeaponDamageRand / 2;
+        weaponDamage            = weaponDamage * nWeaponDamagePercent / 1024;
         break;
     case DamageType::Solar:
-        atAttackPower = attrSelf.getSolarAttackPower();
-        atDamageAddPercent = attrSelf.getSolarDamageAddPercent();
-        atOvercome = this->chAttr.getSolarOvercome();
-        targetShield = target->chAttr.getSolarShield(this->chAttr.atAllShieldIgnorePercent);
+        atAttackPower           = attrSelf.getSolarAttackPower();
+        atDamageAddPercent      = attrSelf.getSolarDamageAddPercent();
+        atOvercome              = this->chAttr.getSolarOvercome();
+        targetShield            = target->chAttr.getSolarShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atSolarDamageCoefficient;
         break;
     case DamageType::Lunar:
-        atAttackPower = attrSelf.getLunarAttackPower();
-        atDamageAddPercent = attrSelf.getLunarDamageAddPercent();
-        atOvercome = this->chAttr.getLunarOvercome();
-        targetShield = target->chAttr.getLunarShield(this->chAttr.atAllShieldIgnorePercent);
+        atAttackPower           = attrSelf.getLunarAttackPower();
+        atDamageAddPercent      = attrSelf.getLunarDamageAddPercent();
+        atOvercome              = this->chAttr.getLunarOvercome();
+        targetShield            = target->chAttr.getLunarShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atLunarDamageCoefficient;
         break;
     case DamageType::Neutral:
-        atAttackPower = attrSelf.getNeutralAttackPower();
-        atDamageAddPercent = attrSelf.getNeutralDamageAddPercent();
-        atOvercome = this->chAttr.getNeutralOvercome();
-        targetShield = target->chAttr.getNeutralShield(this->chAttr.atAllShieldIgnorePercent);
+        atAttackPower           = attrSelf.getNeutralAttackPower();
+        atDamageAddPercent      = attrSelf.getNeutralDamageAddPercent();
+        atOvercome              = this->chAttr.getNeutralOvercome();
+        targetShield            = target->chAttr.getNeutralShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atNeutralDamageCoefficient;
         break;
     case DamageType::Poison:
-        atAttackPower = attrSelf.getPoisonAttackPower();
-        atDamageAddPercent = attrSelf.getPoisonDamageAddPercent();
-        atOvercome = this->chAttr.getPoisonOvercome();
-        targetShield = target->chAttr.getPoisonShield(this->chAttr.atAllShieldIgnorePercent);
+        atAttackPower           = attrSelf.getPoisonAttackPower();
+        atDamageAddPercent      = attrSelf.getPoisonDamageAddPercent();
+        atOvercome              = this->chAttr.getPoisonOvercome();
+        targetShield            = target->chAttr.getPoisonShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atPoisonDamageCoefficient;
         break;
     }

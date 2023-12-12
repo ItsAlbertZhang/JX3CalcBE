@@ -28,24 +28,24 @@ void BuffManager::add(int buffID, int buffLevel) {
 
     // 初始化 buff
     Buff buff;
-    buff.ID = buffID;
+    buff.ID    = buffID;
     buff.Level = buffLevel;
     // 获取 tab
     gdi::select_t arg;
     arg.emplace_back();
-    arg[0]["ID"] = std::to_string(buffID);
+    arg[0]["ID"]    = std::to_string(buffID);
     arg[0]["Level"] = std::to_string(buffLevel);
     gdi::tabSelect(gdi::Tab::buff, arg);
     buff.tab = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     buff.IsStackable = buff.tab["IsStackable"] == "1";
     buff.MaxStackNum = std::stoi(buff.tab["MaxStackNum"]);
-    buff.Count = std::stoi(buff.tab["Count"]);
-    buff.Interval = std::stoi(buff.tab["Interval"]);
-    buff.Hide = buff.tab["Hide"] == "1";
-    buff.Exclude = buff.tab["Exclude"] == "1";
-    buff.ScriptFile = buff.tab["ScriptFile"];
-    buff.CanCancel = buff.tab["CanCancel"] == "1";
+    buff.Count       = std::stoi(buff.tab["Count"]);
+    buff.Interval    = std::stoi(buff.tab["Interval"]);
+    buff.Hide        = buff.tab["Hide"] == "1";
+    buff.Exclude     = buff.tab["Exclude"] == "1";
+    buff.ScriptFile  = buff.tab["ScriptFile"];
+    buff.CanCancel   = buff.tab["CanCancel"] == "1";
     buff.MinInterval = std::stoi(buff.tab["MinInterval"]);
     buff.MaxInterval = std::stoi(buff.tab["MaxInterval"]);
     // 初始化 buff Attrib

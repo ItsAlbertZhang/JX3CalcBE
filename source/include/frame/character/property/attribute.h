@@ -5,171 +5,171 @@
 
 namespace ns_frame {
 /**
- * @brief CharacterAttr 类
+ * @brief ChAttr 类
  * @note 作为 Character 类的一个属性, 其作用是封装, 避免 Character 类过于臃肿.
  * @warning 注意该类的默认构造函数和拷贝构造函数! 应尽量避免向此类中添加高级数据类型, 如 std::string 等. 如果一定要添加, 请注意拷贝构造函数的实现.
  */
-class CharacterAttr {
+class ChAttr {
 public:
-    CharacterAttr() = default;
-    CharacterAttr(const CharacterAttr &obj) {
-        memcpy(this, &obj, sizeof(CharacterAttr));
+    ChAttr() = default;
+    ChAttr(const ChAttr &obj) {
+        memcpy(this, &obj, sizeof(ChAttr));
     }
-    CharacterAttr &operator=(const CharacterAttr &obj) {
-        memcpy(this, &obj, sizeof(CharacterAttr));
+    ChAttr &operator=(const ChAttr &obj) {
+        memcpy(this, &obj, sizeof(ChAttr));
         return *this;
     }
 
     int atLevel = 120; // 等级
 
-    int atBasePotentialAdd = 0;       // 所有主属性
-    int atVitalityBase = 0;           // 体质
-    int atStrengthBase = 0;           // 力道
-    int atAgilityBase = 0;            // 身法
-    int atSpiritBase = 0;             // 根骨
-    int atSpunkBase = 0;              // 元气
+    int atBasePotentialAdd       = 0; // 所有主属性
+    int atVitalityBase           = 0; // 体质
+    int atStrengthBase           = 0; // 力道
+    int atAgilityBase            = 0; // 身法
+    int atSpiritBase             = 0; // 根骨
+    int atSpunkBase              = 0; // 元气
     int atVitalityBasePercentAdd = 0; // 体质%
     int atStrengthBasePercentAdd = 0; // 力道%
-    int atAgilityBasePercentAdd = 0;  // 身法%
-    int atSpiritBasePercentAdd = 0;   // 根骨%
-    int atSpunkBasePercentAdd = 0;    // 元气%
+    int atAgilityBasePercentAdd  = 0; // 身法%
+    int atSpiritBasePercentAdd   = 0; // 根骨%
+    int atSpunkBasePercentAdd    = 0; // 元气%
 
-    int atPhysicsAttackPowerBase = 0;    // 外功基础攻击
-    int atMagicAttackPowerBase = 0;      // 内功基础攻击
-    int atSolarAttackPowerBase = 0;      // 阳性内功基础攻击
-    int atLunarAttackPowerBase = 0;      // 阴性内功基础攻击
-    int atNeutralAttackPowerBase = 0;    // 混元内功基础攻击
-    int atPoisonAttackPowerBase = 0;     // 毒性内功基础攻击
+    int atPhysicsAttackPowerBase    = 0; // 外功基础攻击
+    int atMagicAttackPowerBase      = 0; // 内功基础攻击
+    int atSolarAttackPowerBase      = 0; // 阳性内功基础攻击
+    int atLunarAttackPowerBase      = 0; // 阴性内功基础攻击
+    int atNeutralAttackPowerBase    = 0; // 混元内功基础攻击
+    int atPoisonAttackPowerBase     = 0; // 毒性内功基础攻击
     int atPhysicsAttackPowerPercent = 0; // 外功基础攻击提升1024分数
-    int atMagicAttackPowerPercent = 0;   // 内功基础攻击提升1024分数
-    int atSolarAttackPowerPercent = 0;   // 阳性内功基础攻击提升1024分数
-    int atLunarAttackPowerPercent = 0;   // 阴性内功基础攻击提升1024分数
+    int atMagicAttackPowerPercent   = 0; // 内功基础攻击提升1024分数
+    int atSolarAttackPowerPercent   = 0; // 阳性内功基础攻击提升1024分数
+    int atLunarAttackPowerPercent   = 0; // 阴性内功基础攻击提升1024分数
     int atNeutralAttackPowerPercent = 0; // 混元内功基础攻击提升1024分数
-    int atPoisonAttackPowerPercent = 0;  // 毒性内功基础攻击提升1024分数
-    int atTherapyPowerBase = 0;          // 治疗量
-    int atTherapyPowerPercent = 0;       // 治疗量%
+    int atPoisonAttackPowerPercent  = 0; // 毒性内功基础攻击提升1024分数
+    int atTherapyPowerBase          = 0; // 治疗量
+    int atTherapyPowerPercent       = 0; // 治疗量%
 
-    int atAllTypeCriticalStrike = 0;         // 全会心等级
-    int atPhysicsCriticalStrike = 0;         // 外功会心等级
-    int atMagicCriticalStrike = 0;           // 内功会心等级
-    int atSolarCriticalStrike = 0;           // 阳性内功会心等级
-    int atLunarCriticalStrike = 0;           // 阴性内功会心等级
-    int atNeutralCriticalStrike = 0;         // 混元内功会心等级
-    int atPoisonCriticalStrike = 0;          // 毒性内功会心等级
+    int atAllTypeCriticalStrike         = 0; // 全会心等级
+    int atPhysicsCriticalStrike         = 0; // 外功会心等级
+    int atMagicCriticalStrike           = 0; // 内功会心等级
+    int atSolarCriticalStrike           = 0; // 阳性内功会心等级
+    int atLunarCriticalStrike           = 0; // 阴性内功会心等级
+    int atNeutralCriticalStrike         = 0; // 混元内功会心等级
+    int atPoisonCriticalStrike          = 0; // 毒性内功会心等级
     int atPhysicsCriticalStrikeBaseRate = 0; // 外功额外会心万分数
-    int atSolarCriticalStrikeBaseRate = 0;   // 阳性内功额外会心万分数
-    int atLunarCriticalStrikeBaseRate = 0;   // 阴性内功额外会心万分数
+    int atSolarCriticalStrikeBaseRate   = 0; // 阳性内功额外会心万分数
+    int atLunarCriticalStrikeBaseRate   = 0; // 阴性内功额外会心万分数
     int atNeutralCriticalStrikeBaseRate = 0; // 混元内功额外会心万分数
-    int atPoisonCriticalStrikeBaseRate = 0;  // 毒性内功额外会心万分数
+    int atPoisonCriticalStrikeBaseRate  = 0; // 毒性内功额外会心万分数
 
-    int atAllTypeCriticalDamagePowerBase = 0;            // 全会心效果等级
-    int atPhysicsCriticalDamagePowerBase = 0;            // 外功会心效果等级
-    int atMagicCriticalDamagePowerBase = 0;              // 内功会心效果等级
-    int atSolarCriticalDamagePowerBase = 0;              // 阳性内功会心效果等级
-    int atLunarCriticalDamagePowerBase = 0;              // 阴性内功会心效果等级
-    int atNeutralCriticalDamagePowerBase = 0;            // 混元内功会心效果等级
-    int atPoisonCriticalDamagePowerBase = 0;             // 毒性内功会心效果等级
+    int atAllTypeCriticalDamagePowerBase            = 0; // 全会心效果等级
+    int atPhysicsCriticalDamagePowerBase            = 0; // 外功会心效果等级
+    int atMagicCriticalDamagePowerBase              = 0; // 内功会心效果等级
+    int atSolarCriticalDamagePowerBase              = 0; // 阳性内功会心效果等级
+    int atLunarCriticalDamagePowerBase              = 0; // 阴性内功会心效果等级
+    int atNeutralCriticalDamagePowerBase            = 0; // 混元内功会心效果等级
+    int atPoisonCriticalDamagePowerBase             = 0; // 毒性内功会心效果等级
     int atPhysicsCriticalDamagePowerBaseKiloNumRate = 0; // 外功额外会心效果1024分数
-    int atMagicCriticalDamagePowerBaseKiloNumRate = 0;   // 内功额外会心效果1024分数
-    int atSolarCriticalDamagePowerBaseKiloNumRate = 0;   // 阳性内功额外会心效果1024分数
-    int atLunarCriticalDamagePowerBaseKiloNumRate = 0;   // 阴性内功额外会心效果1024分数
+    int atMagicCriticalDamagePowerBaseKiloNumRate   = 0; // 内功额外会心效果1024分数
+    int atSolarCriticalDamagePowerBaseKiloNumRate   = 0; // 阳性内功额外会心效果1024分数
+    int atLunarCriticalDamagePowerBaseKiloNumRate   = 0; // 阴性内功额外会心效果1024分数
     int atNeutralCriticalDamagePowerBaseKiloNumRate = 0; // 混元内功额外会心效果1024分数
-    int atPoisonCriticalDamagePowerBaseKiloNumRate = 0;  // 毒性内功额外会心效果1024分数
+    int atPoisonCriticalDamagePowerBaseKiloNumRate  = 0; // 毒性内功额外会心效果1024分数
 
-    int atPhysicsOvercomeBase = 0;    // 外功基础破防等级
-    int atMagicOvercome = 0;          // 内功基础破防等级
-    int atSolarOvercomeBase = 0;      // 阳性内功破防等级
-    int atLunarOvercomeBase = 0;      // 阴性内功破防等级
-    int atNeutralOvercomeBase = 0;    // 混元内功破防等级
-    int atPoisonOvercomeBase = 0;     // 毒性内功破防等级
+    int atPhysicsOvercomeBase    = 0; // 外功基础破防等级
+    int atMagicOvercome          = 0; // 内功基础破防等级
+    int atSolarOvercomeBase      = 0; // 阳性内功破防等级
+    int atLunarOvercomeBase      = 0; // 阴性内功破防等级
+    int atNeutralOvercomeBase    = 0; // 混元内功破防等级
+    int atPoisonOvercomeBase     = 0; // 毒性内功破防等级
     int atPhysicsOvercomePercent = 0; // 外功基础破防等级提升1024分数
-    int atSolarOvercomePercent = 0;   // 阳性内功基础破防等级提升1024分数
-    int atLunarOvercomePercent = 0;   // 阴性内功基础破防等级提升1024分数
+    int atSolarOvercomePercent   = 0; // 阳性内功基础破防等级提升1024分数
+    int atLunarOvercomePercent   = 0; // 阴性内功基础破防等级提升1024分数
     int atNeutralOvercomePercent = 0; // 混元内功基础破防等级提升1024分数
-    int atPoisonOvercomePercent = 0;  // 毒性内功基础破防等级提升1024分数
+    int atPoisonOvercomePercent  = 0; // 毒性内功基础破防等级提升1024分数
 
     int atSurplusValueBase = 0; // 破招值
-    int atStrainBase = 0;       // 无双等级
-    int atStrainRate = 0;       // 无双等级提升1024分数
-    int atStrainPercent = 0;    // 额外无双1024分数
+    int atStrainBase       = 0; // 无双等级
+    int atStrainRate       = 0; // 无双等级提升1024分数
+    int atStrainPercent    = 0; // 额外无双1024分数
 
-    int atHasteBase = 0;                  // 基础加速等级
-    int atHasteBasePercentAdd = 0;        // 额外加速1024分数
+    int atHasteBase                  = 0; // 基础加速等级
+    int atHasteBasePercentAdd        = 0; // 额外加速1024分数
     int atUnlimitHasteBasePercentAdd = 0; // 突破上限加速1024分数
 
-    int atMaxLifeBase = 0;            // 最大气血值
-    int atMaxLifePercentAdd = 0;      // 最大气血值%
-    int atMaxLifeAdditional = 0;      // 额外气血值
+    int atMaxLifeBase            = 0; // 最大气血值
+    int atMaxLifePercentAdd      = 0; // 最大气血值%
+    int atMaxLifeAdditional      = 0; // 额外气血值
     int atFinalMaxLifeAddPercent = 0; // 最终气血值%
 
-    int atPhysicsShieldBase = 0;         // 外功基础防御等级
-    int atPhysicsShieldPercent = 0;      // 外功基础防御等级提升1024分数
-    int atPhysicsShieldAdditional = 0;   // 额外外功防御等级
-    int atMagicShield = 0;               // 内功基础防御等级
-    int atSolarMagicShieldBase = 0;      // 阳性内功防御等级
-    int atLunarMagicShieldBase = 0;      // 阴性内功防御等级
-    int atNeutralMagicShieldBase = 0;    // 混元内功防御等级
-    int atPoisonMagicShieldBase = 0;     // 毒性内功防御等级
-    int atSolarMagicShieldPercent = 0;   // 阳性内功基础防御提升1024分数
-    int atLunarMagicShieldPercent = 0;   // 阴性内功基础防御提升1024分数
+    int atPhysicsShieldBase         = 0; // 外功基础防御等级
+    int atPhysicsShieldPercent      = 0; // 外功基础防御等级提升1024分数
+    int atPhysicsShieldAdditional   = 0; // 额外外功防御等级
+    int atMagicShield               = 0; // 内功基础防御等级
+    int atSolarMagicShieldBase      = 0; // 阳性内功防御等级
+    int atLunarMagicShieldBase      = 0; // 阴性内功防御等级
+    int atNeutralMagicShieldBase    = 0; // 混元内功防御等级
+    int atPoisonMagicShieldBase     = 0; // 毒性内功防御等级
+    int atSolarMagicShieldPercent   = 0; // 阳性内功基础防御提升1024分数
+    int atLunarMagicShieldPercent   = 0; // 阴性内功基础防御提升1024分数
     int atNeutralMagicShieldPercent = 0; // 混元内功基础防御提升1024分数
-    int atPoisonMagicShieldPercent = 0;  // 毒性内功基础防御提升1024分数
+    int atPoisonMagicShieldPercent  = 0; // 毒性内功基础防御提升1024分数
 
-    int atDodge = 0;             // 闪避等级
-    int atDodgeBaseRate = 0;     // 闪避%
-    int atParryBase = 0;         // 招架等级
-    int atParryPercent = 0;      // 招架等级%
-    int atParryBaseRate = 0;     // 招架%
-    int atParryValueBase = 0;    // 拆招值
+    int atDodge             = 0; // 闪避等级
+    int atDodgeBaseRate     = 0; // 闪避%
+    int atParryBase         = 0; // 招架等级
+    int atParryPercent      = 0; // 招架等级%
+    int atParryBaseRate     = 0; // 招架%
+    int atParryValueBase    = 0; // 拆招值
     int atParryValuePercent = 0; // 拆招值%
 
-    int atGlobalResistPercent = 0;       // 通用减伤
-    int atPhysicsResistPercent = 0;      // 外功通用减伤%
-    int atSolarMagicResistPercent = 0;   // 阳性内功通用减伤%
-    int atLunarMagicResistPercent = 0;   // 阴性内功通用减伤%
+    int atGlobalResistPercent       = 0; // 通用减伤
+    int atPhysicsResistPercent      = 0; // 外功通用减伤%
+    int atSolarMagicResistPercent   = 0; // 阳性内功通用减伤%
+    int atLunarMagicResistPercent   = 0; // 阴性内功通用减伤%
     int atNeutralMagicResistPercent = 0; // 混元内功通用减伤%
-    int atPoisonMagicResistPercent = 0;  // 毒性内功通用减伤%
+    int atPoisonMagicResistPercent  = 0; // 毒性内功通用减伤%
 
     int atPhysicsDamageCoefficient = 0; // 物理易伤1024分数
-    int atSolarDamageCoefficient = 0;   // 阳性内功易伤1024分数
-    int atLunarDamageCoefficient = 0;   // 阴性内功易伤1024分数
+    int atSolarDamageCoefficient   = 0; // 阳性内功易伤1024分数
+    int atLunarDamageCoefficient   = 0; // 阴性内功易伤1024分数
     int atNeutralDamageCoefficient = 0; // 混元内功易伤1024分数
-    int atPoisonDamageCoefficient = 0;  // 毒性内功易伤1024分数
+    int atPoisonDamageCoefficient  = 0; // 毒性内功易伤1024分数
 
-    int atToughnessBase = 0;     // 御劲等级
-    int atToughnessPercent = 0;  // 御劲等级%
+    int atToughnessBase     = 0; // 御劲等级
+    int atToughnessPercent  = 0; // 御劲等级%
     int atToughnessBaseRate = 0; // 御劲%
 
-    int atDecriticalDamagePowerBase = 0;            // 化劲等级
-    int atDecriticalDamagePowerPercent = 0;         // 化劲等级%
+    int atDecriticalDamagePowerBase            = 0; // 化劲等级
+    int atDecriticalDamagePowerPercent         = 0; // 化劲等级%
     int atDecriticalDamagePowerBaseKiloNumRate = 0; // 化劲%
 
     int atMeleeWeaponDamageBase = 0; // 武器伤害
     int atMeleeWeaponDamageRand = 0; // 武器伤害浮动
 
-    int atAllDamageAddPercent = 0;      // 造成的全伤害和治疗效果提升1024分数
+    int atAllDamageAddPercent      = 0; // 造成的全伤害和治疗效果提升1024分数
     int atAllMagicDamageAddPercent = 0; // 造成的内功伤害和治疗效果提升1024分数
 
-    int atAllShieldIgnorePercent = 0;  // 无视防御1024分数
+    int atAllShieldIgnorePercent  = 0; // 无视防御1024分数
     int atActiveThreatCoefficient = 0; // 仇恨提升1024分数
 
     int atPhysicsAttackPowerAdd = 0; // 外功额外攻击
-    int atSolarAttackPowerAdd = 0;   // 阳性内功额外攻击
-    int atLunarAttackPowerAdd = 0;   // 阴性内功额外攻击
+    int atSolarAttackPowerAdd   = 0; // 阳性内功额外攻击
+    int atLunarAttackPowerAdd   = 0; // 阴性内功额外攻击
     int atNeutralAttackPowerAdd = 0; // 混元内功额外攻击
-    int atPoisonAttackPowerAdd = 0;  // 毒性内功额外攻击
+    int atPoisonAttackPowerAdd  = 0; // 毒性内功额外攻击
 
     int atPhysicsCriticalStrikeAdd = 0; // 外功额外会心等级
-    int atSolarCriticalStrikeAdd = 0;   // 阳性内功额外会心等级
-    int atLunarCriticalStrikeAdd = 0;   // 阴性内功额外会心等级
+    int atSolarCriticalStrikeAdd   = 0; // 阳性内功额外会心等级
+    int atLunarCriticalStrikeAdd   = 0; // 阴性内功额外会心等级
     int atNeutralCriticalStrikeAdd = 0; // 混元内功额外会心等级
-    int atPoisonCriticalStrikeAdd = 0;  // 毒性内功额外会心等级
+    int atPoisonCriticalStrikeAdd  = 0; // 毒性内功额外会心等级
 
     int atPhysicsOvercomeAdd = 0; // 外功额外破防等级
-    int atSolarOvercomeAdd = 0;   // 阳性内功额外破防等级
-    int atLunarOvercomeAdd = 0;   // 阴性内功额外破防等级
+    int atSolarOvercomeAdd   = 0; // 阳性内功额外破防等级
+    int atLunarOvercomeAdd   = 0; // 阴性内功额外破防等级
     int atNeutralOvercomeAdd = 0; // 混元内功额外破防等级
-    int atPoisonOvercomeAdd = 0;  // 毒性内功额外破防等级
+    int atPoisonOvercomeAdd  = 0; // 毒性内功额外破防等级
 
     int atBeTherapyCoefficient = 0; // 受到治疗效果提升1024分数
 
@@ -222,10 +222,10 @@ public:
     int atDstNpcDamageCoefficient = 0; // 非侠士伤害提升1024分数
     int atAddDamageByDstMoveState = 0; // 根据目标移动状态造成的伤害提升1024分数, 出现于: 明教/秘笈/明教_秘籍_烈日斩_静止目标加伤害.lua
 
-    int atSpunkToSolarAndLunarAttackPowerCof = 0;    // 元气转换为阳性和阴性内功攻击的系数
+    int atSpunkToSolarAndLunarAttackPowerCof    = 0; // 元气转换为阳性和阴性内功攻击的系数
     int atSpunkToSolarAndLunarCriticalStrikeCof = 0; // 元气转换为阳性和阴性内功会心的系数
 
-    int atMaxSunEnergy = 0;  // 最大日灵
+    int atMaxSunEnergy  = 0; // 最大日灵
     int atMaxMoonEnergy = 0; // 最大月魂
 };
 } // namespace ns_frame

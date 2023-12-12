@@ -18,7 +18,7 @@ void Character::otherPlayPublicShadowAnimation(int a, int b, bool c, bool d) {
     return;
 }
 
-CharacterScene *Character::sceneGet() {
+ChScene *Character::sceneGet() {
     return &(this->chScene);
 }
 

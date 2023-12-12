@@ -9,7 +9,7 @@
 using namespace ns_frame;
 using namespace ns_frame::ref;
 
-AutoRollbackAttrib::AutoRollbackAttrib(Character *self, CharacterBuff::Item *item, const Buff &buff)
+AutoRollbackAttrib::AutoRollbackAttrib(Character *self, BuffItem *item, const Buff &buff)
     : self(self), item(item), buff(buff) {
     // item->flushLeftFrame();
     for (const auto &it : buff.BeginAttrib) {
@@ -27,7 +27,13 @@ AutoRollbackAttrib::~AutoRollbackAttrib() {
     }
     if (!buff.ScriptFile.empty()) {
         std::string paramStr = "scripts/skill/" + buff.ScriptFile;
-        LuaFunc::analysis(LuaFunc::getOnRemove(paramStr)(item->nCharacterID, item->BuffID, item->nLevel, item->nLeftFrame, item->nCustomValue, item->dwSkillSrcID, item->nStackNum, 0, 0, item->dwCasterSkillID), paramStr, LuaFunc::Enum::OnRemove);
+        LuaFunc::analysis(
+            LuaFunc::getOnRemove(paramStr)(
+                item->nCharacterID, item->nID, item->nLevel, item->nLeftFrame, item->nCustomValue, item->dwSkillSrcID, item->nStackNum, 0, 0, item->dwCasterSkillID
+            ),
+            paramStr,
+            LuaFunc::Enum::OnRemove
+        );
         // OnRemove(nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID)
     }
 }
@@ -38,7 +44,7 @@ void AutoRollbackAttrib::active() {
     }
 }
 
-void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &attrib, bool isRollback) {
+void AutoRollbackAttrib::handle(BuffItem *item, const Buff::Attrib &attrib, bool isRollback) {
     int c = isRollback ? -1 : 1;
     switch (attrib.type) {
     case enumTabAttribute::atLunarDamageCoefficient:
@@ -50,45 +56,33 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
     case enumTabAttribute::atCallSolarDamage: {
         // 计算会心
         Character *src = Character::characterGet(item->dwSkillSrcID);
-        auto [atCriticalStrike, atCriticalDamagePower] =
-            src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel); // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
-        std::random_device rd;
-        std::mt19937 gen(rd());
+        // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
+        auto [atCriticalStrike, atCriticalDamagePower] = src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel);
+        std::random_device              rd;
+        std::mt19937                    gen(rd());
         std::uniform_int_distribution<> dis(0, 9999);
-        bool isCritical = dis(gen) < atCriticalStrike;
-        src->chDamage.damageList.emplace_back(
-            Event::now(), DamageSource::buff,
-            item->BuffID, item->nLevel,
-            isCritical,
-            src->calcDamage(
-                item->attr, self, DamageType::Solar, // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
-                isCritical, atCriticalDamagePower, 0,
-                attrib.valueAInt, 0,
-                item->nChannelInterval, 0,
-                item->rawInterval, item->rawCount),
-            DamageType::Solar);
+        bool                            isCritical = dis(gen) < atCriticalStrike;
+        // 注意计算伤害时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
+        int damage = src->calcDamage(
+            item->attr, self, DamageType::Solar, isCritical, atCriticalDamagePower, 0, attrib.valueAInt, 0, item->nChannelInterval, 0, item->rawInterval, item->rawCount
+        );
+        src->chDamage.damageList.emplace_back(Event::now(), DamageSource::buff, item->nID, item->nLevel, isCritical, damage, DamageType::Solar);
         src->bFightState = true;
     } break;
     case enumTabAttribute::atCallLunarDamage: {
         // 计算会心
         Character *src = Character::characterGet(item->dwSkillSrcID);
-        auto [atCriticalStrike, atCriticalDamagePower] =
-            src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel); // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
-        std::random_device rd;
-        std::mt19937 gen(rd());
+        // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
+        auto [atCriticalStrike, atCriticalDamagePower] = src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel);
+        std::random_device              rd;
+        std::mt19937                    gen(rd());
         std::uniform_int_distribution<> dis(0, 9999);
-        bool isCritical = dis(gen) < atCriticalStrike;
-        src->chDamage.damageList.emplace_back(
-            Event::now(), DamageSource::buff,
-            item->BuffID, item->nLevel,
-            isCritical,
-            src->calcDamage(
-                item->attr, self, DamageType::Lunar, // 注意这里使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
-                isCritical, atCriticalDamagePower, 0,
-                attrib.valueAInt, 0,
-                item->nChannelInterval, 0,
-                item->rawInterval, item->rawCount),
-            DamageType::Lunar);
+        bool                            isCritical = dis(gen) < atCriticalStrike;
+        // 注意计算伤害时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
+        int damage = src->calcDamage(
+            item->attr, self, DamageType::Lunar, isCritical, atCriticalDamagePower, 0, attrib.valueAInt, 0, item->nChannelInterval, 0, item->rawInterval, item->rawCount
+        );
+        src->chDamage.damageList.emplace_back(Event::now(), DamageSource::buff, item->nID, item->nLevel, isCritical, damage, DamageType::Lunar);
         src->bFightState = true;
     } break;
     case enumTabAttribute::atExecuteScript: {
@@ -171,7 +165,7 @@ void AutoRollbackAttrib::handle(CharacterBuff::Item *item, const Buff::Attrib &a
         // 未做相关实现, 推测为免疫击退
         break;
     default:
-        LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->BuffID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)], attrib.valueAInt);
+        LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;
     }
 }

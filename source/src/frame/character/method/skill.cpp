@@ -17,11 +17,11 @@ void Character::skillActive(int skillID) {
         return;
     }
     LOG_INFO("ActiveSkill: {} # {}", skillID, skillLevel);
-    const Skill &skill = SkillManager::get(skillID, skillLevel);
-    RuntimeCastSkill runtime{this, skillID, skillLevel};
+    const Skill           &skill = SkillManager::get(skillID, skillLevel);
+    RuntimeCastSkill       runtime{this, skillID, skillLevel};
     AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, nullptr, &runtime, skill};
     autoRollbackAttributeList.emplace(ptr);
-    this->chSkill.skillActived.emplace(skillID, CharacterSkill::SkillActived{skillLevel, static_cast<void *>(ptr)});
+    this->chSkill.skillActived.emplace(skillID, ChSkill::SkillActived{skillLevel, static_cast<void *>(ptr)});
 }
 
 void Character::skillDeactive(int skillID) {

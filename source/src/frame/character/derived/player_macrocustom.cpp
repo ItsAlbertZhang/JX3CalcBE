@@ -19,50 +19,50 @@ MacroCustom::MacroCustom(const std::filesystem::path &scriptfile) {
 
 static void constructorBefore(MacroCustom *self) {
     self->lua.open_libraries(sol::lib::base);
-    self->lua.new_usertype<CharacterAttr>(
-        "CharacterAttr",
-        "atVitalityBase", &CharacterAttr::atVitalityBase,
-        "atStrengthBase", &CharacterAttr::atStrengthBase,
-        "atAgilityBase", &CharacterAttr::atAgilityBase,
-        "atSpiritBase", &CharacterAttr::atSpiritBase,
-        "atSpunkBase", &CharacterAttr::atSpunkBase,
-        "atPhysicsAttackPowerBase", &CharacterAttr::atPhysicsAttackPowerBase,
-        "atSolarAttackPowerBase", &CharacterAttr::atSolarAttackPowerBase,
-        "atLunarAttackPowerBase", &CharacterAttr::atLunarAttackPowerBase,
-        "atNeutralAttackPowerBase", &CharacterAttr::atNeutralAttackPowerBase,
-        "atPoisonAttackPowerBase", &CharacterAttr::atPoisonAttackPowerBase,
-        "atTherapyPowerBase", &CharacterAttr::atTherapyPowerBase,
-        "atPhysicsCriticalStrike", &CharacterAttr::atPhysicsCriticalStrike,
-        "atSolarCriticalStrike", &CharacterAttr::atSolarCriticalStrike,
-        "atLunarCriticalStrike", &CharacterAttr::atLunarCriticalStrike,
-        "atNeutralCriticalStrike", &CharacterAttr::atNeutralCriticalStrike,
-        "atPoisonCriticalStrike", &CharacterAttr::atPoisonCriticalStrike,
-        "atPhysicsCriticalDamagePowerBase", &CharacterAttr::atPhysicsCriticalDamagePowerBase,
-        "atSolarCriticalDamagePowerBase", &CharacterAttr::atSolarCriticalDamagePowerBase,
-        "atLunarCriticalDamagePowerBase", &CharacterAttr::atLunarCriticalDamagePowerBase,
-        "atNeutralCriticalDamagePowerBase", &CharacterAttr::atNeutralCriticalDamagePowerBase,
-        "atPoisonCriticalDamagePowerBase", &CharacterAttr::atPoisonCriticalDamagePowerBase,
-        "atPhysicsOvercomeBase", &CharacterAttr::atPhysicsOvercomeBase,
-        "atSolarOvercomeBase", &CharacterAttr::atSolarOvercomeBase,
-        "atLunarOvercomeBase", &CharacterAttr::atLunarOvercomeBase,
-        "atNeutralOvercomeBase", &CharacterAttr::atNeutralOvercomeBase,
-        "atPoisonOvercomeBase", &CharacterAttr::atPoisonOvercomeBase,
-        "atSurplusValueBase", &CharacterAttr::atSurplusValueBase,
-        "atStrainBase", &CharacterAttr::atStrainBase,
-        "atHasteBase", &CharacterAttr::atHasteBase,
-        "atPhysicsShieldBase", &CharacterAttr::atPhysicsShieldBase,
-        "atSolarMagicShieldBase", &CharacterAttr::atSolarMagicShieldBase,
-        "atLunarMagicShieldBase", &CharacterAttr::atLunarMagicShieldBase,
-        "atNeutralMagicShieldBase", &CharacterAttr::atNeutralMagicShieldBase,
-        "atPoisonMagicShieldBase", &CharacterAttr::atPoisonMagicShieldBase,
-        "atDodge", &CharacterAttr::atDodge,
-        "atParryBase", &CharacterAttr::atParryBase,
-        "atParryValueBase", &CharacterAttr::atParryValueBase,
-        "atToughnessBase", &CharacterAttr::atToughnessBase,
-        "atDecriticalDamagePowerBase", &CharacterAttr::atDecriticalDamagePowerBase,
-        "atMeleeWeaponDamageBase", &CharacterAttr::atMeleeWeaponDamageBase,
-        "atMeleeWeaponDamageRand", &CharacterAttr::atMeleeWeaponDamageRand
-        // lua.new_usertype<CharacterAttr> end
+    // clang-format off
+    self->lua.new_usertype<ChAttr>(
+        "ChAttr",
+        "atVitalityBase", &ChAttr::atVitalityBase,
+        "atStrengthBase", &ChAttr::atStrengthBase,
+        "atAgilityBase", &ChAttr::atAgilityBase,
+        "atSpiritBase", &ChAttr::atSpiritBase,
+        "atSpunkBase", &ChAttr::atSpunkBase,
+        "atPhysicsAttackPowerBase", &ChAttr::atPhysicsAttackPowerBase,
+        "atSolarAttackPowerBase", &ChAttr::atSolarAttackPowerBase,
+        "atLunarAttackPowerBase", &ChAttr::atLunarAttackPowerBase,
+        "atNeutralAttackPowerBase", &ChAttr::atNeutralAttackPowerBase,
+        "atPoisonAttackPowerBase", &ChAttr::atPoisonAttackPowerBase,
+        "atTherapyPowerBase", &ChAttr::atTherapyPowerBase,
+        "atPhysicsCriticalStrike", &ChAttr::atPhysicsCriticalStrike,
+        "atSolarCriticalStrike", &ChAttr::atSolarCriticalStrike,
+        "atLunarCriticalStrike", &ChAttr::atLunarCriticalStrike,
+        "atNeutralCriticalStrike", &ChAttr::atNeutralCriticalStrike,
+        "atPoisonCriticalStrike", &ChAttr::atPoisonCriticalStrike,
+        "atPhysicsCriticalDamagePowerBase", &ChAttr::atPhysicsCriticalDamagePowerBase,
+        "atSolarCriticalDamagePowerBase", &ChAttr::atSolarCriticalDamagePowerBase,
+        "atLunarCriticalDamagePowerBase", &ChAttr::atLunarCriticalDamagePowerBase,
+        "atNeutralCriticalDamagePowerBase", &ChAttr::atNeutralCriticalDamagePowerBase,
+        "atPoisonCriticalDamagePowerBase", &ChAttr::atPoisonCriticalDamagePowerBase,
+        "atPhysicsOvercomeBase", &ChAttr::atPhysicsOvercomeBase,
+        "atSolarOvercomeBase", &ChAttr::atSolarOvercomeBase,
+        "atLunarOvercomeBase", &ChAttr::atLunarOvercomeBase,
+        "atNeutralOvercomeBase", &ChAttr::atNeutralOvercomeBase,
+        "atPoisonOvercomeBase", &ChAttr::atPoisonOvercomeBase,
+        "atSurplusValueBase", &ChAttr::atSurplusValueBase,
+        "atStrainBase", &ChAttr::atStrainBase,
+        "atHasteBase", &ChAttr::atHasteBase,
+        "atPhysicsShieldBase", &ChAttr::atPhysicsShieldBase,
+        "atSolarMagicShieldBase", &ChAttr::atSolarMagicShieldBase,
+        "atLunarMagicShieldBase", &ChAttr::atLunarMagicShieldBase,
+        "atNeutralMagicShieldBase", &ChAttr::atNeutralMagicShieldBase,
+        "atPoisonMagicShieldBase", &ChAttr::atPoisonMagicShieldBase,
+        "atDodge", &ChAttr::atDodge,
+        "atParryBase", &ChAttr::atParryBase,
+        "atParryValueBase", &ChAttr::atParryValueBase,
+        "atToughnessBase", &ChAttr::atToughnessBase,
+        "atDecriticalDamagePowerBase", &ChAttr::atDecriticalDamagePowerBase,
+        "atMeleeWeaponDamageBase", &ChAttr::atMeleeWeaponDamageBase,
+        "atMeleeWeaponDamageRand", &ChAttr::atMeleeWeaponDamageRand
     );
     self->lua.new_usertype<Player>(
         "Player",
@@ -124,14 +124,14 @@ static void constructorBefore(MacroCustom *self) {
         "delayRand", &Player::delayRand,
         "delayCustom", &Player::delayCustom,
         "macroIdx", &Player::macroIdx
-        // lua.new_usertype<Player> end
     );
+    // clang-format on
 }
 
 static void constructorAfter(MacroCustom *self) {
-    self->attrInit = self->lua["AttrInit"];
+    self->attrInit     = self->lua["AttrInit"];
     self->macroPrepare = self->lua["MacroPrepare"];
-    int macroNum = self->lua["MacroNum"].get<int>();
+    int macroNum       = self->lua["MacroNum"].get<int>();
     for (int i = 0; i < macroNum; i++) {
         self->macroRuntime.push_back(self->lua["Macro" + std::to_string(i)]);
     }

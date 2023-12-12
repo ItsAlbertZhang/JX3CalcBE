@@ -5,9 +5,9 @@
 
 namespace ns_concrete {
 
-class ChNpc124 : public ns_frame::NPC {
+class NPC124 : public ns_frame::NPC {
 public:
-    ChNpc124();
+    NPC124();
 };
 
 } // namespace ns_concrete

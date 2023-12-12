@@ -3,7 +3,7 @@
 
 namespace ns_frame {
 
-class CharacterScene {
+class ChScene {
 public:
     int nType = 0;
 };

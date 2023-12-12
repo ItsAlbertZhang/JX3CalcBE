@@ -12,24 +12,27 @@ class MacroCustom {
 public:
     MacroCustom(const std::string &script);
     MacroCustom(const std::filesystem::path &scriptfile);
-    sol::state lua; // lua 状态机
-    sol::protected_function attrInit;
-    sol::protected_function macroPrepare;
+
+    sol::state                           lua; // lua 状态机
+    sol::protected_function              attrInit;
+    sol::protected_function              macroPrepare;
     std::vector<sol::protected_function> macroRuntime;
 };
 
 class Player : public Character {
 public:
     Player();
-    int publicCooldownID = 0;
-    int delayBase = 0;
-    int delayRand = 0;
-    int delayCustom = 0;
-    int macroIdx = 0;
-    MacroCustom *macroCustom = nullptr;
-    void macroRun();
     virtual void macroPrepareDefault() {}
     virtual void macroRuntimeDefault() {}
+
+    int          publicCooldownID = 0;
+    int          delayBase        = 0;
+    int          delayRand        = 0;
+    int          delayCustom      = 0;
+    int          macroIdx         = 0;
+    MacroCustom *macroCustom      = nullptr;
+
+    void macroRun();
 };
 
 } // namespace ns_frame

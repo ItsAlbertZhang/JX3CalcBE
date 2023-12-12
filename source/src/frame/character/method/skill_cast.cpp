@@ -19,7 +19,7 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
 static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDown &cooldown);
 static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int nCoolDownAdd);
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
-static void callbackDelaySubSkill(void *self, void *item);
+static void        callbackDelaySubSkill(void *self, void *item);
 
 void Character::skillCast4(int skillID, int skillLevel, int type, int targetID) {
     skillCast(characterGet(targetID), skillID, skillLevel);
@@ -186,7 +186,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
 
     // 2.4.1 准备 SkillRecipe (后续的 2.5 步需要用到该资源)
     std::set<const SkillRecipe *> skillrecipeList = this->skillrecipeGet(skillID, skill.RecipeType);
-    std::vector<const Skill *> recipeskillList;
+    std::vector<const Skill *>    recipeskillList;
     for (const auto &it : skillrecipeList) {
         const Skill *ptrSkill = SkillRecipeManager::getSkill(it);
         if (nullptr != ptrSkill) {                  // 如果技能的秘籍存在对应技能
@@ -288,7 +288,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
 static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {
     for (const auto &cond : skill.attrCheckBuff) {
         Character *checkbuffCharacter = nullptr;
-        bool checkbuffSrcOwn = false;
+        bool       checkbuffSrcOwn    = false;
         switch (cond.type) {
         case Skill::SkillCheckBuff::TypeEnum::self:
             checkbuffCharacter = self;
@@ -298,18 +298,18 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
             break;
         case Skill::SkillCheckBuff::TypeEnum::selfOwn:
             checkbuffCharacter = self;
-            checkbuffSrcOwn = true;
+            checkbuffSrcOwn    = true;
             break;
         case Skill::SkillCheckBuff::TypeEnum::destOwn:
             checkbuffCharacter = target;
-            checkbuffSrcOwn = true;
+            checkbuffSrcOwn    = true;
             break;
         }
         if (checkbuffCharacter == nullptr) {
             return false; // 检查 buff 的角色不存在, CastSkill 失败
         }
-        CharacterBuff::Item *buff = nullptr;
-        int nLevelCompareFlag = cond.nLevelCompareFlag;
+        BuffItem *buff              = nullptr;
+        int       nLevelCompareFlag = cond.nLevelCompareFlag;
         if (cond.nLevel == 0 && cond.nLevelCompareFlag == static_cast<int>(ref::enumLuaBuffCompareFlag::EQUAL)) {
             /**
              * @note
@@ -406,17 +406,18 @@ static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDo
 
 static inline void staticTriggerCoolDown(Character *self, int cooldownID, int cooldownAdd) {
     const Cooldown &cooldown = CooldownManager::get(cooldownID);
+    // 计算 CD 时间
     int durationFrame = cooldown.DurationFrame * (1024 - self->chAttr.getHaste()) / 1024;
-    durationFrame = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
-    durationFrame = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
-    durationFrame += cooldownAdd;
+    durationFrame     = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
+    durationFrame     = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
+    durationFrame     = durationFrame + cooldownAdd;
     self->cooldownModify(cooldownID, durationFrame);
 }
 
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent) {
     for (const auto &it : skillevent) {
-        std::random_device rd;
-        std::mt19937 gen(rd());
+        std::random_device              rd;
+        std::mt19937                    gen(rd());
         std::uniform_int_distribution<> dis(0, 1023);
         if (dis(gen) < it->Odds) {
             Character *caster = it->SkillCaster == ref::enumSkilleventCastertarget::EventCaster ? self : self->targetCurr;
@@ -429,7 +430,7 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
 }
 
 static void callbackDelaySubSkill(void *self, void *item) {
-    Character *ptrSelf = static_cast<Character *>(self);
+    Character                  *ptrSelf = static_cast<Character *>(self);
     const Skill::DelaySubSkill *ptrItem = static_cast<const Skill::DelaySubSkill *>(item);
     ptrSelf->skillCast2(ptrItem->skillID, ptrItem->skillLevel);
 }

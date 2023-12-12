@@ -16,19 +16,19 @@ extern const std::vector<std::string> luaFuncStaticToDynamic;
 class LuaGlobalFunction {
 public:
     LuaGlobalFunction() = delete;
-    static void Include(const std::string &filename);
+    static bool                 CheckInTongWar(ns_frame::Character *character);
+    static bool                 IsLangKeXingMap(int mapID);
+    static bool                 IsPlayer(int nCharacterID);
+    static bool                 IsTreasureBattleFieldMap(int mapID);
+    static int                  GetValueByBits(int nValue, int nBit, int c);
+    static int                  SetValueByBits(int nValue, int nBit, int c, int nNewBitValue);
+    static int                  GetDistanceSq(int pX, int pY, int pZ, int tX, int tY, int tZ);
+    static void                 AdditionalAttribute(ns_frame::Skill &skill);
+    static void                 Include(const std::string &filename);
+    static void                 ModityCDToUI(ns_frame::Character *character, int skillID, int c, int d);
+    static void                 RemoteCallToClient();
     static ns_frame::Character *GetPlayer(int nCharacterID);
     static ns_frame::Character *GetNpc(int nCharacterID);
-    static bool IsPlayer(int nCharacterID);
-    static void AdditionalAttribute(ns_frame::Skill &skill);
-    static bool IsLangKeXingMap(int mapID);
-    static void ModityCDToUI(ns_frame::Character *character, int skillID, int c, int d);
-    static bool CheckInTongWar(ns_frame::Character *character);
-    static bool IsTreasureBattleFieldMap(int mapID);
-    static int GetValueByBits(int nValue, int nBit, int c);
-    static int SetValueByBits(int nValue, int nBit, int c, int nNewBitValue);
-    static void RemoteCallToClient();
-    static int GetDistanceSq(int pX, int pY, int pZ, int tX, int tY, int tZ);
 };
 
 } // namespace ns_frame

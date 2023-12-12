@@ -24,27 +24,28 @@ public:
     std::unordered_map<std::string, std::string> tab; // buffs.tab 中的数据
 
     // 初始化时拿出一些数据, 降低使用开销
-    int ID;
-    int Level;
-    bool IsStackable;
-    int MaxStackNum;
-    int Count;
-    int Interval;
-    bool Hide;
-    bool Exclude;
+    int         ID;
+    int         Level;
+    bool        IsStackable;
+    int         MaxStackNum;
+    int         Count;
+    int         Interval;
+    bool        Hide;
+    bool        Exclude;
     std::string ScriptFile;
-    bool CanCancel;
-    int MinInterval;
-    int MaxInterval;
+    bool        CanCancel;
+    int         MinInterval;
+    int         MaxInterval;
 
     class Attrib {
     public:
-        Attrib(ref::enumTabAttribute type, const std::string &valueA, const std::string &valueB) : type(type), valueAStr(valueA), valueBStr(valueB) {}
-        ref::enumTabAttribute type = ref::enumTabAttribute::COUNT;
-        std::string valueAStr = "";
-        std::string valueBStr = "";
-        int valueAInt = 0;
-        int valueBInt = 0;
+        Attrib(ref::enumTabAttribute type, const std::string &valueA, const std::string &valueB)
+            : type(type), valueAStr(valueA), valueBStr(valueB) {}
+        ref::enumTabAttribute type      = ref::enumTabAttribute::COUNT;
+        std::string           valueAStr = "";
+        std::string           valueBStr = "";
+        int                   valueAInt = 0;
+        int                   valueBInt = 0;
     };
     std::vector<Attrib> BeginAttrib;
     std::vector<Attrib> ActiveAttrib;

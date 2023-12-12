@@ -42,17 +42,17 @@ void UISkillManager::add(int skillID, int skillLevel) {
 
     // 初始化 skill
     UISkill skill;
-    skill.ID = skillID;
+    skill.ID    = skillID;
     skill.Level = skillLevel;
     // 获取 tab
     gdi::select_t arg;
     arg.emplace_back();
     /* Precise select first */
     arg[0]["SkillID"] = std::to_string(skillID);
-    arg[0]["Level"] = std::to_string(skillLevel);
+    arg[0]["Level"]   = std::to_string(skillLevel);
     arg.emplace_back();
     arg[1]["SkillID"] = std::to_string(skillID);
-    arg[1]["Level"] = "0";
+    arg[1]["Level"]   = "0";
     gdi::tabSelect(gdi::Tab::ui_skill, arg);
     // if (arg.size() == 0) {
     //     /* FIXME: Replace this after proper implementation of damage source */

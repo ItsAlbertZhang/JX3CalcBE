@@ -24,18 +24,28 @@ enum class DamageSource {
 
 class Damage {
 public:
-    Damage(event_tick_t tick, DamageSource source, int id, int level, bool isCritical, int damage, DamageType damageType)
-        : tick(tick), source(source), id(id), level(level), isCritical(isCritical), damage(damage), damageType(damageType) {}
+    Damage(
+        event_tick_t tick,
+        DamageSource source,
+        int          id,
+        int          level,
+        bool         isCritical,
+        int          damage,
+        DamageType   damageType
+    )
+        : tick(tick), source(source), id(id), level(level),
+          isCritical(isCritical), damage(damage), damageType(damageType) {}
+
     event_tick_t tick;
     DamageSource source;
-    int id;
-    int level;
-    bool isCritical;
-    int damage;
-    DamageType damageType;
+    int          id;
+    int          level;
+    bool         isCritical;
+    int          damage;
+    DamageType   damageType;
 };
 
-class CharacterDamage {
+class ChDamage {
 public:
     std::vector<Damage> damageList;
 };

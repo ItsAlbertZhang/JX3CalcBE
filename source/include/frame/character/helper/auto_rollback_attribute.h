@@ -18,22 +18,24 @@ class RuntimeCastSkill;
 class AutoRollbackAttribute {
 public:
     AutoRollbackAttribute(Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill);
-    AutoRollbackAttribute(const AutoRollbackAttribute &) = delete;
+    AutoRollbackAttribute(const AutoRollbackAttribute &)            = delete;
     AutoRollbackAttribute &operator=(const AutoRollbackAttribute &) = delete;
-    AutoRollbackAttribute(AutoRollbackAttribute &&) = delete;
-    AutoRollbackAttribute &operator=(AutoRollbackAttribute &&) = delete;
+    AutoRollbackAttribute(AutoRollbackAttribute &&)                 = delete;
+    AutoRollbackAttribute &operator=(AutoRollbackAttribute &&)      = delete;
     ~AutoRollbackAttribute();
+
     bool CallDamage(int DamageAddPercent);
 
 private:
-    Character *self;
-    Character *target;
+    Character        *self;
+    Character        *target;
     RuntimeCastSkill *runtime;
-    const Skill &skill;
-    int atDamage[static_cast<int>(DamageType::COUNT)] = {0};
-    int atDamageRand[static_cast<int>(DamageType::COUNT)] = {0};
-    int atGlobalDamageFactor = 0; // 破招系数
-    int callDamage[static_cast<int>(DamageType::COUNT)] = {0};
+    const Skill      &skill;
+
+    int atDamage[static_cast<int>(DamageType::COUNT)]          = {0};
+    int atDamageRand[static_cast<int>(DamageType::COUNT)]      = {0};
+    int atGlobalDamageFactor                                   = 0; // 破招系数
+    int callDamage[static_cast<int>(DamageType::COUNT)]        = {0};
     int callSurplusDamage[static_cast<int>(DamageType::COUNT)] = {0};
 
     void handle(bool isRollback);

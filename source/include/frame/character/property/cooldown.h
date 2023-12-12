@@ -7,14 +7,14 @@ namespace ns_frame {
 
 using event_tick_t = unsigned long long;
 
-class CharacterCooldown {
+class ChCooldown {
 public:
     /**
      * @brief 单个 Cooldown
      */
     class Item {
     public:
-        bool isValid = false;
+        bool         isValid  = false;
         event_tick_t tickOver = 0; // 结束 tick
     };
 

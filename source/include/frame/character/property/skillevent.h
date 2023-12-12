@@ -9,7 +9,7 @@ namespace ns_frame {
 
 class SkillEvent;
 
-class CharacterSkillEvent {
+class ChSkillEvent {
 public:
     // 下列方法均已在 Character 类中实现.
     // void add(int ID);
@@ -18,10 +18,11 @@ public:
 
     class ItemType {
     public:
-        std::unordered_map<int, std::set<const SkillEvent *>> EventSkillID; // 用于快速查找指定 SkillID 的 SkillEvent
-        std::set<const SkillEvent *> EventMask1[32];                        // 用于快速查找指定 EventMask1 的 SkillEvent
-        std::set<const SkillEvent *> EventMask2[32];                        // 用于快速查找指定 EventMask2 的 SkillEvent
+        std::unordered_map<int, std::set<const SkillEvent *>> EventSkillID;   // 用于快速查找指定 SkillID 的 SkillEvent
+        std::set<const SkillEvent *>                          EventMask1[32]; // 用于快速查找指定 EventMask1 的 SkillEvent
+        std::set<const SkillEvent *>                          EventMask2[32]; // 用于快速查找指定 EventMask2 的 SkillEvent
     };
+
     ItemType data[static_cast<int>(ref::enumSkilleventEventtype::COUNT)];
 };
 

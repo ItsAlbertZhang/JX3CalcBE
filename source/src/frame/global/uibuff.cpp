@@ -43,7 +43,7 @@ void UIBuffManager::add(int buffID, int buffLevel) {
 
     // 初始化 buff
     UIBuff buff;
-    buff.ID = buffID;
+    buff.ID    = buffID;
     buff.Level = buffLevel;
 
     // 获取 tab
@@ -51,10 +51,10 @@ void UIBuffManager::add(int buffID, int buffLevel) {
     arg.emplace_back();
     /* Precise select first */
     arg[0]["BuffID"] = std::to_string(buffID);
-    arg[0]["Level"] = std::to_string(buffLevel);
+    arg[0]["Level"]  = std::to_string(buffLevel);
     arg.emplace_back();
     arg[1]["BuffID"] = std::to_string(buffID);
-    arg[1]["Level"] = "0";
+    arg[1]["Level"]  = "0";
     gdi::tabSelect(gdi::Tab::ui_buff, arg);
     buff.tab = std::move(arg[0]);
 

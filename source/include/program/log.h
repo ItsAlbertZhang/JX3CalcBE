@@ -10,11 +10,14 @@ namespace ns_program {
 
 class Log {
 public:
-    Log(const std::string &name) : name(name) {}
+    Log(const std::string &name)
+        : name(name) {}
+
     std::string name;
     std::string data;
-    bool record = false;
-    bool realtime = false;
+    bool        record   = false;
+    bool        realtime = false;
+
     void print() {
         std::cout << data << std::endl;
         data.clear();

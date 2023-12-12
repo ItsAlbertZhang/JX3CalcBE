@@ -6,11 +6,11 @@
 
 using namespace ns_frame;
 
-static void staticDelBuff(Character *self, CharacterBuff::Item *it);
+static void staticDelBuff(Character *self, BuffItem *it);
 
 static void callbackActiveBuff(void *selfPtr, void *param) {
     Character *self = (Character *)selfPtr;
-    CharacterBuff::Item *it = (CharacterBuff::Item *)param;
+    BuffItem  *it   = (BuffItem *)param;
     static_cast<AutoRollbackAttrib *>(it->ptrAttrib)->active(); // ActivateAttrib
     (it->nLeftActiveCount)--;
     if (it->nLeftActiveCount <= 0) {
@@ -23,7 +23,7 @@ static void callbackActiveBuff(void *selfPtr, void *param) {
     }
 }
 
-static void staticDelBuff(Character *self, CharacterBuff::Item *it) {
+static void staticDelBuff(Character *self, BuffItem *it) {
     it->isValid = false;
     delete static_cast<AutoRollbackAttrib *>(it->ptrAttrib); // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
     self->autoRollbackAttribList.erase(static_cast<AutoRollbackAttrib *>(it->ptrAttrib));
@@ -38,24 +38,25 @@ void Character::buffAdd5(int buffSourceID, int buffSourceLevel, int buffID, int 
     buffAdd7(buffSourceID, buffSourceLevel, buffID, buffLevel, count, 0, 1);
 }
 void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum) {
-    bool newBuff = false;
-    const Buff &buff = BuffManager::get(buffID, buffLevel);
+    bool        newBuff = false;
+    const Buff &buff    = BuffManager::get(buffID, buffLevel);
     if (this->chBuff.buffMap[buffSourceID][buffID].find(buffLevel) == this->chBuff.buffMap[buffSourceID][buffID].end()) {
         // 对于 buffSourceID 和 buffID, 直接使用 [] 运算符, 没有则直接创建.
         this->chBuff.buffMap[buffSourceID][buffID].emplace(
             std::piecewise_construct,
             std::forward_as_tuple(buffLevel),
-            std::forward_as_tuple(this->dwID, buffSourceID, buffID, buffLevel, static_cast<int>(this->chBuff.buffList.size()), buff.Interval, buff.Count));
+            std::forward_as_tuple(this->dwID, buffSourceID, buffID, buffLevel, static_cast<int>(this->chBuff.buffList.size()), buff.Interval, buff.Count)
+        );
         // 原地插入. 通过这种方式插入的 key 和 value, 不是构造后移动至容器, 而是直接在容器内构造. 这可以避免 Item 的 const 属性出现问题.
         newBuff = true;
     }
-    CharacterBuff::Item &it = this->chBuff.buffMap[buffSourceID][buffID].at(buffLevel);
+    BuffItem &it = this->chBuff.buffMap[buffSourceID][buffID].at(buffLevel);
     if (newBuff)
         this->chBuff.buffList.emplace_back(&it);
     if (!it.isValid) {
         // 当前不存在 buff
-        it.isValid = true;
-        it.attr = characterGet(buffSourceID)->chAttr;           // 调用复制构造函数, 锁面板
+        it.isValid   = true;
+        it.attr      = characterGet(buffSourceID)->chAttr;      // 调用复制构造函数, 锁面板
         it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
         this->autoRollbackAttribList.emplace(static_cast<AutoRollbackAttrib *>(it.ptrAttrib));
         it.nLeftActiveCount = buff.Count * count;
@@ -69,8 +70,8 @@ void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int 
         it.nStackNum = stacknum; // 将层数设置为 1
     } else {
         // 当前存在该 buff
-        it.attr = characterGet(buffSourceID)->chAttr; // 锁面板
-        it.nLeftActiveCount = buff.Count * count;     // 重置计数
+        it.attr             = characterGet(buffSourceID)->chAttr; // 锁面板
+        it.nLeftActiveCount = buff.Count * count;                 // 重置计数
         // 重新计算 interval
         it.interval = buff.Interval * (1024 - it.attr.getHaste()) / 1024;
         it.interval = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
@@ -88,7 +89,7 @@ void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int 
 }
 
 void Character::buffDel(int buffID, int buffLevel) {
-    CharacterBuff::Item *ptr = buffGet(buffID, buffLevel);
+    BuffItem *ptr = buffGet(buffID, buffLevel);
     // 返回的一定是 isValie == true 的 Item.
     if (nullptr != ptr) {
         if (ptr->nStackNum > 1) {
@@ -102,7 +103,7 @@ void Character::buffDel(int buffID, int buffLevel) {
 }
 
 void Character::buffDelGroup(int buffID, int buffLevel) {
-    CharacterBuff::Item *ptr = buffGet(buffID, buffLevel);
+    BuffItem *ptr = buffGet(buffID, buffLevel);
     // 返回的一定是 isValie == true 的 Item.
     if (nullptr != ptr) {
         staticDelBuff(this, ptr);
@@ -110,7 +111,7 @@ void Character::buffDelGroup(int buffID, int buffLevel) {
 }
 
 void Character::buffDelMultiGroupByID(int buffID) {
-    CharacterBuff::Item *ptr = buffGet(buffID, 0);
+    BuffItem *ptr = buffGet(buffID, 0);
     while (nullptr != ptr) {
         staticDelBuff(this, ptr);
         ptr = buffGet(buffID, 0);
@@ -119,24 +120,24 @@ void Character::buffDelMultiGroupByID(int buffID) {
 
 void Character::buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel) {
     const Skill &skill = SkillManager::get(skillID, skillLevel);
-    const Buff &buff = BuffManager::get(buffID, buffLevel);
+    const Buff  &buff  = BuffManager::get(buffID, buffLevel);
     this->buffAdd4(buffSourceID, buffSourceLevel, buffID, buffLevel);
-    CharacterBuff::Item &it = this->chBuff.buffMap[buffSourceID][buffID].at(buffLevel);
-    it.dwCasterSkillID = skillID;
+    BuffItem &it          = this->chBuff.buffMap[buffSourceID][buffID].at(buffLevel);
+    it.dwCasterSkillID    = skillID;
     it.dwCasterSkillLevel = skillLevel;
-    it.nChannelInterval = static_cast<int>(skill.nChannelInterval);
+    it.nChannelInterval   = static_cast<int>(skill.nChannelInterval);
 }
 
 bool Character::buffExist(int buffID, int buffLevel) {
     return nullptr != buffGet(buffID, buffLevel);
 }
 
-void Character::buffFlushLeftFrame(CharacterBuff::Item *item) {
-    item->nLeftFrame = item->interval * item->nLeftActiveCount + static_cast<int>(item->tickActive - Event::now() + 63) / 64;
+void Character::buffFlushLeftFrame(BuffItem *item) {
+    item->nLeftFrame       = item->interval * item->nLeftActiveCount + static_cast<int>(item->tickActive - Event::now() + 63) / 64;
     item->nNextActiveFrame = static_cast<int>(item->tickActive - Event::now() + 63) / 64;
 }
 
-CharacterBuff::Item *Character::buffGetWithCompareFlag(int buffID, int buffLevel, int flag) {
+BuffItem *Character::buffGetWithCompareFlag(int buffID, int buffLevel, int flag) {
     for (auto &list : this->chBuff.buffMap) { // 遍历 sourceID
         if (list.second.find(buffID) == list.second.end()) {
             continue; // 找不到有效的 buffID, 继续遍历 sourceID
@@ -166,7 +167,7 @@ CharacterBuff::Item *Character::buffGetWithCompareFlag(int buffID, int buffLevel
     return nullptr;
 }
 
-CharacterBuff::Item *Character::buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag) {
+BuffItem *Character::buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag) {
     if (this->chBuff.buffMap.find(sourceID) == this->chBuff.buffMap.end()) {
         return nullptr; // 找不到有效的 sourceID
     }
@@ -199,8 +200,8 @@ CharacterBuff::Item *Character::buffGetByOwnerWithCompareFlag(int buffID, int bu
     return nullptr;
 }
 
-CharacterBuff::Item *Character::buffGet(int buffID, int buffLevel) {
-    CharacterBuff::Item *ret = nullptr;
+BuffItem *Character::buffGet(int buffID, int buffLevel) {
+    BuffItem *ret = nullptr;
     if (0 == buffLevel) {
         ret = buffGetWithCompareFlag(buffID, buffLevel + 1, static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER_EQUAL));
     } else {
@@ -212,8 +213,8 @@ CharacterBuff::Item *Character::buffGet(int buffID, int buffLevel) {
     return ret;
 }
 
-CharacterBuff::Item *Character::buffGetByOwner(int buffID, int buffLevel, int sourceID) {
-    CharacterBuff::Item *ret = nullptr;
+BuffItem *Character::buffGetByOwner(int buffID, int buffLevel, int sourceID) {
+    BuffItem *ret = nullptr;
     if (0 == buffLevel) {
         ret = buffGetByOwnerWithCompareFlag(buffID, buffLevel + 1, sourceID, static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER_EQUAL));
     } else {
@@ -229,14 +230,14 @@ void Character::buffSetLeftActiveCount(int buffIndex, int count) {
     if (buffIndex < 0 || buffIndex >= this->chBuff.buffList.size()) {
         return;
     }
-    CharacterBuff::Item *buff = this->chBuff.buffList.at(buffIndex);
+    BuffItem *buff         = this->chBuff.buffList.at(buffIndex);
     buff->nLeftActiveCount = count;
 }
 void Character::buffSetNextActiveFrame(int buffIndex, int nextActiveFrame) {
     if (buffIndex < 0 || buffIndex >= this->chBuff.buffList.size()) {
         return;
     }
-    CharacterBuff::Item *buff = this->chBuff.buffList.at(buffIndex);
+    BuffItem *buff = this->chBuff.buffList.at(buffIndex);
     Event::cancel(buff->tickActive, callbackActiveBuff, this, buff);
     buff->tickActive = Event::add(nextActiveFrame * 1024 / 16, callbackActiveBuff, this, buff);
 }

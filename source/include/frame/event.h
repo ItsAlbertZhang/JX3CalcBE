@@ -57,11 +57,11 @@ private:
     public:
         EventItem(event_tick_t tick, event_func_t func, void *self, void *param)
             : tick(tick), func(func), self(self), param(param) {}
-        event_tick_t tick; // 生效时间
-        event_func_t func; // 回调函数
-        void *self;        // 回调函数的第一个参数
-        void *param;       // 回调函数的第二个参数
-        bool operator<(const EventItem &other) const {
+        event_tick_t tick;  // 生效时间
+        event_func_t func;  // 回调函数
+        void        *self;  // 回调函数的第一个参数
+        void        *param; // 回调函数的第二个参数
+        bool         operator<(const EventItem &other) const {
             return std::tie(tick, func, self, param) < std::tie(other.tick, other.func, other.self, other.param);
         }
     };

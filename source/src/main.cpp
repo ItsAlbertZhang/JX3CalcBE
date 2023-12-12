@@ -27,36 +27,42 @@ int main(int argc, char *argv[]) {
     // 初始化程序
     ns_program::Init::init(argc, argv);
     // 初始化接口
-    ret = gdi::init(ns_program::Config::pJX3, ns_program::Config::pUnpack, ns_frame::luaInit, ns_frame::luaFuncStaticToDynamic, static_cast<int>(gdi::Tab::COUNT));
+    ret = gdi::init(
+        ns_program::Config::pJX3,
+        ns_program::Config::pUnpack,
+        ns_frame::luaInit,
+        ns_frame::luaFuncStaticToDynamic,
+        static_cast<int>(gdi::Tab::COUNT)
+    );
     if (!ret)
         return 0;
 
 #ifdef DEBUG
-    ns_program::log_info.record = true;
+    ns_program::log_info.record    = true;
     ns_program::log_error.realtime = true;
 #endif
 
-    std::filesystem::path pAPI = ns_program::Config::pExeDir / "api.lua";
-    std::filesystem::path pRES = ns_program::Config::pExeDir / "res.txt";
-    ns_frame::MacroCustom macroCustom(pAPI);
-    bool useCustomMacro = macroCustom.lua["UseCustomMacro"].get<bool>();
-    ns_frame::MacroCustom *ptr = useCustomMacro ? &macroCustom : nullptr;
-    int fighttime = macroCustom.lua["FightTime"].get<int>();
+    std::filesystem::path  pAPI = ns_program::Config::pExeDir / "api.lua";
+    std::filesystem::path  pRES = ns_program::Config::pExeDir / "res.txt";
+    ns_frame::MacroCustom  macroCustom(pAPI);
+    bool                   useCustomMacro = macroCustom.lua["UseCustomMacro"].get<bool>();
+    ns_frame::MacroCustom *ptr            = useCustomMacro ? &macroCustom : nullptr;
+    int                    fighttime      = macroCustom.lua["FightTime"].get<int>();
     if (fighttime <= 0)
         fighttime = 300;
     int fightcount = macroCustom.lua["FightCount"].get<int>();
     if (fightcount <= 0)
         fightcount = 100;
 
-    ns_concrete::ChPlyMjFysj fysj;
-    ns_concrete::ChNpc124 npc124;
-    ns_frame::Player &player = fysj;
-    ns_frame::NPC &npc = npc124;
-    player.targetSelect = &npc;
-    player.macroCustom = ptr;
+    ns_concrete::MjFysj fysj;
+    ns_concrete::NPC124 npc124;
+    ns_frame::Player   &player = fysj;
+    ns_frame::NPC      &npc    = npc124;
+    player.targetSelect        = &npc;
+    player.macroCustom         = ptr;
     macroCustom.attrInit(player);
-    ns_frame::CharacterAttr attrBackup = player.attrExport();
-    auto start = std::chrono::steady_clock::now();
+    ns_frame::ChAttr attrBackup = player.attrExport();
+    auto             start      = std::chrono::steady_clock::now();
     player.macroRun();
     while (ns_frame::Event::now() < 1024 * fighttime) {
         ret = ns_frame::Event::run();
@@ -71,12 +77,12 @@ int main(int argc, char *argv[]) {
             ns_program::log_info.print();
         }
     }
-    ns_program::log_info.record = false;
+    ns_program::log_info.record    = false;
     ns_program::log_error.realtime = false;
 #endif
 
     unsigned long long totalDamage = 0;
-    std::ofstream ofs(pRES);
+    std::ofstream      ofs(pRES);
     ofs << "tick\tID\tlv\tcri\tdmg\ttype\tname\n";
     ns_frame::event_tick_t presentCurr = 0;
     for (auto &it : player.chDamage.damageList) {
@@ -84,11 +90,11 @@ int main(int argc, char *argv[]) {
         switch (it.source) {
         case ns_frame::DamageSource::skill: {
             const ns_frame::UISkill &skill = ns_frame::UISkillManager::get(it.id, it.level);
-            name = skill.Name;
+            name                           = skill.Name;
         } break;
         case ns_frame::DamageSource::buff: {
             const ns_frame::UIBuff &buff = ns_frame::UIBuffManager::get(it.id, it.level);
-            name = buff.Name;
+            name                         = buff.Name;
         } break;
         }
         if (it.tick != presentCurr) {
@@ -103,16 +109,16 @@ int main(int argc, char *argv[]) {
     }
     ofs.close();
 
-    unsigned long long damageAvg = 0;
-    std::chrono::milliseconds timeAvg = std::chrono::milliseconds(0);
+    unsigned long long        damageAvg = 0;
+    std::chrono::milliseconds timeAvg   = std::chrono::milliseconds(0);
     for (int i = 0; i < fightcount; i++) {
-        auto start = std::chrono::steady_clock::now();
-        ns_concrete::ChPlyMjFysj fysj;
-        ns_concrete::ChNpc124 npc124;
-        ns_frame::Player &player = fysj;
-        ns_frame::NPC &npc = npc124;
-        player.targetSelect = &npc;
-        player.macroCustom = ptr;
+        auto                start = std::chrono::steady_clock::now();
+        ns_concrete::MjFysj fysj;
+        ns_concrete::NPC124 npc124;
+        ns_frame::Player   &player = fysj;
+        ns_frame::NPC      &npc    = npc124;
+        player.targetSelect        = &npc;
+        player.macroCustom         = ptr;
         player.attrImportFromBackup(attrBackup);
         ns_frame::Event::clear();
         player.macroRun();

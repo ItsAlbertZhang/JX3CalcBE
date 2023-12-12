@@ -2,12 +2,12 @@
 
 using namespace ns_concrete;
 
-ChPlyMjFysj::ChPlyMjFysj() {
+MjFysj::MjFysj() {
     delayBase = 45; // 网络延迟, 单位为 tick
     delayRand = 20; // 按键延迟, 单位为 tick
 
     skillLearn(10242, 13); // 焚影圣诀
-    dwKungfuID = 10242;
+    dwKungfuID       = 10242;
     publicCooldownID = 503; // GCD
     skillActive(10242);     // 激活心法加成
 
@@ -87,7 +87,7 @@ ChPlyMjFysj::ChPlyMjFysj() {
     skillrecipeAdd(1053, 1); // 驱夜断愁, 伤害提高5%
 }
 
-void ChPlyMjFysj::macroPrepareDefault() {
+void MjFysj::macroPrepareDefault() {
     cast(3974);
     if (nSunPowerValue == 0 && nMoonPowerValue == 0) {
         if (nCurrentMoonEnergy >= 10000)
@@ -97,7 +97,7 @@ void ChPlyMjFysj::macroPrepareDefault() {
     }
 }
 
-void ChPlyMjFysj::macroRuntimeDefault() {
+void MjFysj::macroRuntimeDefault() {
     switch (macroIdx) {
     case 0:
         macroDefault0();
@@ -111,7 +111,7 @@ void ChPlyMjFysj::macroRuntimeDefault() {
     }
 }
 
-void ChPlyMjFysj::macroDefault0() {
+void MjFysj::macroDefault0() {
     if (nCurrentMoonEnergy >= 10000 || nCurrentMoonEnergy <= 2000)
         cast(3967); // 净世破魔击
     cast(3979);     // 驱夜断愁
@@ -127,7 +127,7 @@ void ChPlyMjFysj::macroDefault0() {
     }
 }
 
-void ChPlyMjFysj::macroDefault1() {
+void MjFysj::macroDefault1() {
     if (nCurrentSunEnergy >= 10000 && nCurrentMoonEnergy >= 10000) {
         macroIdx = 2;    // 切换至 2 号宏
         macroDefault2(); // 执行一次 2 号宏
@@ -154,7 +154,7 @@ void ChPlyMjFysj::macroDefault1() {
     }
 }
 
-void ChPlyMjFysj::macroDefault2() {
+void MjFysj::macroDefault2() {
     if (nCurrentMoonEnergy >= 6000)
         cast(22890); // 诛邪镇魔
     if (nCurrentSunEnergy >= 10000)

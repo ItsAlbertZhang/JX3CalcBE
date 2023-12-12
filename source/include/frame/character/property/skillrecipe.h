@@ -8,7 +8,7 @@ namespace ns_frame {
 
 class SkillRecipe;
 
-class CharacterSkillRecipe {
+class ChSkillRecipe {
 public:
     // 下列方法均已在 Character 类中实现.
     // void add(int RecipeID, int RecipeLevel);                                 // 添加秘籍

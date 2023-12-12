@@ -24,24 +24,24 @@ public:
     std::unordered_map<std::string, std::string> tab; // skills.tab 中的数据
 
     ref::enumSkillKindtype KindType;
-    bool HasCriticalStrike;
-    uint32_t SkillEventMask1;
-    uint32_t SkillEventMask2;
-    bool NeedOutOfFight;
-    bool TargetTypePlayer;
-    bool TargetTypeNpc;
-    bool TargetRelationNone;
-    bool TargetRelationSelf;
-    bool TargetRelationEnemy;
-    int RecipeType;
-    int SunSubsectionSkillID;
-    int SunSubsectionSkillLevel;
-    int MoonSubsectionSkillID;
-    int MoonSubsectionSkillLevel;
+    bool                   HasCriticalStrike;
+    uint32_t               SkillEventMask1;
+    uint32_t               SkillEventMask2;
+    bool                   NeedOutOfFight;
+    bool                   TargetTypePlayer;
+    bool                   TargetTypeNpc;
+    bool                   TargetRelationNone;
+    bool                   TargetRelationSelf;
+    bool                   TargetRelationEnemy;
+    int                    RecipeType;
+    int                    SunSubsectionSkillID;
+    int                    SunSubsectionSkillLevel;
+    int                    MoonSubsectionSkillID;
+    int                    MoonSubsectionSkillLevel;
 
     // ---------- 技能等级 ----------
     int dwSkillID = -1;
-    int dwLevel = 1;
+    int dwLevel   = 1;
 
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性类 ----------
     class SkillAttribute {
@@ -52,11 +52,11 @@ public:
             : mode(mode), type(type), param1Str(param1Str), param2(param2) {}
         SkillAttribute(int mode, int type, double param1Double, int param2)
             : mode(mode), type(type), param1Int(static_cast<int>(param1Double)), param2(param2) {}
-        int mode = -1;
-        int type = -1;
-        int param1Int = -1;
+        int         mode      = -1;
+        int         type      = -1;
+        int         param1Int = -1;
         std::string param1Str;
-        int param2 = -1;
+        int         param2 = -1;
     };
 
     class SkillCheckBuff {
@@ -70,11 +70,11 @@ public:
         SkillCheckBuff(TypeEnum type, int dwBuffID, int nStackNum, int nStackNumCompareFlag, int nLevel, int nLevelCompareFlag)
             : type(type), dwBuffID(dwBuffID), nStackNum(nStackNum), nStackNumCompareFlag(nStackNumCompareFlag), nLevel(nLevel), nLevelCompareFlag(nLevelCompareFlag) {}
         TypeEnum type;
-        int dwBuffID;
-        int nStackNum;
-        int nStackNumCompareFlag;
-        int nLevel;
-        int nLevelCompareFlag;
+        int      dwBuffID;
+        int      nStackNum;
+        int      nStackNumCompareFlag;
+        int      nLevel;
+        int      nLevelCompareFlag;
     };
 
     class SkillCheckSelfLearntSkill {
@@ -88,16 +88,16 @@ public:
 
     class SkillBindBuff {
     public:
-        bool used = false;
-        bool isValid[4] = {false, false, false, false};
-        int nBuffID[4] = {0, 0, 0, 0};
-        int nBuffLevel[4] = {0, 0, 0, 0};
+        bool used          = false;
+        bool isValid[4]    = {false, false, false, false};
+        int  nBuffID[4]    = {0, 0, 0, 0};
+        int  nBuffLevel[4] = {0, 0, 0, 0};
         void overload(const SkillBindBuff &other) {
             if (other.used) {
                 for (int i = 0; i < 4; ++i) {
                     if (other.isValid[i]) {
-                        isValid[i] = true;
-                        nBuffID[i] = other.nBuffID[i];
+                        isValid[i]    = true;
+                        nBuffID[i]    = other.nBuffID[i];
                         nBuffLevel[i] = other.nBuffLevel[i];
                     }
                 }
@@ -107,28 +107,28 @@ public:
 
     class SkillCoolDown {
     public:
-        bool used = false;
-        bool isValidPublicCoolDown = false;
-        int nPublicCoolDown = 0;
+        bool used                     = false;
+        bool isValidPublicCoolDown    = false;
+        int  nPublicCoolDown          = 0;
         bool isValidNormalCoolDown[3] = {false, false, false};
-        int nNormalCoolDownID[3] = {0, 0, 0};
-        int nNormalCoolDownAdd[3] = {0, 0, 0};
-        bool isValidCheckCoolDown[3] = {false, false, false};
-        int nCheckCoolDownID[3] = {0, 0, 0};
+        int  nNormalCoolDownID[3]     = {0, 0, 0};
+        int  nNormalCoolDownAdd[3]    = {0, 0, 0};
+        bool isValidCheckCoolDown[3]  = {false, false, false};
+        int  nCheckCoolDownID[3]      = {0, 0, 0};
         void overload(const SkillCoolDown &other) {
             if (other.used) {
                 if (other.isValidPublicCoolDown) {
                     isValidPublicCoolDown = true;
-                    nPublicCoolDown = other.nPublicCoolDown;
+                    nPublicCoolDown       = other.nPublicCoolDown;
                 }
                 for (int i = 0; i < 3; ++i) {
                     if (other.isValidNormalCoolDown[i]) {
                         isValidNormalCoolDown[i] = true;
-                        nNormalCoolDownID[i] = other.nNormalCoolDownID[i];
+                        nNormalCoolDownID[i]     = other.nNormalCoolDownID[i];
                     }
                     if (other.isValidCheckCoolDown[i]) {
                         isValidCheckCoolDown[i] = true;
-                        nCheckCoolDownID[i] = other.nCheckCoolDownID[i];
+                        nCheckCoolDownID[i]     = other.nCheckCoolDownID[i];
                     }
                 }
             }
@@ -144,19 +144,19 @@ public:
     public:
         DelaySubSkill(int delay, int skillID, int skillLevel)
             : delay(delay), skillID(skillID), skillLevel(skillLevel) {}
-        int delay = 0;
-        int skillID = 0;
+        int delay      = 0;
+        int skillID    = 0;
         int skillLevel = 0;
     };
 
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性 ----------
 
-    std::vector<SkillAttribute> attrAttributes;                      // AddAttribute 添加的属性列表
-    std::vector<SkillCheckBuff> attrCheckBuff;                       // 需要检查的 buff
+    std::vector<SkillAttribute>            attrAttributes;           // AddAttribute 添加的属性列表
+    std::vector<SkillCheckBuff>            attrCheckBuff;            // 需要检查的 buff
     std::vector<SkillCheckSelfLearntSkill> attrCheckSelfLearntSkill; // 需要检查的自身技能
-    SkillBindBuff attrBindBuff;                                      // 需要绑定的 buff
-    SkillCoolDown attrCoolDown;                                      // 需要绑定的 CD
-    std::vector<DelaySubSkill> attrDelaySubSkill;                    // 需要延迟的子技能
+    SkillBindBuff                          attrBindBuff;             // 需要绑定的 buff
+    SkillCoolDown                          attrCoolDown;             // 需要绑定的 CD
+    std::vector<DelaySubSkill>             attrDelaySubSkill;        // 需要延迟的子技能
 
     // ---------- GetSkillLevelData 中操作的属性 ----------
     void SetDelaySubSkill(int a, int b, int c);
@@ -181,19 +181,19 @@ public:
     void SetCheckCoolDown(int a, int b);  // 后跳公共CD
 
     // 经验升级相关
-    int dwLevelUpExp = 0;      // 升级经验
-    int nExpAddOdds = 1024;    // 技能熟练度增长概率
-    int nPlayerLevelLimit = 0; // 角色可以学会该技能所必须达到的最低等级
+    int dwLevelUpExp      = 0;    // 升级经验
+    int nExpAddOdds       = 1024; // 技能熟练度增长概率
+    int nPlayerLevelLimit = 0;    // 角色可以学会该技能所必须达到的最低等级
 
     // 技能仇恨
     int nBaseThreat = 0;
 
     // 技能消耗
-    int nCostLife = 0;        // 技能消耗生命值
-    int nCostMana = 0;        // 技能消耗的内力
-    int nCostStamina = 0;     // 技能消耗的体力
-    int nCostItemType = 0;    // 技能消耗的物品类型
-    int nCostItemIndex = 0;   // 技能消耗的物品索引ID
+    int nCostLife        = 0; // 技能消耗生命值
+    int nCostMana        = 0; // 技能消耗的内力
+    int nCostStamina     = 0; // 技能消耗的体力
+    int nCostItemType    = 0; // 技能消耗的物品类型
+    int nCostItemIndex   = 0; // 技能消耗的物品索引ID
     int nCostSprintPower = 0; // 技能消耗气力值
 
     // 聚气相关
@@ -201,36 +201,36 @@ public:
 
     // 链状技能相关
     void SetSubsectionSkill(int a, int b, int c, int d);
-    int nChainBranch = 0; // 链状技能分支数
-    int nChainDepth = 0;  // 链状技能层数
+    int  nChainBranch = 0; // 链状技能分支数
+    int  nChainDepth  = 0; // 链状技能层数
 
     // 施放距离
     int nMinRadius = 0; // 技能施放的最小距离
     int nMaxRadius = 0; // 技能施放的最大距离
 
     // 作用范围
-    int nProtectRadius = 0; // 环形和矩形AOE的保护距离，范围内不受伤害
-    int nHeight = 0;        // AOE的高度，全高，圆柱体AOE中不填为2倍的nAreaRadius，矩形AOE中不填为nAreaRadius
-    int nRectWidth = 0;     // 矩形AOE的宽度，全宽，不填为nAreaRadius
-    int nAngleRange = 0;    // 攻击范围的扇形角度范围
-    bool bFullAngleInAir = false;
-    int nAreaRadius = 0;              // 技能作用半径
-    int nTargetCountLimit = 0;        // 技能作用目标数量限制,(小于0 代表目标数量不限制)
+    int  nProtectRadius      = 0; // 环形和矩形AOE的保护距离，范围内不受伤害
+    int  nHeight             = 0; // AOE的高度，全高，圆柱体AOE中不填为2倍的nAreaRadius，矩形AOE中不填为nAreaRadius
+    int  nRectWidth          = 0; // 矩形AOE的宽度，全宽，不填为nAreaRadius
+    int  nAngleRange         = 0; // 攻击范围的扇形角度范围
+    bool bFullAngleInAir     = false;
+    int  nAreaRadius         = 0;     // 技能作用半径
+    int  nTargetCountLimit   = 0;     // 技能作用目标数量限制,(小于0 代表目标数量不限制)
     bool bIgnorePrepareState = false; // 技能是否可在吟唱中施放，吟唱、通道、蓄力技不能填true
 
     // 时间相关
-    int nPrepareFrames = 0;      // 吟唱帧数
+    int    nPrepareFrames   = 0; // 吟唱帧数
     double nChannelInterval = 0; // 通道技间隔时间 (实际上为技能系数, 且为 int 类型. 此处使用 double 类型是为了方便 lua 直接操作.)
-    int nChannelFrame = 0;       // 通道技持续时间，单位帧数
-    int nBulletVelocity = 0;     // 子弹速度，单位 点/帧
+    int    nChannelFrame    = 0; // 通道技持续时间，单位帧数
+    int    nBulletVelocity  = 0; // 子弹速度，单位 点/帧
 
     // 阵法相关
     bool bIsSunMoonPower = false;                            // 技能是否需要日月豆
     void SetSunSubsectionSkill(int a, int b, int c, int d);  // 日豆技能
     void SetMoonSubsectionSkill(int a, int b, int c, int d); // 月豆技能
-    bool bIsFormationSkill = false;                          // 是否阵眼技能
-    int nFormationRange = 0;                                 // 结阵的范围
-    int nLeastFormationPopulation = 2;                       // 结阵的范围的最少队员数（包括队长）
+    bool bIsFormationSkill         = false;                  // 是否阵眼技能
+    int  nFormationRange           = 0;                      // 结阵的范围
+    int  nLeastFormationPopulation = 2;                      // 结阵的范围的最少队员数（包括队长）
 
     // 目标血量需求
     int nTargetLifePercentMin = 0;   // 血量最小值>=
@@ -241,10 +241,10 @@ public:
     int nSelfLifePercentMax = 100; // 血量最大值<=
 
     // 打退打断落马相关
-    int nBeatBackRate = 1024; // 技能被打退的概率,默认1024
-    int nBrokenRate = 1024;   // 技能被打断的概率,默认1024
-    int nBreakRate = 0;       // 打断目标施法的概率,基数1024
-    int nDismountingRate = 0; // 将目标击落下马几率,基数1024，默认0
+    int nBeatBackRate    = 1024; // 技能被打退的概率,默认1024
+    int nBrokenRate      = 1024; // 技能被打断的概率,默认1024
+    int nBreakRate       = 0;    // 打断目标施法的概率,基数1024
+    int nDismountingRate = 0;    // 将目标击落下马几率,基数1024，默认0
 
     // 武器伤害相关
     int nWeaponDamagePercent = 0; // 武器伤害百分比,对外功伤害有用。填0表示此次外功攻击不计算武器伤害,1024为100%

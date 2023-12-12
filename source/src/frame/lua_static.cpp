@@ -56,6 +56,9 @@ const std::vector<std::string> ns_frame::luaFuncStaticToDynamic = {
 };
 
 bool ns_frame::luaInit(sol::state &lua) {
+
+    // clang-format off
+    
     lua.new_usertype<Skill>(
         "Skill",
         "dwSkillID", &Skill::dwSkillID,
@@ -132,8 +135,6 @@ bool ns_frame::luaInit(sol::state &lua) {
         "nDismountingRate", &Skill::nDismountingRate,
 
         "nWeaponDamagePercent", &Skill::nWeaponDamagePercent
-
-        // lua.new_usertype<Skill> end
     );
 
     lua.new_usertype<Character>(
@@ -181,21 +182,24 @@ bool ns_frame::luaInit(sol::state &lua) {
         "bFightState", &Character::bFightState,
         "fMaxLife64", &Character::fMaxLife64,
         "fCurrentLife64", &Character::fCurrentLife64
-        // lua.new_usertype<Character> end
     );
 
-    lua.new_usertype<CharacterBuff::Item>(
+    lua.new_usertype<BuffItem>(
         "Buff",
-        "nLevel", &CharacterBuff::Item::nLevel,
-        "nIndex", &CharacterBuff::Item::nIndex,
-        "nStackNum", &CharacterBuff::Item::nStackNum,
-        "nLeftActiveCount", &CharacterBuff::Item::nLeftActiveCount,
-        "nNextActiveFrame", &CharacterBuff::Item::nNextActiveFrame,
-        "nCustomValue", &CharacterBuff::Item::nCustomValue);
+        "nLevel", &BuffItem::nLevel,
+        "nIndex", &BuffItem::nIndex,
+        "nStackNum", &BuffItem::nStackNum,
+        "nLeftActiveCount", &BuffItem::nLeftActiveCount,
+        "nNextActiveFrame", &BuffItem::nNextActiveFrame,
+        "nCustomValue", &BuffItem::nCustomValue
+    );
 
-    lua.new_usertype<CharacterScene>(
+    lua.new_usertype<ChScene>(
         "Scene",
-        "nType", &CharacterScene::nType);
+        "nType", &ChScene::nType
+    );
+
+    // clang-format on
 
     lua.set_function("Include", LuaGlobalFunction::Include);
     lua.set_function("GetPlayer", LuaGlobalFunction::GetPlayer);
@@ -260,7 +264,7 @@ bool ns_frame::luaInit(sol::state &lua) {
     lua["ROLE_TYPE"] = ROLE_TYPE;
 
     lua["CONSUME_BASE"] = 100;
-    lua["LENGTH_BASE"] = 64;
+    lua["LENGTH_BASE"]  = 64;
 
     return true;
 }
@@ -287,7 +291,8 @@ void LuaGlobalFunction::AdditionalAttribute(Skill &skill) {
         static_cast<int>(ref::enumLuaAttributeEffectMode::EFFECT_TO_SELF_AND_ROLLBACK),
         static_cast<int>(ref::enumLuaAttributeType::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE),
         100,
-        0);
+        0
+    );
 }
 
 bool LuaGlobalFunction::IsLangKeXingMap(int mapID) {
