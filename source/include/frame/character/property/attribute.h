@@ -203,11 +203,11 @@ public:
     int getNeutralOvercome() const; // 获取混元内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
     int getPoisonOvercome() const;  // 获取毒性内功破防. 结果为一个1024分数, 这符合游戏内的实际原理.
 
-    int getPhysicsShield(int atAllShieldIgnorePercent) const; // 获取外功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
-    int getSolarShield(int atAllShieldIgnorePercent) const;   // 获取阳性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
-    int getLunarShield(int atAllShieldIgnorePercent) const;   // 获取阴性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
-    int getNeutralShield(int atAllShieldIgnorePercent) const; // 获取混元内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
-    int getPoisonShield(int atAllShieldIgnorePercent) const;  // 获取毒性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
+    int getPhysicsShield(int srcShieldIgnorePercent) const; // 获取外功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
+    int getSolarShield(int srcShieldIgnorePercent) const;   // 获取阳性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
+    int getLunarShield(int srcShieldIgnorePercent) const;   // 获取阴性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
+    int getNeutralShield(int srcShieldIgnorePercent) const; // 获取混元内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
+    int getPoisonShield(int srcShieldIgnorePercent) const;  // 获取毒性内功防御. 结果为一个1024分数, 且最大为 768, 这符合游戏内的实际原理.
 
     int getStrain() const;  // 获取无双. 结果为一个1024分数, 这符合游戏内的实际原理.
     int getHaste() const;   // 获取加速. 结果为一个1024分数, 这符合游戏内的实际原理.

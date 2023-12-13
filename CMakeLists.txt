@@ -12,67 +12,70 @@ set(CMAKE_BUILD_TYPE ${BUILD_MODE}) # Debug / Release
 
 # 若 CMAKE_BUILD_TYPE 为 Debug, 则定义 DEBUG
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-  add_definitions(-DDEBUG)
+    add_definitions(-DDEBUG)
 endif()
 
 # 编译选项
 if(APPLE)
-  set(CMAKE_C_COMPILER "clang")
-  set(CMAKE_CXX_COMPILER "clang++") # 设置编译器为 clang
-  add_compile_options(
-    "-fcolor-diagnostics" "-fansi-escape-codes" # 彩色输出诊断信息
-    "-Wno-unknown-warning-option" # 禁用 clang 编译器下 sol 库一些烦人的警告
-  )
-  # 设置 RPATH 为可执行文件所在目录
-  set(CMAKE_MACOSX_RPATH ON)
-  set(CMAKE_SKIP_BUILD_RPATH FALSE)
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-  set(CMAKE_INSTALL_RPATH "@executable_path/")
+    set(CMAKE_C_COMPILER "clang")
+    set(CMAKE_CXX_COMPILER "clang++") # 设置编译器为 clang
+    add_compile_options(
+        "-fcolor-diagnostics" "-fansi-escape-codes" # 彩色输出诊断信息
+        "-Wno-unknown-warning-option" # 禁用 clang 编译器下 sol 库一些烦人的警告
+    )
+    # 设置 RPATH 为可执行文件所在目录
+    set(CMAKE_MACOSX_RPATH ON)
+    set(CMAKE_SKIP_BUILD_RPATH FALSE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    set(CMAKE_INSTALL_RPATH "@executable_path/")
 
 elseif(UNIX)
-  set(CMAKE_C_COMPILER "clang")
-  set(CMAKE_CXX_COMPILER "clang++") # 设置编译器为 clang
-  add_compile_options(
-    "-fcolor-diagnostics" "-fansi-escape-codes" # 彩色输出诊断信息
-    "-Wno-unknown-warning-option" # 禁用 clang 编译器下 sol 库一些烦人的警告
-  )
-  # 设置 RPATH 为可执行文件所在目录
-  set(CMAKE_SKIP_BUILD_RPATH FALSE)
-  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-  set(CMAKE_INSTALL_RPATH "$ORIGIN")
+    set(CMAKE_C_COMPILER "clang")
+    set(CMAKE_CXX_COMPILER "clang++") # 设置编译器为 clang
+    add_compile_options(
+        "-fcolor-diagnostics" "-fansi-escape-codes" # 彩色输出诊断信息
+        "-Wno-unknown-warning-option" # 禁用 clang 编译器下 sol 库一些烦人的警告
+    )
+    # 设置 RPATH 为可执行文件所在目录
+    set(CMAKE_SKIP_BUILD_RPATH FALSE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    set(CMAKE_INSTALL_RPATH "$ORIGIN")
 
 elseif(WIN32) # Windows
-  set(CMAKE_C_COMPILER "cl")
-  set(CMAKE_CXX_COMPILER "cl") # 设置编译器为 MSVC
-  add_compile_options(
-    "/utf-8" # 指定源文件编码为 UTF-8
-    "/EHsc" # 启用 C++ 异常处理
-    "/D_CRT_SECURE_NO_WARNINGS" # 禁用 strcpy 等不安全的函数的警告
-  )
-  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON) # Windows 下导出所有符号
-  add_compile_options(/MP) # 启用多核编译. UNIX 的类似实现位于 build 命令.
-  add_link_options("/NODEFAULTLIB:LIBCMT") # 禁用 libcmt.lib
+    set(CMAKE_C_COMPILER "cl")
+    set(CMAKE_CXX_COMPILER "cl") # 设置编译器为 MSVC
+    # remove default warning level from CMAKE_CXX_FLAGS
+    string(REGEX REPLACE "/W[0-4]" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+    add_compile_options(
+        "/utf-8" # 指定源文件编码为 UTF-8
+        "/EHsc" # 启用 C++ 异常处理
+        "/D_CRT_SECURE_NO_WARNINGS" # 禁用 strcpy 等不安全的函数的警告
+        "/W4" # 设置警告等级为 4
+    )
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON) # Windows 下导出所有符号
+    add_compile_options(/MP) # 启用多核编译. UNIX 的类似实现位于 build 命令.
+    add_link_options("/NODEFAULTLIB:LIBCMT") # 禁用 libcmt.lib
 endif()
 
 # 设置库文件前后缀
 if(APPLE)
-  set(prefix_lib "lib")
-  set(suffix_lib_dynamic ".dylib")
-  set(suffix_lib_static ".a")
-  set(suffix_lib_link ".dylib")
-  set(directory_lib "macos")
+    set(prefix_lib "lib")
+    set(suffix_lib_dynamic ".dylib")
+    set(suffix_lib_static ".a")
+    set(suffix_lib_link ".dylib")
+    set(directory_lib "macos")
 elseif(UNIX)
-  set(prefix_lib "lib")
-  set(suffix_lib_dynamic ".so")
-  set(suffix_lib_static ".a")
-  set(suffix_lib_link ".so")
-  set(directory_lib "linux")
+    set(prefix_lib "lib")
+    set(suffix_lib_dynamic ".so")
+    set(suffix_lib_static ".a")
+    set(suffix_lib_link ".so")
+    set(directory_lib "linux")
 elseif(WIN32)
-  set(prefix_lib "")
-  set(suffix_lib_dynamic ".dll")
-  set(suffix_lib_static ".lib")
-  set(suffix_lib_link ".lib")
-  set(directory_lib "windows")
+    set(prefix_lib "")
+    set(suffix_lib_dynamic ".dll")
+    set(suffix_lib_static ".lib")
+    set(suffix_lib_link ".lib")
+    set(directory_lib "windows")
 endif()
 
 # ########## 构建目标 ##########
@@ -90,47 +93,36 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}) # .lib .a
 
 # 对于多配置构建系统, 指定每个配置的输出目录
 foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
-  string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY})
-  set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY})
-  set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY})
+    string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY})
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY})
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${OUTPUT_DIRECTORY})
 endforeach(OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES)
 
 # main
 file(GLOB_RECURSE MAIN_SOURCES "${CMAKE_SOURCE_DIR}/source/src/*.cpp")
 add_executable(jx3calc ${MAIN_SOURCES}) # 编译为可执行文件
-target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/source/include"
-)# 指定 main 的头文件目录
+target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/source/include") # 指定 main 的头文件目录
 
 # Game Data Interface
 if(EXISTS "${CMAKE_SOURCE_DIR}/JX3CalcBEgdi")
-  add_subdirectory(JX3CalcBEgdi) # 若子目录存在, 则构建 gdi
-  target_link_libraries(jx3calc PRIVATE gdi) # 将 gdi 链接至 main
+    add_subdirectory(JX3CalcBEgdi) # 若子目录存在, 则构建 gdi
+    target_link_libraries(jx3calc PRIVATE gdi) # 将 gdi 链接至 main
 else()
-  target_link_libraries(
-    jx3calc
-    PRIVATE "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_link}"
-  )# 将 gdi 链接至 main
-  add_custom_command(
-    TARGET jx3calc
-    POST_BUILD
-    COMMAND
-      ${CMAKE_COMMAND} -E copy
-      "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_link}"
-      "${OUTPUT_DIRECTORY}/"
-    COMMAND
-      ${CMAKE_COMMAND} -E copy
-      "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_dynamic}"
-      "${OUTPUT_DIRECTORY}/")
+    target_link_libraries(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_link}") # 将 gdi 链接至 main
+    add_custom_command(
+        TARGET jx3calc
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_link}" "${OUTPUT_DIRECTORY}/"
+        COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_dynamic}" "${OUTPUT_DIRECTORY}/")
 endif()
 
 # 第三方库
-file(GLOB EXTERNAL_SOURCES
-     "${CMAKE_SOURCE_DIR}/external/lib/${directory_lib}/*")
+file(GLOB EXTERNAL_SOURCES "${CMAKE_SOURCE_DIR}/external/lib/${directory_lib}/*")
 target_link_libraries(jx3calc PRIVATE ${EXTERNAL_SOURCES}) # 将第三方库链接至 main
 
 if(APPLE OR UNIX)
-  target_link_libraries(jx3calc PRIVATE fmt) # 链接fmt库
+    target_link_libraries(jx3calc PRIVATE fmt) # 链接fmt库
 endif()
 
 # ########## 处理资源 ##########

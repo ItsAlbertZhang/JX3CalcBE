@@ -6,6 +6,13 @@
 #include <iostream>
 #include <string>
 
+#ifdef _WIN32
+#include <format>
+namespace fmt = std;
+#else
+#include <fmt/core.h>
+#endif
+
 namespace ns_program {
 
 class Log {
@@ -19,7 +26,7 @@ public:
     bool        realtime = false;
 
     void print() {
-        std::cout << data << std::endl;
+        std::cout << fmt::format("Log ({}):\n{}", name, data) << std::endl;
         data.clear();
     }
 };
@@ -28,13 +35,6 @@ inline Log log_info{"info"};
 inline Log log_error{"error"};
 
 } // namespace ns_program
-
-#ifdef _WIN32
-#include <format>
-namespace fmt = std;
-#else
-#include <fmt/core.h>
-#endif
 
 #define LOG_INFO(str, ...)                                                                   \
     {                                                                                        \

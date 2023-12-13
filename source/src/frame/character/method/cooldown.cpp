@@ -1,5 +1,6 @@
 #include "frame/global/cooldown.h"
 #include "frame/character/character.h"
+#include "frame/character/property/buff.h"
 #include "frame/event.h"
 
 using namespace ns_frame;
@@ -33,7 +34,7 @@ void Character::cooldownModify(int cooldownID, int frame) {
         // 若该 CD 正在冷却, 则取消 Event
         delay = Event::cancel(item->tickOver, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
     }
-    if (frame < 0 && -frame * 1024 / 16 >= delay) {
+    if (frame < 0 && static_cast<event_tick_t>(-frame * 1024 / 16) >= delay) {
         // 传入了一个负值的 frame, 且该值大于等于当前的冷却时间, 则直接结束冷却
         item->isValid = false;
     } else {

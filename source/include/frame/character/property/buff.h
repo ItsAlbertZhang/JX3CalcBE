@@ -14,16 +14,15 @@ class BuffItem {
 public:
     BuffItem(
         int nCharacterID,
-        int dwSkillSrcID,
-        int BuffID,
+        int rawInterval,
+        int rawCount,
+        int nID,
         int nLevel,
         int nIndex,
-        int rawInterval,
-        int rawCount
+        int dwSkillSrcID
     )
-        : nCharacterID(nCharacterID), dwSkillSrcID(dwSkillSrcID),
-          nID(BuffID), nLevel(nLevel), nIndex(nIndex),
-          rawInterval(rawInterval), rawCount(rawCount) {}
+        : nCharacterID(nCharacterID), rawInterval(rawInterval), rawCount(rawCount),
+          nID(nID), nLevel(nLevel), nIndex(nIndex), dwSkillSrcID(dwSkillSrcID) {}
 
     const int    nCharacterID = 0; // 角色 ID
     const int    rawInterval  = 0;

@@ -1,5 +1,7 @@
 #include "frame/character/character.h"
 
+#define UNREFERENCED_PARAMETER(P) (P)
+
 using namespace ns_frame;
 
 int Character::otherGetMapID() {
@@ -15,6 +17,10 @@ bool Character::otherIsFormationLeader() {
 }
 
 void Character::otherPlayPublicShadowAnimation(int a, int b, bool c, bool d) {
+    UNREFERENCED_PARAMETER(a);
+    UNREFERENCED_PARAMETER(b);
+    UNREFERENCED_PARAMETER(c);
+    UNREFERENCED_PARAMETER(d);
     return;
 }
 
@@ -31,13 +37,24 @@ bool Character::otherIsInParty() {
 }
 
 void Character::otherDoAction(int a, int b) {
+    UNREFERENCED_PARAMETER(a);
+    UNREFERENCED_PARAMETER(b);
     return;
 }
 
 void Character::otherDestroyPublicShadow(int a, bool b) {
+    UNREFERENCED_PARAMETER(a);
+    UNREFERENCED_PARAMETER(b);
     return;
 }
 
-void Character::otherCreatePublicShadow(int a, int roletype, int dwID, int nX, int nY, int nZ, bool b) {
+void Character::otherCreatePublicShadow(int a, int roletype, int id, int x, int y, int z, bool b) {
+    UNREFERENCED_PARAMETER(a);
+    UNREFERENCED_PARAMETER(roletype);
+    UNREFERENCED_PARAMETER(id);
+    UNREFERENCED_PARAMETER(x);
+    UNREFERENCED_PARAMETER(y);
+    UNREFERENCED_PARAMETER(z);
+    UNREFERENCED_PARAMETER(b);
     return;
 }

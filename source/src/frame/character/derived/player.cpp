@@ -3,6 +3,8 @@
 #include "program/log.h"
 #include <random>
 
+#define UNREFERENCED_PARAMETER(P) (P)
+
 using namespace ns_frame;
 
 Player::Player() {
@@ -44,14 +46,16 @@ inline static ns_frame::event_tick_t getDelay(Player *player) {
 }
 
 static void callbackMacroDefault(void *self, void *nullparam) {
+    UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
     player->macroRuntimeDefault();
     Event::add(getDelay(player), callbackMacroDefault, self, nullptr);
 }
 
 static void callbackMacroCustom(void *self, void *nullparam) {
+    UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
-    if (player->macroIdx >= player->macroCustom->macroRuntime.size()) {
+    if (player->macroIdx >= static_cast<int>(player->macroCustom->macroRuntime.size())) {
         LOG_ERROR("macroIdx >= macroRuntime.size(){}", "");
         return;
     }

@@ -2,7 +2,6 @@
 #define FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_
 
 #include "frame/character/property/damage.h"
-#include "frame/event.h"
 #include <queue>
 #include <vector>
 
@@ -24,11 +23,12 @@ public:
         SkillQueueElement(int skillID, int skillLevel, Character *caster)
             : skillID(skillID), skillLevel(skillLevel), caster(caster) {}
 
-        Character *caster;
-        Character *target;
         int        skillID;    // 技能 ID
         int        skillLevel; // 技能等级
-        bool       hasTarget = false;
+        Character *caster;
+        Character *target;
+
+        bool hasTarget = false;
     };
 
     Character                    *self;

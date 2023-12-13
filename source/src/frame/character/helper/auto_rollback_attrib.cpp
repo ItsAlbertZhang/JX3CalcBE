@@ -13,17 +13,17 @@ AutoRollbackAttrib::AutoRollbackAttrib(Character *self, BuffItem *item, const Bu
     : self(self), item(item), buff(buff) {
     // item->flushLeftFrame();
     for (const auto &it : buff.BeginAttrib) {
-        handle(item, it, false);
+        handle(it, false);
     }
 }
 
 AutoRollbackAttrib::~AutoRollbackAttrib() {
     self->buffFlushLeftFrame(item);
     for (const auto &it : buff.BeginAttrib) {
-        handle(item, it, true);
+        handle(it, true);
     }
     for (const auto &it : buff.EndTimeAttrib) {
-        handle(item, it, false);
+        handle(it, false);
     }
     if (!buff.ScriptFile.empty()) {
         std::string paramStr = "scripts/skill/" + buff.ScriptFile;
@@ -40,11 +40,11 @@ AutoRollbackAttrib::~AutoRollbackAttrib() {
 void AutoRollbackAttrib::active() {
     self->buffFlushLeftFrame(item);
     for (const auto &it : buff.ActiveAttrib) {
-        handle(item, it, false);
+        handle(it, false);
     }
 }
 
-void AutoRollbackAttrib::handle(BuffItem *item, const Buff::Attrib &attrib, bool isRollback) {
+void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     int c = isRollback ? -1 : 1;
     switch (attrib.type) {
     case enumTabAttribute::atLunarDamageCoefficient:

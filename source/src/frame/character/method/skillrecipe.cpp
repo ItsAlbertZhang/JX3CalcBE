@@ -17,17 +17,25 @@ void Character::skillrecipeRemove(int recipeID, int recipeLevel) {
 
 bool Character::skillrecipeExist(int RecipeID, int RecipeLevel) {
     const SkillRecipe &skillrecipe = SkillRecipeManager::get(RecipeID, RecipeLevel);
-    return this->chSkillRecipe.SkillRecipeTypeMap[skillrecipe.SkillRecipeType].find(&skillrecipe) != this->chSkillRecipe.SkillRecipeTypeMap[skillrecipe.SkillRecipeType].end() ||
-           this->chSkillRecipe.SkillIDMap[skillrecipe.SkillID].find(&skillrecipe) != this->chSkillRecipe.SkillIDMap[skillrecipe.SkillID].end();
+    return this->chSkillRecipe.SkillRecipeTypeMap[skillrecipe.SkillRecipeType].find(&skillrecipe) !=
+               this->chSkillRecipe.SkillRecipeTypeMap[skillrecipe.SkillRecipeType].end() ||
+           this->chSkillRecipe.SkillIDMap[skillrecipe.SkillID].find(&skillrecipe) !=
+               this->chSkillRecipe.SkillIDMap[skillrecipe.SkillID].end();
 }
 
 std::set<const SkillRecipe *> Character::skillrecipeGet(int skillID, int skillrecipeType) {
     std::set<const SkillRecipe *> emptySet;
     if (skillID != 0) {
-        emptySet.insert(this->chSkillRecipe.SkillIDMap[skillID].begin(), this->chSkillRecipe.SkillIDMap[skillID].end());
+        emptySet.insert(
+            this->chSkillRecipe.SkillIDMap[skillID].begin(),
+            this->chSkillRecipe.SkillIDMap[skillID].end()
+        );
     }
     if (skillrecipeType != 0) {
-        emptySet.insert(this->chSkillRecipe.SkillRecipeTypeMap[skillrecipeType].begin(), this->chSkillRecipe.SkillRecipeTypeMap[skillrecipeType].end());
+        emptySet.insert(
+            this->chSkillRecipe.SkillRecipeTypeMap[skillrecipeType].begin(),
+            this->chSkillRecipe.SkillRecipeTypeMap[skillrecipeType].end()
+        );
     }
     return emptySet;
 }

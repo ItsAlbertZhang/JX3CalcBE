@@ -2,6 +2,8 @@
 #include "gdi.h"
 #include "program/log.h"
 
+#define UNREFERENCED_PARAMETER(P) (P)
+
 using namespace ns_frame;
 using namespace std;
 
@@ -20,6 +22,8 @@ const string &LuaFunc::getFilename(int idx) {
 }
 
 bool LuaFunc::analysis(sol::protected_function_result res, std::string &filename, Enum func) {
+    UNREFERENCED_PARAMETER(filename); // unreferenced in release mode
+    UNREFERENCED_PARAMETER(func);     // unreferenced in release mode
     std::replace(filename.begin(), filename.end(), '\\', '/');
     if (!res.valid()) {
         sol::error err = res;
@@ -32,6 +36,8 @@ bool LuaFunc::analysis(sol::protected_function_result res, std::string &filename
 }
 
 bool LuaFunc::analysis(sol::protected_function_result res, int idx, Enum func) {
+    UNREFERENCED_PARAMETER(idx);  // unreferenced in release mode
+    UNREFERENCED_PARAMETER(func); // unreferenced in release mode
     // 传入的 idx 是先前通过 getIndex 获取的, 一定存在
     if (!res.valid()) {
         sol::error err = res;

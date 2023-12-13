@@ -115,6 +115,9 @@ int Character::calcDamage(
         targetShield            = target->chAttr.getPoisonShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atPoisonDamageCoefficient;
         break;
+    default:
+        LOG_ERROR("Unknown damage type: {}", static_cast<int>(typeDamage));
+        break;
     }
 
     long long damage = damageBase + damageRand / 2;

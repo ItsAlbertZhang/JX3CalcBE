@@ -18,9 +18,9 @@ event_tick_t Event::add(event_tick_t delay, event_func_t func, void *self, void 
     return tick + delay;
 }
 
-event_tick_t Event::cancel(event_tick_t tick, event_func_t func, void *self, void *param) {
-    eventList.erase(EventItem(tick, func, self, param));
-    return tick - Event::tick;
+event_tick_t Event::cancel(event_tick_t active, event_func_t func, void *self, void *param) {
+    eventList.erase(EventItem(active, func, self, param));
+    return active - tick;
 }
 
 event_tick_t Event::now() {

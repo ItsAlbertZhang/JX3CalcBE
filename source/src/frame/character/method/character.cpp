@@ -25,7 +25,7 @@ Character::~Character() {
 }
 
 Character *Character::characterGet(int nCharacterID) {
-    if (nCharacterID < 0 || nCharacterID >= characterList.size()) {
+    if (nCharacterID < 0 || nCharacterID >= static_cast<int>(characterList.size())) {
         return nullptr;
     } else {
         return characterList.at(nCharacterID);

@@ -1,5 +1,6 @@
 #include "concrete/character/npc/npc124.h"
 #include "concrete/character/player/mj_fysj.h"
+#include "frame/character/property/buff.h"
 #include "frame/event.h"
 #include "frame/global/uibuff.h"
 #include "frame/global/uiskill.h"
@@ -63,7 +64,7 @@ int main(int argc, char *argv[]) {
     ns_frame::ChAttr attrBackup = player.attrExport();
     auto             start      = std::chrono::steady_clock::now();
     player.macroRun();
-    while (ns_frame::Event::now() < 1024 * fighttime) {
+    while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * fighttime)) {
         ret = ns_frame::Event::run();
         if (!ret)
             break;
@@ -80,8 +81,8 @@ int main(int argc, char *argv[]) {
     ns_program::log_error.realtime = false;
 #endif
 
-    unsigned long long totalDamage = 0;
-    std::ofstream      ofs(pRES);
+    // unsigned long long totalDamage = 0;
+    std::ofstream ofs(pRES);
     ofs << "tick\tID\tlv\tcri\tdmg\ttype\tname\n";
     ns_frame::event_tick_t presentCurr = 0;
     for (auto &it : player.chDamage.damageList) {
@@ -106,37 +107,37 @@ int main(int argc, char *argv[]) {
             << it.id << "\t" << it.level << "\t" << it.isCritical << "\t"
             << it.damage << "\t" << static_cast<int>(it.damageType) << "\t"
             << name << "\n";
-        totalDamage += it.damage;
+        // totalDamage += it.damage;
     }
     ofs.close();
 
     unsigned long long        damageAvg = 0;
     std::chrono::milliseconds timeAvg   = std::chrono::milliseconds(0);
     for (int i = 0; i < fightcount; i++) {
-        auto                start = std::chrono::steady_clock::now();
-        ns_concrete::MjFysj fysj;
-        ns_concrete::NPC124 npc124;
-        ns_frame::Player   &player = fysj;
-        ns_frame::NPC      &npc    = npc124;
-        player.targetSelect        = &npc;
-        player.macroCustom         = ptr;
-        player.attrImportFromBackup(attrBackup);
+        auto                substart = std::chrono::steady_clock::now();
+        ns_concrete::MjFysj subfysj;
+        ns_concrete::NPC124 subnpc124;
+        ns_frame::Player   &subplayer = subfysj;
+        ns_frame::NPC      &subnpc    = subnpc124;
+        subplayer.targetSelect        = &subnpc;
+        subplayer.macroCustom         = ptr;
+        subplayer.attrImportFromBackup(attrBackup);
         ns_frame::Event::clear();
-        player.macroRun();
-        while (ns_frame::Event::now() < 1024 * fighttime) {
+        subplayer.macroRun();
+        while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * fighttime)) {
             ret = ns_frame::Event::run();
             if (!ret)
                 break;
         }
-        auto end = std::chrono::steady_clock::now();
+        auto subend = std::chrono::steady_clock::now();
 
         unsigned long long sumDamage = 0;
-        for (auto &it : player.chDamage.damageList) {
+        for (auto &it : subplayer.chDamage.damageList) {
             sumDamage += it.damage;
         }
-        std::cout << sumDamage / fighttime << "\t" << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << std::endl;
+        std::cout << sumDamage / fighttime << "\t" << std::chrono::duration_cast<std::chrono::milliseconds>(subend - substart).count() << std::endl;
         damageAvg += sumDamage / fighttime;
-        timeAvg += std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+        timeAvg += std::chrono::duration_cast<std::chrono::milliseconds>(subend - substart);
     }
 
     std::cout << "第一次计算花费时间: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;

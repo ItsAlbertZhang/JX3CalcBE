@@ -5,6 +5,8 @@
 #include "frame/ref/lua_other.h"
 #include "program/log.h"
 
+#define UNREFERENCED_PARAMETER(P) (P)
+
 using namespace ns_frame;
 
 const std::vector<std::string> ns_frame::luaFuncStaticToDynamic = {
@@ -270,6 +272,7 @@ bool ns_frame::luaInit(sol::state &lua) {
 }
 
 void LuaGlobalFunction::Include(const std::string &filename) {
+    UNREFERENCED_PARAMETER(filename);
     return;
 }
 
@@ -296,18 +299,25 @@ void LuaGlobalFunction::AdditionalAttribute(Skill &skill) {
 }
 
 bool LuaGlobalFunction::IsLangKeXingMap(int mapID) {
+    UNREFERENCED_PARAMETER(mapID);
     return false;
 }
 
 void LuaGlobalFunction::ModityCDToUI(ns_frame::Character *character, int skillID, int c, int d) {
+    UNREFERENCED_PARAMETER(character);
+    UNREFERENCED_PARAMETER(skillID);
+    UNREFERENCED_PARAMETER(c);
+    UNREFERENCED_PARAMETER(d);
     return;
 }
 
 bool LuaGlobalFunction::CheckInTongWar(ns_frame::Character *character) {
+    UNREFERENCED_PARAMETER(character);
     return false;
 }
 
 bool LuaGlobalFunction::IsTreasureBattleFieldMap(int mapID) {
+    UNREFERENCED_PARAMETER(mapID);
     return false;
 }
 
@@ -327,6 +337,7 @@ function CustomFunction.GetValueByBit(nValue, nBit)
 end
 ``` */
 int LuaGlobalFunction::GetValueByBits(int nValue, int nBit, int c) {
+    UNREFERENCED_PARAMETER(c);
     if (nBit > 31 || nBit < 0) {
         LOG_ERROR(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error{}", "");
     }
@@ -368,6 +379,7 @@ function CustomFunction.SetValueByBit(nValue, nBit, nNewBitValue)
 end
 ``` */
 int LuaGlobalFunction::SetValueByBits(int nValue, int nBit, int c, int nNewBitValue) {
+    UNREFERENCED_PARAMETER(c);
     if (nNewBitValue > 1 || nNewBitValue < 0) {
         LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,{}", "");
         return nValue;

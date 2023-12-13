@@ -30,7 +30,7 @@ private:
     BuffItem   *item;
     const Buff &buff;
 
-    void handle(BuffItem *item, const Buff::Attrib &attrib, bool isRollback);
+    void handle(const Buff::Attrib &attrib, bool isRollback);
 };
 
 } // namespace ns_frame

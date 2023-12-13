@@ -1,14 +1,16 @@
 #include "frame/character/character.h"
 #include "frame/character/helper/auto_rollback_attribute.h"
 #include "frame/character/helper/runtime_castskill.h"
+#include "frame/event.h"
 #include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
 #include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"
-#include "frame/lua_runtime.h"
 #include "program/log.h"
 #include <memory> // std::unique_ptr
 #include <random>
+
+#define UNREFERENCED_PARAMETER(P) (P)
 
 using namespace ns_frame;
 
@@ -22,6 +24,7 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
 static void        callbackDelaySubSkill(void *self, void *item);
 
 void Character::skillCast4(int skillID, int skillLevel, int type, int targetID) {
+    UNREFERENCED_PARAMETER(type);
     skillCast(characterGet(targetID), skillID, skillLevel);
 }
 
@@ -41,6 +44,9 @@ void Character::skillCast2(int skillID, int skillLevel) {
 }
 
 void Character::skillCastXYZ(int skillID, int skillLevel, int x, int y, int z) {
+    UNREFERENCED_PARAMETER(x);
+    UNREFERENCED_PARAMETER(y);
+    UNREFERENCED_PARAMETER(z);
     skillCast(this->targetCurr, skillID, skillLevel);
     // 关于此逻辑, 详见下方注释
     this->targetCurr = nullptr;
@@ -251,10 +257,10 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
 
     // 6. 处理 SkillRecipe: ScriptFile
     // 构造技能运行时资源: vector<unique_ptr<AutoRollbackAttribute>>
-    std::vector<std::unique_ptr<AutoRollbackAttribute>> autoRollbackAttributeList;
-    autoRollbackAttributeList.reserve(recipeskillList.size());
+    std::vector<std::unique_ptr<AutoRollbackAttribute>> skillAutoRollbackAttributeList;
+    skillAutoRollbackAttributeList.reserve(recipeskillList.size());
     for (const auto &it : recipeskillList) {
-        autoRollbackAttributeList.emplace_back(new AutoRollbackAttribute{this, target, &runtime, *it});
+        skillAutoRollbackAttributeList.emplace_back(new AutoRollbackAttribute{this, target, &runtime, *it});
     }
 
     // 7. 计算伤害

@@ -28,13 +28,20 @@ void SkillEventManager::add(int ID) {
     arg[0]["ID"] = std::to_string(ID);
     gdi::tabSelect(gdi::Tab::skillevent, arg);
     skillevent.tab = std::move(arg[0]);
+
+    using eType = ref::enumSkilleventEventtype;
+    using eCt   = ref::enumSkilleventCastertarget;
+
+    const std::unordered_map<std::string, eType> &mType = ref::mapSkilleventEventtype;
+    const std::unordered_map<std::string, eCt>   &mCt   = ref::mapSkilleventCastertarget;
+
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    skillevent.type         = ref::mapSkilleventEventtype.find(skillevent.tab["EventType"]) != ref::mapSkilleventEventtype.end() ? ref::mapSkilleventEventtype.at(skillevent.tab["EventType"]) : ref::enumSkilleventEventtype::COUNT;
+    skillevent.type         = mType.find(skillevent.tab["EventType"]) != mType.end() ? mType.at(skillevent.tab["EventType"]) : eType::COUNT;
     skillevent.Odds         = std::stoi(skillevent.tab["Odds"]);
     skillevent.SkillID      = std::stoi(skillevent.tab["SkillID"]);
     skillevent.SkillLevel   = std::stoi(skillevent.tab["SkillLevel"]);
-    skillevent.SkillCaster  = ref::mapSkilleventCastertarget.find(skillevent.tab["SkillCaster"]) != ref::mapSkilleventCastertarget.end() ? ref::mapSkilleventCastertarget.at(skillevent.tab["SkillCaster"]) : ref::enumSkilleventCastertarget::COUNT;
-    skillevent.SkillTarget  = ref::mapSkilleventCastertarget.find(skillevent.tab["SkillTarget"]) != ref::mapSkilleventCastertarget.end() ? ref::mapSkilleventCastertarget.at(skillevent.tab["SkillTarget"]) : ref::enumSkilleventCastertarget::COUNT;
+    skillevent.SkillCaster  = mCt.find(skillevent.tab["SkillCaster"]) != mCt.end() ? mCt.at(skillevent.tab["SkillCaster"]) : eCt::COUNT;
+    skillevent.SkillTarget  = mCt.find(skillevent.tab["SkillTarget"]) != mCt.end() ? mCt.at(skillevent.tab["SkillTarget"]) : eCt::COUNT;
     skillevent.EventMask1   = std::stoi(skillevent.tab["EventMask1"]);
     skillevent.EventMask2   = std::stoi(skillevent.tab["EventMask2"]);
     skillevent.EventSkillID = std::stoi(skillevent.tab["EventSkillID"]);

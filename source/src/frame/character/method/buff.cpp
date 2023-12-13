@@ -4,6 +4,8 @@
 #include "frame/event.h"
 #include "frame/global/skill.h"
 
+#define UNREFERENCED_PARAMETER(P) (P)
+
 using namespace ns_frame;
 
 static void staticDelBuff(Character *self, BuffItem *it);
@@ -38,6 +40,8 @@ void Character::buffAdd5(int buffSourceID, int buffSourceLevel, int buffID, int 
     buffAdd7(buffSourceID, buffSourceLevel, buffID, buffLevel, count, 0, 1);
 }
 void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum) {
+    UNREFERENCED_PARAMETER(buffSourceLevel);
+    UNREFERENCED_PARAMETER(param6);
     bool        newBuff = false;
     const Buff &buff    = BuffManager::get(buffID, buffLevel);
     if (this->chBuff.buffMap[buffSourceID][buffID].find(buffLevel) == this->chBuff.buffMap[buffSourceID][buffID].end()) {
@@ -45,7 +49,7 @@ void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int 
         this->chBuff.buffMap[buffSourceID][buffID].emplace(
             std::piecewise_construct,
             std::forward_as_tuple(buffLevel),
-            std::forward_as_tuple(this->dwID, buffSourceID, buffID, buffLevel, static_cast<int>(this->chBuff.buffList.size()), buff.Interval, buff.Count)
+            std::forward_as_tuple(this->dwID, buff.Interval, buff.Count, buffID, buffLevel, static_cast<int>(this->chBuff.buffList.size()), buffSourceID)
         );
         // 原地插入. 通过这种方式插入的 key 和 value, 不是构造后移动至容器, 而是直接在容器内构造. 这可以避免 Item 的 const 属性出现问题.
         newBuff = true;
@@ -120,7 +124,7 @@ void Character::buffDelMultiGroupByID(int buffID) {
 
 void Character::buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel) {
     const Skill &skill = SkillManager::get(skillID, skillLevel);
-    const Buff  &buff  = BuffManager::get(buffID, buffLevel);
+    // const Buff  &buff  = BuffManager::get(buffID, buffLevel);
     this->buffAdd4(buffSourceID, buffSourceLevel, buffID, buffLevel);
     BuffItem &it          = this->chBuff.buffMap[buffSourceID][buffID].at(buffLevel);
     it.dwCasterSkillID    = skillID;
@@ -227,14 +231,14 @@ BuffItem *Character::buffGetByOwner(int buffID, int buffLevel, int sourceID) {
 }
 
 void Character::buffSetLeftActiveCount(int buffIndex, int count) {
-    if (buffIndex < 0 || buffIndex >= this->chBuff.buffList.size()) {
+    if (buffIndex < 0 || buffIndex >= static_cast<int>(this->chBuff.buffList.size())) {
         return;
     }
     BuffItem *buff         = this->chBuff.buffList.at(buffIndex);
     buff->nLeftActiveCount = count;
 }
 void Character::buffSetNextActiveFrame(int buffIndex, int nextActiveFrame) {
-    if (buffIndex < 0 || buffIndex >= this->chBuff.buffList.size()) {
+    if (buffIndex < 0 || buffIndex >= static_cast<int>(this->chBuff.buffList.size())) {
         return;
     }
     BuffItem *buff = this->chBuff.buffList.at(buffIndex);

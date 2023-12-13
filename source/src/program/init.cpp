@@ -1,11 +1,13 @@
 #include "program/init.h"
-#include <cstring>
 #include <fstream>
 #include <nlohmann/json.hpp>
+
+#define UNREFERENCED_PARAMETER(P) (P)
 
 using namespace ns_program;
 
 void Init::init(int argc, char *argv[]) { // 初始化所有环境
+    UNREFERENCED_PARAMETER(argc);
     Config::pExeDir = fs::absolute(argv[0]).parent_path();
     Config::load();
 }

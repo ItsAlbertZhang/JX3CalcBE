@@ -29,6 +29,7 @@ enum class Tab {
     COUNT, // 用于计数, 请勿使用
 };
 
+using luaInit_t = bool (*)(sol::state &);
 /**
  * @brief 初始化 gdi 库
  * @param dataPathJX3           剑网3 (JX3) 目录. 该项可以为空, 但不可与 dataPathUnpacked 同时为空.
@@ -38,7 +39,6 @@ enum class Tab {
  * @param tabCount              表的数量
  * @warning 这个函数只需要在主线程中调用一次!
  */
-using luaInit_t = bool (*)(sol::state &);
 bool init(
     const std::filesystem::path    &dataPathJX3,
     const std::filesystem::path    &dataPathUnpacked,
