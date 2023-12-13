@@ -3,11 +3,11 @@
         "cwd": "${workspaceFolder}/build/"
     },
     "tasks": [
-        { "label": "windows_debug_cmake", "command": "cmake", "args": [ "..", "-G", "Visual Studio 17 2022", "-DBUILD_MODE=Debug" ], },
+        { "label": "windows_debug_cmake", "command": "cmake", "args": [ "..", "-G", "Ninja", "-DBUILD_MODE=Debug" ], },
         { "label": "windows_debug_make", "command": "cmake", "args": [ "--build", ".", "--config", "Debug" ], },
         { "label": "windows_debug_build", "dependsOrder": "sequence", "dependsOn": [ "windows_debug_cmake", "windows_debug_make" ], },
 
-        { "label": "windows_release_cmake", "command": "cmake", "args": [ "..", "-G", "Visual Studio 17 2022", "-DBUILD_MODE=Release" ], },
+        { "label": "windows_release_cmake", "command": "cmake", "args": [ "..", "-G", "Ninja", "-DBUILD_MODE=Release" ], },
         { "label": "windows_release_make", "command": "cmake", "args": [ "--build", ".", "--config", "Release" ], },
         { "label": "windows_release_build", "dependsOrder": "sequence", "dependsOn": [ "windows_release_cmake", "windows_release_make" ], },
 

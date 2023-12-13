@@ -86,6 +86,7 @@ include_directories("${CMAKE_SOURCE_DIR}/external/include") # 第三方库头文
 set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin") # 输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}) # .exe .dll
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}) # .dylib .so
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY}) # .lib .a
 
 # 对于多配置构建系统, 指定每个配置的输出目录
 foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
