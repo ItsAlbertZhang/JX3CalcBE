@@ -68,20 +68,23 @@ public:
     BuffItem *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
     BuffItem *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
     // calc
-    int calcDamage(
-        const ChAttr &attrSelf,
-        Character    *target,
-        DamageType    typeDamage,
-        bool          isCritical,
-        int           atCriticalDamagePower,
-        int           DamageAddPercent,
-        int           damageBase,
-        int           damageRand,
-        int           nChannelInterval,
-        int           nWeaponDamagePercent,
-        int           dotInterval = 1,
-        int           dotCount    = 1,
-        bool          isSurplus   = false
+    Damage calcDamage(
+        int              recordID,
+        int              recordLevel,
+        const ChAttr    &attrSelf,
+        const Character *target,
+        DamageType       typeDamage,
+        int              atCriticalStrike,
+        int              atCriticalDamagePower,
+        int              damageBase,
+        int              damageRand,
+        int              damageAddPercent,
+        int              nChannelInterval,
+        int              nWeaponDamagePercent,
+        bool             isSurplus    = false,
+        bool             isBuff       = false,
+        int              buffInterval = 1,
+        int              buffCount    = 1
     );
     std::tuple<int, int> calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel);
     // skill

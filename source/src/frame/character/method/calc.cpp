@@ -1,4 +1,6 @@
 #include "frame/character/character.h"
+#include "frame/character/property/damage.h"
+#include "frame/event.h"
 #include "frame/global/skill.h"
 #include "program/log.h"
 
@@ -38,23 +40,28 @@ std::tuple<int, int> Character::calcCritical(const ChAttr &attrSelf, int skillID
         break;
     }
 
+    atCriticalStrike = atCriticalStrike > 10000 ? 10000 : atCriticalStrike;
+
     return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 }
 
-int Character::calcDamage(
-    const ChAttr &attrSelf,
-    Character    *target,
-    DamageType    typeDamage,
-    bool          isCritical,
-    int           atCriticalDamagePower,
-    int           DamageAddPercent,
-    int           damageBase,
-    int           damageRand,
-    int           nChannelInterval,
-    int           nWeaponDamagePercent,
-    int           dotInterval,
-    int           dotCount,
-    bool          isSurplus
+Damage Character::calcDamage(
+    int              recordID,
+    int              recordLevel,
+    const ChAttr    &attrSelf,
+    const Character *target,
+    DamageType       typeDamage,
+    int              atCriticalStrike,
+    int              atCriticalDamagePower,
+    int              damageBase,
+    int              damageRand,
+    int              damageAddPercent,
+    int              nChannelInterval,
+    int              nWeaponDamagePercent,
+    bool             isSurplus,
+    bool             isBuff,
+    int              buffInterval,
+    int              buffCount
 ) {
     int atStrain                  = this->chAttr.getStrain();               // 类型× 快照
     int atSurplus                 = this->chAttr.getSurplus();              // 类型× 快照
@@ -72,8 +79,8 @@ int Character::calcDamage(
     int c            = 12;
     int weaponDamage = 0;
 
-    int coeffCount    = dotCount;
-    int coeffInterval = dotInterval * dotCount / 12;
+    int coeffCount    = isBuff ? buffCount : 1;
+    int coeffInterval = isBuff ? buffInterval * buffCount / 12 : 1;
     coeffInterval     = coeffInterval > 16 ? coeffInterval : 16;
 
     switch (typeDamage) {
@@ -120,7 +127,7 @@ int Character::calcDamage(
         break;
     }
 
-    long long damage = damageBase + damageRand / 2;
+    unsigned long long damage = damageBase + damageRand / 2;
     if (isSurplus)
         damage = damage + static_cast<long long>(atSurplus) * (nChannelInterval + (1 << 20)) / (1 << 20);
     else
@@ -131,7 +138,7 @@ int Character::calcDamage(
         damage = damage * levelCof / 100;
     }
     damage = damage * (1024 + atOvercome) / 1024;
-    damage = damage * (1024 + atDamageAddPercent + DamageAddPercent) / 1024;
+    damage = damage * (1024 + atDamageAddPercent + damageAddPercent) / 1024;
     if (true) {
         // TODO: 实现目标移动状态
         damage = damage * (1024 + atAddDamageByDstMoveState) / 1024;
@@ -139,9 +146,18 @@ int Character::calcDamage(
     damage = damage * (1024 - targetShield) / 1024;
     damage = damage * (1024 + targetDamageCoefficient) / 1024;
 
-    if (isCritical) {
-        damage = damage * (1792 + atCriticalDamagePower) / 1024;
-    }
+    unsigned long long damageCritical = damage * (1792 + atCriticalDamagePower) / 1024;
+    unsigned long long damageExcept   = (damage * (10000 - atCriticalStrike) + damageCritical * atCriticalStrike) / 10000;
 
-    return static_cast<int>(damage);
+    return Damage{
+        Event::now(),
+        isBuff ? DamageSource::buff : DamageSource::skill,
+        typeDamage,
+        recordID,
+        recordLevel,
+        static_cast<int>(damage),
+        static_cast<int>(damageCritical),
+        static_cast<int>(damageExcept),
+        atCriticalStrike
+    };
 }

@@ -27,22 +27,26 @@ public:
     Damage(
         event_tick_t tick,
         DamageSource source,
+        DamageType   damageType,
         int          id,
         int          level,
-        bool         isCritical,
-        int          damage,
-        DamageType   damageType
+        int          damageBase,
+        int          damageCritical,
+        int          damageExcept,
+        int          criticalRate
     )
-        : tick(tick), source(source), id(id), level(level),
-          isCritical(isCritical), damage(damage), damageType(damageType) {}
+        : tick(tick), source(source), damageType(damageType), id(id), level(level),
+          damageBase(damageBase), damageCritical(damageCritical), damageExcept(damageExcept), criticalRate(criticalRate) {}
 
     event_tick_t tick;
     DamageSource source;
+    DamageType   damageType;
     int          id;
     int          level;
-    bool         isCritical;
-    int          damage;
-    DamageType   damageType;
+    int          damageBase;
+    int          damageCritical;
+    int          damageExcept;
+    int          criticalRate;
 };
 
 class ChDamage {

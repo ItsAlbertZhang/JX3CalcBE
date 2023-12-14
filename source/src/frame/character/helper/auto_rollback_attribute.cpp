@@ -1,7 +1,7 @@
 #include "frame/character/helper/auto_rollback_attribute.h"
 #include "frame/character/character.h"
 #include "frame/character/helper/runtime_castskill.h"
-#include "frame/event.h"
+#include "frame/character/property/damage.h"
 #include "frame/lua_runtime.h"            // LuaFunc
 #include "frame/ref/lua_attribute_type.h" // enumLuaAttributeType
 #include "frame/ref/lua_other.h"          // enumLuaAttributeEffectMode
@@ -29,25 +29,40 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
     // 计算伤害
     for (int idxType = 0; idxType < static_cast<int>(DamageType::COUNT); idxType++) {
         for (int idxTime = 0; idxTime < callDamage[idxType]; idxTime++) {
-            int damage = self->calcDamage(
+            runtime->damageList.emplace_back(self->calcDamage(
+                skill.dwSkillID,
+                skill.dwLevel,
                 self->chAttr,
                 target,
                 static_cast<DamageType>(idxType),
-                isCritical,
+                atCriticalStrike,
                 atCriticalDamagePower,
-                DamageAddPercent,
                 atDamage[idxType],
                 atDamageRand[idxType],
+                DamageAddPercent,
                 static_cast<int>(skill.nChannelInterval),
-                skill.nWeaponDamagePercent
-            );
-            runtime->damageList.emplace_back(Event::now(), DamageSource::skill, skill.dwSkillID, skill.dwLevel, isCritical, damage, static_cast<DamageType>(idxType));
+                skill.nWeaponDamagePercent,
+                false,
+                false
+            ));
         }
         for (int idxTime = 0; idxTime < callSurplusDamage[idxType]; idxTime++) {
-            int damage = self->calcDamage(
-                self->chAttr, target, static_cast<DamageType>(idxType), isCritical, atCriticalDamagePower, DamageAddPercent, 0, 0, this->atGlobalDamageFactor, 0, 1, 1, true
-            );
-            runtime->damageList.emplace_back(Event::now(), DamageSource::skill, skill.dwSkillID, skill.dwLevel, isCritical, damage, static_cast<DamageType>(idxType));
+            runtime->damageList.emplace_back(self->calcDamage(
+                skill.dwSkillID,
+                skill.dwLevel,
+                self->chAttr,
+                target,
+                static_cast<DamageType>(idxType),
+                atCriticalStrike,
+                atCriticalDamagePower,
+                0,
+                0,
+                DamageAddPercent,
+                this->atGlobalDamageFactor,
+                0,
+                true,
+                false
+            ));
         }
     }
     return isCritical;

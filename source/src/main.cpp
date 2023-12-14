@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     std::filesystem::path  pAPI = ns_program::Config::pExeDir / "api.lua";
-    std::filesystem::path  pRES = ns_program::Config::pExeDir / "res.txt";
+    std::filesystem::path  pRES = ns_program::Config::pExeDir / "res.tab";
     ns_frame::MacroCustom  macroCustom(pAPI);
     bool                   useCustomMacro = macroCustom.lua["UseCustomMacro"].get<bool>();
     ns_frame::MacroCustom *ptr            = useCustomMacro ? &macroCustom : nullptr;
@@ -62,7 +62,8 @@ int main(int argc, char *argv[]) {
     player.macroCustom         = ptr;
     macroCustom.attrInit(player);
     ns_frame::ChAttr attrBackup = player.attrExport();
-    auto             start      = std::chrono::steady_clock::now();
+
+    auto start = std::chrono::steady_clock::now();
     player.macroRun();
     while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * fighttime)) {
         ret = ns_frame::Event::run();
@@ -83,7 +84,7 @@ int main(int argc, char *argv[]) {
 
     // unsigned long long totalDamage = 0;
     std::ofstream ofs(pRES);
-    ofs << "tick\tID\tlv\tcri\tdmg\ttype\tname\n";
+    ofs << "time\ttype\tID\tlv\tdmgBase\tdmgCri\tdmgExp\tcriRate\tname\n";
     ns_frame::event_tick_t presentCurr = 0;
     for (auto &it : player.chDamage.damageList) {
         std::string name;
@@ -104,12 +105,19 @@ int main(int argc, char *argv[]) {
             ofs << "\n";
         }
         ofs << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s\t"
-            << it.id << "\t" << it.level << "\t" << it.isCritical << "\t"
-            << it.damage << "\t" << static_cast<int>(it.damageType) << "\t"
+            << static_cast<int>(it.damageType) << "\t"
+            << it.id << "\t" << it.level << "\t"
+            << it.damageBase << "\t" << it.damageCritical << "\t" << it.damageExcept << "\t" << it.criticalRate << "\t"
             << name << "\n";
         // totalDamage += it.damage;
     }
     ofs.close();
+
+    std::cout << "第一次计算花费时间: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms, 已将战斗记录保存至 res.tab" << std::endl;
+
+    int lineidx = 0;
+    int damage[5];
+    int time[5];
 
     unsigned long long        damageAvg = 0;
     std::chrono::milliseconds timeAvg   = std::chrono::milliseconds(0);
@@ -133,9 +141,19 @@ int main(int argc, char *argv[]) {
 
         unsigned long long sumDamage = 0;
         for (auto &it : subplayer.chDamage.damageList) {
-            sumDamage += it.damage;
+            sumDamage += it.damageExcept;
         }
-        std::cout << sumDamage / fighttime << "\t" << std::chrono::duration_cast<std::chrono::milliseconds>(subend - substart).count() << std::endl;
+        damage[lineidx] = static_cast<int>(sumDamage / fighttime);
+        time[lineidx]   = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(subend - substart).count());
+        std::cout << "\r";
+        lineidx++;
+        for (int idx = 0; idx < lineidx; idx++)
+            std::cout << damage[idx] << " " << time[idx] << "ms  ";
+        if (lineidx == 5) {
+            lineidx = 0;
+            std::cout << std::endl;
+        }
+        std::cout << "(" << i << "/" << fightcount << ")" << std::flush;
         damageAvg += sumDamage / fighttime;
         timeAvg += std::chrono::duration_cast<std::chrono::milliseconds>(subend - substart);
     }

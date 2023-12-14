@@ -1,10 +1,8 @@
 #include "frame/character/helper/auto_rollback_attrib.h"
 #include "frame/character/character.h"
-#include "frame/event.h"
 #include "frame/lua_runtime.h"
 #include "frame/ref/tab_attribute.h" // enumTabAttribute
 #include "program/log.h"
-#include <random>
 
 using namespace ns_frame;
 using namespace ns_frame::ref;
@@ -58,15 +56,25 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         Character *src = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         auto [atCriticalStrike, atCriticalDamagePower] = src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel);
-        std::random_device              rd;
-        std::mt19937                    gen(rd());
-        std::uniform_int_distribution<> dis(0, 9999);
-        bool                            isCritical = dis(gen) < atCriticalStrike;
         // 注意计算伤害时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
-        int damage = src->calcDamage(
-            item->attr, self, DamageType::Solar, isCritical, atCriticalDamagePower, 0, attrib.valueAInt, 0, item->nChannelInterval, 0, item->rawInterval, item->rawCount
-        );
-        src->chDamage.damageList.emplace_back(Event::now(), DamageSource::buff, item->nID, item->nLevel, isCritical, damage, DamageType::Solar);
+        src->chDamage.damageList.emplace_back(src->calcDamage(
+            item->nID,
+            item->nLevel,
+            item->attr,
+            self,
+            DamageType::Solar,
+            atCriticalStrike,
+            atCriticalDamagePower,
+            attrib.valueAInt,
+            0,
+            0,
+            item->nChannelInterval,
+            0,
+            false,
+            true,
+            item->rawInterval,
+            item->rawCount
+        ));
         src->bFightState = true;
     } break;
     case enumTabAttribute::atCallLunarDamage: {
@@ -74,15 +82,25 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         Character *src = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         auto [atCriticalStrike, atCriticalDamagePower] = src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel);
-        std::random_device              rd;
-        std::mt19937                    gen(rd());
-        std::uniform_int_distribution<> dis(0, 9999);
-        bool                            isCritical = dis(gen) < atCriticalStrike;
         // 注意计算伤害时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
-        int damage = src->calcDamage(
-            item->attr, self, DamageType::Lunar, isCritical, atCriticalDamagePower, 0, attrib.valueAInt, 0, item->nChannelInterval, 0, item->rawInterval, item->rawCount
-        );
-        src->chDamage.damageList.emplace_back(Event::now(), DamageSource::buff, item->nID, item->nLevel, isCritical, damage, DamageType::Lunar);
+        src->chDamage.damageList.emplace_back(src->calcDamage(
+            item->nID,
+            item->nLevel,
+            item->attr,
+            self,
+            DamageType::Lunar,
+            atCriticalStrike,
+            atCriticalDamagePower,
+            attrib.valueAInt,
+            0,
+            0,
+            item->nChannelInterval,
+            0,
+            false,
+            true,
+            item->rawInterval,
+            item->rawCount
+        ));
         src->bFightState = true;
     } break;
     case enumTabAttribute::atExecuteScript: {
