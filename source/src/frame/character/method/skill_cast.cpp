@@ -413,7 +413,7 @@ static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDo
 static inline void staticTriggerCoolDown(Character *self, int cooldownID, int cooldownAdd) {
     const Cooldown &cooldown = CooldownManager::get(cooldownID);
     // 计算 CD 时间
-    int durationFrame = cooldown.DurationFrame * (1024 - self->chAttr.getHaste()) / 1024;
+    int durationFrame = cooldown.DurationFrame * 1024 / (1024 + self->chAttr.getHaste());
     durationFrame     = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
     durationFrame     = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
     durationFrame     = durationFrame + cooldownAdd;

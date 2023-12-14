@@ -50,7 +50,7 @@ void Character::cooldownReset(int cooldownID) {
         // 若该 CD 正在冷却, 则取消 Event
         Event::cancel(item->tickOver, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
     }
-    int durationFrame = cooldown.DurationFrame * (1024 - this->chAttr.getHaste()) / 1024;
+    int durationFrame = cooldown.DurationFrame * 1024 / (1024 + this->chAttr.getHaste());
     durationFrame     = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
     durationFrame     = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
     item->isValid     = true;

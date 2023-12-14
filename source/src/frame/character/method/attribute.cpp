@@ -215,11 +215,10 @@ int ChAttr::getStrain() const {
 }
 // 急速
 int ChAttr::getHaste() const {
-    int res = atHasteBasePercentAdd +
-              static_cast<int>(
-                  atHasteBase *
-                  1024 / (GlobalParam::get().fHasteRate * GlobalParam::levelCof(atLevel))
-              );
+    int res;
+    res = atHasteBase;
+    res = static_cast<int>(res * 1024 / (GlobalParam::get().fHasteRate * GlobalParam::levelCof(atLevel)));
+    res = res + atHasteBasePercentAdd;
     res = res > 256 ? 256 : res;
     return res + atUnlimitHasteBasePercentAdd;
 }

@@ -176,6 +176,6 @@ void MjFysj::macroDefault2() {
 // virtual override
 int MjFysj::normalAttack() {
     skillCast(targetSelect, 4326, 1); // 大漠刀法
-    int frame = 16 * (1024 - this->chAttr.getHaste()) / 1024;
+    int frame = 16 * 1024 / (1024 + this->chAttr.getHaste());
     return frame * 64; // 64 = 1024/16
 }
