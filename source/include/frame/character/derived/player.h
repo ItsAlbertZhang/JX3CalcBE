@@ -24,6 +24,9 @@ public:
     Player();
     virtual void macroPrepareDefault() {}
     virtual void macroRuntimeDefault() {}
+    virtual int  normalAttack() {
+        return 1024; // 返回普通攻击间隔
+    }
 
     int          publicCooldownID = 0;
     int          delayBase        = 0;

@@ -58,6 +58,13 @@ void SkillManager::add(int skillID, int skillLevel) {
     skill.TargetRelationSelf  = skill.tab["TargetRelationSelf"] == "1";
     skill.TargetRelationEnemy = skill.tab["TargetRelationEnemy"] == "1";
     skill.RecipeType          = atoi(skill.tab["RecipeType"].c_str());
+    // 处理武器伤害. 目前推测: WeaponRequest 字段非 0 的技能默认拥有 1024 的武器伤害.
+    // 注意: 拥有武器伤害不一定代表会造成武器伤害. 造成武器伤害与 AddAttribute 中的 CALL_PHYSICS_DAMAGE 有关.
+    // 推测的依据:
+    // 1. 部分技能并没有在 lua 中显式声明 nWeaponDamagePercent, 但是仍然可以造成武器伤害. (最简单的例子即为普通攻击)
+    // 2. 部分不造成武器伤害的外功技能, 似乎都在 lua 中显式声明了其 nWeaponDamagePercent = 0. (例如, 丐帮的诸多需要武器施展的技能.)
+    // 暂时按照该推测进行处理.
+    skill.nWeaponDamagePercent = !skill.tab["WeaponRequest"].empty() && skill.tab["WeaponRequest"] != "0" ? 1024 : 0;
     // 执行 GetSkillLevelData
     std::string name = "scripts/skill/" + skill.tab["ScriptFile"];
     bool        res  = LuaFunc::analysis(

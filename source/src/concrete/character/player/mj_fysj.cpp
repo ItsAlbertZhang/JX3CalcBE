@@ -87,6 +87,7 @@ MjFysj::MjFysj() {
     skillrecipeAdd(1053, 1); // 驱夜断愁, 伤害提高5%
 }
 
+// virtual override
 void MjFysj::macroPrepareDefault() {
     cast(3974);
     if (nSunPowerValue == 0 && nMoonPowerValue == 0) {
@@ -97,6 +98,7 @@ void MjFysj::macroPrepareDefault() {
     }
 }
 
+// virtual override
 void MjFysj::macroRuntimeDefault() {
     switch (macroIdx) {
     case 0:
@@ -169,4 +171,11 @@ void MjFysj::macroDefault2() {
         macroIdx = 0; // 切换至 0 号宏
         // 在结尾进行判断的原因时, 导致切换条件 (moon>=100 & sun<100 & nobuff:25721) 的事件 (银月斩的释放) 是发生在宏内的. 因此, 可以在宏结束时进行判断.
     }
+}
+
+// virtual override
+int MjFysj::normalAttack() {
+    skillCast(targetSelect, 4326, 1); // 大漠刀法
+    int frame = 16 * (1024 - this->chAttr.getHaste()) / 1024;
+    return frame * 64; // 64 = 1024/16
 }

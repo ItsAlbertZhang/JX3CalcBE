@@ -10,6 +10,7 @@ public:
     MjFysj();
     virtual void macroPrepareDefault() override;
     virtual void macroRuntimeDefault() override;
+    virtual int  normalAttack() override;
 
     bool macroSwitchedOnce = false;
     void macroDefault0();
