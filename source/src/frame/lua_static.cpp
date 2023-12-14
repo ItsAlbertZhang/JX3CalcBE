@@ -265,8 +265,9 @@ bool ns_frame::luaInit(sol::state &lua) {
     }
     lua["ROLE_TYPE"] = ROLE_TYPE;
 
-    lua["CONSUME_BASE"] = 100;
-    lua["LENGTH_BASE"]  = 64;
+    lua["CONSUME_BASE"]          = 100;
+    lua["LENGTH_BASE"]           = 64;
+    lua["MELEE_ATTACK_DISTANCE"] = 4 * 64;
 
     return true;
 }

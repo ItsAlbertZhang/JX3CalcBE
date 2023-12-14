@@ -194,7 +194,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     std::set<const SkillRecipe *> skillrecipeList = this->skillrecipeGet(skillID, skill.RecipeType);
     std::vector<const Skill *>    recipeskillList;
     for (const auto &it : skillrecipeList) {
-        const Skill *ptrSkill = SkillRecipeManager::getSkill(it);
+        const Skill *ptrSkill = SkillRecipeManager::getScriptSkill(it, &skill);
         if (nullptr != ptrSkill) {                  // 如果技能的秘籍存在对应技能
             recipeskillList.emplace_back(ptrSkill); // 将秘籍的技能加入列表
             // 使用秘籍的技能重载当前的 CD 和 bindbuff

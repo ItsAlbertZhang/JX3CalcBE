@@ -21,14 +21,15 @@ public:
     std::unordered_map<std::string, std::string> tab; // buffs.tab 中的数据
 
     // 初始化时拿出一些数据, 降低使用开销
-    int RecipeID;
-    int RecipeLevel;
-    int SkillRecipeType;
-    int SkillID;
-    int CoolDownAdd1;
-    int CoolDownAdd2;
-    int CoolDownAdd3;
-    int DamageAddPercent;
+    int  RecipeID;
+    int  RecipeLevel;
+    int  SkillRecipeType;
+    int  SkillID;
+    int  CoolDownAdd1;
+    int  CoolDownAdd2;
+    int  CoolDownAdd3;
+    int  DamageAddPercent;
+    bool hasScriptFile;
     // std::string ScriptFile; // ScriptFile 不在此处实现, 而是在 SkillManager::getRecipe() 中实现
 };
 
@@ -45,8 +46,8 @@ public:
      * @param RecipeID
      * @return SkillRecipe&
      */
-    static const SkillRecipe &get(int RecipeID, int RecipeLevel);
-    static const Skill       *getSkill(const SkillRecipe *skillrecipe);
+    static const SkillRecipe &getRecipe(int RecipeID, int RecipeLevel);
+    static const Skill       *getScriptSkill(const SkillRecipe *skillrecipe, const Skill *skill);
 
 private:
     static inline std::mutex mutex; // 互斥锁. 用于保护 add 操作.
@@ -63,14 +64,16 @@ private:
     /**
      * @brief SkillRecipe 缓存数据
      */
-    static inline std::unordered_map<std::tuple<int, int>, SkillRecipe, tuple_hash> data;
-    static inline std::unordered_map<const SkillRecipe *, Skill>                    ScriptSkill; // 用于保存 ScriptFile 作用的 Skill 对象
+    static inline std::unordered_map<std::tuple<int, int>, SkillRecipe, tuple_hash>                     mapRecipe;
+    static inline std::unordered_map<std::tuple<const SkillRecipe *, const Skill *>, Skill, tuple_hash> mapScriptSkill; // 用于保存 ScriptFile 作用的 Skill 对象
 
     /**
      * @brief 初始化 SkillRecipe. 将指定 ID 的 SkillRecipe 数据存至缓存.
      * @param RecipeID
      */
     static void add(int RecipeID, int RecipeLevel);
+
+    static void addScriptSkill(const SkillRecipe *skillrecipe, const Skill *skill);
 };
 
 } // namespace ns_frame
