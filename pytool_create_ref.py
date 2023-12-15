@@ -106,6 +106,8 @@ list_to_create = {
             "atSolarCriticalStrikeBaseRate",
             "atSolarDamageCoefficient",
             "atStealth",
+            "atSolarCriticalDamagePowerBaseKiloNumRate",
+            "atLunarCriticalDamagePowerBaseKiloNumRate",
         ],
     },
 }

@@ -182,6 +182,15 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case enumTabAttribute::atKnockedOffRate:
         // 未做相关实现, 推测为免疫击退
         break;
+    case enumTabAttribute::atSolarCriticalDamagePowerBaseKiloNumRate:
+        self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
+        break;
+    case enumTabAttribute::atLunarCriticalDamagePowerBaseKiloNumRate:
+        self->chAttr.atLunarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
+        break;
+    case enumTabAttribute::atAllDamageAddPercent:
+        self->chAttr.atAllDamageAddPercent += attrib.valueAInt * c;
+        break;
     default:
         LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;

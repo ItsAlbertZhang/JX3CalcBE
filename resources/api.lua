@@ -1,12 +1,18 @@
 FightCount = 10000; -- 战斗次数
-FightTime = 300; -- 战斗时间
+FightTime = 300;    -- 战斗时间
 -- 注: 1 tick = 1/1024 秒. 数字不大的情况下, 可以近似将其视作 1ms.
-DelayBase = 45; -- 网络延迟, 单位为 tick
-DelayRand = 20; -- 按键延迟, 单位为 tick
+DelayBase = 45;     -- 网络延迟, 单位为 tick
+DelayRand = 20;     -- 按键延迟, 单位为 tick
 -- 注: 在延迟较为极端的情况下, 使用内置宏可能会出现问题 (乱循环导致的DPS大幅降低, 符合游戏内实际表现). 此时, 可以尝试使用自定义宏.
+TZ_JN = true;       -- 是否启用门派套装效果-技能加成
+TZ_TX = true;       -- 是否启用门派套装效果-触发特效
+DFM_YD = true;      -- 是否启用腰带大附魔
+DFM_HW = true;      -- 是否启用护腕大附魔
+DFM_XZ = true;      -- 是否启用鞋子大附魔
+WQ_CW = false;      -- 是否启用橙武特效
+-- 注意! 开启橙武特效之后, 内置循环会出现问题, 请使用自定义宏.
 
 function AttrInit(player)
-
     -- 输入玩家属性. 以下两种方法仅应当使用其中一种.
 
     -- 方法 1: 从 JX3BOX 导入属性

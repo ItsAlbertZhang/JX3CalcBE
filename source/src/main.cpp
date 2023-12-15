@@ -105,6 +105,28 @@ void thread_cleanup() {
     ns_frame::LuaFunc::clear();
 }
 
+bool tz_jn  = false;
+bool tz_tx  = false;
+bool dfm_yd = false;
+bool dfm_hw = false;
+bool dfm_xz = false;
+bool wq_cw  = false;
+
+void init_player(ns_frame::Player &player) {
+    if (tz_jn)
+        player.skillrecipeAdd(948, 2);
+    if (tz_tx)
+        player.skilleventAdd(1922);
+    if (dfm_yd)
+        player.skilleventAdd(1705);
+    if (dfm_hw)
+        player.skilleventAdd(1843);
+    if (dfm_xz)
+        player.skilleventAdd(2393);
+    if (wq_cw)
+        player.skilleventAdd(2421);
+}
+
 int thread_calculate() {
     ns_concrete::MjFysj fysj{delay_network, delay_keybord};
     ns_concrete::NPC124 npc124;
@@ -113,6 +135,7 @@ int thread_calculate() {
     player.targetSelect        = &npc;
     player.macroCustom         = ptr_macro_custom.get();
     player.attrImportFromBackup(attr_backup);
+    init_player(player);
     ns_frame::Event::clear();
     // auto start = std::chrono::steady_clock::now();
     player.macroRun();
@@ -142,6 +165,7 @@ int thread_output() {
     player.targetSelect        = &npc;
     player.macroCustom         = ptr_macro_custom.get();
     player.attrImportFromBackup(attr_backup);
+    init_player(player);
     ns_frame::Event::clear();
     player.macroRun();
     while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * fight_time)) {
@@ -213,6 +237,12 @@ int main(int argc, char *argv[]) {
     fight_time        = macroCustom.lua["FightTime"].get<int>();
     delay_network     = macroCustom.lua["DelayBase"].get<int>();
     delay_keybord     = macroCustom.lua["DelayRand"].get<int>();
+    tz_jn             = macroCustom.lua["TZ_JN"].get<bool>();
+    tz_tx             = macroCustom.lua["TZ_TX"].get<bool>();
+    dfm_yd            = macroCustom.lua["DFM_YD"].get<bool>();
+    dfm_hw            = macroCustom.lua["DFM_HW"].get<bool>();
+    dfm_xz            = macroCustom.lua["DFM_XZ"].get<bool>();
+    wq_cw             = macroCustom.lua["WQ_CW"].get<bool>();
     if (fight_time <= 0)
         fight_time = 300;
     if (delay_network <= 0)
@@ -270,6 +300,10 @@ int main(int argc, char *argv[]) {
     double timespendAvg = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() * thread_count / static_cast<double>(fightCount));
     std::cout << "平均每次计算所需时间: " << std::fixed << std::setprecision(2) << timespendAvg << " ms / " << thread_count << " 并发数 = "
               << std::fixed << std::setprecision(2) << timespendAvg / thread_count << " ms" << std::endl;
+
+#ifdef _WIN32
+    system("pause");
+#endif
 
     thread_cleanup();
 

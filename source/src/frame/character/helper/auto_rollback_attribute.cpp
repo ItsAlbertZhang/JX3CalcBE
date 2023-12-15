@@ -167,16 +167,20 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 self->chAttr.atPhysicsAttackPowerPercent += it.param1Int * c;
                 break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT): {
-                std::string paramStr      = "scripts/" + it.param1Str;
-                int         dwCharacterID = Character::characterGetID(self);
-                int         dwSkillSrcID  = Character::characterGetID(self);
-                LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
+                if (!isRollback) {
+                    std::string paramStr      = "scripts/" + it.param1Str;
+                    int         dwCharacterID = Character::characterGetID(self);
+                    int         dwSkillSrcID  = Character::characterGetID(self);
+                    LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
+                }
             } break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
-                std::string paramStr      = "scripts/" + it.param1Str;
-                int         dwCharacterID = Character::characterGetID(self);
-                int         dwSkillSrcID  = Character::characterGetID(self);
-                LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
+                if (!isRollback) {
+                    std::string paramStr      = "scripts/" + it.param1Str;
+                    int         dwCharacterID = Character::characterGetID(self);
+                    int         dwSkillSrcID  = Character::characterGetID(self);
+                    LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
+                }
             } break;
             case static_cast<int>(enumLuaAttributeType::DST_NPC_DAMAGE_COEFFICIENT):
                 self->chAttr.atDstNpcDamageCoefficient += it.param1Int * c;

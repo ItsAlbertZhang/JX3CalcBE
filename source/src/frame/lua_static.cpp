@@ -1,9 +1,12 @@
 #include "frame/lua_static.h"
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
+#include "frame/ref/lua_adaptive_type.h"
 #include "frame/ref/lua_attribute_type.h"
 #include "frame/ref/lua_other.h"
 #include "program/log.h"
+#include <random>
+#include <sol2/sol.hpp>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
@@ -58,6 +61,8 @@ const std::vector<std::string> ns_frame::luaFuncStaticToDynamic = {
 };
 
 bool ns_frame::luaInit(sol::state &lua) {
+    lua.open_libraries(sol::lib::base);
+    lua.open_libraries(sol::lib::table);
 
     // clang-format off
     
@@ -216,6 +221,11 @@ bool ns_frame::luaInit(sol::state &lua) {
     lua.set_function("SetValueByBits", LuaGlobalFunction::SetValueByBits);
     lua.set_function("RemoteCallToClient", LuaGlobalFunction::RemoteCallToClient);
     lua.set_function("GetDistanceSq", LuaGlobalFunction::GetDistanceSq);
+    lua.set_function("Random", LuaGlobalFunction::Random);
+
+    lua["CONSUME_BASE"]          = 100;
+    lua["LENGTH_BASE"]           = 64;
+    lua["MELEE_ATTACK_DISTANCE"] = 4 * 64;
 
     sol::table AttributeType = lua.create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaAttributeType::COUNT); i++) {
@@ -265,9 +275,13 @@ bool ns_frame::luaInit(sol::state &lua) {
     }
     lua["ROLE_TYPE"] = ROLE_TYPE;
 
-    lua["CONSUME_BASE"]          = 100;
-    lua["LENGTH_BASE"]           = 64;
-    lua["MELEE_ATTACK_DISTANCE"] = 4 * 64;
+    sol::table KUNGFU_ADAPTIVETYPE_LIST = lua.create_table();
+    for (auto &i : ref::mapLuaAdaptiveType) {
+        sol::table sub_table                                = lua.create_table();
+        sub_table["adaptiveType"]                           = static_cast<int>(i.second);
+        KUNGFU_ADAPTIVETYPE_LIST[static_cast<int>(i.first)] = sub_table;
+    }
+    lua["KUNGFU_ADAPTIVETYPE_LIST"] = KUNGFU_ADAPTIVETYPE_LIST;
 
     return true;
 }
@@ -398,4 +412,11 @@ void LuaGlobalFunction::RemoteCallToClient() {
 
 int LuaGlobalFunction::GetDistanceSq(int pX, int pY, int pZ, int tX, int tY, int tZ) {
     return (pX - tX) * (pX - tX) + (pY - tY) * (pY - tY) + (pZ - tZ) * (pZ - tZ);
+}
+
+int LuaGlobalFunction::Random(int min, int max) {
+    std::random_device              rd;
+    std::mt19937                    gen(rd());
+    std::uniform_int_distribution<> dis(min, max);
+    return static_cast<int>(dis(gen));
 }
