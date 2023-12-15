@@ -1,9 +1,13 @@
-function AttrInit(player)
-    -- 注: 1 tick = 1/1024 秒. 数字不大的情况下, 可以近似将其视作 1ms.
-    player.delayBase = 45; -- 网络延迟, 单位为 tick
-    player.delayRand = 20; -- 按键延迟, 单位为 tick
+FightCount = 10000; -- 战斗次数
+FightTime = 300; -- 战斗时间
+-- 注: 1 tick = 1/1024 秒. 数字不大的情况下, 可以近似将其视作 1ms.
+DelayBase = 45; -- 网络延迟, 单位为 tick
+DelayRand = 20; -- 按键延迟, 单位为 tick
+-- 注: 在延迟较为极端的情况下, 使用内置宏可能会出现问题 (乱循环导致的DPS大幅降低, 符合游戏内实际表现). 此时, 可以尝试使用自定义宏.
 
-    -- 以下两种方法仅应当使用其中一种.
+function AttrInit(player)
+
+    -- 输入玩家属性. 以下两种方法仅应当使用其中一种.
 
     -- 方法 1: 从 JX3BOX 导入属性
     player:attrImportFromJX3BOX(787136);
@@ -43,8 +47,6 @@ function AttrInit(player)
     -- player.chAttr.atMeleeWeaponDamageRand = 160;        -- 武器伤害(浮动, 数值上等于最大减去最小)
 end
 
-FightTime = 300;
-FightCount = 10000;
 UseCustomMacro = false; -- 是否使用自定义宏. 如果为 false, 则以下的所有设置均不会生效, 且会使用内置宏以提高计算速度.
 -- 除非你确切地知道自己在干什么, 否则不要修改此项及以下的内容.
 

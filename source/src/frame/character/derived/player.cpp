@@ -7,7 +7,8 @@
 
 using namespace ns_frame;
 
-Player::Player() {
+Player::Player(int delayNetwork, int delayKeybord)
+    : Character(), delayBase(delayNetwork), delayRand(delayKeybord) {
     isPlayer = true;
 }
 

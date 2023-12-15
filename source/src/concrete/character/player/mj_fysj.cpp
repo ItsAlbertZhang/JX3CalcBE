@@ -2,9 +2,8 @@
 
 using namespace ns_concrete;
 
-MjFysj::MjFysj() {
-    delayBase = 45; // 网络延迟, 单位为 tick
-    delayRand = 20; // 按键延迟, 单位为 tick
+MjFysj::MjFysj(int delayNetwork, int delayKeybord)
+    : Player(delayNetwork, delayKeybord) {
 
     skillLearn(10242, 13); // 焚影圣诀
     dwKungfuID       = 10242;

@@ -86,8 +86,11 @@ private:
 const int thread_count = 16;
 
 ns_frame::ChAttr      attr_backup;
+int                   delay_network;
+int                   delay_keybord;
 int                   fight_time;
 std::filesystem::path p_api;
+std::filesystem::path p_res;
 bool                  use_costume_macro;
 
 thread_local std::unique_ptr<ns_frame::MacroCustom> ptr_macro_custom;
@@ -103,7 +106,7 @@ void thread_cleanup() {
 }
 
 int thread_calculate() {
-    ns_concrete::MjFysj fysj;
+    ns_concrete::MjFysj fysj{delay_network, delay_keybord};
     ns_concrete::NPC124 npc124;
     ns_frame::Player   &player = fysj;
     ns_frame::NPC      &npc    = npc124;
@@ -128,11 +131,11 @@ int thread_calculate() {
     // return static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 }
 
-int thread_output(const std::filesystem::path &pRes) {
-    std::ofstream ofs(pRes);
+int thread_output() {
+    std::ofstream ofs(p_res);
     auto          start = std::chrono::steady_clock::now();
 
-    ns_concrete::MjFysj fysj;
+    ns_concrete::MjFysj fysj{delay_network, delay_keybord};
     ns_concrete::NPC124 npc124;
     ns_frame::Player   &player = fysj;
     ns_frame::NPC      &npc    = npc124;
@@ -199,17 +202,25 @@ int main(int argc, char *argv[]) {
     if (!ret)
         return 0;
 
-    std::filesystem::path pRes = ns_program::Config::pExeDir / "res.tab";
-    p_api                      = ns_program::Config::pExeDir / "api.lua";
+    p_res = ns_program::Config::pExeDir / "res.tab";
+    p_api = ns_program::Config::pExeDir / "api.lua";
     ns_frame::MacroCustom macroCustom(p_api);
-    use_costume_macro = macroCustom.lua["UseCustomMacro"].get<bool>();
-    fight_time        = macroCustom.lua["FightTime"].get<int>();
-    if (fight_time <= 0)
-        fight_time = 300;
+
     int fightCount = macroCustom.lua["FightCount"].get<int>();
     if (fightCount <= 0)
         fightCount = 300;
-    ns_concrete::MjFysj fysj;
+    use_costume_macro = macroCustom.lua["UseCustomMacro"].get<bool>();
+    fight_time        = macroCustom.lua["FightTime"].get<int>();
+    delay_network     = macroCustom.lua["DelayBase"].get<int>();
+    delay_keybord     = macroCustom.lua["DelayRand"].get<int>();
+    if (fight_time <= 0)
+        fight_time = 300;
+    if (delay_network <= 0)
+        delay_network = 45;
+    if (delay_keybord <= 0)
+        delay_keybord = 20;
+
+    ns_concrete::MjFysj fysj{delay_network, delay_keybord};
     ns_frame::Player   &player = fysj;
     macroCustom.attrInit(player);
     attr_backup = player.attrExport();
@@ -220,7 +231,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     ThreadPool pool(thread_count, thread_init, thread_cleanup);
-    auto       first     = pool.enqueue(thread_output, pRes);
+    auto       first     = pool.enqueue(thread_output);
     int        timespend = first.get();
     std::cout << "第一次计算花费时间: " << timespend << "ms, 已将战斗记录保存至 res.tab" << std::endl;
 
