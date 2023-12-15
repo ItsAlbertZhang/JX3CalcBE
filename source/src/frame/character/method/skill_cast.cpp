@@ -260,7 +260,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     std::vector<std::unique_ptr<AutoRollbackAttribute>> skillAutoRollbackAttributeList;
     skillAutoRollbackAttributeList.reserve(recipeskillList.size());
     for (const auto &it : recipeskillList) {
-        skillAutoRollbackAttributeList.emplace_back(new AutoRollbackAttribute{this, target, &runtime, *it});
+        skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this, target, &runtime, *it));
     }
 
     // 7. 计算伤害

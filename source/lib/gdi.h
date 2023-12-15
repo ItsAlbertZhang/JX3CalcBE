@@ -75,9 +75,10 @@ using select_t = std::vector<std::unordered_map<std::string, std::string>>;
  * @note #
  * @note 当用于传入数据时:
  * @note - arg[i] 中的 key-value 对应查询条件, 且彼此之间为与的关系.
- * @note - 不同的 arg[i] 之间为或的关系. (通常情况下, arg.size() 应该为 1, 即不使用本条规则)
+ * @note - 不同的 arg[i] 之间为或的关系. (大部分情况下, arg.size() 为 1, 即不使用本条规则)
  * @note #
  * @note 当用于传出数据时, 每一条 arg[i] 都是一行满足查询条件的数据, 且对于任何 i, arg[i].size() 是一个定值 (field 的数量, 也即列数).
+ * @warning tabSelect 不是线程安全的, 原因在于 tab 作为资源, 被多线程同时操作会出现错误. 若要在多线程中调用, 需要加锁.
  */
 void tabSelect(Tab tab, select_t &arg);
 

@@ -1,5 +1,6 @@
 #include "concrete/character/npc/npc124.h"
 #include "concrete/character/player/mj_fysj.h"
+#include "frame/character/derived/player.h"
 #include "frame/character/property/buff.h"
 #include "frame/event.h"
 #include "frame/global/uibuff.h"
@@ -10,80 +11,144 @@
 #include "program/init.h"
 #include "program/log.h"
 #include <chrono>
+#include <condition_variable>
 #include <filesystem>
 #include <fstream>
+#include <functional>
+#include <future>
 #include <iostream>
+#include <memory>
+#include <queue>
+#include <thread>
+#include <vector>
 #ifdef _WIN32
 #include <Windows.h>
 #endif
 
-int main(int argc, char *argv[]) {
+class ThreadPool {
+public:
+    ThreadPool(size_t threads, std::function<void()> init_func, std::function<void()> cleanup_func)
+        : stop(false), cleanup_func(cleanup_func) {
+        for (size_t i = 0; i < threads; ++i)
+            workers.emplace_back([this, init_func] {
+                init_func();
+                for (;;) {
+                    std::function<void()> task;
+                    {
+                        std::unique_lock<std::mutex> lock(this->queue_mutex);
+                        this->condition.wait(lock, [this] { return this->stop || !this->tasks.empty(); });
+                        if (this->stop && this->tasks.empty())
+                            return;
+                        task = std::move(this->tasks.front());
+                        this->tasks.pop();
+                    }
+                    task();
+                }
+            });
+    }
 
-    // 如果是 Windows 操作系统, 将控制台编码设置为 UTF-8, 以便输出中文.
-#ifdef _WIN32
-    SetConsoleOutputCP(CP_UTF8);
-#endif
-    bool ret;
-    // 初始化程序
-    ns_program::Init::init(argc, argv);
-    // 初始化接口
-    ret = gdi::init(
-        ns_program::Config::pJX3,
-        ns_program::Config::pUnpack,
-        ns_frame::luaInit,
-        ns_frame::luaFuncStaticToDynamic,
-        static_cast<int>(gdi::Tab::COUNT)
-    );
-    if (!ret)
-        return 0;
+    template <class F, class... Args>
+    auto enqueue(F &&f, Args &&...args) -> std::future<typename std::invoke_result<F, Args...>::type> {
+        using return_type             = typename std::invoke_result<F, Args...>::type;
+        auto                     task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+        std::future<return_type> res  = task->get_future();
+        {
+            std::unique_lock<std::mutex> lock(queue_mutex);
+            if (stop)
+                throw std::runtime_error("enqueue on stopped ThreadPool");
+            tasks.emplace([task]() { (*task)(); });
+        }
+        condition.notify_one();
+        return res;
+    }
 
-#ifdef DEBUG
-    ns_program::log_info.record    = true;
-    ns_program::log_error.realtime = true;
-#endif
+    ~ThreadPool() {
+        {
+            std::unique_lock<std::mutex> lock(queue_mutex);
+            stop = true;
+        }
+        condition.notify_all();
+        for (std::thread &worker : workers) {
+            worker.join();
+            cleanup_func();
+        }
+    }
 
-    std::filesystem::path  pAPI = ns_program::Config::pExeDir / "api.lua";
-    std::filesystem::path  pRES = ns_program::Config::pExeDir / "res.tab";
-    ns_frame::MacroCustom  macroCustom(pAPI);
-    bool                   useCustomMacro = macroCustom.lua["UseCustomMacro"].get<bool>();
-    ns_frame::MacroCustom *ptr            = useCustomMacro ? &macroCustom : nullptr;
-    int                    fighttime      = macroCustom.lua["FightTime"].get<int>();
-    if (fighttime <= 0)
-        fighttime = 300;
-    int fightcount = macroCustom.lua["FightCount"].get<int>();
-    if (fightcount <= 0)
-        fightcount = 100;
+private:
+    std::vector<std::thread>          workers;
+    std::queue<std::function<void()>> tasks;
+    std::mutex                        queue_mutex;
+    std::condition_variable           condition;
+    bool                              stop;
+    std::function<void()>             cleanup_func;
+};
+
+const int thread_count = 16;
+
+ns_frame::ChAttr      attr_backup;
+int                   fight_time;
+std::filesystem::path p_api;
+bool                  use_costume_macro;
+
+thread_local std::unique_ptr<ns_frame::MacroCustom> ptr_macro_custom;
+
+void thread_init() {
+    if (use_costume_macro) {
+        ptr_macro_custom = std::make_unique<ns_frame::MacroCustom>(p_api);
+    }
+}
+
+void thread_cleanup() {
+    ns_frame::LuaFunc::clear();
+}
+
+int thread_calculate() {
+    ns_concrete::MjFysj fysj;
+    ns_concrete::NPC124 npc124;
+    ns_frame::Player   &player = fysj;
+    ns_frame::NPC      &npc    = npc124;
+    player.targetSelect        = &npc;
+    player.macroCustom         = ptr_macro_custom.get();
+    player.attrImportFromBackup(attr_backup);
+    ns_frame::Event::clear();
+    // auto start = std::chrono::steady_clock::now();
+    player.macroRun();
+    while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * fight_time)) {
+        bool ret = ns_frame::Event::run();
+        if (!ret)
+            break;
+    }
+    // auto end = std::chrono::steady_clock::now();
+
+    unsigned long long sumDamage = 0;
+    for (auto &it : player.chDamage.damageList) {
+        sumDamage += it.damageExcept;
+    }
+    return static_cast<int>(sumDamage / fight_time);
+    // return static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+}
+
+int thread_output(const std::filesystem::path &pRes) {
+    std::ofstream ofs(pRes);
+    auto          start = std::chrono::steady_clock::now();
 
     ns_concrete::MjFysj fysj;
     ns_concrete::NPC124 npc124;
     ns_frame::Player   &player = fysj;
     ns_frame::NPC      &npc    = npc124;
     player.targetSelect        = &npc;
-    player.macroCustom         = ptr;
-    macroCustom.attrInit(player);
-    ns_frame::ChAttr attrBackup = player.attrExport();
-
-    auto start = std::chrono::steady_clock::now();
+    player.macroCustom         = ptr_macro_custom.get();
+    player.attrImportFromBackup(attr_backup);
+    ns_frame::Event::clear();
     player.macroRun();
-    while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * fighttime)) {
-        ret = ns_frame::Event::run();
+    while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * fight_time)) {
+        bool ret = ns_frame::Event::run();
         if (!ret)
             break;
     }
+
     auto end = std::chrono::steady_clock::now();
 
-#ifdef DEBUG
-    if (argc > 1) {
-        if (strcmp(argv[1], "--log=info") == 0) {
-            ns_program::log_info.print();
-        }
-    }
-    ns_program::log_info.record    = false;
-    ns_program::log_error.realtime = false;
-#endif
-
-    // unsigned long long totalDamage = 0;
-    std::ofstream ofs(pRES);
     ofs << "time\ttype\tID\tlv\tdmgBase\tdmgCri\tdmgExp\tcriRate\tname\n";
     ns_frame::event_tick_t presentCurr = 0;
     for (auto &it : player.chDamage.damageList) {
@@ -109,59 +174,93 @@ int main(int argc, char *argv[]) {
             << it.id << "\t" << it.level << "\t"
             << it.damageBase << "\t" << it.damageCritical << "\t" << it.damageExcept << "\t" << it.criticalRate << "\t"
             << name << "\n";
-        // totalDamage += it.damage;
     }
     ofs.close();
+    return static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+}
 
-    std::cout << "第一次计算花费时间: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms, 已将战斗记录保存至 res.tab" << std::endl;
+int main(int argc, char *argv[]) {
 
-    int lineidx = 0;
-    int damage[5];
-    int time[5];
+    // 如果是 Windows 操作系统, 将控制台编码设置为 UTF-8, 以便输出中文.
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+#endif
+    bool ret;
+    // 初始化程序
+    ns_program::Init::init(argc, argv);
+    // 初始化接口
+    ret = gdi::init(
+        ns_program::Config::pJX3,
+        ns_program::Config::pUnpack,
+        ns_frame::luaInit,
+        ns_frame::luaFuncStaticToDynamic,
+        static_cast<int>(gdi::Tab::COUNT)
+    );
+    if (!ret)
+        return 0;
 
-    unsigned long long        damageAvg = 0;
-    std::chrono::milliseconds timeAvg   = std::chrono::milliseconds(0);
-    for (int i = 0; i < fightcount; i++) {
-        auto                substart = std::chrono::steady_clock::now();
-        ns_concrete::MjFysj subfysj;
-        ns_concrete::NPC124 subnpc124;
-        ns_frame::Player   &subplayer = subfysj;
-        ns_frame::NPC      &subnpc    = subnpc124;
-        subplayer.targetSelect        = &subnpc;
-        subplayer.macroCustom         = ptr;
-        subplayer.attrImportFromBackup(attrBackup);
-        ns_frame::Event::clear();
-        subplayer.macroRun();
-        while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * fighttime)) {
-            ret = ns_frame::Event::run();
-            if (!ret)
-                break;
+    std::filesystem::path pRes = ns_program::Config::pExeDir / "res.tab";
+    p_api                      = ns_program::Config::pExeDir / "api.lua";
+    ns_frame::MacroCustom macroCustom(p_api);
+    use_costume_macro = macroCustom.lua["UseCustomMacro"].get<bool>();
+    fight_time        = macroCustom.lua["FightTime"].get<int>();
+    if (fight_time <= 0)
+        fight_time = 300;
+    int fightCount = macroCustom.lua["FightCount"].get<int>();
+    if (fightCount <= 0)
+        fightCount = 300;
+    ns_concrete::MjFysj fysj;
+    ns_frame::Player   &player = fysj;
+    macroCustom.attrInit(player);
+    attr_backup = player.attrExport();
+
+#ifdef DEBUG
+    ns_program::log_info.record    = true;
+    ns_program::log_error.realtime = true;
+#endif
+
+    ThreadPool pool(thread_count, thread_init, thread_cleanup);
+    auto       first     = pool.enqueue(thread_output, pRes);
+    int        timespend = first.get();
+    std::cout << "第一次计算花费时间: " << timespend << "ms, 已将战斗记录保存至 res.tab" << std::endl;
+
+#ifdef DEBUG
+    if (argc > 1) {
+        if (strcmp(argv[1], "--log=info") == 0) {
+            ns_program::log_info.print();
         }
-        auto subend = std::chrono::steady_clock::now();
-
-        unsigned long long sumDamage = 0;
-        for (auto &it : subplayer.chDamage.damageList) {
-            sumDamage += it.damageExcept;
-        }
-        damage[lineidx] = static_cast<int>(sumDamage / fighttime);
-        time[lineidx]   = static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(subend - substart).count());
-        std::cout << "\r";
-        lineidx++;
-        for (int idx = 0; idx < lineidx; idx++)
-            std::cout << damage[idx] << " " << time[idx] << "ms  ";
-        if (lineidx == 5) {
-            lineidx = 0;
-            std::cout << std::endl;
-        }
-        std::cout << "(" << i << "/" << fightcount << ")" << std::flush;
-        damageAvg += sumDamage / fighttime;
-        timeAvg += std::chrono::duration_cast<std::chrono::milliseconds>(subend - substart);
     }
+    ns_program::log_info.record    = false;
+    ns_program::log_error.realtime = false;
+#endif
 
-    std::cout << "第一次计算花费时间: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
-    std::cout << "平均 DPS: " << damageAvg / fightcount << std::endl;
-    std::cout << "平均计算时间: " << timeAvg.count() / fightcount << "ms" << std::endl;
+    std::vector<std::future<int>> futures;
+    for (int i = 0; i < fightCount; ++i) {
+        futures.emplace_back(pool.enqueue(thread_calculate));
+    }
+    unsigned long long damageAvg      = 0;
+    int                idx            = 0;
+    int                idxBeforeSleep = 0;
+    auto               start          = std::chrono::steady_clock::now();
+    while (idx >= 0 && static_cast<std::vector<int>::size_type>(idx) < futures.size()) {
+        if (futures[idx].wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
+            damageAvg += futures[idx].get();
+            idx++;
+        } else {
+            std::cout << "\r(" << idx << "/" << fightCount << ")   当前速度: " << idx - idxBeforeSleep << " 次计算/s   " << std::flush;
+            idxBeforeSleep = idx;
+            std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+    }
+    auto end = std::chrono::steady_clock::now();
 
-    ns_frame::LuaFunc::clear();
+    std::cout << "\r                                                                                                    \r";
+    std::cout << "平均 DPS: " << damageAvg / fightCount << std::endl;
+    double timespendAvg = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() * thread_count / static_cast<double>(fightCount));
+    std::cout << "平均每次计算所需时间: " << std::fixed << std::setprecision(2) << timespendAvg << " ms / " << thread_count << " 并发数 = "
+              << std::fixed << std::setprecision(2) << timespendAvg / thread_count << " ms" << std::endl;
+
+    thread_cleanup();
+
     return 0;
 }

@@ -59,8 +59,12 @@ void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int 
         this->chBuff.buffList.emplace_back(&it);
     if (!it.isValid) {
         // 当前不存在 buff
-        it.isValid   = true;
-        it.attr      = characterGet(buffSourceID)->chAttr;      // 调用复制构造函数, 锁面板
+        it.isValid     = true;
+        Character *src = characterGet(buffSourceID);
+        if (nullptr != src) {      // lua 中有 AddBuff 时直接填 CharacterID 为 0 的逆天逻辑
+            it.attr = src->chAttr; // 调用复制构造函数, 锁面板
+        }
+        // it.attr      = characterGet(buffSourceID)->chAttr;      // 调用复制构造函数, 锁面板
         it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
         this->autoRollbackAttribList.emplace(static_cast<AutoRollbackAttrib *>(it.ptrAttrib));
         it.nLeftActiveCount = buff.Count * count;
@@ -74,8 +78,12 @@ void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int 
         it.nStackNum = stacknum; // 将层数设置为 1
     } else {
         // 当前存在该 buff
-        it.attr             = characterGet(buffSourceID)->chAttr; // 锁面板
-        it.nLeftActiveCount = buff.Count * count;                 // 重置计数
+        // it.attr             = characterGet(buffSourceID)->chAttr; // 锁面板
+        Character *src = characterGet(buffSourceID);
+        if (nullptr != src) {      // lua 中有 AddBuff 时直接填 CharacterID 为 0 的逆天逻辑
+            it.attr = src->chAttr; // 调用复制构造函数, 锁面板
+        }
+        it.nLeftActiveCount = buff.Count * count; // 重置计数
         // 重新计算 interval
         it.interval = buff.Interval * 1024 / (1024 + it.attr.getHaste());
         it.interval = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
