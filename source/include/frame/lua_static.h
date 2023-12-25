@@ -3,7 +3,7 @@
 
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
-#include <sol2/sol.hpp>
+#include <sol/sol.hpp>
 #include <string>
 #include <vector>
 

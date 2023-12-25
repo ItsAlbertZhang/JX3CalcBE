@@ -2,7 +2,7 @@
 #define LIB_GDI_H
 
 #include <filesystem>
-#include <sol2/sol.hpp>
+#include <sol/sol.hpp>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -30,6 +30,7 @@ enum class Tab {
 };
 
 using luaInit_t = bool (*)(sol::state &);
+
 /**
  * @brief 初始化 gdi 库
  * @param dataPathJX3           剑网3 (JX3) 目录. 该项可以为空, 但不可与 dataPathUnpacked 同时为空.

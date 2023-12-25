@@ -1,2 +1,119 @@
 # JX3CalcBE
-剑网3计算器后端.
+
+剑网三计算器后端.
+
+## 环境配置
+
+### Windows
+
+#### Step 1: 配置 MSVC 工具链
+
+##### 1.1 安装 [Visual Studio 2022](https://visualstudio.microsoft.com/zh-hans/downloads/)
+
+安装完成后, 打开 Visual Studio Installer, 安装 "使用 C++ 的桌面开发" 工具包.
+
+##### 1.2 添加 Path
+
+打开 "环境变量", 在 "系统变量" 的 `Path` 变量下, 应当可以找到安装 VS 2022 时自动添加的 `C:\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\` 项.
+
+在其后添加如下项:
+
+```
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\bin\Hostx64\x64
+C:\Program Files (x86)\Windows Kits\10\bin\10.0.22621.0\x64
+```
+
+其中, 第一项用于将 `cl.exe` 添加至环境变量中, 后两项则用于将构建时依赖的 dll 添加至环境变量中.
+
+注意: 诸如 `14.38.33130` 的目录为当前 VS 2022 工具链中对应工具的版本号. 添加时, 应当将其替换为当前该目录下实际的名称. 若后续升级 VS 2022, 亦应注意该目录名称是否有变化.
+
+##### 1.3 添加 INCLUDE
+
+打开 "环境变量", 在 "系统变量" 下查找 `INCLUDE` 变量.
+
+若其存在, 则在其后添加如下项:
+
+```
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\include
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\ucrt
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\um
+C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared
+```
+
+若其不存在, 则点击 "系统变量" 下的 "新建", 变量名输入 `INCLUDE` , 变量值输入上文中任意一项并在其后添加一个分号. 随后点击确定, 其便会出现在 "系统变量" 下. 双击即可以类似 `Path` 的多项界面方式对其进行编辑. (若弹出的界面依然为单项界面, 请检查分号是否添加.)
+
+同添加 `Path` 时一样, 此处应注意版本号问题.
+
+##### 1.4 添加 LIB
+
+同添加 `INCLUDE` 时一样, 将如下项添加至名为 `LIB` 的系统变量下:
+
+```
+C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.38.33130\lib\x64
+C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\ucrt\x64
+C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64
+```
+
+同添加 `Path` 时一样, 此处应注意版本号问题.
+
+#### Step 2: 配置包管理工具
+
+在 Windows 下, 使用 `vcpkg` 作为包管理工具.
+
+##### 2.1 安装 [vcpkg](https://vcpkg.io/en/getting-started)
+
+可将其安装至任意位置. 本示例将其安装在 `~/AppData/Local` 目录下 (无论将其安装至何处, 其均会在该目录下存放下载缓存).
+
+在 `~/AppData/Local` 目录下打开终端, 执行如下命令:
+
+```powershell
+git clone https://github.com/Microsoft/vcpkg.git
+.\vcpkg\bootstrap-vcpkg.bat
+```
+
+##### 2.2 添加 INCLUDE 和 LIB
+
+将如下项添加至名为 `INCLUDE` 的系统变量下:
+
+```
+{...}\vcpkg\installed\x64-windows-static-md\include
+```
+
+将如下项添加至名为 `LIB` 的系统变量下:
+
+```
+{...}\vcpkg\installed\x64-windows-static-md\lib
+```
+
+其中, `{...}` 为 vcpkg 安装的位置.
+
+#### Step 3: 配置构建工具
+
+安装 [CMake](https://cmake.org/) , 并将 cmake.exe 所在目录添加至系统环境变量的 Path 变量下.
+
+下载 [Ninja](https://github.com/ninja-build/ninja/releases/latest) , 将 ninja.exe 放置在某个目录下, 并将该目录添加至系统环境变量的 Path 变量下.
+
+(可以将 ninja.exe 放置在 cmake.exe 目录下, 使其共用 cmake 的 Path 变量.)
+
+#### Step 4: 配置第三方库
+
+在 vcpkg 的安装目录下打开终端, 执行如下命令:
+
+```powershell
+.\vcpkg install cpp-httplib:x64-windows-static-md crow:x64-windows-static-md lua:x64-windows-static-md nlohmann-json:x64-windows-static-md sol2:x64-windows-static-md
+```
+
+### MacOS
+
+待更新.
+
+### Linux
+
+待更新.
+
+## 编译运行
+
+在 VS Code 中使用 F5 即可编译运行. 第一次编译运行时, 启动任务可能不正确, 此时中止编译运行, 选择正确的启动任务再次编译运行即可.
+
+也可以在终端中使用命令编译运行. 关于使用命令的详情, 可以参考 `.vscode/tasks.json` .

@@ -6,16 +6,10 @@ BasedOnStyle: LLVM
 AccessModifierOffset: -4 # 访问说明符的偏移
 AlignAfterOpenBracket: BlockIndent # 如果要对小括号换行, 则在小括号后换行, 且在新行关闭尾括号
 AlignArrayOfStructures: Left # 对齐结构体数组
-AlignConsecutiveAssignments: # 对齐连续赋值
-    Enabled: true
-AlignConsecutiveBitFields: # 对齐连续位域
-    Enabled: true
-AlignConsecutiveDeclarations: # 对齐连续声明
-    Enabled: true
-AlignConsecutiveMacros: # 对齐连续宏
-    Enabled: true
-AlignConsecutiveShortCaseStatements: # 对齐连续短case语句
-    Enabled: true
+AlignConsecutiveAssignments: AcrossComments # 跨注释行对齐连续赋值
+AlignConsecutiveBitFields: AcrossComments # 跨注释行对齐连续位域
+AlignConsecutiveDeclarations: AcrossComments # 跨注释行对齐连续声明
+AlignConsecutiveMacros: AcrossComments # 跨注释行对齐连续宏
 AllowAllArgumentsOnNextLine: true # 允许函数调用时所有参数都在下一行
 AllowAllConstructorInitializersOnNextLine: true # 允许构造函数的所有参数都在下一行
 AllowAllParametersOfDeclarationOnNextLine: true # 允许函数声明的所有参数都在下一行

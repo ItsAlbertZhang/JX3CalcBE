@@ -83,7 +83,6 @@ project(jx3calc)
 
 # 指定头文件目录
 include_directories("${CMAKE_SOURCE_DIR}/source/lib") # 动态库头文件目录
-include_directories("${CMAKE_SOURCE_DIR}/external/include") # 第三方库头文件目录
 
 # 指定目标输出目录
 set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin") # 输出目录
@@ -116,14 +115,10 @@ else()
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_link}" "${OUTPUT_DIRECTORY}/"
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_dynamic}" "${OUTPUT_DIRECTORY}/")
 endif()
-
-# 第三方库
-file(GLOB EXTERNAL_SOURCES "${CMAKE_SOURCE_DIR}/external/lib/${directory_lib}/*")
-target_link_libraries(jx3calc PRIVATE ${EXTERNAL_SOURCES}) # 将第三方库链接至 main
-
 if(APPLE OR UNIX)
-    target_link_libraries(jx3calc PRIVATE fmt) # 链接fmt库
+    target_link_libraries(jx3calc PRIVATE fmt)
 endif()
+target_link_libraries(jx3calc PRIVATE lua)
 
 # ########## 处理资源 ##########
 set(RESOURCE_DIRECTORY "${CMAKE_SOURCE_DIR}/resources/") # 资源文件

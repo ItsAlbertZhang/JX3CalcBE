@@ -6,7 +6,7 @@
 #include "frame/ref/lua_other.h"
 #include "program/log.h"
 #include <random>
-#include <sol2/sol.hpp>
+#include <sol/sol.hpp>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 

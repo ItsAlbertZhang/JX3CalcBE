@@ -3,7 +3,7 @@
 
 #include "frame/character/character.h"
 #include <filesystem>
-#include <sol2/sol.hpp>
+#include <sol/sol.hpp>
 #include <string>
 
 namespace ns_frame {
