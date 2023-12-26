@@ -106,7 +106,62 @@ git clone https://github.com/Microsoft/vcpkg.git
 
 ### MacOS
 
-待更新.
+#### Step 1: 配置 Apple Clang 工具链
+
+在 App Store 中安装 Xcode, 随后打开终端, 执行如下命令:
+
+```shell
+xcode-select --install
+```
+
+#### Step 2: 配置包管理工具
+
+在 MacOS 下, 使用 `Homebrew` 作为包管理工具.
+
+##### 2.1 安装 [Homebrew](https://brew.sh/zh-cn/)
+
+可以使用 .pkg 安装工具在图形界面下进行安装, 亦可使用官方提供的命令行安装命令:
+
+```shell
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+##### 2.2 添加 PATH, INCLUDE_PATH 与 LIBRARY_PATH
+
+在当前用户下建立一套变量, 与 Homebrew 配合使用, 以补充其缺失的第三方库.
+
+```shell
+mkdir ~/.local ~/.local/bin ~/.local/include ~/.local/lib
+```
+
+编辑当前 Shell 的配置文件 (对于 MacOS 来说, Shell 通常是 zsh, 即编辑 `~/.zshrc` ), 在其最后加入如下内容:
+
+```shell
+export PATH=~/.local/bin:/opt/homebrew/bin:$PATH
+export CPLUS_INCLUDE_PATH=~/.local/include:/opt/homebrew/include:$CPLUS_INCLUDE_PATH
+export LIBRARY_PATH=~/.local/lib:/opt/homebrew/lib:$LIBRARY_PATH
+```
+
+其中, `/opt/homebrew` 是 Apple Silicon 下 Homebrew 的默认安装位置. 非 Apple Silicon 的默认安装位置可能不在此处.
+
+#### Step 3: 配置构建工具与第三方库
+
+使用 Homebrew 安装构建工具 CMake 与第三方库:
+
+```shell
+brew install cmake boost cpp-httplib fmt lua nlohmann-json
+sudo ln -s /opt/homebrew/include/lua/* /opt/homebrew/include/
+```
+
+手动安装 Homebrew 缺失的第三方库:
+
+```shell
+git clone https://github.com/ThePhD/sol2.git
+mv sol2/include/* ~/.local/include
+git clone https://github.com/CrowCpp/Crow.git
+mv Crow/include/* ~/.local/include
+rm -rf Crow sol2
+```
 
 ### Linux
 
