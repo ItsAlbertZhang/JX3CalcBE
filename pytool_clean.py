@@ -4,21 +4,23 @@ from pathlib import Path
 import shutil
 import sys
 
+path_build = Path("./build/")
+path_bin = Path("./bin/")
+
 
 def clean_all():
-    dir = Path("./build/")
-    for sub in dir.iterdir():
+    for sub in path_build.iterdir():
         if sub.is_dir():
             shutil.rmtree(sub)
         else:
             if sub.name != ".gitkeep":
                 sub.unlink()
-    shutil.rmtree("./bin/")
+    if path_bin.exists():
+        shutil.rmtree("./bin/")
 
 
 def clean_build():
-    dir = Path("./bin/")
-    for sub in dir.iterdir():
+    for sub in path_bin.iterdir():
         if sub.suffix == ".lib" or sub.suffix == ".exp" or sub.suffix == ".pdb":
             sub.unlink()
 
