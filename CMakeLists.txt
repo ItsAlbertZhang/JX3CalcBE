@@ -123,13 +123,13 @@ find_library(LIB_LUA lua REQUIRED)
 list(APPEND LIBRARIES_LINK ${LIB_LUA})
 
 # fmt
-if(APPLE OR UNIX)
+if(UNIX) # linux / macos
     find_library(LIB_FMT fmt REQUIRED)
     list(APPEND LIBRARIES_LINK ${LIB_FMT})
 endif()
 
 # cpp-httplib
-if(UNIX)
+if(UNIX AND NOT APPLE) # linux
     find_library(LIB_CPP_HTTPLIB cpp-httplib REQUIRED)
     list(APPEND LIBRARIES_LINK ${LIB_CPP_HTTPLIB})
 endif()
