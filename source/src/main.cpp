@@ -37,8 +37,10 @@ public:
                     {
                         std::unique_lock<std::mutex> lock(this->queue_mutex);
                         this->condition.wait(lock, [this] { return this->stop || !this->tasks.empty(); });
-                        if (this->stop && this->tasks.empty())
+                        if (this->stop && this->tasks.empty()) {
+                            this->cleanup_func();
                             return;
+                        }
                         task = std::move(this->tasks.front());
                         this->tasks.pop();
                     }
@@ -70,7 +72,6 @@ public:
         condition.notify_all();
         for (std::thread &worker : workers) {
             worker.join();
-            cleanup_func();
         }
     }
 
@@ -88,6 +89,7 @@ const int thread_count = 16;
 ns_frame::ChAttr      attr_backup;
 int                   delay_network;
 int                   delay_keybord;
+int                   fight_count;
 int                   fight_time;
 std::filesystem::path p_api;
 std::filesystem::path p_res;
@@ -230,10 +232,8 @@ int main(int argc, char *argv[]) {
     p_api = ns_program::Config::pExeDir / "api.lua";
     ns_frame::MacroCustom macroCustom(p_api);
 
-    int fightCount = macroCustom.lua["FightCount"].get<int>();
-    if (fightCount <= 0)
-        fightCount = 300;
     use_costume_macro = macroCustom.lua["UseCustomMacro"].get<bool>();
+    fight_count       = macroCustom.lua["FightCount"].get<int>();
     fight_time        = macroCustom.lua["FightTime"].get<int>();
     delay_network     = macroCustom.lua["DelayBase"].get<int>();
     delay_keybord     = macroCustom.lua["DelayRand"].get<int>();
@@ -243,6 +243,8 @@ int main(int argc, char *argv[]) {
     dfm_hw            = macroCustom.lua["DFM_HW"].get<bool>();
     dfm_xz            = macroCustom.lua["DFM_XZ"].get<bool>();
     wq_cw             = macroCustom.lua["WQ_CW"].get<bool>();
+    if (fight_count <= 0)
+        fight_count = 300;
     if (fight_time <= 0)
         fight_time = 300;
     if (delay_network <= 0)
@@ -276,7 +278,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     std::vector<std::future<int>> futures;
-    for (int i = 0; i < fightCount; ++i) {
+    for (int i = 0; i < fight_count; ++i) {
         futures.emplace_back(pool.enqueue(thread_calculate));
     }
     unsigned long long damageAvg      = 0;
@@ -288,7 +290,7 @@ int main(int argc, char *argv[]) {
             damageAvg += futures[idx].get();
             idx++;
         } else {
-            std::cout << "\r(" << idx << "/" << fightCount << ")   当前速度: " << idx - idxBeforeSleep << " 次计算/s   " << std::flush;
+            std::cout << "\r(" << idx << "/" << fight_count << ")   当前速度: " << idx - idxBeforeSleep << " 次计算/s   " << std::flush;
             idxBeforeSleep = idx;
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
@@ -296,8 +298,8 @@ int main(int argc, char *argv[]) {
     auto end = std::chrono::steady_clock::now();
 
     std::cout << "\r                                                                                                    \r";
-    std::cout << "平均 DPS: " << damageAvg / fightCount << std::endl;
-    double timespendAvg = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() * thread_count / static_cast<double>(fightCount));
+    std::cout << "平均 DPS: " << damageAvg / fight_count << std::endl;
+    double timespendAvg = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() * thread_count / static_cast<double>(fight_count));
     std::cout << "平均每次计算所需时间: " << std::fixed << std::setprecision(2) << timespendAvg << " ms / " << thread_count << " 并发数 = "
               << std::fixed << std::setprecision(2) << timespendAvg / thread_count << " ms" << std::endl;
 
