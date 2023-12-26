@@ -115,10 +115,37 @@ else()
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_link}" "${OUTPUT_DIRECTORY}/"
         COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/source/lib/${prefix_lib}gdi${suffix_lib_dynamic}" "${OUTPUT_DIRECTORY}/")
 endif()
+
+# 第三方库
+
+# lua
+find_library(LIB_LUA lua REQUIRED)
+list(APPEND LIBRARIES_LINK ${LIB_LUA})
+
+# fmt
 if(APPLE OR UNIX)
-    target_link_libraries(jx3calc PRIVATE fmt)
+    find_library(LIB_FMT fmt REQUIRED)
+    list(APPEND LIBRARIES_LINK ${LIB_FMT})
 endif()
-target_link_libraries(jx3calc PRIVATE lua)
+
+# cpp-httplib
+if(UNIX)
+    find_library(LIB_CPP_HTTPLIB cpp-httplib REQUIRED)
+    list(APPEND LIBRARIES_LINK ${LIB_CPP_HTTPLIB})
+endif()
+
+# 将第三方库链接至 main
+message(STATUS "LIBRARIES_LINK: ${LIBRARIES_LINK}")
+target_link_libraries(jx3calc PRIVATE ${LIBRARIES_LINK})
+# 将第三方库复制到输出目录
+foreach(lib IN LISTS LIBRARIES_LINK)
+    string(REPLACE ${suffix_lib_link} ${suffix_lib_dynamic} lib_dynamic ${lib})
+    list(APPEND LIBRARIES_DYNAMIC ${lib_dynamic})
+endforeach()
+add_custom_command(
+    TARGET jx3calc
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIBRARIES_DYNAMIC} "${OUTPUT_DIRECTORY}/")
 
 # ########## 处理资源 ##########
 set(RESOURCE_DIRECTORY "${CMAKE_SOURCE_DIR}/resources/") # 资源文件

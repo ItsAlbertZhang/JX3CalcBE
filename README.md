@@ -165,7 +165,24 @@ rm -rf Crow sol2
 
 ### Linux
 
-待更新.
+Linux 下通常可使用系统包管理器 (软件源) 直接配置环境.
+
+-   本示例基于 Ubuntu 24.04 下的 apt 包管理器, 其他版本操作系统可自行更换为相应包管理器.
+-   建议使用最新版本而非 LTS 版本的操作系统, 因为 LTS 版本包管理器软件源内的软件可能默认使用旧版本, 甚至软件源中未发布新版本.
+
+```shell
+sudo apt update
+sudo apt install -y clang cmake libboost-all-dev libcpp-httplib-dev libfmt-dev liblua5.4-dev nlohmann-json3-dev
+sudo ln -s /usr/lib/x86_64-linux-gnu/liblua5.4.so /usr/lib/x86_64-linux-gnu/liblua.so
+sudo ln -s /usr/include/lua5.4/* /usr/include/
+git clone https://github.com/CrowCpp/Crow.git
+sudo mv Crow/include/* /usr/include/
+git clone https://github.com/ThePhD/sol2.git
+sudo mv sol2/include/* /usr/include
+rm -rf Crow sol2
+```
+
+可以将上述命令放入文本文件 `install.sh` , 并 `chmod u+x install.sh` 赋予可执行权限, 随后执行 `./install.sh` , 以一次性完成这些命令.
 
 ## 编译运行
 
