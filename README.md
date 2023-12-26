@@ -157,18 +157,20 @@ sudo ln -s /opt/homebrew/include/lua/* /opt/homebrew/include/
 
 ```shell
 git clone https://github.com/ThePhD/sol2.git
-mv sol2/include/* ~/.local/include
+mv sol2/include/* ~/.local/include/
 git clone https://github.com/CrowCpp/Crow.git
-mv Crow/include/* ~/.local/include
+mv Crow/include/* ~/.local/include/
 rm -rf Crow sol2
 ```
 
 ### Linux
 
-Linux 下通常可使用系统包管理器 (软件源) 直接配置环境.
+Linux 下通常可使用系统包管理器 (软件源) 直接配置环境. 注意:
 
--   本示例基于 Ubuntu 24.04 下的 apt 包管理器, 其他版本操作系统可自行更换为相应包管理器.
--   建议使用最新版本而非 LTS 版本的操作系统, 因为 LTS 版本包管理器软件源内的软件可能默认使用旧版本, 甚至软件源中未发布新版本.
+1. 本示例基于 Ubuntu 24.04 下的 apt 包管理器, 其他版本操作系统可自行更换为相应包管理器. 建议使用最新版本而非 LTS 版本的操作系统, 因为 LTS 版本包管理器软件源内的软件可能默认使用旧版本, 甚至软件源中未发布新版本.
+2. Linux 下, 项目会链接至动态库而非静态库, 因为 Linux 发行版鼓励这样做, 以至于在许多情况下, 通过系统自带包管理器安装的第三方库甚至不提供静态库版本. 这会导致 Linux 下编译的二进制文件无法直接迁移至其他主机上运行, 除非它们也安装对应的第三方库, 以获取运行时所需的动态库. 但这并不是一个大问题, 因为在 Linux 下安装第三方库本就非常方便.
+
+如果出现系统包管理器的软件版本问题, 或希望使用静态库进行链接, 可以考虑使用 Homebrew, 使用方法与 MacOS 大同小异.
 
 ```shell
 sudo apt update
@@ -178,7 +180,7 @@ sudo ln -s /usr/include/lua5.4/* /usr/include/
 git clone https://github.com/CrowCpp/Crow.git
 sudo mv Crow/include/* /usr/include/
 git clone https://github.com/ThePhD/sol2.git
-sudo mv sol2/include/* /usr/include
+sudo mv sol2/include/* /usr/include/
 rm -rf Crow sol2
 ```
 
@@ -188,4 +190,4 @@ rm -rf Crow sol2
 
 在 VS Code 中使用 F5 即可编译运行. 第一次编译运行时, 启动任务可能不正确, 此时中止编译运行, 选择正确的启动任务再次编译运行即可.
 
-也可以在终端中使用命令编译运行. 关于使用命令的详情, 可以参考 `.vscode/tasks.json` .
+也可以在终端中使用命令编译运行. 关于所使用命令的详情, 可以参考 `.vscode/tasks.json` .
