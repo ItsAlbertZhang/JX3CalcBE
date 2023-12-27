@@ -258,8 +258,9 @@ int main(int argc, char *argv[]) {
     attr_backup = player.attrExport();
 
 #ifdef DEBUG
-    ns_program::log_info.record    = true;
-    ns_program::log_error.realtime = true;
+    ns_program::log_info.enable  = true;
+    ns_program::log_error.enable = true;
+    ns_program::log_error.output = true;
 #endif
 
     ThreadPool pool(thread_count, thread_init, thread_cleanup);
@@ -268,13 +269,11 @@ int main(int argc, char *argv[]) {
     std::cout << "第一次计算花费时间: " << timespend << "ms, 已将战斗记录保存至 res.tab" << std::endl;
 
 #ifdef DEBUG
-    if (argc > 1) {
-        if (strcmp(argv[1], "--log=info") == 0) {
-            ns_program::log_info.print();
-        }
-    }
-    ns_program::log_info.record    = false;
-    ns_program::log_error.realtime = false;
+    ns_program::log_info.save();
+    ns_program::log_error.save();
+    ns_program::log_info.enable  = false;
+    ns_program::log_error.enable = false;
+    ns_program::log_error.output = false;
 #endif
 
     std::vector<std::future<int>> futures;
