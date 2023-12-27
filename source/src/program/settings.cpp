@@ -1,4 +1,4 @@
-#include "program/init.h"
+#include "program/settings.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 
@@ -6,7 +6,7 @@
 
 using namespace ns_program;
 
-void Init::init(int argc, char *argv[]) { // 初始化所有环境
+void ns_program::init(int argc, char *argv[]) { // 初始化所有环境
     UNREFERENCED_PARAMETER(argc);
     Config::pExeDir = fs::absolute(argv[0]).parent_path();
     Config::load();

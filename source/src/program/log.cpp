@@ -1,5 +1,5 @@
 #include "program/log.h"
-#include "program/init.h"
+#include "program/settings.h"
 #include <fstream>
 #include <iostream>
 

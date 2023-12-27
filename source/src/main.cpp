@@ -8,8 +8,8 @@
 #include "frame/lua_runtime.h"
 #include "frame/lua_static.h"
 #include "gdi.h"
-#include "program/init.h"
 #include "program/log.h"
+#include "program/settings.h"
 #include <chrono>
 #include <condition_variable>
 #include <filesystem>
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
 #endif
     bool ret;
     // 初始化程序
-    ns_program::Init::init(argc, argv);
+    ns_program::init(argc, argv);
     // 初始化接口
     ret = gdi::init(
         ns_program::Config::pJX3,

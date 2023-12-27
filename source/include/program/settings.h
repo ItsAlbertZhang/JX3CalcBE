@@ -1,5 +1,5 @@
-#ifndef PROGRAM_INIT_H_
-#define PROGRAM_INIT_H_
+#ifndef PROGRAM_SETTINGS_H_
+#define PROGRAM_SETTINGS_H_
 
 #include <filesystem>
 
@@ -7,14 +7,8 @@ namespace fs = std::filesystem;
 
 namespace ns_program {
 
-// 初始化环境. 注意, 这是一个静态类, 无法创建实例.
-class Init {
-public:
-    // 禁止创建类实例
-    Init() = delete;
-    // 初始化所有环境
-    static void init(int argc, char *argv[]);
-};
+// 初始化环境.
+void init(int argc, char *argv[]);
 
 // 配置设置. 注意, 这是一个静态类, 无法创建实例.
 class Config {
@@ -32,4 +26,4 @@ public:
 
 }; // namespace ns_program
 
-#endif // PROGRAM_INIT_H_
+#endif // PROGRAM_SETTINGS_H_
