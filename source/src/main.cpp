@@ -10,79 +10,17 @@
 #include "gdi.h"
 #include "program/log.h"
 #include "program/settings.h"
+#include "program/thread_pool.h"
 #include <chrono>
-#include <condition_variable>
 #include <filesystem>
 #include <fstream>
-#include <functional>
-#include <future>
 #include <iostream>
 #include <memory>
-#include <queue>
 #include <thread>
 #include <vector>
 #ifdef _WIN32
 #include <Windows.h>
 #endif
-
-class ThreadPool {
-public:
-    ThreadPool(size_t threads, std::function<void()> init_func, std::function<void()> cleanup_func)
-        : stop(false), cleanup_func(cleanup_func) {
-        for (size_t i = 0; i < threads; ++i)
-            workers.emplace_back([this, init_func] {
-                init_func();
-                for (;;) {
-                    std::function<void()> task;
-                    {
-                        std::unique_lock<std::mutex> lock(this->queue_mutex);
-                        this->condition.wait(lock, [this] { return this->stop || !this->tasks.empty(); });
-                        if (this->stop && this->tasks.empty()) {
-                            this->cleanup_func();
-                            return;
-                        }
-                        task = std::move(this->tasks.front());
-                        this->tasks.pop();
-                    }
-                    task();
-                }
-            });
-    }
-
-    template <class F, class... Args>
-    auto enqueue(F &&f, Args &&...args) -> std::future<typename std::invoke_result<F, Args...>::type> {
-        using return_type             = typename std::invoke_result<F, Args...>::type;
-        auto                     task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
-        std::future<return_type> res  = task->get_future();
-        {
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            if (stop)
-                throw std::runtime_error("enqueue on stopped ThreadPool");
-            tasks.emplace([task]() { (*task)(); });
-        }
-        condition.notify_one();
-        return res;
-    }
-
-    ~ThreadPool() {
-        {
-            std::unique_lock<std::mutex> lock(queue_mutex);
-            stop = true;
-        }
-        condition.notify_all();
-        for (std::thread &worker : workers) {
-            worker.join();
-        }
-    }
-
-private:
-    std::vector<std::thread>          workers;
-    std::queue<std::function<void()>> tasks;
-    std::mutex                        queue_mutex;
-    std::condition_variable           condition;
-    bool                              stop;
-    std::function<void()>             cleanup_func;
-};
 
 const int thread_count = 16;
 
@@ -263,9 +201,9 @@ int main(int argc, char *argv[]) {
     ns_program::log_error.output = true;
 #endif
 
-    ThreadPool pool(thread_count, thread_init, thread_cleanup);
-    auto       first     = pool.enqueue(thread_output);
-    int        timespend = first.get();
+    ns_program::ThreadPool pool(thread_count, thread_init, thread_cleanup);
+    auto                   first     = pool.enqueue(thread_output);
+    int                    timespend = first.get();
     std::cout << "第一次计算花费时间: " << timespend << "ms, 已将战斗记录保存至 res.tab" << std::endl;
 
 #ifdef DEBUG
