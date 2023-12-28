@@ -3,7 +3,6 @@
         {
             "name": "Win32",
             "includePath": [
-                "${workspaceFolder}/external/include",
                 "${workspaceFolder}/source/include",
                 "${workspaceFolder}/source/lib",
                 "${workspaceFolder}/JX3CalcBEgdi/include"

@@ -10,7 +10,10 @@
 #include "gdi.h"
 #include "program/log.h"
 #include "program/settings.h"
-#include "program/thread_pool.h"
+#include "thread/pool.h"
+#pragma warning(push, 0)
+#include <crow.h>
+#pragma warning(pop)
 #include <chrono>
 #include <filesystem>
 #include <fstream>
@@ -21,8 +24,6 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
-
-const int thread_count = 16;
 
 ns_frame::ChAttr      attr_backup;
 int                   delay_network;
@@ -166,6 +167,16 @@ int main(int argc, char *argv[]) {
     if (!ret)
         return 0;
 
+    crow::SimpleApp app;
+
+    CROW_ROUTE(app, "/<string>")
+    ([](const std::string &user_name) {
+        std::cout << "message from " + user_name << std::endl;
+        return "hello, " + user_name;
+    });
+
+    app.port(12897).multithreaded().run();
+
     p_res = ns_program::Config::pExeDir / "res.tab";
     p_api = ns_program::Config::pExeDir / "api.lua";
     ns_frame::MacroCustom macroCustom(p_api);
@@ -201,9 +212,9 @@ int main(int argc, char *argv[]) {
     ns_program::log_error.output = true;
 #endif
 
-    ns_program::ThreadPool pool(thread_count, thread_init, thread_cleanup);
-    auto                   first     = pool.enqueue(thread_output);
-    int                    timespend = first.get();
+    ns_thread::Pool pool(thread_init, thread_cleanup);
+    auto            first     = pool.enqueue(thread_output);
+    int             timespend = first.get();
     std::cout << "第一次计算花费时间: " << timespend << "ms, 已将战斗记录保存至 res.tab" << std::endl;
 
 #ifdef DEBUG
@@ -234,11 +245,12 @@ int main(int argc, char *argv[]) {
     }
     auto end = std::chrono::steady_clock::now();
 
+    const unsigned int corecnt = std::thread::hardware_concurrency();
     std::cout << "\r                                                                                                    \r";
     std::cout << "平均 DPS: " << damageAvg / fight_count << std::endl;
-    double timespendAvg = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() * thread_count / static_cast<double>(fight_count));
-    std::cout << "平均每次计算所需时间: " << std::fixed << std::setprecision(2) << timespendAvg << " ms / " << thread_count << " 并发数 = "
-              << std::fixed << std::setprecision(2) << timespendAvg / thread_count << " ms" << std::endl;
+    double timespendAvg = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() * corecnt / static_cast<double>(fight_count));
+    std::cout << "平均每次计算所需时间: " << std::fixed << std::setprecision(2) << timespendAvg << " ms / " << corecnt << " 并发数 = "
+              << std::fixed << std::setprecision(2) << timespendAvg / corecnt << " ms" << std::endl;
 
 #ifdef _WIN32
     system("pause");

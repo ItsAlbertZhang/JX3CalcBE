@@ -1,18 +1,20 @@
-#ifndef PROGRAM_THREAD_POOL_H_
-#define PROGRAM_THREAD_POOL_H_
+#ifndef THREAD_POOL_H_
+#define THREAD_POOL_H_
 
 #include <condition_variable>
 #include <functional>
 #include <future>
 #include <queue>
+#include <thread>
 
-namespace ns_program {
+namespace ns_thread {
 
-class ThreadPool {
+class Pool {
 public:
-    ThreadPool(size_t threads, std::function<void()> thread_init, std::function<void()> thread_cleanup)
+    Pool(std::function<void()> thread_init, std::function<void()> thread_cleanup)
         : stop(false) {
-        for (size_t i = 0; i < threads; ++i)
+        unsigned int corecnt = std::thread::hardware_concurrency();
+        for (unsigned int i = 0; i < corecnt; ++i)
             workers.emplace_back([this, thread_init, thread_cleanup] {
                 thread_init();
                 while (true) {
@@ -47,7 +49,7 @@ public:
         return res;
     }
 
-    ~ThreadPool() {
+    ~Pool() {
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
             stop = true;
@@ -66,6 +68,6 @@ private:
     bool                              stop;
 };
 
-} // namespace ns_program
+} // namespace ns_thread
 
-#endif // PROGRAM_THREAD_POOL_H_
+#endif // THREAD_POOL_H_
