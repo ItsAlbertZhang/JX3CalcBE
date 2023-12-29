@@ -34,8 +34,5 @@ int main(int argc, char *argv[]) {
     }
     webHandler.stop();
 
-#ifdef _WIN32
-    system("pause");
-#endif
     return 0;
 }

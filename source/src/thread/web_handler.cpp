@@ -3,6 +3,8 @@
 #include <thread>
 #include <unordered_map>
 
+#define UNREFERENCED_PARAMETER(P) (P)
+
 using namespace ns_thread;
 
 WebHandler::WebHandler() {
@@ -21,6 +23,7 @@ void WebHandler::run() {
 
     CROW_ROUTE(app, "/setting")
         .methods("POST"_method)([this](const crow::request &req) {
+            UNREFERENCED_PARAMETER(req);
             return crow::response{400, "text/plain", "setting is unavailable now."};
         });
 
@@ -35,7 +38,12 @@ void WebHandler::run() {
             return crow::response{200};
         });
 
+#ifdef _WIN32
+    CROW_ROUTE(app, "/ws")
+        .websocket()
+#else
     CROW_WEBSOCKET_ROUTE(app, "/ws")
+#endif
         .onclose([&](crow::websocket::connection &conn, const std::string &reason) {
             CROW_LOG_INFO << "websocket connection closed: " << reason;
             std::lock_guard<std::mutex> _(mtx);

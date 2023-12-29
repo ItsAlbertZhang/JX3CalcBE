@@ -3,7 +3,9 @@
 
 #include "thread/pool.h"
 #include "thread/web_helper.h"
+#pragma warning(push, 0)
 #include <crow.h>
+#pragma warning(pop)
 #include <memory>
 #include <mutex>
 #include <string>
