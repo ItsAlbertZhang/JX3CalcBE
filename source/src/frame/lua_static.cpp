@@ -1,6 +1,7 @@
 #include "frame/lua_static.h"
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
+#include "frame/lua_runtime.h"
 #include "frame/ref/lua_adaptive_type.h"
 #include "frame/ref/lua_attribute_type.h"
 #include "frame/ref/lua_other.h"
@@ -60,13 +61,14 @@ const std::vector<std::string> ns_frame::luaFuncStaticToDynamic = {
     "SetBuffNextActiveFrame",
 };
 
-bool ns_frame::luaInit(sol::state &lua) {
-    lua.open_libraries(sol::lib::base);
-    lua.open_libraries(sol::lib::table);
+std::shared_ptr<sol::state> ns_frame::luaInit() {
+    auto lua = LuaFunc::getLua();
+    lua->open_libraries(sol::lib::base);
+    lua->open_libraries(sol::lib::table);
 
     // clang-format off
     
-    lua.new_usertype<Skill>(
+    lua->new_usertype<Skill>(
         "Skill",
         "dwSkillID", &Skill::dwSkillID,
         "dwLevel", &Skill::dwLevel,
@@ -144,7 +146,7 @@ bool ns_frame::luaInit(sol::state &lua) {
         "nWeaponDamagePercent", &Skill::nWeaponDamagePercent
     );
 
-    lua.new_usertype<Character>(
+    lua->new_usertype<Character>(
         "Character",
         "GetSelectCharacter", &Character::characterGetSelect,
         "GetSkillTarget", &Character::characterGetTargetID,
@@ -191,7 +193,7 @@ bool ns_frame::luaInit(sol::state &lua) {
         "fCurrentLife64", &Character::fCurrentLife64
     );
 
-    lua.new_usertype<BuffItem>(
+    lua->new_usertype<BuffItem>(
         "Buff",
         "nLevel", &BuffItem::nLevel,
         "nIndex", &BuffItem::nIndex,
@@ -201,89 +203,89 @@ bool ns_frame::luaInit(sol::state &lua) {
         "nCustomValue", &BuffItem::nCustomValue
     );
 
-    lua.new_usertype<ChScene>(
+    lua->new_usertype<ChScene>(
         "Scene",
         "nType", &ChScene::nType
     );
 
     // clang-format on
 
-    lua.set_function("Include", LuaGlobalFunction::Include);
-    lua.set_function("GetPlayer", LuaGlobalFunction::GetPlayer);
-    lua.set_function("GetNpc", LuaGlobalFunction::GetNpc);
-    lua.set_function("IsPlayer", LuaGlobalFunction::IsPlayer);
-    lua.set_function("AdditionalAttribute", LuaGlobalFunction::AdditionalAttribute);
-    lua.set_function("IsLangKeXingMap", LuaGlobalFunction::IsLangKeXingMap);
-    lua.set_function("ModityCDToUI", LuaGlobalFunction::ModityCDToUI);
-    lua.set_function("CheckInTongWar", LuaGlobalFunction::CheckInTongWar);
-    lua.set_function("IsTreasureBattleFieldMap", LuaGlobalFunction::IsTreasureBattleFieldMap);
-    lua.set_function("GetValueByBits", LuaGlobalFunction::GetValueByBits);
-    lua.set_function("SetValueByBits", LuaGlobalFunction::SetValueByBits);
-    lua.set_function("RemoteCallToClient", LuaGlobalFunction::RemoteCallToClient);
-    lua.set_function("GetDistanceSq", LuaGlobalFunction::GetDistanceSq);
-    lua.set_function("Random", LuaGlobalFunction::Random);
+    lua->set_function("Include", LuaGlobalFunction::Include);
+    lua->set_function("GetPlayer", LuaGlobalFunction::GetPlayer);
+    lua->set_function("GetNpc", LuaGlobalFunction::GetNpc);
+    lua->set_function("IsPlayer", LuaGlobalFunction::IsPlayer);
+    lua->set_function("AdditionalAttribute", LuaGlobalFunction::AdditionalAttribute);
+    lua->set_function("IsLangKeXingMap", LuaGlobalFunction::IsLangKeXingMap);
+    lua->set_function("ModityCDToUI", LuaGlobalFunction::ModityCDToUI);
+    lua->set_function("CheckInTongWar", LuaGlobalFunction::CheckInTongWar);
+    lua->set_function("IsTreasureBattleFieldMap", LuaGlobalFunction::IsTreasureBattleFieldMap);
+    lua->set_function("GetValueByBits", LuaGlobalFunction::GetValueByBits);
+    lua->set_function("SetValueByBits", LuaGlobalFunction::SetValueByBits);
+    lua->set_function("RemoteCallToClient", LuaGlobalFunction::RemoteCallToClient);
+    lua->set_function("GetDistanceSq", LuaGlobalFunction::GetDistanceSq);
+    lua->set_function("Random", LuaGlobalFunction::Random);
 
-    lua["CONSUME_BASE"]          = 100;
-    lua["LENGTH_BASE"]           = 64;
-    lua["MELEE_ATTACK_DISTANCE"] = 4 * 64;
+    (*lua)["CONSUME_BASE"]          = 100;
+    (*lua)["LENGTH_BASE"]           = 64;
+    (*lua)["MELEE_ATTACK_DISTANCE"] = 4 * 64;
 
-    sol::table AttributeType = lua.create_table();
+    sol::table AttributeType = lua->create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaAttributeType::COUNT); i++) {
         AttributeType[ref::refLuaAttributeType[i]] = i;
     }
-    lua["ATTRIBUTE_TYPE"] = AttributeType;
+    (*lua)["ATTRIBUTE_TYPE"] = AttributeType;
 
-    sol::table AttributeEffectMode = lua.create_table();
+    sol::table AttributeEffectMode = lua->create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaAttributeEffectMode::COUNT); i++) {
         AttributeEffectMode[ref::refLuaAttributeEffectMode[i]] = i;
     }
-    lua["ATTRIBUTE_EFFECT_MODE"] = AttributeEffectMode;
+    (*lua)["ATTRIBUTE_EFFECT_MODE"] = AttributeEffectMode;
 
-    sol::table BuffCompareFlag = lua.create_table();
+    sol::table BuffCompareFlag = lua->create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaBuffCompareFlag::COUNT); i++) {
         BuffCompareFlag[ref::refLuaBuffCompareFlag[i]] = i;
     }
-    lua["BUFF_COMPARE_FLAG"] = BuffCompareFlag;
+    (*lua)["BUFF_COMPARE_FLAG"] = BuffCompareFlag;
 
-    sol::table SKILL_COMPARE_FLAG = lua.create_table();
+    sol::table SKILL_COMPARE_FLAG = lua->create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaSkillCompareFlag::COUNT); i++) {
         SKILL_COMPARE_FLAG[ref::refLuaSkillCompareFlag[i]] = i;
     }
-    lua["SKILL_COMPARE_FLAG"] = SKILL_COMPARE_FLAG;
+    (*lua)["SKILL_COMPARE_FLAG"] = SKILL_COMPARE_FLAG;
 
-    sol::table TARGET = lua.create_table();
+    sol::table TARGET = lua->create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaTarget::COUNT); i++) {
         TARGET[ref::refLuaTarget[i]] = i;
     }
-    lua["TARGET"] = TARGET;
+    (*lua)["TARGET"] = TARGET;
 
-    sol::table SKILL_KIND_TYPE = lua.create_table();
+    sol::table SKILL_KIND_TYPE = lua->create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaSkillKindType::COUNT); i++) {
         SKILL_KIND_TYPE[ref::refLuaSkillKindType[i]] = i;
     }
-    lua["SKILL_KIND_TYPE"] = SKILL_KIND_TYPE;
+    (*lua)["SKILL_KIND_TYPE"] = SKILL_KIND_TYPE;
 
-    sol::table MOVE_STATE = lua.create_table();
+    sol::table MOVE_STATE = lua->create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaMoveState::COUNT); i++) {
         MOVE_STATE[ref::refLuaMoveState[i]] = i;
     }
-    lua["MOVE_STATE"] = MOVE_STATE;
+    (*lua)["MOVE_STATE"] = MOVE_STATE;
 
-    sol::table ROLE_TYPE = lua.create_table();
+    sol::table ROLE_TYPE = lua->create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaRoleType::COUNT); i++) {
         ROLE_TYPE[ref::refLuaRoleType[i]] = i;
     }
-    lua["ROLE_TYPE"] = ROLE_TYPE;
+    (*lua)["ROLE_TYPE"] = ROLE_TYPE;
 
-    sol::table KUNGFU_ADAPTIVETYPE_LIST = lua.create_table();
+    sol::table KUNGFU_ADAPTIVETYPE_LIST = lua->create_table();
     for (auto &i : ref::mapLuaAdaptiveType) {
-        sol::table sub_table                                = lua.create_table();
+        sol::table sub_table                                = lua->create_table();
         sub_table["adaptiveType"]                           = static_cast<int>(i.second);
         KUNGFU_ADAPTIVETYPE_LIST[static_cast<int>(i.first)] = sub_table;
     }
-    lua["KUNGFU_ADAPTIVETYPE_LIST"] = KUNGFU_ADAPTIVETYPE_LIST;
+    (*lua)["KUNGFU_ADAPTIVETYPE_LIST"] = KUNGFU_ADAPTIVETYPE_LIST;
 
-    return true;
+    return lua;
 }
 
 void LuaGlobalFunction::Include(const std::string &filename) {

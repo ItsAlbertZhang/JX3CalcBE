@@ -1,5 +1,5 @@
-#ifndef FRAME_CONCRETE_CHARACTER_PLAYER_MJFYSJ_H_
-#define FRAME_CONCRETE_CHARACTER_PLAYER_MJFYSJ_H_
+#ifndef CONCRETE_CHARACTER_PLAYER_MJFYSJ_H_
+#define CONCRETE_CHARACTER_PLAYER_MJFYSJ_H_
 
 #include "frame/character/derived/player.h"
 
@@ -20,4 +20,4 @@ public:
 
 } // namespace ns_concrete
 
-#endif // FRAME_CONCRETE_CHARACTER_PLAYER_MJFYSJ_H_
+#endif // CONCRETE_CHARACTER_PLAYER_MJFYSJ_H_

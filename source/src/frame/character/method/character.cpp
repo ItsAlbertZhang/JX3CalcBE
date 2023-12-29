@@ -11,9 +11,16 @@ Character::Character() {
     characterMap.emplace(this, this->dwID);
 }
 
+// Character::Character(Character &&character) {
+//     this->dwID                   = character.dwID;
+//     characterList.at(this->dwID) = this;
+//     characterMap.emplace(this, this->dwID);
+//     character.dwID = -1;
+// }
+
 Character::~Character() {
+    // if (this->dwID >= 0) {
     characterList.at(this->dwID) = nullptr;
-    characterMap.erase(this);
     // 不能偷懒省掉哈希表的移除, 否则大量 Character 析构紧接构造时, 非常有可能出现:
     // 新构造的对象指针地址与上一个析构的对象指针地址相同. 此时会引发哈希冲突.
     for (auto &it : autoRollbackAttribList) {
@@ -22,6 +29,8 @@ Character::~Character() {
     for (auto &it : autoRollbackAttributeList) {
         std::free(it); // 没必要析构和置空, 直接 free 省点性能
     }
+    // }
+    characterMap.erase(this);
 }
 
 Character *Character::characterGet(int nCharacterID) {

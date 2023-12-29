@@ -3,13 +3,14 @@
 
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
+#include <memory>
 #include <sol/sol.hpp>
 #include <string>
 #include <vector>
 
 namespace ns_frame {
 
-bool luaInit(sol::state &lua);
+std::shared_ptr<sol::state> luaInit();
 
 extern const std::vector<std::string> luaFuncStaticToDynamic;
 

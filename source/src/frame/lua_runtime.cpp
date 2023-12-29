@@ -7,6 +7,10 @@
 using namespace ns_frame;
 using namespace std;
 
+std::shared_ptr<sol::state> LuaFunc::getLua() {
+    return lua;
+}
+
 int LuaFunc::getIndex(string &filename, bool reload) {
     std::replace(filename.begin(), filename.end(), '\\', '/');
     if (filenameMap.find(filename) == filenameMap.end()) {
@@ -69,12 +73,6 @@ void LuaFunc::add(const std::string &filename) {
         funcs.emplace_back(gdi::luaGetFunction("FileNotExistEmptyFunction")); // 名称随意, 取一个空函数即可
     }
     LOG_ERROR("luaExecuteFile failed: {}.", filename);
-}
-
-void LuaFunc::clear() {
-    filenameList.clear();
-    filenameMap.clear();
-    filefuncList.clear();
 }
 
 sol::protected_function LuaFunc::getGetSkillLevelData(string &filename) {

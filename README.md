@@ -174,7 +174,7 @@ Linux 下通常可使用系统包管理器 (软件源) 直接配置环境. 注�
 
 ```shell
 sudo apt update
-sudo apt install -y clang cmake libboost-all-dev libcpp-httplib-dev libfmt-dev liblua5.4-dev nlohmann-json3-dev
+sudo apt install -y clang cmake libasio-dev libboost-all-dev libcpp-httplib-dev libfmt-dev liblua5.4-dev nlohmann-json3-dev
 sudo ln -s /usr/lib/x86_64-linux-gnu/liblua5.4.so /usr/lib/x86_64-linux-gnu/liblua.so
 sudo ln -s /usr/include/lua5.4/* /usr/include/
 git clone https://github.com/CrowCpp/Crow.git

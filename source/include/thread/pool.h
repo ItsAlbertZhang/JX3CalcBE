@@ -11,7 +11,10 @@ namespace ns_thread {
 
 class Pool {
 public:
-    Pool(std::function<void()> thread_init, std::function<void()> thread_cleanup)
+    Pool(
+        std::function<void()> thread_init    = []() {},
+        std::function<void()> thread_cleanup = []() {}
+    )
         : stop(false) {
         unsigned int corecnt = std::thread::hardware_concurrency();
         for (unsigned int i = 0; i < corecnt; ++i)
@@ -49,7 +52,7 @@ public:
         return res;
     }
 
-    ~Pool() {
+    virtual ~Pool() {
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
             stop = true;

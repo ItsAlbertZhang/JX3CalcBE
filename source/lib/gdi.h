@@ -2,6 +2,7 @@
 #define LIB_GDI_H
 
 #include <filesystem>
+#include <memory>
 #include <sol/sol.hpp>
 #include <string>
 #include <unordered_map>
@@ -29,7 +30,7 @@ enum class Tab {
     COUNT, // 用于计数, 请勿使用
 };
 
-using luaInit_t = bool (*)(sol::state &);
+using luaInit_t = std::shared_ptr<sol::state> (*)();
 
 /**
  * @brief 初始化 gdi 库

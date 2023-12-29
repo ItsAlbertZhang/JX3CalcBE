@@ -35,6 +35,9 @@ public:
     Character(); // 构造函数, 线程安全通过 thread_local 保证
     virtual ~Character();
 
+    Character(const Character &) = delete;
+    Character(Character &&)      = delete;
+
     bool       isPlayer     = false;   // 是否为玩家
     Character *targetSelect = nullptr; // 选中的目标
     Character *targetCurr   = nullptr; // 当前目标
@@ -54,19 +57,20 @@ public:
     std::set<AutoRollbackAttribute *> autoRollbackAttributeList; // 自动回滚的魔法属性列表
 
     // ---------- 以下属性和方法未被游戏 lua 调用 ----------
-    int dwKungfuID = 0;
+    int               dwKungfuID = 0;
     // character
     static int        characterGetID(Character *character);
     static Character *characterGet(int nCharacterID);
     // attr
-    void   attrImportFromJX3BOX(int pzID);
-    void   attrImportFromBackup(const ChAttr &attr);
-    ChAttr attrExport();
+    static bool       attrExportFromJX3BOX(int pzID, ChAttr &attr);
+    bool              attrImportFromJX3BOX(int pzID);
+    bool              attrImportFromBackup(const ChAttr &attr);
     // buff
-    void      buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
-    void      buffFlushLeftFrame(BuffItem *item);
-    BuffItem *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
-    BuffItem *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
+    void              buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
+    void              buffFlushLeftFrame(BuffItem *item);
+    BuffItem         *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
+    BuffItem         *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
+
     // calc
     Damage calcDamage(
         int              recordID,
@@ -87,20 +91,21 @@ public:
         int              buffCount    = 1
     );
     std::tuple<int, int> calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel);
+
     // skill
-    void cast(int skillID);
-    bool skillCast(Character *target, int skillID, int skillLevel);
-    void skillActive(int skillID);
-    void skillDeactive(int skillID);
-    void skillLearn(int skillID, int skillLevel);
+    void                          cast(int skillID);
+    bool                          skillCast(Character *target, int skillID, int skillLevel);
+    void                          skillActive(int skillID);
+    void                          skillDeactive(int skillID);
+    void                          skillLearn(int skillID, int skillLevel);
     // skillrecipe
     void                          skillrecipeAdd(int recipeID, int recipeLevel);
     void                          skillrecipeRemove(int recipeID, int recipeLevel);
     std::set<const SkillRecipe *> skillrecipeGet(int skillID, int skillrecipeType);
     // skillevent
-    void                         skilleventAdd(int eventID);
-    void                         skilleventRemove(int eventID);
-    std::set<const SkillEvent *> skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2);
+    void                          skilleventAdd(int eventID);
+    void                          skilleventRemove(int eventID);
+    std::set<const SkillEvent *>  skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2);
 
     // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua_static.cpp ----------
 
@@ -108,44 +113,44 @@ public:
     int        characterGetTargetID();
     Character *characterGetSelect();
     // buff
-    bool      buffExist(int buffID, int buffLevel);
-    void      buffAdd4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
-    void      buffAdd5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count);
-    void      buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum);
-    void      buffDel(int buffID, int buffLevel);
-    void      buffDelGroup(int buffID, int buffLevel);
-    void      buffDelMultiGroupByID(int buffID);
-    void      buffSetLeftActiveCount(int buffIndex, int count);
-    void      buffSetNextActiveFrame(int buffIndex, int nextActiveFrame);
-    BuffItem *buffGet(int buffID, int buffLevel);
-    BuffItem *buffGetByOwner(int buffID, int buffLevel, int sourceID);
+    bool       buffExist(int buffID, int buffLevel);
+    void       buffAdd4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
+    void       buffAdd5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count);
+    void       buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum);
+    void       buffDel(int buffID, int buffLevel);
+    void       buffDelGroup(int buffID, int buffLevel);
+    void       buffDelMultiGroupByID(int buffID);
+    void       buffSetLeftActiveCount(int buffIndex, int count);
+    void       buffSetNextActiveFrame(int buffIndex, int nextActiveFrame);
+    BuffItem  *buffGet(int buffID, int buffLevel);
+    BuffItem  *buffGetByOwner(int buffID, int buffLevel, int sourceID);
     // cooldown
-    void cooldownClearTime(int cooldownID);
-    void cooldownModify(int cooldownID, int frame);
-    void cooldownReset(int cooldownID);
+    void       cooldownClearTime(int cooldownID);
+    void       cooldownModify(int cooldownID, int frame);
+    void       cooldownReset(int cooldownID);
     // skill
-    int  skillGetLevel(int skillID);
-    void skillCast2(int skillID, int skillLevel);
-    void skillCast3(int skillID, int skillLevel, int targetID);
-    void skillCast4(int skillID, int skillLevel, int type, int targetID);
-    void skillCastXYZ(int skillID, int skillLevel, int x, int y, int z);
+    int        skillGetLevel(int skillID);
+    void       skillCast2(int skillID, int skillLevel);
+    void       skillCast3(int skillID, int skillLevel, int targetID);
+    void       skillCast4(int skillID, int skillLevel, int type, int targetID);
+    void       skillCastXYZ(int skillID, int skillLevel, int x, int y, int z);
     // skillrecipe
-    bool skillrecipeExist(int RecipeID, int RecipeLevel);
+    bool       skillrecipeExist(int RecipeID, int RecipeLevel);
     // scene
-    ChScene *sceneGet();
+    ChScene   *sceneGet();
     // timer
-    void timerSet3(int frame, std::string filename, int targetID);
-    void timerSet4(int frame, std::string filename, int type, int targetID);
+    void       timerSet3(int frame, std::string filename, int targetID);
+    void       timerSet4(int frame, std::string filename, int type, int targetID);
     // other
-    bool otherIsFormationLeader();
-    bool otherIsInParty();
-    int  otherGetKungfuMountID();
-    int  otherGetMapID();
-    void otherClearAllNpcThreat();
-    void otherCreatePublicShadow(int a, int roletype, int dwID, int nX, int nY, int nZ, bool b);
-    void otherDestroyPublicShadow(int a, bool b);
-    void otherDoAction(int a, int b);
-    void otherPlayPublicShadowAnimation(int a, int b, bool c, bool d);
+    bool       otherIsFormationLeader();
+    bool       otherIsInParty();
+    int        otherGetKungfuMountID();
+    int        otherGetMapID();
+    void       otherClearAllNpcThreat();
+    void       otherCreatePublicShadow(int a, int roletype, int dwID, int nX, int nY, int nZ, bool b);
+    void       otherDestroyPublicShadow(int a, bool b);
+    void       otherDoAction(int a, int b);
+    void       otherPlayPublicShadowAnimation(int a, int b, bool c, bool d);
 
     //  ---------- 被游戏 lua 调用的属性, 通常为匈牙利命名法 ----------
     int    dwID;                          // 角色 ID
