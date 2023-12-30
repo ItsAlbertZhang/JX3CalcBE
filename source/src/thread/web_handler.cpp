@@ -1,4 +1,5 @@
 #include "thread/web_handler.h"
+#include "thread/data_models/task.h"
 #include <string>
 #include <thread>
 #include <unordered_map>
@@ -29,13 +30,15 @@ void WebHandler::run() {
 
     CROW_ROUTE(app, "/task")
         .methods("GET"_method)([this]() {
-            return crow::response{200, "text/plain", "task getting is unavailable now."};
+            return crow::response{200, "application/json", DMTask::format()};
         });
 
     CROW_ROUTE(app, "/task")
         .methods("POST"_method)([this](const crow::request &req) {
-            this->task(req.body);
-            return crow::response{200};
+            if (this->task(req.body))
+                return crow::response{200};
+            else
+                return crow::response{400};
         });
 
 #ifdef _WIN32

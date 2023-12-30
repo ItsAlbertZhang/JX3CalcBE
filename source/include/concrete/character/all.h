@@ -1,19 +1,20 @@
-#ifndef CONCRETE_CHARACTER_PLAYER_ALL_H_
-#define CONCRETE_CHARACTER_PLAYER_ALL_H_
+#ifndef CONCRETE_CHARACTER_ALL_H_
+#define CONCRETE_CHARACTER_ALL_H_
 
 #include "frame/character/derived/npc.h"
 #include "frame/character/derived/player.h"
 #include <memory>
+#include <unordered_map>
 
 namespace ns_concrete {
 
 enum class PlayerType {
-    MjFysj,
+    MjFysj = 10242,
     COUNT,
 };
 
-inline const char *PlayerTypeName[] = {
-    "焚影圣诀",
+inline std::unordered_map<PlayerType, std::string> PlayerTypeMap = {
+    {PlayerType::MjFysj, "焚影圣诀"},
 };
 
 class PlayerManager {
@@ -27,8 +28,8 @@ enum class NPCType {
     COUNT,
 };
 
-inline const char *NPCTypeName[] = {
-    "124级NPC目标",
+inline std::unordered_map<NPCType, std::string> NPCTypeMap = {
+    {NPCType::NPC124, "124级NPC目标"},
 };
 
 class NPCManager {
@@ -39,4 +40,4 @@ public:
 
 } // namespace ns_concrete
 
-#endif // CONCRETE_CHARACTER_PLAYER_ALL_H_
+#endif // CONCRETE_CHARACTER_ALL_H_

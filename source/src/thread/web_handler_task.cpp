@@ -16,61 +16,20 @@ using json = nlohmann::json;
 static int calculate(const DMTask &arg);
 static int output(const DMTask &arg, std::filesystem::path resfile);
 
-static inline int getInt(bool &stat, const nlohmann::json &j, const std::string &key) {
-    if (j.contains(key) && j[key].is_number_integer()) {
-        return j[key];
-    }
-    stat = false;
-    return 0;
-}
-
-static inline bool getBool(bool &stat, const nlohmann::json &j, const std::string &key) {
-    if (j.contains(key) && j[key].is_boolean()) {
-        return j[key];
-    }
-    stat = false;
-    return false;
-}
-
 bool WebHandler::task(const std::string &jsonstr) {
     std::filesystem::path p_res = ns_program::Config::pExeDir / "res.tab";
-
-    // TODO: check jsonstr
-    json j    = json::parse(jsonstr);
-    bool stat = true;
-
-    std::unique_ptr<ns_frame::Player> player = ns_concrete::PlayerManager::create(ns_concrete::PlayerType::MjFysj, 0, 0);
-    switch (j["attribute"]["id"].get<int>()) {
-    case static_cast<int>(DMTask::AttributeType::jx3box):
-        player->attrImportFromJX3BOX(j["attribute"]["data"].get<int>());
-        break;
-    default:
-        return false;
-    }
-
-    bool useCustomMacro = j.contains("customMacro") && j["customMacro"].is_string();
-
-    DMTask arg{
-        .attrBackup     = player->chAttr,
-        .delayNetwork   = getInt(stat, j, "delayNetwork"),
-        .delayKeybord   = getInt(stat, j, "delayKeybord"),
-        .fightTime      = getInt(stat, j, "fightTime"),
-        .fightCount     = getInt(stat, j, "fightCount"),
-        .tz_jn          = getBool(stat, j["effects"], "套装·技能"),
-        .tz_tx          = getBool(stat, j["effects"], "套装·特效"),
-        .dfm_y          = getBool(stat, j["effects"], "大附魔·腰"),
-        .dfm_w          = getBool(stat, j["effects"], "大附魔·腕"),
-        .dfm_x          = getBool(stat, j["effects"], "大附魔·鞋"),
-        .wq_cw          = getBool(stat, j["effects"], "武器·橙武"),
-        .useCustomMacro = useCustomMacro,
-        .customMacro    = useCustomMacro ? j["customMacro"].get<std::string>() : "",
-    };
 
 #ifdef DEBUG
     ns_program::log_info.enable  = true;
     ns_program::log_error.enable = true;
     ns_program::log_error.output = true;
 #endif
+
+    auto argptr = DMTask::create(jsonstr);
+    if (argptr == nullptr) {
+        return false;
+    }
+    DMTask &arg = *argptr;
 
     auto first     = pool.enqueue(output, arg, p_res);
     int  timespend = first.get();
@@ -126,18 +85,9 @@ static auto calc(const DMTask &arg) {
         player->macroCustom = map.at(arg.custom_macro_hash).get();
     }
     player->attrImportFromBackup(arg.attrBackup);
-    if (arg.tz_jn)
-        player->skillrecipeAdd(948, 2);
-    if (arg.tz_tx)
-        player->skilleventAdd(1922);
-    if (arg.dfm_y)
-        player->skilleventAdd(1705);
-    if (arg.dfm_w)
-        player->skilleventAdd(1843);
-    if (arg.dfm_x)
-        player->skilleventAdd(2393);
-    if (arg.wq_cw)
-        player->skilleventAdd(2421);
+    for (auto &it : arg.effects) {
+        it->active(player.get());
+    }
     ns_frame::Event::clear();
     player->macroRun();
     while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * arg.fightTime)) {
