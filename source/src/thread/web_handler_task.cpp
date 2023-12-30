@@ -8,10 +8,8 @@
 #include "thread/web_handler.h"
 #include <filesystem>
 #include <memory>
-#include <nlohmann/json.hpp>
 
 using namespace ns_thread;
-using json = nlohmann::json;
 
 static int calculate(const DMTask &arg);
 static int output(const DMTask &arg, std::filesystem::path resfile);
@@ -31,8 +29,8 @@ bool WebHandler::task(const std::string &jsonstr) {
     }
     DMTask &arg = *argptr;
 
-    auto first     = pool.enqueue(output, arg, p_res);
-    int  timespend = first.get();
+    auto first     = pool.enqueue("taska", 1, output, arg, p_res);
+    int  timespend = first[0].get();
     std::cout << "第一次计算花费时间: " << timespend << "ms, 已将战斗记录保存至 res.tab" << std::endl;
 
 #ifdef DEBUG
@@ -43,10 +41,7 @@ bool WebHandler::task(const std::string &jsonstr) {
     ns_program::log_error.output = false;
 #endif
 
-    std::vector<std::future<int>> futures;
-    for (int i = 0; i < arg.fightCount; ++i) {
-        futures.emplace_back(pool.enqueue(calculate, arg));
-    }
+    auto               futures        = pool.enqueue("taskb", arg.fightCount, calculate, arg);
     unsigned long long damageAvg      = 0;
     int                idx            = 0;
     int                idxBeforeSleep = 0;

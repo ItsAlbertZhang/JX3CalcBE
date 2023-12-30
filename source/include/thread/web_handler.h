@@ -1,22 +1,21 @@
-#ifndef THREAD_MAIN_H_
-#define THREAD_MAIN_H_
+#ifndef THREAD_WEB_HANDLER_H_
+#define THREAD_WEB_HANDLER_H_
 
 #include "thread/pool.h"
+#include "thread/web_datashared.h"
 #include "thread/web_helper.h"
 #pragma warning(push, 0)
 #include <crow.h>
 #pragma warning(pop)
 #include <memory>
-#include <mutex>
 #include <string>
 #include <thread>
-#include <unordered_map>
 
 namespace ns_thread {
 
 class WebHandler {
 public:
-    WebHandler();
+    WebHandler(); // 构造 WebHandler 的同时, 会启动一个线程
     virtual ~WebHandler();
     WebHandler(const WebHandler &)            = delete;
     WebHandler &operator=(const WebHandler &) = delete;
@@ -31,13 +30,9 @@ private:
     WebHelper helper;
     Pool      pool;
 
-    friend class WebHelper;
+    WebDataShared shared;
 
-    // web server
     crow::SimpleApp app;
-    std::mutex      mtx;
-    std::unordered_map<crow::websocket::connection *, std::string>
-        wsmap;
 
     void run();
     bool task(const std::string &jsonstr);
@@ -45,4 +40,4 @@ private:
 
 } // namespace ns_thread
 
-#endif // THREAD_MAIN_H_
+#endif // THREAD_WEB_HANDLER_H_

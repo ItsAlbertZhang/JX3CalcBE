@@ -1,5 +1,5 @@
-#ifndef THREAD_DATA_MODELS_P_ARG_H_
-#define THREAD_DATA_MODELS_P_ARG_H_
+#ifndef THREAD_DATA_MODELS_TASK_H_
+#define THREAD_DATA_MODELS_TASK_H_
 
 #include "concrete/effects/base.h"
 #include "frame/character/property/attribute.h"
@@ -58,4 +58,4 @@ public:
 
 } // namespace ns_thread
 
-#endif // THREAD_DATA_MODELS_P_ARG_H_
+#endif // THREAD_DATA_MODELS_TASK_H_
