@@ -1,6 +1,6 @@
 #include "frame/character/derived/player.h"
 #include "frame/event.h"
-#include "program/log.h"
+#include "global/log.h"
 #include <random>
 
 #define UNREFERENCED_PARAMETER(P) (P)

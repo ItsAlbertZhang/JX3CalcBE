@@ -1,6 +1,6 @@
 #include "frame/lua_runtime.h"
 #include "gdi.h"
-#include "program/log.h"
+#include "global/log.h"
 
 #define UNREFERENCED_PARAMETER(P) (P)
 

@@ -146,21 +146,18 @@ export LIBRARY_PATH=~/.local/lib:/opt/homebrew/lib:$LIBRARY_PATH
 
 #### Step 3: 配置构建工具与第三方库
 
-使用 Homebrew 安装构建工具 CMake 与第三方库:
+使用 Homebrew 安装构建工具 CMake 与第三方库, 并手动安装一些版本要求较高的仅标头的头文件库:
 
 ```shell
-brew install cmake boost cpp-httplib fmt lua nlohmann-json
+brew install cmake cpp-httplib fmt lua nlohmann-json
 sudo ln -s /opt/homebrew/include/lua/* /opt/homebrew/include/
-```
-
-手动安装 Homebrew 缺失的第三方库:
-
-```shell
+git clone https://github.com/chriskohlhoff/asio.git
+mv asio/asio/include/asio* ~/.local/include/
 git clone https://github.com/ThePhD/sol2.git
 mv sol2/include/* ~/.local/include/
 git clone https://github.com/CrowCpp/Crow.git
 mv Crow/include/* ~/.local/include/
-rm -rf Crow sol2
+rm -rf asio Crow sol2
 ```
 
 ### Linux
@@ -174,14 +171,16 @@ Linux 下通常可使用系统包管理器 (软件源) 直接配置环境. 注�
 
 ```shell
 sudo apt update
-sudo apt install -y clang cmake libasio-dev libboost-all-dev libcpp-httplib-dev libfmt-dev liblua5.4-dev nlohmann-json3-dev
+sudo apt install -y clang cmake libcpp-httplib-dev libfmt-dev liblua5.4-dev nlohmann-json3-dev
 sudo ln -s /usr/lib/x86_64-linux-gnu/liblua5.4.so /usr/lib/x86_64-linux-gnu/liblua.so
 sudo ln -s /usr/include/lua5.4/* /usr/include/
+git clone https://github.com/chriskohlhoff/asio.git
+sudo mv asio/asio/include/asio* /usr/include/
 git clone https://github.com/CrowCpp/Crow.git
 sudo mv Crow/include/* /usr/include/
 git clone https://github.com/ThePhD/sol2.git
 sudo mv sol2/include/* /usr/include/
-rm -rf Crow sol2
+rm -rf asio Crow sol2
 ```
 
 可以将上述命令放入文本文件 `install.sh` , 并 `chmod u+x install.sh` 赋予可执行权限, 随后执行 `./install.sh` , 以一次性完成这些命令.

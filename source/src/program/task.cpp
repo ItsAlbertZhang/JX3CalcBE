@@ -1,13 +1,13 @@
-#include "thread/data_models/task.h"
+#include "program/task.h"
 #include "concrete/character/all.h"
 #include "concrete/effects/all.h"
 #include "frame/character/derived/player.h"
-#include "program/log.h"
+#include "global/log.h"
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <vector>
 
-using namespace ns_thread;
+using namespace ns_program;
 
 std::string DMTask::format() {
     using json = nlohmann::json;

@@ -1,12 +1,12 @@
-#include "program/settings.h"
+#include "global/settings.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_program;
+using namespace ns_global;
 
-void ns_program::init(int argc, char *argv[]) { // 初始化所有环境
+void ns_global::init(int argc, char *argv[]) { // 初始化所有环境
     UNREFERENCED_PARAMETER(argc);
     Config::pExeDir = fs::absolute(argv[0]).parent_path();
     Config::load();

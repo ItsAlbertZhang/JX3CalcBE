@@ -2,7 +2,7 @@
 #include "frame/character/property/damage.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
-#include "program/log.h"
+#include "global/log.h"
 
 using namespace ns_frame;
 

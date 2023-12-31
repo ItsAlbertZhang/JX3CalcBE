@@ -1,5 +1,5 @@
-#ifndef THREAD_DATA_MODELS_TASK_H_
-#define THREAD_DATA_MODELS_TASK_H_
+#ifndef PROGRAM_TASK_H_
+#define PROGRAM_TASK_H_
 
 #include "concrete/effects/base.h"
 #include "frame/character/property/attribute.h"
@@ -8,23 +8,16 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ns_thread {
+namespace ns_program {
 
 class DMTask {
 public:
-    // 静态数据区
+    // 静态数据区: 声明及设置无关变量
     class intValue {
     public:
         int min;
         int max;
     };
-
-    static inline intValue nDelayNetwork{0, 1024};
-    static inline intValue nDelayKeybord{0, 1024};
-    static inline intValue nFightTime{1, 1 << 30};
-    static inline intValue nFightCount{1, 1 << 30};
-
-    static inline bool allowCustomMacro = true;
 
     enum class AttributeType {
         zero,
@@ -35,6 +28,14 @@ public:
         {AttributeType::zero,   "未启用"      },
         {AttributeType::jx3box, "从JX3BOX导入"},
     };
+
+    // 静态数据区: 设置相关变量
+    static inline intValue nDelayNetwork{0, 1024};
+    static inline intValue nDelayKeybord{0, 1024};
+    static inline intValue nFightTime{1, 1 << 30};
+    static inline intValue nFightCount{1, 1 << 30};
+
+    static inline bool allowCustomMacro = true;
 
     // 静态方法区
     static std::string             format();
@@ -56,6 +57,6 @@ public:
     const size_t custom_macro_hash = std::hash<std::string>{}(customMacro);
 };
 
-} // namespace ns_thread
+} // namespace ns_program
 
-#endif // THREAD_DATA_MODELS_TASK_H_
+#endif // PROGRAM_TASK_H_

@@ -2,7 +2,7 @@
 #include "frame/character/character.h"
 #include "frame/lua_runtime.h"
 #include "frame/ref/tab_attribute.h" // enumTabAttribute
-#include "program/log.h"
+#include "global/log.h"
 
 using namespace ns_frame;
 using namespace ns_frame::ref;
@@ -53,7 +53,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         break;
     case enumTabAttribute::atCallSolarDamage: {
         // 计算会心
-        Character *src = Character::characterGet(item->dwSkillSrcID);
+        Character *src                                 = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         auto [atCriticalStrike, atCriticalDamagePower] = src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel);
         // 注意计算伤害时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
@@ -79,7 +79,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     } break;
     case enumTabAttribute::atCallLunarDamage: {
         // 计算会心
-        Character *src = Character::characterGet(item->dwSkillSrcID);
+        Character *src                                 = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         auto [atCriticalStrike, atCriticalDamagePower] = src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel);
         // 注意计算伤害时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果

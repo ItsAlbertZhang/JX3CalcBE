@@ -2,25 +2,25 @@
 #include "frame/event.h"
 #include "frame/global/uibuff.h"
 #include "frame/global/uiskill.h"
-#include "program/log.h"
-#include "program/settings.h"
-#include "thread/data_models/task.h"
-#include "thread/web_handler.h"
+#include "global/log.h"
+#include "global/settings.h"
+#include "program/task.h"
+#include "program/thread_web.h"
 #include <filesystem>
 #include <memory>
 
-using namespace ns_thread;
+using namespace ns_program;
 
 static int calculate(const DMTask &arg);
 static int output(const DMTask &arg, std::filesystem::path resfile);
 
-bool WebHandler::task(const std::string &jsonstr) {
-    std::filesystem::path p_res = ns_program::Config::pExeDir / "res.tab";
+bool Web::task(const std::string &jsonstr) {
+    std::filesystem::path p_res = ns_global::Config::pExeDir / "res.tab";
 
 #ifdef DEBUG
-    ns_program::log_info.enable  = true;
-    ns_program::log_error.enable = true;
-    ns_program::log_error.output = true;
+    ns_global::log_info.enable  = true;
+    ns_global::log_error.enable = true;
+    ns_global::log_error.output = true;
 #endif
 
     auto argptr = DMTask::create(jsonstr);
@@ -34,11 +34,11 @@ bool WebHandler::task(const std::string &jsonstr) {
     std::cout << "第一次计算花费时间: " << timespend << "ms, 已将战斗记录保存至 res.tab" << std::endl;
 
 #ifdef DEBUG
-    ns_program::log_info.save();
-    ns_program::log_error.save();
-    ns_program::log_info.enable  = false;
-    ns_program::log_error.enable = false;
-    ns_program::log_error.output = false;
+    ns_global::log_info.save();
+    ns_global::log_error.save();
+    ns_global::log_info.enable  = false;
+    ns_global::log_error.enable = false;
+    ns_global::log_error.output = false;
 #endif
 
     auto               futures        = pool.enqueue("taskb", arg.fightCount, calculate, arg);

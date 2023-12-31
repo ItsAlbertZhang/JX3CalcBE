@@ -1,7 +1,7 @@
 #include "frame/global/skill.h"
 #include "frame/lua_runtime.h"
 #include "gdi.h"
-#include "program/log.h"
+#include "global/log.h"
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
@@ -45,19 +45,19 @@ void SkillManager::add(int skillID, int skillLevel) {
         skill.tab = it->second.tab;
     }
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    skill.KindType            = ref::mapSkillKindtype.find(skill.tab["KindType"]) != ref::mapSkillKindtype.end()
-                                    ? ref::mapSkillKindtype.at(skill.tab["KindType"])
-                                    : ref::enumSkillKindtype::COUNT;
-    skill.HasCriticalStrike   = skill.tab["HasCriticalStrike"] == "1";
-    skill.SkillEventMask1     = atoi(skill.tab["SkillEventMask1"].c_str());
-    skill.SkillEventMask2     = atoi(skill.tab["SkillEventMask2"].c_str());
-    skill.NeedOutOfFight      = skill.tab["NeedOutOfFight"] == "1";
-    skill.TargetTypePlayer    = skill.tab["TargetTypePlayer"] == "1";
-    skill.TargetTypeNpc       = skill.tab["TargetTypeNpc"] == "1";
-    skill.TargetRelationNone  = skill.tab["TargetRelationNone"] == "1";
-    skill.TargetRelationSelf  = skill.tab["TargetRelationSelf"] == "1";
-    skill.TargetRelationEnemy = skill.tab["TargetRelationEnemy"] == "1";
-    skill.RecipeType          = atoi(skill.tab["RecipeType"].c_str());
+    skill.KindType             = ref::mapSkillKindtype.find(skill.tab["KindType"]) != ref::mapSkillKindtype.end()
+                                     ? ref::mapSkillKindtype.at(skill.tab["KindType"])
+                                     : ref::enumSkillKindtype::COUNT;
+    skill.HasCriticalStrike    = skill.tab["HasCriticalStrike"] == "1";
+    skill.SkillEventMask1      = atoi(skill.tab["SkillEventMask1"].c_str());
+    skill.SkillEventMask2      = atoi(skill.tab["SkillEventMask2"].c_str());
+    skill.NeedOutOfFight       = skill.tab["NeedOutOfFight"] == "1";
+    skill.TargetTypePlayer     = skill.tab["TargetTypePlayer"] == "1";
+    skill.TargetTypeNpc        = skill.tab["TargetTypeNpc"] == "1";
+    skill.TargetRelationNone   = skill.tab["TargetRelationNone"] == "1";
+    skill.TargetRelationSelf   = skill.tab["TargetRelationSelf"] == "1";
+    skill.TargetRelationEnemy  = skill.tab["TargetRelationEnemy"] == "1";
+    skill.RecipeType           = atoi(skill.tab["RecipeType"].c_str());
     // 处理武器伤害. 目前推测: WeaponRequest 字段非 0 的技能默认拥有 1024 的武器伤害.
     // 注意: 拥有武器伤害不一定代表会造成武器伤害. 造成武器伤害与 AddAttribute 中的 CALL_PHYSICS_DAMAGE 有关.
     // 推测的依据:
@@ -66,8 +66,8 @@ void SkillManager::add(int skillID, int skillLevel) {
     // 暂时按照该推测进行处理.
     skill.nWeaponDamagePercent = !skill.tab["WeaponRequest"].empty() && skill.tab["WeaponRequest"] != "0" ? 1024 : 0;
     // 执行 GetSkillLevelData
-    std::string name = "scripts/skill/" + skill.tab["ScriptFile"];
-    bool        res  = LuaFunc::analysis(
+    std::string name           = "scripts/skill/" + skill.tab["ScriptFile"];
+    bool        res            = LuaFunc::analysis(
         LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData
     );
     if (res) {

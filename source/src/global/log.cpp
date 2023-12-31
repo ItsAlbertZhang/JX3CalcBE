@@ -1,9 +1,9 @@
-#include "program/log.h"
-#include "program/settings.h"
+#include "global/log.h"
+#include "global/settings.h"
 #include <fstream>
 #include <iostream>
 
-using namespace ns_program;
+using namespace ns_global;
 
 #ifdef DEBUG
 

@@ -1,5 +1,5 @@
-#ifndef THREAD_POOL_H_
-#define THREAD_POOL_H_
+#ifndef PROGRAM_THREAD_POOL_H_
+#define PROGRAM_THREAD_POOL_H_
 
 #include <cassert>
 #include <condition_variable>
@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ns_thread {
+namespace ns_program {
 
 class TaskList {
     // 链表结点. 每一个结点对应一批任务 (一个任务队列).
@@ -182,6 +182,6 @@ private:
     bool                     stop;
 };
 
-} // namespace ns_thread
+} // namespace ns_program
 
-#endif // THREAD_POOL_H_
+#endif // PROGRAM_THREAD_POOL_H_

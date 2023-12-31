@@ -1,22 +1,21 @@
-#include "thread/web_handler.h"
-#include "thread/data_models/task.h"
+#include "program/task.h"
+#include "program/thread_web.h"
 #include <string>
 #include <thread>
-#include <unordered_map>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_thread;
+using namespace ns_program;
 
-WebHandler::WebHandler() {
-    thread = std::make_unique<std::thread>(&WebHandler::run, this);
+Web::Web() {
+    webThread = std::thread(&Web::webEntry, this);
 }
 
-WebHandler::~WebHandler() {
-    thread->join();
+Web::~Web() {
+    webThread.join();
 }
 
-void WebHandler::run() {
+void Web::webEntry() {
     CROW_ROUTE(app, "/")
         .methods("GET"_method)([]() {
             return "Hello, world!";
@@ -49,19 +48,15 @@ void WebHandler::run() {
 #endif
         .onclose([&](crow::websocket::connection &conn, const std::string &reason) {
             CROW_LOG_INFO << "websocket connection closed: " << reason;
-            std::lock_guard<std::mutex> _(mtx);
-            wsmap.erase(&conn);
         })
         .onmessage([&](crow::websocket::connection &conn, const std::string &data, bool is_binary) {
-            std::cout << "message from client: " << data << std::endl;
-            std::lock_guard<std::mutex> _(mtx);
             if (!is_binary)
-                wsmap.emplace(&conn, data);
+                std::cout << "message from client: " << data << std::endl;
         });
 
     app.bindaddr("127.0.0.1").port(12897).multithreaded().run();
 }
 
-void WebHandler::stop() {
+void Web::stop() {
     app.stop();
 }

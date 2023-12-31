@@ -1,11 +1,11 @@
-#ifndef PROGRAM_SETTINGS_H_
-#define PROGRAM_SETTINGS_H_
+#ifndef GLOBAL_SETTINGS_H_
+#define GLOBAL_SETTINGS_H_
 
 #include <filesystem>
 
 namespace fs = std::filesystem;
 
-namespace ns_program {
+namespace ns_global {
 
 // 初始化环境.
 void init(int argc, char *argv[]);
@@ -24,6 +24,6 @@ public:
     static void load();
 };
 
-}; // namespace ns_program
+}; // namespace ns_global
 
-#endif // PROGRAM_SETTINGS_H_
+#endif // GLOBAL_SETTINGS_H_

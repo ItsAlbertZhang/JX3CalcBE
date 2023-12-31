@@ -1,6 +1,6 @@
 #include "frame/global/buff.h"
 #include "gdi.h"
-#include "program/log.h"
+#include "global/log.h"
 
 using namespace ns_frame;
 
@@ -13,7 +13,7 @@ const Buff &BuffManager::get(int buffID, int buffLevel) {
 }
 
 static inline void addAttribute(std::vector<ns_frame::Buff::Attrib> &attrib, ref::enumTabAttribute type, const std::string &valueA, const std::string &valueB) {
-    auto &it = attrib.emplace_back(type, valueA, valueB);
+    auto &it     = attrib.emplace_back(type, valueA, valueB);
     // 尝试将 valueA 和 value B 转换为数字形态. 若转换失败, 则其会被置为 0, 且不会引发报错.
     it.valueAInt = atoi(valueA.c_str());
     it.valueBInt = atoi(valueB.c_str());
@@ -36,18 +36,18 @@ void BuffManager::add(int buffID, int buffLevel) {
     arg[0]["ID"]    = std::to_string(buffID);
     arg[0]["Level"] = std::to_string(buffLevel);
     gdi::tabSelect(gdi::Tab::buff, arg);
-    buff.tab = std::move(arg[0]);
+    buff.tab                              = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    buff.IsStackable = buff.tab["IsStackable"] == "1";
-    buff.MaxStackNum = std::stoi(buff.tab["MaxStackNum"]);
-    buff.Count       = std::stoi(buff.tab["Count"]);
-    buff.Interval    = std::stoi(buff.tab["Interval"]);
-    buff.Hide        = buff.tab["Hide"] == "1";
-    buff.Exclude     = buff.tab["Exclude"] == "1";
-    buff.ScriptFile  = buff.tab["ScriptFile"];
-    buff.CanCancel   = buff.tab["CanCancel"] == "1";
-    buff.MinInterval = std::stoi(buff.tab["MinInterval"]);
-    buff.MaxInterval = std::stoi(buff.tab["MaxInterval"]);
+    buff.IsStackable                      = buff.tab["IsStackable"] == "1";
+    buff.MaxStackNum                      = std::stoi(buff.tab["MaxStackNum"]);
+    buff.Count                            = std::stoi(buff.tab["Count"]);
+    buff.Interval                         = std::stoi(buff.tab["Interval"]);
+    buff.Hide                             = buff.tab["Hide"] == "1";
+    buff.Exclude                          = buff.tab["Exclude"] == "1";
+    buff.ScriptFile                       = buff.tab["ScriptFile"];
+    buff.CanCancel                        = buff.tab["CanCancel"] == "1";
+    buff.MinInterval                      = std::stoi(buff.tab["MinInterval"]);
+    buff.MaxInterval                      = std::stoi(buff.tab["MaxInterval"]);
     // 初始化 buff Attrib
     static const std::string attribName[] = {"Begin", "Active", "EndTime"};
     for (int attribIdx = 0; attribIdx < 3; attribIdx++) {

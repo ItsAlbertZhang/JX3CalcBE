@@ -1,7 +1,7 @@
 #include "frame/lua_static.h"
 #include "gdi.h"
-#include "program/settings.h"
-#include "thread/web_handler.h"
+#include "global/settings.h"
+#include "program/thread_web.h"
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -14,11 +14,11 @@ int main(int argc, char *argv[]) {
 #endif
     bool ret;
     // 初始化程序
-    ns_program::init(argc, argv);
+    ns_global::init(argc, argv);
     // 初始化接口
     ret = gdi::init(
-        ns_program::Config::pJX3,
-        ns_program::Config::pUnpack,
+        ns_global::Config::pJX3,
+        ns_global::Config::pUnpack,
         ns_frame::luaInit,
         ns_frame::luaFuncStaticToDynamic,
         static_cast<int>(gdi::Tab::COUNT)
@@ -26,8 +26,8 @@ int main(int argc, char *argv[]) {
     if (!ret)
         return 0;
 
-    ns_thread::WebHandler webHandler;
-    std::string           s;
+    ns_program::Web webHandler;
+    std::string     s;
     while (std::getline(std::cin, s)) {
         if (s == "exit")
             break;

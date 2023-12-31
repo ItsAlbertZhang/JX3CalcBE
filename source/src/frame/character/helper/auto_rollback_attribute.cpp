@@ -5,7 +5,7 @@
 #include "frame/lua_runtime.h"            // LuaFunc
 #include "frame/ref/lua_attribute_type.h" // enumLuaAttributeType
 #include "frame/ref/lua_other.h"          // enumLuaAttributeEffectMode
-#include "program/log.h"
+#include "global/log.h"
 #include <random>
 
 using namespace ns_frame;

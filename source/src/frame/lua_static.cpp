@@ -5,7 +5,7 @@
 #include "frame/ref/lua_adaptive_type.h"
 #include "frame/ref/lua_attribute_type.h"
 #include "frame/ref/lua_other.h"
-#include "program/log.h"
+#include "global/log.h"
 #include <random>
 #include <sol/sol.hpp>
 

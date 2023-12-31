@@ -1,5 +1,5 @@
-#ifndef PROGRAM_LOG_H_
-#define PROGRAM_LOG_H_
+#ifndef GLOBAL_LOG_H_
+#define GLOBAL_LOG_H_
 
 #ifdef DEBUG
 
@@ -12,7 +12,7 @@ namespace fmt = std;
 #include <fmt/core.h>
 #endif
 
-namespace ns_program {
+namespace ns_global {
 
 using format_args = fmt::format_args; // 消除编译器对于 #include <format> 和 namespace fmt = std 未使用的警告
 
@@ -33,10 +33,10 @@ public:
 inline Log log_info{"info"};
 inline Log log_error{"error"};
 
-} // namespace ns_program
+} // namespace ns_global
 
-#define LOG_INFO(str, ...)  ns_program::log_info(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
-#define LOG_ERROR(str, ...) ns_program::log_error(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
+#define LOG_INFO(str, ...)  ns_global::log_info(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
+#define LOG_ERROR(str, ...) ns_global::log_error(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
 
 #else // DEBUG
 
@@ -45,4 +45,4 @@ inline Log log_error{"error"};
 
 #endif // DEBUG
 
-#endif // PROGRAM_LOG_H_
+#endif // GLOBAL_LOG_H_
