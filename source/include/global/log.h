@@ -30,8 +30,8 @@ public:
     void save();
 };
 
-inline Log log_info{"info"};
-inline Log log_error{"error"};
+inline thread_local Log log_info{"info"};
+inline thread_local Log log_error{"error"};
 
 } // namespace ns_global
 

@@ -14,7 +14,7 @@ using namespace ns_program;
 static int calculate(const DMTask &arg);
 static int output(const DMTask &arg, std::filesystem::path resfile);
 
-bool Web::task(const std::string &jsonstr) {
+std::string Web::urlTask(const std::string &jsonstr) {
     std::filesystem::path p_res = ns_global::Config::pExeDir / "res.tab";
 
 #ifdef DEBUG
@@ -22,49 +22,67 @@ bool Web::task(const std::string &jsonstr) {
     ns_global::log_error.enable = true;
     ns_global::log_error.output = true;
 #endif
-
     auto argptr = DMTask::create(jsonstr);
     if (argptr == nullptr) {
-        return false;
+        return "";
     }
-    DMTask &arg = *argptr;
-
-    auto first     = pool.enqueue("taska", 1, output, arg, p_res);
-    int  timespend = first[0].get();
-    std::cout << "第一次计算花费时间: " << timespend << "ms, 已将战斗记录保存至 res.tab" << std::endl;
-
 #ifdef DEBUG
-    ns_global::log_info.save();
-    ns_global::log_error.save();
     ns_global::log_info.enable  = false;
     ns_global::log_error.enable = false;
     ns_global::log_error.output = false;
 #endif
+    std::string id = genID();
+    Task       &it =
+        tasks.emplace(
+                 std::piecewise_construct,
+                 std::forward_as_tuple(id),
+                 std::forward_as_tuple(id, std::move(*argptr))
+        )
+            .first->second;
+    // 原地插入. 通过这种方式插入的 key 和 value, 不是构造后移动至容器, 而是直接在容器内构造.
+    argptr.reset();
+    pool.enqueue(id, 1, it.futures, output, it.task, p_res);
+    pool.enqueue(id, it.task.fightCount, it.futures, calculate, it.task);
 
-    auto               futures        = pool.enqueue("taskb", arg.fightCount, calculate, arg);
-    unsigned long long damageAvg      = 0;
-    int                idx            = 0;
-    int                idxBeforeSleep = 0;
-    auto               start          = std::chrono::steady_clock::now();
-    while (idx >= 0 && static_cast<std::vector<int>::size_type>(idx) < futures.size()) {
-        if (futures[idx].wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-            damageAvg += futures[idx].get();
-            idx++;
-        } else {
-            std::cout << "\r(" << idx << "/" << arg.fightCount << ")   当前速度: " << idx - idxBeforeSleep << " 次计算/s   " << std::flush;
-            idxBeforeSleep = idx;
-            std::this_thread::sleep_for(std::chrono::seconds(1));
-        }
-    }
-    auto end = std::chrono::steady_clock::now();
+    return id;
+    //     DMTask &arg = *argptr;
 
-    const unsigned int corecnt = std::thread::hardware_concurrency();
-    std::cout << "\r                                                                                                    \r";
-    std::cout << "平均 DPS: " << damageAvg / arg.fightCount << std::endl;
-    double timespendAvg = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() * corecnt / static_cast<double>(arg.fightCount));
-    std::cout << "平均每次计算所需时间: " << std::fixed << std::setprecision(2) << timespendAvg << " ms / " << corecnt << " 并发数 = "
-              << std::fixed << std::setprecision(2) << timespendAvg / corecnt << " ms" << std::endl;
-    return true;
+    //     auto first     = pool.enqueue("taska", 1, output, arg, p_res);
+    //     int  timespend = first[0].get();
+    //     std::cout << "第一次计算花费时间: " << timespend << "ms, 已将战斗记录保存至 res.tab" << std::endl;
+
+    // #ifdef DEBUG
+    //     ns_global::log_info.save();
+    //     ns_global::log_error.save();
+    //     ns_global::log_info.enable  = false;
+    //     ns_global::log_error.enable = false;
+    //     ns_global::log_error.output = false;
+    // #endif
+
+    //     auto               futures        = pool.enqueue("taskb", arg.fightCount, calculate, arg);
+    //     unsigned long long damageAvg      = 0;
+    //     int                idx            = 0;
+    //     int                idxBeforeSleep = 0;
+    //     auto               start          = std::chrono::steady_clock::now();
+    //     while (idx >= 0 && static_cast<std::vector<int>::size_type>(idx) < futures.size()) {
+    //         if (futures[idx].wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
+    //             damageAvg += futures[idx].get();
+    //             idx++;
+    //         } else {
+    //             std::cout << "\r(" << idx << "/" << arg.fightCount << ")   当前速度: " << idx - idxBeforeSleep << " 次计算/s   " << std::flush;
+    //             idxBeforeSleep = idx;
+    //             std::this_thread::sleep_for(std::chrono::seconds(1));
+    //         }
+    //     }
+    //     auto end = std::chrono::steady_clock::now();
+
+    //     const unsigned int corecnt = std::thread::hardware_concurrency();
+    //     std::cout << "\r                                                                                                    \r";
+    //     std::cout << "平均 DPS: " << damageAvg / arg.fightCount << std::endl;
+    //     double timespendAvg = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() * corecnt / static_cast<double>(arg.fightCount));
+    //     std::cout << "平均每次计算所需时间: " << std::fixed << std::setprecision(2) << timespendAvg << " ms / " << corecnt << " 并发数 = "
+    //               << std::fixed << std::setprecision(2) << timespendAvg / corecnt << " ms" << std::endl;
+    //     return true;
 }
 
 static auto calc(const DMTask &arg) {
@@ -105,9 +123,21 @@ static int calculate(const DMTask &arg) {
 }
 
 static int output(const DMTask &arg, std::filesystem::path resfile) {
+#ifdef DEBUG
+    ns_global::log_info.enable  = true;
+    ns_global::log_error.enable = true;
+    ns_global::log_error.output = true;
+#endif
     auto start  = std::chrono::steady_clock::now();
     auto player = calc(arg);
     auto end    = std::chrono::steady_clock::now();
+#ifdef DEBUG
+    ns_global::log_info.enable  = false;
+    ns_global::log_error.enable = false;
+    ns_global::log_error.output = false;
+    ns_global::log_info.save();
+    ns_global::log_error.save();
+#endif
 
     std::ofstream ofs{resfile};
     ofs << "time\ttype\tID\tlv\tdmgBase\tdmgCri\tdmgExp\tcriRate\tname\n";

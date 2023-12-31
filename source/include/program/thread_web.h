@@ -1,7 +1,9 @@
 #ifndef PROGRAM_THREAD_WEB_H_
 #define PROGRAM_THREAD_WEB_H_
 
+#include "program/task.h"
 #include "program/thread_pool.h"
+#include <unordered_map>
 #pragma warning(push, 0)
 #include <crow.h>
 #pragma warning(pop)
@@ -25,10 +27,12 @@ private:
     std::thread webThread;
     void        webEntry();
 
-    crow::SimpleApp app;
-    Pool            pool;
+    crow::SimpleApp                       app;
+    Pool                                  pool;
+    std::unordered_map<std::string, Task> tasks;
 
-    bool task(const std::string &jsonstr);
+    std::string urlTask(const std::string &jsonstr);
+    std::string genID(int length = 6);
 };
 
 } // namespace ns_program

@@ -69,7 +69,7 @@ public:
      * @param id 任务哈希 ID
      * @param task 任务
      */
-    void emplace(std::string id, std::function<void()> task) {
+    void emplace(const std::string &id, std::function<void()> task) {
         if (!map.contains(id)) {
             // 如果哈希表中不存在该批任务, 则新建一个结点.
             Node *node = new Node();
@@ -98,7 +98,7 @@ public:
      * @brief 删除指定哈希 ID 的任务批次
      * @param id 任务哈希 ID
      */
-    void erase(std::string id) {
+    void erase(const std::string &id) {
         if (!map.contains(id))
             return;
         Node *node = map.at(id);
@@ -145,10 +145,9 @@ public:
     }
 
     template <class F, class... Args>
-    auto enqueue(std::string id, int count, F &&f, Args &&...args) -> std::vector<std::future<typename std::invoke_result<F, Args...>::type>> {
+    void enqueue(const std::string &id, int count, std::vector<std::future<typename std::invoke_result<F, Args...>::type>> &res, F &&f, Args &&...args) {
         using return_type = typename std::invoke_result<F, Args...>::type;
-        std::vector<std::future<return_type>> res;
-        res.reserve(count);
+        res.reserve(res.size() + count);
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
             for (int i = 0; i < count; ++i) {
@@ -160,7 +159,7 @@ public:
             }
         }
         condition.notify_all();
-        return res;
+        return;
     }
 
     virtual ~Pool() {

@@ -1,5 +1,5 @@
-#include "program/task.h"
 #include "program/thread_web.h"
+#include "program/task.h"
 #include <string>
 #include <thread>
 
@@ -34,17 +34,18 @@ void Web::webEntry() {
 
     CROW_ROUTE(app, "/task")
         .methods("POST"_method)([this](const crow::request &req) {
-            if (this->task(req.body))
-                return crow::response{200};
-            else
+            std::string id = urlTask(req.body);
+            if (id.empty())
                 return crow::response{400};
+            else
+                return crow::response{200, id};
         });
 
 #ifdef _WIN32
     CROW_ROUTE(app, "/ws")
         .websocket()
 #else
-    CROW_WEBSOCKET_ROUTE(app, "/ws")
+    CROW_WEBSOCKET_ROUTE(app, "/task/ws")
 #endif
         .onclose([&](crow::websocket::connection &conn, const std::string &reason) {
             CROW_LOG_INFO << "websocket connection closed: " << reason;
@@ -59,4 +60,20 @@ void Web::webEntry() {
 
 void Web::stop() {
     app.stop();
+}
+
+std::string Web::genID(int length) {
+    const std::string CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+    std::random_device              random_device;
+    std::mt19937                    generator(random_device());
+    std::uniform_int_distribution<> distribution(0, CHARACTERS.size() - 1);
+
+    std::string random_string;
+    while (random_string.empty() || tasks.contains(random_string)) {
+        for (size_t i = 0; i < length; ++i) {
+            random_string += CHARACTERS[distribution(generator)];
+        }
+    }
+    return random_string;
 }

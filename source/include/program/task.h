@@ -3,6 +3,9 @@
 
 #include "concrete/effects/base.h"
 #include "frame/character/property/attribute.h"
+#pragma warning(push, 0)
+#include <crow.h>
+#pragma warning(pop)
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -55,6 +58,21 @@ public:
 
     // 根据 json 数据区计算得到的数据区
     const size_t custom_macro_hash = std::hash<std::string>{}(customMacro);
+};
+
+class Task {
+public:
+    enum class Phase {
+        wait_for_connect,
+        calculating,
+        // COUNT, // 不需要 COUNT, 这不是一个会在后续扩展的枚举类
+    };
+
+    const std::string             id;
+    const DMTask                  task;
+    Phase                         phase = Phase::wait_for_connect;
+    crow::websocket::connection  *conn  = nullptr;
+    std::vector<std::future<int>> futures;
 };
 
 } // namespace ns_program
