@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My Page</title>
+        <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    </head>
+    <body>
+        <label>我知道你很急, 但你先别急, 先拿AI写的丑东西凑合用一下</label>
+        <div id="content"></div>
+        <button id="calc">计算</button><br /><br />
+        <textarea id="log" cols="100" rows="50"> </textarea>
+        <script>
+            var dt;
+            var player;
+            var delayNetwork;
+            var delayKeyboard;
+            var fightTime;
+            var fightCount;
+            var attribute;
+            var attributeData;
+            var checkboxes = [];
+            var sock = new WebSocket("ws://127.0.0.1:12897/task/ws");
+
+            function createInput(name, key, data) {
+                var divElement = document.createElement("div");
+                var labelElement = document.createElement("label");
+                labelElement.textContent = name;
+                var inputElement = document.createElement("input");
+                inputElement.type = "number";
+                // inputElement.min = data[key][0];
+                // inputElement.max = data[key][1];
+                inputElement.addEventListener("input", function () {
+                    this.value = Math.round(this.value);
+                    if (data.hasOwnProperty(key)) {
+                        this.value = Math.max(this.value, data[key][0]);
+                        this.value = Math.min(this.value, data[key][1]);
+                    }
+                });
+                divElement.appendChild(labelElement);
+                divElement.appendChild(document.createTextNode("  "));
+                divElement.appendChild(inputElement);
+                document.getElementById("content").appendChild(divElement);
+                return inputElement;
+            }
+            function createSelect(name, key, data) {
+                var divElement = document.createElement("div");
+                var labelElement = document.createElement("label");
+                labelElement.textContent = name;
+                var selectElement = document.createElement("select");
+                for (var i = 0; i < data[key].length; i++) {
+                    var optionElement = document.createElement("option");
+                    optionElement.value = data[key][i].id;
+                    optionElement.textContent = data[key][i].name;
+                    selectElement.appendChild(optionElement);
+                }
+                divElement.appendChild(labelElement);
+                divElement.appendChild(document.createTextNode("  "));
+                divElement.appendChild(selectElement);
+                document.getElementById("content").appendChild(divElement);
+                return selectElement;
+            }
+            function createCheckbox(name) {
+                var divElement = document.createElement("div");
+                var labelElement = document.createElement("label");
+                labelElement.textContent = name;
+                var inputElement = document.createElement("input");
+                inputElement.type = "checkbox";
+                divElement.appendChild(labelElement);
+                divElement.appendChild(document.createTextNode("  "));
+                divElement.appendChild(inputElement);
+                document.getElementById("content").appendChild(divElement);
+                return inputElement;
+            }
+            $(document).ready(function () {
+                $.get("http://127.0.0.1:12897/task", function (data) {
+                    console.log(data);
+                    dt = data;
+                    player = createSelect("心法", "player", data);
+                    delayNetwork = createInput("网络延迟", "delayNetwork", data);
+                    delayKeyboard = createInput("按键延迟", "delayKeyboard", data);
+                    fightTime = createInput("战斗时间", "fightTime", data);
+                    fightCount = createInput("战斗次数", "fightCount", data);
+                    attribute = createSelect("属性导入方法", "attribute", data);
+                    attributeData = createInput("配装ID", "attributeLevel", data);
+                    for (var i = 0; i < data.effects.length; i++) {
+                        var checkbox = createCheckbox(data.effects[i]);
+                        checkboxes.push(checkbox);
+                    }
+                });
+            });
+            $("#calc").click(() => {
+                var postData = {
+                    player: +player.value,
+                    delayNetwork: +delayNetwork.value,
+                    delayKeyboard: +delayKeyboard.value,
+                    fightTime: +fightTime.value,
+                    fightCount: +fightCount.value,
+                    customMacro: null,
+                    attribute: {
+                        id: +attribute.value,
+                        data: +attributeData.value,
+                    },
+                    effects: {},
+                };
+                for (var i = 0; i < checkboxes.length; i++) {
+                    postData.effects[dt.effects[i]] = checkboxes[i].checked;
+                }
+                console.log(postData);
+                console.log(JSON.stringify(postData));
+                $.ajax({
+                    url: "http://127.0.0.1:12897/task",
+                    type: "POST",
+                    data: JSON.stringify(postData),
+                    contentType: "text/plain",
+                    success: function (response) {
+                        sock.send(response);
+                    },
+                });
+            });
+            sock.onopen = () => {
+                console.log("open");
+            };
+            sock.onerror = (e) => {
+                console.log("error", e);
+            };
+            sock.onclose = (e) => {
+                console.log("close", e);
+            };
+            sock.onmessage = (e) => {
+                $("#log").val(e.data + $("#log").val());
+            };
+        </script>
+    </body>
+    <style>
+        div {
+            margin: 2px 0;
+        }
+    </style>
+</html>

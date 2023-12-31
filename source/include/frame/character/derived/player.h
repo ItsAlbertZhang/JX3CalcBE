@@ -21,7 +21,7 @@ public:
 
 class Player : public Character {
 public:
-    Player(int delayNetwork, int delayKeybord);
+    Player(int delayNetwork, int delayKeyboard);
     virtual void macroPrepareDefault() {}
     virtual void macroRuntimeDefault() {}
     virtual int  normalAttack() {

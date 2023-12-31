@@ -75,7 +75,8 @@ static asio::awaitable<void> taskCoroutine(asio::io_context &io, crow::websocket
             damageAvg += task.futures[idx].get();
             idx++;
         } else {
-            conn.send_text(fmt::format("({}/{})    当前速度: {} 次计算/s. 到目前为止的平均 DPS: {}\n", idx, task.data.fightCount, idx - idxBeforeSleep, damageAvg / (idx - 1)));
+            if (idx > 1) [[likely]]
+                conn.send_text(fmt::format("({}/{})    当前速度: {} 次计算/s. 到目前为止的平均 DPS: {}\n", idx, task.data.fightCount, idx - idxBeforeSleep, damageAvg / (idx - 1)));
             idxBeforeSleep = idx;
             timer.expires_after(interval);
             co_await timer.async_wait(asio::use_awaitable);
@@ -117,7 +118,7 @@ void Web::urlTaskWs_onClose(crow::websocket::connection &conn) {
 static auto calc(const DMTask &arg) {
     static thread_local std::unordered_map<size_t, std::unique_ptr<ns_frame::MacroCustom>> map;
 
-    std::unique_ptr<ns_frame::Player> player = ns_concrete::PlayerManager::create(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeybord);
+    std::unique_ptr<ns_frame::Player> player = ns_concrete::PlayerManager::create(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
     std::unique_ptr<ns_frame::NPC>    npc    = ns_concrete::NPCManager::create(ns_concrete::NPCType::NPC124);
     player->targetSelect                     = npc.get();
     if (arg.useCustomMacro) {

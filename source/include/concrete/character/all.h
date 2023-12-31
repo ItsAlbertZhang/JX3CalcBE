@@ -20,7 +20,7 @@ inline std::unordered_map<PlayerType, std::string> PlayerTypeMap = {
 class PlayerManager {
 public:
     PlayerManager() = delete;
-    static std::unique_ptr<ns_frame::Player> create(PlayerType type, int delayNetwork, int delayKeybord);
+    static std::unique_ptr<ns_frame::Player> create(PlayerType type, int delayNetwork, int delayKeyboard);
 };
 
 enum class NPCType {

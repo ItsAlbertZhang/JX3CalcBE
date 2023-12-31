@@ -2,8 +2,8 @@
 
 using namespace ns_concrete;
 
-MjFysj::MjFysj(int delayNetwork, int delayKeybord)
-    : Player(delayNetwork, delayKeybord) {
+MjFysj::MjFysj(int delayNetwork, int delayKeyboard)
+    : Player(delayNetwork, delayKeyboard) {
 
     skillLearn(10242, 13); // 焚影圣诀
     dwKungfuID       = 10242;
@@ -121,7 +121,7 @@ void MjFysj::macroDefault0() {
         macroIdx = 1; // 切换至 1 号宏
         if (macroSwitchedOnce == false) {
             // 起手时, 早一些释放暗尘弥散, 以避免第二轮卡隐身CD
-            delayCustom = 300; // 将下一次释放宏的时机设置至 300 tick 后
+            delayCustom       = 300; // 将下一次释放宏的时机设置至 300 tick 后
             // 如果不进行设置, 那么下一次释放宏的时机会是 GCD 结束后 + 网络延迟 + 随机按键延迟.
             macroSwitchedOnce = true; // 将起手标记置为 false
         }

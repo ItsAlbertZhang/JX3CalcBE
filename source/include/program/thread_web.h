@@ -8,6 +8,7 @@
 #include <unordered_map>
 #pragma warning(push, 0)
 #include <crow.h>
+#include <crow/middlewares/cors.h>
 #pragma warning(pop)
 #include <string>
 #include <thread>
@@ -31,7 +32,7 @@ private:
     std::thread ioThread;
     Pool        pool;
 
-    crow::SimpleApp app;
+    crow::App<crow::CORSHandler> app;
 
     std::unordered_map<std::string, Task>                     tasks;
     std::unordered_map<crow::websocket::connection *, Task *> wsmap;

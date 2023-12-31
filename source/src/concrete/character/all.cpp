@@ -6,10 +6,10 @@
 
 using namespace ns_concrete;
 
-std::unique_ptr<ns_frame::Player> PlayerManager::create(PlayerType type, int delayNetwork, int delayKeybord) {
+std::unique_ptr<ns_frame::Player> PlayerManager::create(PlayerType type, int delayNetwork, int delayKeyboard) {
     switch (type) {
     case PlayerType::MjFysj:
-        return std::make_unique<MjFysj>(delayNetwork, delayKeybord);
+        return std::make_unique<MjFysj>(delayNetwork, delayKeyboard);
     default:
         throw std::runtime_error{"PlayerManager::create: invalid type"};
     }

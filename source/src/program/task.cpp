@@ -12,14 +12,14 @@ using namespace ns_program;
 std::string DMTask::format() {
     using json = nlohmann::json;
     json j{
-        {"player",       json::array()                         },
-        {"delayNetwork", {nDelayNetwork.min, nDelayNetwork.max}},
-        {"delayKeybord", {nDelayKeybord.min, nDelayKeybord.max}},
-        {"fightTime",    {nFightTime.min, nFightTime.max}      },
-        {"fightCount",   {nFightCount.min, nFightCount.max}    },
-        {"customMacro",  allowCustomMacro                      },
-        {"attribute",    json::array()                         },
-        {"effects",      json::array()                         },
+        {"player",        json::array()                           },
+        {"delayNetwork",  {nDelayNetwork.min, nDelayNetwork.max}  },
+        {"delayKeyboard", {nDelayKeyboard.min, nDelayKeyboard.max}},
+        {"fightTime",     {nFightTime.min, nFightTime.max}        },
+        {"fightCount",    {nFightCount.min, nFightCount.max}      },
+        {"customMacro",   allowCustomMacro                        },
+        {"attribute",     json::array()                           },
+        {"effects",       json::array()                           },
     };
     for (auto &x : ns_concrete::PlayerTypeMap) {
         j["player"] += {
@@ -29,8 +29,8 @@ std::string DMTask::format() {
     }
     for (auto &x : PlayerTypeMap) {
         j["attribute"] += {
-            {"id",      static_cast<int>(x.first)},
-            {"comment", x.second                 },
+            {"id",   static_cast<int>(x.first)},
+            {"name", x.second                 },
         };
     }
     for (auto &x : ns_concrete::EffectTypeMap) {
@@ -73,7 +73,7 @@ std::unique_ptr<DMTask> DMTask::create(const std::string &jsonstr) {
         }
         std::unique_ptr<DMTask> ret = std::make_unique<DMTask>(DMTask{
             .delayNetwork   = j["delayNetwork"].get<int>(),
-            .delayKeybord   = j["delayKeybord"].get<int>(),
+            .delayKeyboard  = j["delayKeyboard"].get<int>(),
             .fightTime      = j["fightTime"].get<int>(),
             .fightCount     = j["fightCount"].get<int>(),
             .useCustomMacro = j["customMacro"].is_string(),

@@ -2,6 +2,9 @@
 #include "program/task.h"
 #include <asio.hpp>
 #include <chrono>
+#include <crow/http_response.h>
+#include <crow/logging.h>
+#include <crow/mustache.h>
 #include <string>
 #include <thread>
 
@@ -38,7 +41,11 @@ Web::~Web() {
 void Web::webEntry() {
     CROW_ROUTE(app, "/")
         .methods("GET"_method)([]() {
-            return "Hello, world!";
+            crow::mustache::context    x;
+            crow::mustache::template_t page = crow::mustache::load("index.html");
+            crow::response             res{page.render(x)};
+            res.add_header("Content-Type", "text/html; charset=utf-8");
+            return res;
         });
 
     CROW_ROUTE(app, "/setting")
@@ -67,7 +74,11 @@ void Web::webEntry() {
 #else
     CROW_WEBSOCKET_ROUTE(app, "/task/ws")
 #endif
+        .onopen([&](crow::websocket::connection &conn) {
+            CROW_LOG_INFO << "a websocket opened.";
+        })
         .onclose([&](crow::websocket::connection &conn, const std::string &reason) {
+            CROW_LOG_INFO << "a websocket closed.";
             urlTaskWs_onClose(conn);
         })
         .onmessage([&](crow::websocket::connection &conn, const std::string &data, bool is_binary) {

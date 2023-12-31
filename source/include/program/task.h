@@ -34,7 +34,7 @@ public:
 
     // 静态数据区: 设置相关变量
     static inline intValue nDelayNetwork{0, 1024};
-    static inline intValue nDelayKeybord{0, 1024};
+    static inline intValue nDelayKeyboard{0, 1024};
     static inline intValue nFightTime{1, 1 << 30};
     static inline intValue nFightCount{1, 1 << 30};
 
@@ -45,10 +45,10 @@ public:
     static std::unique_ptr<DMTask> create(const std::string &jsonstr);
 
     // json 数据区
-    const int delayNetwork = 45;
-    const int delayKeybord = 20;
-    const int fightTime    = 300;
-    const int fightCount   = 100;
+    const int delayNetwork  = 45;
+    const int delayKeyboard = 20;
+    const int fightTime     = 300;
+    const int fightCount    = 100;
 
     const bool        useCustomMacro = false;
     const std::string customMacro;
