@@ -1,11 +1,15 @@
 #ifndef PROGRAM_TASK_H_
 #define PROGRAM_TASK_H_
 
-#include "concrete/effects/base.h"
-#include "frame/character/property/attribute.h"
 #pragma warning(push, 0)
+#ifdef _WIN32
+#include <sdkddkver.h>
+#endif
 #include <crow.h>
 #pragma warning(pop)
+
+#include "concrete/effects/base.h"
+#include "frame/character/property/attribute.h"
 #include <memory>
 #include <string>
 #include <unordered_map>

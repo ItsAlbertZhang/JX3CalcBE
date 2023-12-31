@@ -7,6 +7,8 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 
+#define UNREFERENCED_PARAMETER(P) (P)
+
 using namespace ns_program;
 
 std::string DMTask::format() {
@@ -33,8 +35,8 @@ std::string DMTask::format() {
             {"name", x.second                 },
         };
     }
-    for (auto &x : ns_concrete::EffectTypeMap) {
-        j["effects"] += x.first;
+    for (auto &x : ns_concrete::EffectTypeRef) {
+        j["effects"] += x;
     }
     return j.dump();
 }
@@ -83,9 +85,11 @@ std::unique_ptr<DMTask> DMTask::create(const std::string &jsonstr) {
         });
         return ret;
     } catch (nlohmann::json::exception &e) {
+        UNREFERENCED_PARAMETER(e);
         LOG_ERROR("DMTask::create: json parse error: {}", e.what());
         return nullptr;
     } catch (std::exception &e) {
+        UNREFERENCED_PARAMETER(e);
         LOG_ERROR("DMTask::create: error: {}", e.what());
         return nullptr;
     }

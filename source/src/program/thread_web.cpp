@@ -1,10 +1,10 @@
 #include "program/thread_web.h"
+#include "global/settings.h"
 #include "program/task.h"
 #include <asio.hpp>
 #include <chrono>
-#include <crow/http_response.h>
-#include <crow/logging.h>
 #include <crow/mustache.h>
+#include <iostream>
 #include <string>
 #include <thread>
 
@@ -39,8 +39,11 @@ Web::~Web() {
 }
 
 void Web::webEntry() {
+    std::cout << "成功于 http://127.0.0.1:12897 上开启服务器, 按住 Ctrl 点击链接即可在浏览器中打开使用." << std::endl;
+    std::cout << "Server started at http://127.0.0.1:12897 ." << std::endl;
     CROW_ROUTE(app, "/")
         .methods("GET"_method)([]() {
+            crow::mustache::set_base((ns_global::Config::pExeDir / "templates").string());
             crow::mustache::context    x;
             crow::mustache::template_t page = crow::mustache::load("index.html");
             crow::response             res{page.render(x)};
@@ -68,16 +71,13 @@ void Web::webEntry() {
                 return crow::response{200, id};
         });
 
-#ifdef _WIN32
-    CROW_ROUTE(app, "/ws")
-        .websocket()
-#else
     CROW_WEBSOCKET_ROUTE(app, "/task/ws")
-#endif
         .onopen([&](crow::websocket::connection &conn) {
+            UNREFERENCED_PARAMETER(conn);
             CROW_LOG_INFO << "a websocket opened.";
         })
         .onclose([&](crow::websocket::connection &conn, const std::string &reason) {
+            UNREFERENCED_PARAMETER(reason);
             CROW_LOG_INFO << "a websocket closed.";
             urlTaskWs_onClose(conn);
         })
@@ -97,7 +97,7 @@ std::string Web::genID(int length) {
 
     std::random_device              random_device;
     std::mt19937                    generator(random_device());
-    std::uniform_int_distribution<> distribution(0, CHARACTERS.size() - 1);
+    std::uniform_int_distribution<> distribution(0, static_cast<int>(CHARACTERS.size() - 1));
 
     std::string random_string;
     while (random_string.empty() || tasks.contains(random_string)) {

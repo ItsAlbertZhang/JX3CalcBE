@@ -57,7 +57,7 @@ C:\Program Files (x86)\Windows Kits\10\Lib\10.0.22621.0\um\x64
 
 同添加 `Path` 时一样, 此处应注意版本号问题.
 
-#### Step 2: 配置包管理工具
+#### Step 2: 配置编译环境
 
 在 Windows 下, 使用 `vcpkg` 作为包管理工具.
 
@@ -74,19 +74,30 @@ git clone https://github.com/Microsoft/vcpkg.git
 
 ##### 2.2 添加 INCLUDE 和 LIB
 
+在用户文件夹 (`~`) 下新建文件夹 `.local` . 在其下分别新建文件夹 `bin` , `include` 和 `lib` .
+
+将如下项添加至 `Path` 系统变量下:
+
+```
+~\.local\bin
+{local}\vcpkg
+```
+
 将如下项添加至名为 `INCLUDE` 的系统变量下:
 
 ```
-{...}\vcpkg\installed\x64-windows-static-md\include
+~\.local\include
+{local}\vcpkg\installed\x64-windows-static-md\include
 ```
 
 将如下项添加至名为 `LIB` 的系统变量下:
 
 ```
-{...}\vcpkg\installed\x64-windows-static-md\lib
+~\.local\lib
+{local}\vcpkg\installed\x64-windows-static-md\lib
 ```
 
-其中, `{...}` 为 vcpkg 安装的位置.
+其中, `~` 为你的用户文件夹, 通常为 `C:\Users\{username}` . `{local}` 为 vcpkg 安装的目录.
 
 #### Step 3: 配置构建工具
 
@@ -98,10 +109,18 @@ git clone https://github.com/Microsoft/vcpkg.git
 
 #### Step 4: 配置第三方库
 
-在 vcpkg 的安装目录下打开终端, 执行如下命令:
+打开终端, 执行如下命令:
 
 ```powershell
-.\vcpkg install cpp-httplib:x64-windows-static-md crow:x64-windows-static-md lua:x64-windows-static-md nlohmann-json:x64-windows-static-md sol2:x64-windows-static-md
+vcpkg install cpp-httplib:x64-windows-static-md lua:x64-windows-static-md nlohmann-json:x64-windows-static-md
+```
+
+下载如下项目的源码, 并将其 `include` 文件夹下的所有 `*.h` 和 `*.hpp` 文件拷贝至 `~\.local\include` .
+
+```
+https://github.com/chriskohlhoff/asio
+https://github.com/CrowCpp/Crow
+https://github.com/ThePhD/sol2
 ```
 
 ### MacOS
@@ -114,7 +133,7 @@ git clone https://github.com/Microsoft/vcpkg.git
 xcode-select --install
 ```
 
-#### Step 2: 配置包管理工具
+#### Step 2: 配置编译环境
 
 在 MacOS 下, 使用 `Homebrew` 作为包管理工具.
 

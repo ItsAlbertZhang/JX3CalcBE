@@ -1,5 +1,6 @@
 #include "concrete/effects/all.h"
 #include "concrete/effects/derived.h"
+#include <stdexcept>
 
 using namespace ns_concrete;
 

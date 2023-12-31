@@ -1,17 +1,21 @@
 #ifndef PROGRAM_THREAD_WEB_H_
 #define PROGRAM_THREAD_WEB_H_
 
+#pragma warning(push, 0)
+#ifdef _WIN32
+#include <sdkddkver.h>
+#endif
+#include <crow.h>
+#include <crow/middlewares/cors.h>
+#include <crow/websocket.h>
+#pragma warning(pop)
+
 #include "program/task.h"
 #include "program/thread_pool.h"
 #include <asio.hpp>
-#include <crow/websocket.h>
-#include <unordered_map>
-#pragma warning(push, 0)
-#include <crow.h>
-#include <crow/middlewares/cors.h>
-#pragma warning(pop)
 #include <string>
 #include <thread>
+#include <unordered_map>
 
 namespace ns_program {
 
