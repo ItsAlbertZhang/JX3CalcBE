@@ -1,5 +1,7 @@
 #include "program/thread_web.h"
 #include "program/task.h"
+#include <asio.hpp>
+#include <chrono>
 #include <string>
 #include <thread>
 
@@ -8,11 +10,29 @@
 using namespace ns_program;
 
 Web::Web() {
+    asio::co_spawn(
+        io,
+        [&]() -> asio::awaitable<void> {
+            asio::steady_timer timer(io);
+            while (!iostop.load()) {
+                timer.expires_after(std::chrono::seconds(1));
+                co_await timer.async_wait(asio::use_awaitable);
+            }
+        },
+        asio::detached
+    ); // 用于保持 io.run() 的运行
     webThread = std::thread(&Web::webEntry, this);
+    ioThread  = std::thread([&]() {
+        io.run();
+    });
 }
 
 Web::~Web() {
+    for (auto &task : tasks)
+        task.second.stop.store(true);
+    iostop.store(true);
     webThread.join();
+    ioThread.join();
 }
 
 void Web::webEntry() {
@@ -48,11 +68,10 @@ void Web::webEntry() {
     CROW_WEBSOCKET_ROUTE(app, "/task/ws")
 #endif
         .onclose([&](crow::websocket::connection &conn, const std::string &reason) {
-            CROW_LOG_INFO << "websocket connection closed: " << reason;
+            urlTaskWs_onClose(conn);
         })
         .onmessage([&](crow::websocket::connection &conn, const std::string &data, bool is_binary) {
-            if (!is_binary)
-                std::cout << "message from client: " << data << std::endl;
+            urlTaskWs_onMessage(conn, data, is_binary);
         });
 
     app.bindaddr("127.0.0.1").port(12897).multithreaded().run();

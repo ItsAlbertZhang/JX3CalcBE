@@ -133,7 +133,7 @@ public:
                     {
                         std::unique_lock<std::mutex> lock(this->queue_mutex);
                         this->condition.wait(lock, [this] { return this->stop || !this->tasks.empty(); });
-                        if (this->stop && this->tasks.empty()) {
+                        if (this->stop) [[unlikely]] {
                             thread_cleanup();
                             return;
                         }
@@ -145,7 +145,7 @@ public:
     }
 
     template <class F, class... Args>
-    void enqueue(const std::string &id, int count, std::vector<std::future<typename std::invoke_result<F, Args...>::type>> &res, F &&f, Args &&...args) {
+    void emplace(const std::string &id, int count, std::vector<std::future<typename std::invoke_result<F, Args...>::type>> &res, F &&f, Args &&...args) {
         using return_type = typename std::invoke_result<F, Args...>::type;
         res.reserve(res.size() + count);
         {
@@ -160,6 +160,10 @@ public:
         }
         condition.notify_all();
         return;
+    }
+
+    void erase(const std::string &id) {
+        tasks.erase(id);
     }
 
     virtual ~Pool() {

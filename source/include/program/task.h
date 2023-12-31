@@ -62,16 +62,9 @@ public:
 
 class Task {
 public:
-    enum class Phase {
-        wait_for_connect,
-        calculating,
-        // COUNT, // 不需要 COUNT, 这不是一个会在后续扩展的枚举类
-    };
-
     const std::string             id;
-    const DMTask                  task;
-    Phase                         phase = Phase::wait_for_connect;
-    crow::websocket::connection  *conn  = nullptr;
+    const DMTask                  data;
+    std::atomic<bool>             stop{false};
     std::vector<std::future<int>> futures;
 };
 

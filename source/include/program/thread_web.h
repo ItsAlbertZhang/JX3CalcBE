@@ -3,6 +3,8 @@
 
 #include "program/task.h"
 #include "program/thread_pool.h"
+#include <asio.hpp>
+#include <crow/websocket.h>
 #include <unordered_map>
 #pragma warning(push, 0)
 #include <crow.h>
@@ -26,12 +28,20 @@ public:
 private:
     std::thread webThread;
     void        webEntry();
+    std::thread ioThread;
+    Pool        pool;
 
-    crow::SimpleApp                       app;
-    Pool                                  pool;
-    std::unordered_map<std::string, Task> tasks;
+    crow::SimpleApp app;
+
+    std::unordered_map<std::string, Task>                     tasks;
+    std::unordered_map<crow::websocket::connection *, Task *> wsmap;
+
+    asio::io_context  io;
+    std::atomic<bool> iostop{false};
 
     std::string urlTask(const std::string &jsonstr);
+    void        urlTaskWs_onMessage(crow::websocket::connection &conn, const std::string &data, bool is_binary);
+    void        urlTaskWs_onClose(crow::websocket::connection &conn);
     std::string genID(int length = 6);
 };
 
