@@ -19,7 +19,13 @@
             var attribute;
             var attributeData;
             var checkboxes = [];
-            var sock = new WebSocket("ws://127.0.0.1:12897/task/ws");
+
+            var hostname = window.location.hostname;
+            var hostport = window.location.port;
+            if (hostport) {
+                hostname += ":" + hostport;
+            }
+            var sock = new WebSocket("ws://" + hostname + "/task/ws");
 
             function createInput(name, key, data) {
                 var divElement = document.createElement("div");
@@ -72,7 +78,7 @@
                 return inputElement;
             }
             $(document).ready(function () {
-                $.get("http://127.0.0.1:12897/task", function (data) {
+                $.get("http://" + hostname + "/task", function (data) {
                     console.log(data);
                     dt = data;
                     player = createSelect("心法", "player", data);
@@ -108,7 +114,7 @@
                 console.log(postData);
                 console.log(JSON.stringify(postData));
                 $.ajax({
-                    url: "http://127.0.0.1:12897/task",
+                    url: "http://" + hostname + "/task",
                     type: "POST",
                     data: JSON.stringify(postData),
                     contentType: "text/plain",
