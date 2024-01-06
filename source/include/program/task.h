@@ -66,6 +66,8 @@ public:
 
 class Task {
 public:
+    Task(const std::string &id, const DMTask &data)
+        : id(id), data(data){};
     const std::string             id;
     const DMTask                  data;
     std::atomic<bool>             stop{false};
