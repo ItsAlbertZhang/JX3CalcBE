@@ -1,4 +1,5 @@
 #include "frame/lua_runtime.h"
+#include "frame/statics/lua_blacklist_files.h"
 #include "gdi.h"
 #include "global/log.h"
 
@@ -58,7 +59,7 @@ void LuaFunc::add(const std::string &filename) {
     filenameMap[filename] = static_cast<int>(filefuncList.size());
     filenameList.emplace_back(filename);
     std::vector<sol::protected_function> &funcs = filefuncList.emplace_back();
-    if (gdi::luaExecuteFile(filename)) {
+    if (!staticsLuaBlacklistFiles.contains(filename) && gdi::luaExecuteFile(filename)) {
         LOG_INFO("luaExecuteFile success: {}.", filename);
         for (int i = 0; i < static_cast<int>(Enum::COUNT); i++) {
             /**
@@ -108,4 +109,13 @@ sol::protected_function LuaFunc::getOnRemove(string &filename) {
 sol::protected_function LuaFunc::getOnTimer(int idx) {
     // 传入的 idx 是先前通过 getIndex 获取的, 一定存在
     return filefuncList[idx][static_cast<int>(Enum::OnTimer)];
+}
+
+void LuaFunc::include(const std::string &filename) {
+    if (includedFiles.contains(filename)) {
+        return;
+    }
+    includedFiles.insert(filename);
+    if (!staticsLuaBlacklistFiles.contains(filename))
+        gdi::luaExecuteFile(filename);
 }

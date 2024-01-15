@@ -1,6 +1,7 @@
 #include "frame/global/skillrecipe.h"
 #include "frame/lua_runtime.h"
 #include "gdi.h"
+#include "global/log.h"
 #include <tuple>
 
 using namespace ns_frame;
@@ -42,15 +43,15 @@ void SkillRecipeManager::add(int RecipeID, int RecipeLevel) {
     arg[0]["RecipeID"]    = std::to_string(RecipeID);
     arg[0]["RecipeLevel"] = std::to_string(RecipeLevel);
     gdi::tabSelect(gdi::Tab::skillrecipe, arg);
-    skillrecipe.tab = std::move(arg[0]);
+    skillrecipe.tab                                   = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    skillrecipe.SkillRecipeType  = atoi(skillrecipe.tab["SkillRecipeType"].c_str());
-    skillrecipe.SkillID          = atoi(skillrecipe.tab["SkillID"].c_str());
-    skillrecipe.CoolDownAdd1     = atoi(skillrecipe.tab["CoolDownAdd1"].c_str());
-    skillrecipe.CoolDownAdd2     = atoi(skillrecipe.tab["CoolDownAdd2"].c_str());
-    skillrecipe.CoolDownAdd3     = atoi(skillrecipe.tab["CoolDownAdd3"].c_str());
-    skillrecipe.DamageAddPercent = atoi(skillrecipe.tab["DamageAddPercent"].c_str());
-    skillrecipe.hasScriptFile    = !skillrecipe.tab["ScriptFile"].empty();
+    skillrecipe.SkillRecipeType                       = atoi(skillrecipe.tab["SkillRecipeType"].c_str());
+    skillrecipe.SkillID                               = atoi(skillrecipe.tab["SkillID"].c_str());
+    skillrecipe.CoolDownAdd1                          = atoi(skillrecipe.tab["CoolDownAdd1"].c_str());
+    skillrecipe.CoolDownAdd2                          = atoi(skillrecipe.tab["CoolDownAdd2"].c_str());
+    skillrecipe.CoolDownAdd3                          = atoi(skillrecipe.tab["CoolDownAdd3"].c_str());
+    skillrecipe.DamageAddPercent                      = atoi(skillrecipe.tab["DamageAddPercent"].c_str());
+    skillrecipe.hasScriptFile                         = !skillrecipe.tab["ScriptFile"].empty();
     // 将 Cooldown 存入缓存
     mapRecipe[std::make_tuple(RecipeID, RecipeLevel)] = std::move(skillrecipe);
 }
@@ -78,5 +79,7 @@ void SkillRecipeManager::addScriptSkill(const SkillRecipe *skillrecipe, const Sk
     if (res) {
         // 成功执行, 将技能添加到 ScriptSkill 中
         mapScriptSkill[std::make_tuple(skillrecipe, skill)] = std::move(scriptskill);
+    } else {
+        LOG_ERROR("LuaFunc::getGetSkillRecipeData(\"{}\") failed.", path);
     }
 }

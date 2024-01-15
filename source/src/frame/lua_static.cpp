@@ -8,6 +8,7 @@
 #include "global/log.h"
 #include <random>
 #include <sol/sol.hpp>
+#include <string>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
@@ -224,10 +225,14 @@ std::shared_ptr<sol::state> ns_frame::luaInit() {
     lua->set_function("RemoteCallToClient", LuaGlobalFunction::RemoteCallToClient);
     lua->set_function("GetDistanceSq", LuaGlobalFunction::GetDistanceSq);
     lua->set_function("Random", LuaGlobalFunction::Random);
+    lua->set_function("GetEditorString", LuaGlobalFunction::GetEditorString);
+    lua->set_function("IsClient", LuaGlobalFunction::IsClient);
 
     (*lua)["CONSUME_BASE"]          = 100;
     (*lua)["LENGTH_BASE"]           = 64;
     (*lua)["MELEE_ATTACK_DISTANCE"] = 4 * 64;
+    (*lua)["GLOBAL"]                = lua->create_table();
+    (*lua)["GLOBAL"]["GAME_FPS"]    = 16;
 
     sol::table AttributeType = lua->create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaAttributeType::COUNT); i++) {
@@ -285,11 +290,17 @@ std::shared_ptr<sol::state> ns_frame::luaInit() {
     }
     (*lua)["KUNGFU_ADAPTIVETYPE_LIST"] = KUNGFU_ADAPTIVETYPE_LIST;
 
+    sol::table ABSORB_ATTRIBUTE_SHIELD_TYPE = lua->create_table();
+    for (int i = 0; i < static_cast<int>(ref::enumLuaAbsorbAttributeShieldType::COUNT); i++) {
+        ROLE_TYPE[ref::refLuaAbsorbAttributeShieldType[i]] = i;
+    }
+    (*lua)["ABSORB_ATTRIBUTE_SHIELD_TYPE"] = ABSORB_ATTRIBUTE_SHIELD_TYPE;
+
     return lua;
 }
 
 void LuaGlobalFunction::Include(const std::string &filename) {
-    UNREFERENCED_PARAMETER(filename);
+    LuaFunc::include(filename);
     return;
 }
 
@@ -421,4 +432,12 @@ int LuaGlobalFunction::Random(int min, int max) {
     std::mt19937                    gen(rd());
     std::uniform_int_distribution<> dis(min, max);
     return static_cast<int>(dis(gen));
+}
+
+std::string LuaGlobalFunction::GetEditorString(int a, int b) {
+    return std::to_string(a) + "-" + std::to_string(b);
+}
+
+bool LuaGlobalFunction::IsClient() {
+    return false;
 }

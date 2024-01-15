@@ -25,13 +25,14 @@ AutoRollbackAttrib::~AutoRollbackAttrib() {
     }
     if (!buff.ScriptFile.empty()) {
         std::string paramStr = "scripts/skill/" + buff.ScriptFile;
-        LuaFunc::analysis(
-            LuaFunc::getOnRemove(paramStr)(
-                item->nCharacterID, item->nID, item->nLevel, item->nLeftFrame, item->nCustomValue, item->dwSkillSrcID, item->nStackNum, 0, 0, item->dwCasterSkillID
-            ),
-            paramStr,
-            LuaFunc::Enum::OnRemove
-        );
+        if (!LuaFunc::analysis(
+                LuaFunc::getOnRemove(paramStr)(
+                    item->nCharacterID, item->nID, item->nLevel, item->nLeftFrame, item->nCustomValue, item->dwSkillSrcID, item->nStackNum, 0, 0, item->dwCasterSkillID
+                ),
+                paramStr,
+                LuaFunc::Enum::OnRemove
+            ))
+            LOG_ERROR("LuaFunc::getOnRemove(\"{}\") failed.", paramStr);
         // OnRemove(nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID)
     }
 }
@@ -106,9 +107,11 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case enumTabAttribute::atExecuteScript: {
         std::string paramStr = "scripts/" + attrib.valueAStr;
         if (isRollback) {
-            LuaFunc::analysis(LuaFunc::getUnApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::UnApply);
+            if (!LuaFunc::analysis(LuaFunc::getUnApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::UnApply))
+                LOG_ERROR("LuaFunc::getUnApply(\"{}\") failed.", paramStr);
         } else {
-            LuaFunc::analysis(LuaFunc::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::Apply);
+            if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
+                LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
         }
     } break;
     case enumTabAttribute::atLunarCriticalStrikeBaseRate:

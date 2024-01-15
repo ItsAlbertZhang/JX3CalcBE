@@ -169,7 +169,7 @@ export LIBRARY_PATH=~/.local/lib:/opt/homebrew/lib:$LIBRARY_PATH
 
 ```shell
 brew install cmake cpp-httplib fmt lua nlohmann-json
-sudo ln -s /opt/homebrew/include/lua/* /opt/homebrew/include/
+ln -s /opt/homebrew/include/lua/* ~/.local/include/
 git clone https://github.com/chriskohlhoff/asio.git
 mv asio/asio/include/asio* ~/.local/include/
 git clone https://github.com/ThePhD/sol2.git

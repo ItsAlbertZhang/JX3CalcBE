@@ -6,6 +6,7 @@
 #include <sol/state.hpp>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace ns_frame {
 
@@ -17,6 +18,8 @@ namespace ns_frame {
 class LuaFunc {
 public:
     LuaFunc() = delete; // 禁止创建类实例
+
+    static std::shared_ptr<sol::state> getLua();
 
     enum class Enum {
         GetSkillLevelData,
@@ -42,7 +45,7 @@ public:
     static sol::protected_function getOnRemove(std::string &filename);
     static sol::protected_function getOnTimer(int idx);
 
-    static std::shared_ptr<sol::state> getLua();
+    static void include(const std::string &filename);
 
 private:
     static inline const std::string names[] = {
@@ -60,6 +63,7 @@ private:
     static inline thread_local std::vector<std::string>                          filenameList;
     static inline thread_local std::unordered_map<std::string, int>              filenameMap;
     static inline thread_local std::vector<std::vector<sol::protected_function>> filefuncList;
+    static inline thread_local std::unordered_set<std::string>                   includedFiles;
 
     static const std::string &getFilename(int idx);
     static void               add(const std::string &filename);

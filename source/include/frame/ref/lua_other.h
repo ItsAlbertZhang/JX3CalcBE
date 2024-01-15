@@ -4,6 +4,24 @@
 namespace ns_frame {
 namespace ref {
 
+enum class enumLuaAbsorbAttributeShieldType {
+    GLOBAL,
+    PHYSICS,
+    SOLAR,
+    NEUTRAL,
+    LUNAR,
+    POISON,
+    COUNT,
+};
+inline const char *refLuaAbsorbAttributeShieldType[] = {
+    "GLOBAL",
+    "PHYSICS",
+    "SOLAR",
+    "NEUTRAL",
+    "LUNAR",
+    "POISON",
+};
+
 enum class enumLuaAttributeEffectMode {
     EFFECT_TO_SELF_NOT_ROLLBACK,
     EFFECT_TO_SELF_AND_ROLLBACK,
@@ -68,7 +86,21 @@ inline const char *refLuaSkillKindType[] = {
     "POISON_MAGIC",
 };
 
-// 不全, 出现在 明教/明教_暗尘弥散.lua
+enum class enumLuaRoleType {
+    LITTLE_BOY,
+    STANDARD_MALE,
+    LITTLE_GIRL,
+    STANDARD_FEMALE,
+    COUNT,
+};
+inline const char *refLuaRoleType[] = {
+    "LITTLE_BOY",
+    "STANDARD_MALE",
+    "LITTLE_GIRL",
+    "STANDARD_FEMALE",
+};
+
+// 几乎确定不全, 出现于 明教/明教_暗尘弥散.lua
 enum class enumLuaMoveState {
     ON_ENTRAP,
     ON_FREEZE,
@@ -89,20 +121,6 @@ inline const char *refLuaMoveState[] = {
     "ON_KNOCKED_OFF",
     "ON_SKILL_MOVE_DST",
     "ON_REPULSED",
-};
-
-enum class enumLuaRoleType {
-    LITTLE_BOY,
-    STANDARD_MALE,
-    LITTLE_GIRL,
-    STANDARD_FEMALE,
-    COUNT,
-};
-inline const char *refLuaRoleType[] = {
-    "LITTLE_BOY",
-    "STANDARD_MALE",
-    "LITTLE_GIRL",
-    "STANDARD_FEMALE",
 };
 
 } // namespace ref

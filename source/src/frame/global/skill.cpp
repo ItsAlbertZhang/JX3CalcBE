@@ -73,6 +73,8 @@ void SkillManager::add(int skillID, int skillLevel) {
     if (res) {
         // 成功执行, 将技能存入缓存
         data[skillID][skillLevel] = std::move(skill);
+    } else {
+        LOG_ERROR("LuaFunc::getGetSkillLevelData(\"{}\") failed.", name);
     }
 }
 
