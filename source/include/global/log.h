@@ -12,7 +12,7 @@ namespace fmt = std;
 #include <fmt/core.h>
 #endif
 
-namespace ns_global {
+namespace nsg_log {
 
 using format_args = fmt::format_args; // 消除编译器对于 #include <format> 和 namespace fmt = std 未使用的警告
 
@@ -30,13 +30,13 @@ public:
     void save();
 };
 
-inline thread_local Log log_info{"info"};
-inline thread_local Log log_error{"error"};
+inline thread_local Log info{"info"};
+inline thread_local Log error{"error"};
 
-} // namespace ns_global
+} // namespace nsg_log
 
-#define LOG_INFO(str, ...)  ns_global::log_info(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
-#define LOG_ERROR(str, ...) ns_global::log_error(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
+#define LOG_INFO(str, ...)  nsg_log::info(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
+#define LOG_ERROR(str, ...) nsg_log::error(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
 
 #else // DEBUG
 

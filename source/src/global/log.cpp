@@ -1,9 +1,9 @@
 #include "global/log.h"
-#include "global/settings.h"
+#include "global/config.h"
 #include <fstream>
 #include <iostream>
 
-using namespace ns_global;
+using namespace nsg_log;
 
 #ifdef DEBUG
 
@@ -15,7 +15,7 @@ void Log::operator()(const std::string &newdata) {
 }
 
 void Log::save() {
-    std::ofstream file(Config::pExeDir / ("log_" + name + ".log"));
+    std::ofstream file(nsg_config::pExeDir / ("log_" + name + ".log"));
     file << data;
     file.close();
 }

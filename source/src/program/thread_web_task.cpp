@@ -2,8 +2,8 @@
 #include "frame/event.h"
 #include "frame/global/uibuff.h"
 #include "frame/global/uiskill.h"
+#include "global/config.h"
 #include "global/log.h"
-#include "global/settings.h"
 #include "program/task.h"
 #include "program/thread_web.h"
 #include <asio/co_spawn.hpp>
@@ -24,21 +24,21 @@ static int calculate(const DMTask &arg);
 static int output(const DMTask &arg, std::filesystem::path resfile);
 
 std::string Web::urlTask(const std::string &jsonstr) {
-    std::filesystem::path p_res = ns_global::Config::pExeDir / "res.tab";
+    std::filesystem::path p_res = nsg_config::pExeDir / "res.tab";
 
 #ifdef DEBUG
-    ns_global::log_info.enable  = true;
-    ns_global::log_error.enable = true;
-    ns_global::log_error.output = true;
+    nsg_log::info.enable  = true;
+    nsg_log::error.enable = true;
+    nsg_log::error.output = true;
 #endif
     auto argptr = DMTask::create(jsonstr);
     if (argptr == nullptr) {
         return "";
     }
 #ifdef DEBUG
-    ns_global::log_info.enable  = false;
-    ns_global::log_error.enable = false;
-    ns_global::log_error.output = false;
+    nsg_log::info.enable  = false;
+    nsg_log::error.enable = false;
+    nsg_log::error.output = false;
 #endif
     std::string id = genID();
     Task       &it =
@@ -154,19 +154,19 @@ static int calculate(const DMTask &arg) {
 
 static int output(const DMTask &arg, std::filesystem::path resfile) {
 #ifdef DEBUG
-    ns_global::log_info.enable  = true;
-    ns_global::log_error.enable = true;
-    ns_global::log_error.output = true;
+    nsg_log::info.enable  = true;
+    nsg_log::error.enable = true;
+    nsg_log::error.output = true;
 #endif
     auto start  = std::chrono::steady_clock::now();
     auto player = calc(arg);
     auto end    = std::chrono::steady_clock::now();
 #ifdef DEBUG
-    ns_global::log_info.enable  = false;
-    ns_global::log_error.enable = false;
-    ns_global::log_error.output = false;
-    ns_global::log_info.save();
-    ns_global::log_error.save();
+    nsg_log::info.enable  = false;
+    nsg_log::error.enable = false;
+    nsg_log::error.output = false;
+    nsg_log::info.save();
+    nsg_log::error.save();
 #endif
 
     std::ofstream ofs{resfile};
