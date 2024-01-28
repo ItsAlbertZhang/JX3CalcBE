@@ -220,6 +220,7 @@ public:
     int getPoisonDamageAddPercent() const;  // 获取毒性内功伤害和治疗效果提升. 结果为一个1024分数, 这符合游戏内的实际原理.
 
     int atDstNpcDamageCoefficient = 0; // 非侠士伤害提升1024分数
+    int atGlobalDamageFactor      = 0; // 全局伤害系数, 通常用于调整破招伤害
     int atAddDamageByDstMoveState = 0; // 根据目标移动状态造成的伤害提升1024分数, 出现于: 明教/秘笈/明教_秘籍_烈日斩_静止目标加伤害.lua
 
     int atSpunkToSolarAndLunarAttackPowerCof    = 0; // 元气转换为阳性和阴性内功攻击的系数

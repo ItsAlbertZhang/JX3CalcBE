@@ -13,6 +13,8 @@ set(CMAKE_BUILD_TYPE ${BUILD_MODE}) # Debug / Release
 # 若 CMAKE_BUILD_TYPE 为 Debug, 则定义 DEBUG
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DDEBUG)
+    add_definitions(-DD_CONSTEXPR_LOG)
+    add_definitions(-DD_CONSTEXPR_CHANNELINTERVAL)
 endif()
 
 # 编译选项

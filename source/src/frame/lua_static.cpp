@@ -5,7 +5,7 @@
 #include "frame/ref/lua_adaptive_type.h"
 #include "frame/ref/lua_attribute_type.h"
 #include "frame/ref/lua_other.h"
-#include "global/log.h"
+#include "global/constexpr_log.h"
 #include <random>
 #include <sol/sol.hpp>
 #include <string>
@@ -367,7 +367,7 @@ end
 int LuaGlobalFunction::GetValueByBits(int nValue, int nBit, int c) {
     UNREFERENCED_PARAMETER(c);
     if (nBit > 31 || nBit < 0) {
-        LOG_ERROR(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error{}", "");
+        CONSTEXPR_LOG_ERROR(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error{}", "");
     }
     return (nValue >> nBit) & 1;
 }
@@ -409,11 +409,11 @@ end
 int LuaGlobalFunction::SetValueByBits(int nValue, int nBit, int c, int nNewBitValue) {
     UNREFERENCED_PARAMETER(c);
     if (nNewBitValue > 1 || nNewBitValue < 0) {
-        LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,{}", "");
+        CONSTEXPR_LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,{}", "");
         return nValue;
     }
     if (nBit > 31 || nBit < 0) {
-        LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!BitIndex error{}", "");
+        CONSTEXPR_LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!BitIndex error{}", "");
         return nValue;
     }
     return (nValue & ~(1 << nBit)) | (nNewBitValue << nBit);

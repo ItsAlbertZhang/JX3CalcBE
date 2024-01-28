@@ -1,6 +1,6 @@
 #include "frame/character/derived/player.h"
 #include "frame/event.h"
-#include "global/log.h"
+#include "global/constexpr_log.h"
 #include <random>
 
 #define UNREFERENCED_PARAMETER(P) (P)
@@ -65,7 +65,7 @@ static void callbackMacroCustom(void *self, void *nullparam) {
     UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
     if (player->macroIdx >= static_cast<int>(player->macroCustom->macroRuntime.size())) {
-        LOG_ERROR("macroIdx >= macroRuntime.size(){}", "");
+        CONSTEXPR_LOG_ERROR("macroIdx >= macroRuntime.size(){}", "");
         return;
     }
     player->macroCustom->macroRuntime.at(player->macroIdx)(player);

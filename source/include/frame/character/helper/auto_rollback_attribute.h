@@ -34,7 +34,6 @@ private:
 
     int atDamage[static_cast<int>(DamageType::COUNT)]          = {0};
     int atDamageRand[static_cast<int>(DamageType::COUNT)]      = {0};
-    int atGlobalDamageFactor                                   = 0; // 破招系数
     int callDamage[static_cast<int>(DamageType::COUNT)]        = {0};
     int callSurplusDamage[static_cast<int>(DamageType::COUNT)] = {0};
 

@@ -2,7 +2,7 @@
 #include "frame/character/character.h"
 #include "frame/lua_runtime.h"
 #include "frame/ref/tab_attribute.h" // enumTabAttribute
-#include "global/log.h"
+#include "global/constexpr_log.h"
 
 using namespace ns_frame;
 using namespace ns_frame::ref;
@@ -32,7 +32,7 @@ AutoRollbackAttrib::~AutoRollbackAttrib() {
                 paramStr,
                 LuaFunc::Enum::OnRemove
             ))
-            LOG_ERROR("LuaFunc::getOnRemove(\"{}\") failed.", paramStr);
+            CONSTEXPR_LOG_ERROR("LuaFunc::getOnRemove(\"{}\") failed.", paramStr);
         // OnRemove(nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID)
     }
 }
@@ -108,10 +108,10 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         std::string paramStr = "scripts/" + attrib.valueAStr;
         if (isRollback) {
             if (!LuaFunc::analysis(LuaFunc::getUnApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::UnApply))
-                LOG_ERROR("LuaFunc::getUnApply(\"{}\") failed.", paramStr);
+                CONSTEXPR_LOG_ERROR("LuaFunc::getUnApply(\"{}\") failed.", paramStr);
         } else {
             if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
-                LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
+                CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
         }
     } break;
     case enumTabAttribute::atLunarCriticalStrikeBaseRate:
@@ -195,7 +195,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         self->chAttr.atAllDamageAddPercent += attrib.valueAInt * c;
         break;
     default:
-        LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)], attrib.valueAInt);
+        CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;
     }
 }

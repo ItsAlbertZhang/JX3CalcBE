@@ -1,11 +1,11 @@
-#include "global/log.h"
+#ifdef D_CONSTEXPR_LOG
+
+#include "global/constexpr_log.h"
 #include "global/config.h"
 #include <fstream>
 #include <iostream>
 
-using namespace nsg_log;
-
-#ifdef DEBUG
+using namespace nsgc_log;
 
 void Log::operator()(const std::string &newdata) {
     if (enable)
@@ -15,9 +15,9 @@ void Log::operator()(const std::string &newdata) {
 }
 
 void Log::save() {
-    std::ofstream file(nsg_config::pExeDir / ("log_" + name + ".log"));
+    std::ofstream file(nsg_config::pExeDir / ("log_" + name + ".tab"));
     file << data;
     file.close();
 }
 
-#endif // DEBUG
+#endif // D_CONSTEXPR_LOG

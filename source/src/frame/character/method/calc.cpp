@@ -2,7 +2,8 @@
 #include "frame/character/property/damage.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
-#include "global/log.h"
+#include "global/constexpr_channelinterval.h"
+#include "global/constexpr_log.h"
 
 using namespace ns_frame;
 
@@ -36,7 +37,7 @@ std::tuple<int, int> Character::calcCritical(const ChAttr &attrSelf, int skillID
         atCriticalDamagePower = attrSelf.getPoisonCriticalDamagePower();
         break;
     default:
-        LOG_ERROR("Unknown skill KindType: {}", static_cast<int>(skill.KindType));
+        CONSTEXPR_LOG_ERROR("Unknown skill KindType: {}", static_cast<int>(skill.KindType));
         break;
     }
 
@@ -66,6 +67,7 @@ Damage Character::calcDamage(
     int atStrain                  = this->chAttr.getStrain();               // 类型× 快照
     int atSurplus                 = this->chAttr.getSurplus();              // 类型× 快照
     int atDstNpcDamageCoefficient = this->chAttr.atDstNpcDamageCoefficient; // 类型× 快照
+    int atGlobalDamageFactor      = this->chAttr.atGlobalDamageFactor;      // 类型× 快照
     int atAddDamageByDstMoveState = this->chAttr.atAddDamageByDstMoveState; // 类型× 快照
 
     int atAttackPower           = 0; // 类型√ 快照
@@ -123,15 +125,33 @@ Damage Character::calcDamage(
         targetDamageCoefficient = target->chAttr.atPoisonDamageCoefficient;
         break;
     default:
-        LOG_ERROR("Unknown damage type: {}", static_cast<int>(typeDamage));
+        CONSTEXPR_LOG_ERROR("Unknown damage type: {}", static_cast<int>(typeDamage));
         break;
     }
 
     unsigned long long damage = damageBase + damageRand / 2;
-    if (isSurplus)
-        damage = damage + static_cast<long long>(atSurplus) * (nChannelInterval + (1 << 20)) / (1 << 20);
-    else
+    if (isSurplus) {
+        CONSTEXPR_CHANNELINTERVAL_RECORD(
+            recordID,
+            recordLevel,
+            damageBase,
+            damageRand,
+            static_cast<double>(1) * (atGlobalDamageFactor + (1 << 20)) / (1 << 20),
+            isBuff
+        );
+        damage = damage + atSurplus * 1;
+    } else {
+        CONSTEXPR_CHANNELINTERVAL_RECORD(
+            recordID,
+            recordLevel,
+            damageBase,
+            damageRand,
+            static_cast<double>(1) * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 * (atGlobalDamageFactor + (1 << 20)) / (1 << 20),
+            isBuff
+        );
         damage = damage + atAttackPower * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 + weaponDamage;
+    }
+    damage = damage * (atGlobalDamageFactor + (1 << 20)) / (1 << 20);
     if (!target->isPlayer) {
         damage = damage * (1024 + atStrain) / 1024;
         damage = damage * (1024 + atDstNpcDamageCoefficient) / 1024;

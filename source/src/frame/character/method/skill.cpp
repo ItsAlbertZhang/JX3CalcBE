@@ -2,7 +2,7 @@
 #include "frame/character/character.h"
 #include "frame/character/helper/auto_rollback_attribute.h"
 #include "frame/character/helper/runtime_castskill.h"
-#include "global/log.h"
+#include "global/constexpr_log.h"
 
 using namespace ns_frame;
 
@@ -16,7 +16,7 @@ void Character::skillActive(int skillID) {
     if (skillLevel == 0) {
         return;
     }
-    LOG_INFO("ActiveSkill: {} # {}", skillID, skillLevel);
+    CONSTEXPR_LOG_INFO("ActiveSkill: {} # {}", skillID, skillLevel);
     const Skill           &skill = SkillManager::get(skillID, skillLevel);
     RuntimeCastSkill       runtime{this, skillID, skillLevel};
     AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, nullptr, &runtime, skill};
@@ -25,7 +25,7 @@ void Character::skillActive(int skillID) {
 }
 
 void Character::skillDeactive(int skillID) {
-    LOG_INFO("DeactiveSkill: {}", skillID);
+    CONSTEXPR_LOG_INFO("DeactiveSkill: {}", skillID);
     auto it = this->chSkill.skillActived.find(skillID);
     if (it != this->chSkill.skillActived.end()) {
         delete static_cast<AutoRollbackAttribute *>(it->second.attribute);

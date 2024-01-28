@@ -3,7 +3,8 @@
 #include "frame/global/uibuff.h"
 #include "frame/global/uiskill.h"
 #include "global/config.h"
-#include "global/log.h"
+#include "global/constexpr_channelinterval.h"
+#include "global/constexpr_log.h"
 #include "program/task.h"
 #include "program/thread_web.h"
 #include <asio/co_spawn.hpp>
@@ -26,19 +27,21 @@ static int output(const DMTask &arg, std::filesystem::path resfile);
 std::string Web::urlTask(const std::string &jsonstr) {
     std::filesystem::path p_res = nsg_config::pExeDir / "res.tab";
 
-#ifdef DEBUG
-    nsg_log::info.enable  = true;
-    nsg_log::error.enable = true;
-    nsg_log::error.output = true;
+#ifdef D_CONSTEXPR_LOG
+    nsgc_log::info.enable  = true;
+    nsgc_log::error.enable = true;
+    nsgc_log::error.output = true;
 #endif
     auto argptr = DMTask::create(jsonstr);
     if (argptr == nullptr) {
         return "";
     }
-#ifdef DEBUG
-    nsg_log::info.enable  = false;
-    nsg_log::error.enable = false;
-    nsg_log::error.output = false;
+#ifdef D_CONSTEXPR_LOG
+    nsgc_log::info.enable  = false;
+    nsgc_log::error.enable = false;
+    nsgc_log::error.output = false;
+    nsgc_log::info.save();
+    nsgc_log::error.save();
 #endif
     std::string id = genID();
     Task       &it =
@@ -153,20 +156,27 @@ static int calculate(const DMTask &arg) {
 }
 
 static int output(const DMTask &arg, std::filesystem::path resfile) {
-#ifdef DEBUG
-    nsg_log::info.enable  = true;
-    nsg_log::error.enable = true;
-    nsg_log::error.output = true;
+#ifdef D_CONSTEXPR_LOG
+    nsgc_log::info.enable  = true;
+    nsgc_log::error.enable = true;
+    nsgc_log::error.output = true;
+#endif
+#ifdef D_CONSTEXPR_CHANNELINTERVAL
+    nsgc_channelinterval::enable = true;
 #endif
     auto start  = std::chrono::steady_clock::now();
     auto player = calc(arg);
     auto end    = std::chrono::steady_clock::now();
-#ifdef DEBUG
-    nsg_log::info.enable  = false;
-    nsg_log::error.enable = false;
-    nsg_log::error.output = false;
-    nsg_log::info.save();
-    nsg_log::error.save();
+#ifdef D_CONSTEXPR_CHANNELINTERVAL
+    nsgc_channelinterval::enable = false;
+    nsgc_channelinterval::save();
+#endif
+#ifdef D_CONSTEXPR_LOG
+    nsgc_log::info.enable  = false;
+    nsgc_log::error.enable = false;
+    nsgc_log::error.output = false;
+    nsgc_log::info.save();
+    nsgc_log::error.save();
 #endif
 
     std::ofstream ofs{resfile};

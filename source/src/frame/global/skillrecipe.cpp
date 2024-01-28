@@ -1,7 +1,7 @@
 #include "frame/global/skillrecipe.h"
 #include "frame/lua_runtime.h"
 #include "gdi.h"
-#include "global/log.h"
+#include "global/constexpr_log.h"
 #include <tuple>
 
 using namespace ns_frame;
@@ -80,6 +80,6 @@ void SkillRecipeManager::addScriptSkill(const SkillRecipe *skillrecipe, const Sk
         // 成功执行, 将技能添加到 ScriptSkill 中
         mapScriptSkill[std::make_tuple(skillrecipe, skill)] = std::move(scriptskill);
     } else {
-        LOG_ERROR("LuaFunc::getGetSkillRecipeData(\"{}\") failed.", path);
+        CONSTEXPR_LOG_ERROR("LuaFunc::getGetSkillRecipeData(\"{}\") failed.", path);
     }
 }

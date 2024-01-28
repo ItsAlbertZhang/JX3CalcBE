@@ -5,7 +5,7 @@
 #include "frame/lua_runtime.h"            // LuaFunc
 #include "frame/ref/lua_attribute_type.h" // enumLuaAttributeType
 #include "frame/ref/lua_other.h"          // enumLuaAttributeEffectMode
-#include "global/log.h"
+#include "global/constexpr_log.h"
 #include <random>
 
 using namespace ns_frame;
@@ -58,7 +58,7 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
                 0,
                 0,
                 DamageAddPercent,
-                this->atGlobalDamageFactor,
+                1, // 破招伤害的调整是通过 atGlobalDamageFactor 实现的
                 0,
                 true,
                 false
@@ -88,14 +88,14 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 int         dwCharacterID = Character::characterGetID(self);
                 int         dwSkillSrcID  = Character::characterGetID(self);
                 if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
-                    LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
+                    CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
             } break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
                 std::string paramStr      = "scripts/" + it.param1Str;
                 int         dwCharacterID = Character::characterGetID(self);
                 int         dwSkillSrcID  = Character::characterGetID(self);
                 if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
-                    LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
+                    CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
             } break;
             case static_cast<int>(enumLuaAttributeType::CURRENT_SUN_ENERGY):
                 self->nCurrentSunEnergy += it.param1Int;
@@ -128,7 +128,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 // 未做相关实现, 推测为动作
                 break;
             default:
-                LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                CONSTEXPR_LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
                 break;
             }
         } break; // EFFECT_TO_SELF_NOT_ROLLBACK
@@ -174,7 +174,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     int         dwCharacterID = Character::characterGetID(self);
                     int         dwSkillSrcID  = Character::characterGetID(self);
                     if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
-                        LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
+                        CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
                 }
             } break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
@@ -183,7 +183,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     int         dwCharacterID = Character::characterGetID(self);
                     int         dwSkillSrcID  = Character::characterGetID(self);
                     if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
-                        LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
+                        CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
                 }
             } break;
             case static_cast<int>(enumLuaAttributeType::DST_NPC_DAMAGE_COEFFICIENT):
@@ -278,7 +278,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 self->chAttr.atAddDamageByDstMoveState += it.param2 * c;
                 break;
             default:
-                LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                CONSTEXPR_LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
                 break;
             }
         } break; // EFFECT_TO_SELF_AND_ROLLBACK
@@ -294,14 +294,14 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 int         dwCharacterID = Character::characterGetID(target);
                 int         dwSkillSrcID  = Character::characterGetID(self);
                 if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
-                    LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
+                    CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
             } break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
                 std::string paramStr      = "scripts/" + it.param1Str;
                 int         dwCharacterID = Character::characterGetID(target);
                 int         dwSkillSrcID  = Character::characterGetID(self);
                 if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
-                    LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
+                    CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_PHYSICS_DAMAGE):
                 this->callDamage[static_cast<int>(DamageType::Physics)] += 1;
@@ -350,7 +350,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 // 未做相关实现, 推测为冲刺
                 break;
             default:
-                LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                CONSTEXPR_LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
                 break;
             }
         } break; // EFFECT_TO_DEST_NOT_ROLLBACK
@@ -360,10 +360,10 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             switch (it.type) {
             case static_cast<int>(enumLuaAttributeType::GLOBAL_DAMGAGE_FACTOR):
-                this->atGlobalDamageFactor += it.param1Int * c;
+                this->self->chAttr.atGlobalDamageFactor += it.param1Int * c;
                 break;
             default:
-                LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
+                CONSTEXPR_LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", refLuaAttributeEffectMode[it.mode], refLuaAttributeType[it.type], it.param1Int, it.param2, isRollback);
                 break;
             }
         } break; // EFFECT_TO_DEST_AND_ROLLBACK

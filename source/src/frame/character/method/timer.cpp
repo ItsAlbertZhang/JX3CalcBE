@@ -1,7 +1,7 @@
 #include "frame/character/character.h"
 #include "frame/event.h"
 #include "frame/lua_runtime.h"
-#include "global/log.h"
+#include "global/constexpr_log.h"
 
 using namespace ns_frame;
 
@@ -18,7 +18,7 @@ static void callbackSetTimer(void *self, void *param) {
     Character *selfPtr = (Character *)self;
     Data       data{.param = param};
     if (!LuaFunc::analysis(LuaFunc::getOnTimer(data.data.idx)(selfPtr, data.data.type, data.data.targetID), data.data.idx, LuaFunc::Enum::OnTimer))
-        LOG_ERROR("LuaFunc::getOnTimer() failed.{}", "");
+        CONSTEXPR_LOG_ERROR("LuaFunc::getOnTimer() failed.{}", "");
 }
 
 void Character::timerSet3(int frame, std::string filename, int targetID) {

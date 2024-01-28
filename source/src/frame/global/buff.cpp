@@ -1,6 +1,6 @@
 #include "frame/global/buff.h"
 #include "gdi.h"
-#include "global/log.h"
+#include "global/constexpr_log.h"
 
 using namespace ns_frame;
 
@@ -61,7 +61,7 @@ void BuffManager::add(int buffID, int buffLevel) {
             std::string valueB = buff.tab[attribName[attribIdx] + "Value" + std::to_string(i) + "B"]; // BeginValue1B, BeginValue2B, ...
 
             if (ref::mapTabAttribute.find(name) == ref::mapTabAttribute.end()) {
-                LOG_ERROR("BuffManager::add: {} Unknown Attribute: {}", attribIdx, name);
+                CONSTEXPR_LOG_ERROR("BuffManager::add: {} Unknown Attribute: {}", attribIdx, name);
                 continue;
             }
             switch (attribIdx) {

@@ -6,7 +6,7 @@
 #include "frame/global/skill.h"
 #include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"
-#include "global/log.h"
+#include "global/constexpr_log.h"
 #include <memory> // std::unique_ptr
 #include <random>
 
@@ -142,7 +142,7 @@ end
 */
 
 bool Character::skillCast(Character *target, int skillID, int skillLevel) {
-    LOG_INFO("Try to CastSkill: {} # {}", skillID, skillLevel);
+    CONSTEXPR_LOG_INFO("Try to CastSkill: {} # {}", skillID, skillLevel);
 
     // 获取技能
     const Skill &skill = SkillManager::get(skillID, skillLevel);
@@ -208,7 +208,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
         return false;
 
     // ---------- 检查完毕, 释放技能 ----------
-    LOG_INFO("{} # {} cast successfully!", skillID, skillLevel);
+    CONSTEXPR_LOG_INFO("{} # {} cast successfully!", skillID, skillLevel);
 
     // 构造技能运行时资源: RuntimeCastSkill
     RuntimeCastSkill runtime{this, skillID, skillLevel};

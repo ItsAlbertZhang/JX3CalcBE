@@ -2,7 +2,7 @@
 #include "concrete/character/all.h"
 #include "concrete/effects/all.h"
 #include "frame/character/derived/player.h"
-#include "global/log.h"
+#include "global/constexpr_log.h"
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <vector>
@@ -86,11 +86,11 @@ std::unique_ptr<DMTask> DMTask::create(const std::string &jsonstr) {
         return ret;
     } catch (nlohmann::json::exception &e) {
         UNREFERENCED_PARAMETER(e);
-        LOG_ERROR("DMTask::create: json parse error: {}", e.what());
+        CONSTEXPR_LOG_ERROR("DMTask::create: json parse error: {}", e.what());
         return nullptr;
     } catch (std::exception &e) {
         UNREFERENCED_PARAMETER(e);
-        LOG_ERROR("DMTask::create: error: {}", e.what());
+        CONSTEXPR_LOG_ERROR("DMTask::create: error: {}", e.what());
         return nullptr;
     }
 }

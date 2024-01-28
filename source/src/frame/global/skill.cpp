@@ -1,7 +1,7 @@
 #include "frame/global/skill.h"
 #include "frame/lua_runtime.h"
 #include "gdi.h"
-#include "global/log.h"
+#include "global/constexpr_log.h"
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
@@ -74,7 +74,7 @@ void SkillManager::add(int skillID, int skillLevel) {
         // 成功执行, 将技能存入缓存
         data[skillID][skillLevel] = std::move(skill);
     } else {
-        LOG_ERROR("LuaFunc::getGetSkillLevelData(\"{}\") failed.", name);
+        CONSTEXPR_LOG_ERROR("LuaFunc::getGetSkillLevelData(\"{}\") failed.", name);
     }
 }
 
@@ -144,7 +144,7 @@ void Skill::SetSubsectionSkill(int a, int b, int c, int d) {
     UNREFERENCED_PARAMETER(b);
     UNREFERENCED_PARAMETER(c);
     UNREFERENCED_PARAMETER(d);
-    LOG_ERROR("SetSubsectionSkill 未实现!{}", "");
+    CONSTEXPR_LOG_ERROR("SetSubsectionSkill 未实现!{}", "");
 }
 
 void Skill::SetSunSubsectionSkill(int a, int b, int c, int d) {
