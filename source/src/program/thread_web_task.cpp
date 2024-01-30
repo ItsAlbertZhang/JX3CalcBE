@@ -1,4 +1,4 @@
-#include "concrete/character.h"
+#include "concrete/character/character.h"
 #include "frame/event.h"
 #include "frame/global/uibuff.h"
 #include "frame/global/uiskill.h"

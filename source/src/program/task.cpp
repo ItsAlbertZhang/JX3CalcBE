@@ -1,6 +1,6 @@
 #include "program/task.h"
-#include "concrete/character.h"
-#include "concrete/effect.h"
+#include "concrete/character/character.h"
+#include "concrete/effect/effect.h"
 #include "frame/character/derived/player.h"
 #include "global/constexpr_log.h"
 #include <memory>

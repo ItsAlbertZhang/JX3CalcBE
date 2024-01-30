@@ -1,4 +1,4 @@
-#include "concrete/character.h"
+#include "concrete/character/character.h"
 #include "concrete/character/npc/npc124.h"
 #include "concrete/character/player/mj_fysj.h"
 #include "frame/character/derived/player.h"
