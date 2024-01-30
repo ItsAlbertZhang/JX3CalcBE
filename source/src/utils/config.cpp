@@ -5,12 +5,14 @@
 #define UNREFERENCED_PARAMETER(P) (P)
 
 void ns_utils::config::init(int argc, char *argv[]) { // 初始化所有环境
+    namespace fs = std::filesystem;
     UNREFERENCED_PARAMETER(argc);
     pExeDir = fs::absolute(argv[0]).parent_path();
     load();
 }
 
 void ns_utils::config::load() { // 加载配置文件
+    namespace fs        = std::filesystem;
     fs::path pathConfig = pExeDir / "config.json";
     if (!fs::exists(pathConfig)) {
         return;

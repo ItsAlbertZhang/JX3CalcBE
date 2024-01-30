@@ -9,7 +9,7 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_program;
+using namespace ns_modules;
 
 std::string DMTask::format() {
     using json = nlohmann::json;

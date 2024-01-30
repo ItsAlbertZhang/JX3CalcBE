@@ -1,5 +1,5 @@
-#ifndef PROGRAM_TASK_H_
-#define PROGRAM_TASK_H_
+#ifndef MODULES_TASK_H_
+#define MODULES_TASK_H_
 
 #pragma warning(push, 0)
 #ifdef _WIN32
@@ -15,7 +15,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ns_program {
+namespace ns_modules {
 
 class DMTask {
 public:
@@ -74,6 +74,6 @@ public:
     std::vector<std::future<int>> futures;
 };
 
-} // namespace ns_program
+} // namespace ns_modules
 
-#endif // PROGRAM_TASK_H_
+#endif // MODULES_TASK_H_

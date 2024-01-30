@@ -1,5 +1,5 @@
-#ifndef PROGRAM_THREAD_WEB_H_
-#define PROGRAM_THREAD_WEB_H_
+#ifndef MODULES_WEB_H_
+#define MODULES_WEB_H_
 
 #pragma warning(push, 0)
 #ifdef _WIN32
@@ -17,7 +17,7 @@
 #include <thread>
 #include <unordered_map>
 
-namespace ns_program {
+namespace ns_modules {
 
 class Web {
 public:
@@ -50,6 +50,6 @@ private:
     std::string genID(int length = 6);
 };
 
-} // namespace ns_program
+} // namespace ns_modules
 
-#endif // PROGRAM_THREAD_WEB_H_
+#endif // MODULES_WEB_H_

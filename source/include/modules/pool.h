@@ -1,5 +1,5 @@
-#ifndef PROGRAM_THREAD_POOL_H_
-#define PROGRAM_THREAD_POOL_H_
+#ifndef MODULES_POOL_H_
+#define MODULES_POOL_H_
 
 #include <cassert>
 #include <condition_variable>
@@ -11,7 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ns_program {
+namespace ns_modules {
 
 class Pool {
     class TaskList {
@@ -185,6 +185,6 @@ private:
     bool                     stop;
 };
 
-} // namespace ns_program
+} // namespace ns_modules
 
-#endif // PROGRAM_THREAD_POOL_H_
+#endif // MODULES_POOL_H_

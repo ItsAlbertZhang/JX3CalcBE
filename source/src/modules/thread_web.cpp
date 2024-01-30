@@ -10,7 +10,7 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_program;
+using namespace ns_modules;
 
 Web::Web() {
     asio::co_spawn(

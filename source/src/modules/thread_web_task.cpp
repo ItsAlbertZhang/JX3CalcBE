@@ -19,7 +19,7 @@ namespace fmt = std;
 #include <fmt/core.h>
 #endif
 
-using namespace ns_program;
+using namespace ns_modules;
 
 static int calculate(const DMTask &arg);
 static int output(const DMTask &arg, std::filesystem::path resfile);

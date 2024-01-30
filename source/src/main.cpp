@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    ns_program::Web webHandler;
+    ns_modules::Web webHandler;
     std::string     s;
     while (std::getline(std::cin, s)) {
         if (s == "exit")
