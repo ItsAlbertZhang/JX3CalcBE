@@ -17,42 +17,29 @@
 
 namespace ns_modules {
 
+namespace task {
+
+enum class AttributeType {
+    // zero,
+    jx3box,
+    COUNT,
+};
+inline const std::unordered_map<std::string, AttributeType> AttributeTypeMap = {
+  // {"未启用",       AttributeType::zero  },
+    {"从JX3BOX导入", AttributeType::jx3box},
+};
+
+std::string schema();
+
+} // namespace task
+
 class DMTask {
 public:
-    // 静态数据区: 声明及设置无关变量
-    class intValue {
-    public:
-        int min;
-        int max;
-    };
-
-    enum class AttributeType {
-        zero,
-        jx3box,
-        COUNT,
-    };
-    static inline std::unordered_map<AttributeType, std::string> PlayerTypeMap = {
-        {AttributeType::zero,   "未启用"      },
-        {AttributeType::jx3box, "从JX3BOX导入"},
-    };
-
-    // 静态数据区: 设置相关变量
-    static inline intValue nDelayNetwork{0, 1024};
-    static inline intValue nDelayKeyboard{0, 1024};
-    static inline intValue nFightTime{1, 1 << 30};
-    static inline intValue nFightCount{1, 1 << 30};
-
-    static inline bool allowCustomMacro = true;
-
-    // 静态方法区
-    static std::string             format();
-    static std::unique_ptr<DMTask> create(const std::string &jsonstr);
-
     // json 数据区
-    const int delayNetwork  = 45;
-    const int delayKeyboard = 20;
-    const int fightTime     = 300;
-    const int fightCount    = 100;
+    const int delayNetwork;
+    const int delayKeyboard;
+    const int fightTime;
+    const int fightCount;
 
     const bool        useCustomMacro = false;
     const std::string customMacro;
@@ -73,6 +60,10 @@ public:
     std::atomic<bool>             stop{false};
     std::vector<std::future<int>> futures;
 };
+
+namespace task {
+std::unique_ptr<DMTask> create(const std::string &jsonstr);
+} // namespace task
 
 } // namespace ns_modules
 

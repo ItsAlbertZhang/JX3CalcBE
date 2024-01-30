@@ -13,8 +13,8 @@ enum class PlayerType {
     COUNT,
 };
 
-inline const std::unordered_map<PlayerType, std::string> PlayerTypeMap = {
-    {PlayerType::MjFysj, "焚影圣诀"},
+inline const std::unordered_map<std::string, PlayerType> PlayerTypeMap = {
+    {"焚影圣诀", PlayerType::MjFysj},
 };
 
 std::unique_ptr<ns_frame::Player> createPlayer(PlayerType type, int delayNetwork, int delayKeyboard);
@@ -24,8 +24,8 @@ enum class NPCType {
     COUNT,
 };
 
-inline const std::unordered_map<NPCType, std::string> NPCTypeMap = {
-    {NPCType::NPC124, "124级NPC目标"},
+inline const std::unordered_map<std::string, NPCType> NPCTypeMap = {
+    {"124级NPC目标", NPCType::NPC124},
 };
 
 std::unique_ptr<ns_frame::NPC> createNPC(NPCType type);

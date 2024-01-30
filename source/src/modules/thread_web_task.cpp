@@ -32,7 +32,7 @@ std::string Web::urlTask(const std::string &jsonstr) {
     ns_plugin::log::error.enable = true;
     ns_plugin::log::error.output = true;
 #endif
-    auto argptr = DMTask::create(jsonstr);
+    auto argptr = task::create(jsonstr);
     if (argptr == nullptr) {
         return "";
     }

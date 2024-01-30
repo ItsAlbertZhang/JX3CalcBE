@@ -2,6 +2,7 @@
 #define UTILS_CONFIG_H_
 
 #include <filesystem>
+#include <nlohmann/json.hpp>
 
 namespace ns_utils {
 namespace config {
@@ -9,6 +10,10 @@ namespace config {
 inline std::filesystem::path pExeDir; // 可执行文件所在目录的路径
 inline std::filesystem::path pUnpack; // 未打包的数据目录
 inline std::filesystem::path pJX3;    // 已打包的数据目录
+
+void                  schemaTaskDataComplete(nlohmann::json &j);
+nlohmann::json        schemaTaskDataInit();
+inline nlohmann::json schemaTaskData = schemaTaskDataInit();
 
 // 初始化环境.
 void init(int argc, char *argv[]);

@@ -3,6 +3,7 @@
 #include "concrete/effect/effect.h"
 #include "frame/character/derived/player.h"
 #include "plugin/log.h"
+#include "utils/config.h"
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <vector>
@@ -11,37 +12,11 @@
 
 using namespace ns_modules;
 
-std::string DMTask::format() {
-    using json = nlohmann::json;
-    json j{
-        {"player",        json::array()                           },
-        {"delayNetwork",  {nDelayNetwork.min, nDelayNetwork.max}  },
-        {"delayKeyboard", {nDelayKeyboard.min, nDelayKeyboard.max}},
-        {"fightTime",     {nFightTime.min, nFightTime.max}        },
-        {"fightCount",    {nFightCount.min, nFightCount.max}      },
-        {"customMacro",   allowCustomMacro                        },
-        {"attribute",     json::array()                           },
-        {"effects",       json::array()                           },
-    };
-    for (auto &x : ns_concrete::PlayerTypeMap) {
-        j["player"] += {
-            {"id",   static_cast<int>(x.first)},
-            {"name", x.second                 }
-        };
-    }
-    for (auto &x : PlayerTypeMap) {
-        j["attribute"] += {
-            {"id",   static_cast<int>(x.first)},
-            {"name", x.second                 },
-        };
-    }
-    for (auto &x : ns_concrete::EffectTypeRef) {
-        j["effects"] += x;
-    }
-    return j.dump();
+std::string task::schema() {
+    return ns_utils::config::schemaTaskData.dump();
 }
 
-std::unique_ptr<DMTask> DMTask::create(const std::string &jsonstr) {
+std::unique_ptr<DMTask> task::create(const std::string &jsonstr) {
     try {
         nlohmann::json j = nlohmann::json::parse(jsonstr);
 
@@ -55,8 +30,8 @@ std::unique_ptr<DMTask> DMTask::create(const std::string &jsonstr) {
             throw std::runtime_error("unknown player");
         }
         // attribute
-        switch (static_cast<DMTask::AttributeType>(j["attribute"]["id"].get<int>())) {
-        case DMTask::AttributeType::jx3box:
+        switch (static_cast<AttributeType>(j["attribute"]["id"].get<int>())) {
+        case AttributeType::jx3box:
             player->attrImportFromJX3BOX(j["attribute"]["data"].get<int>());
             break;
         default:

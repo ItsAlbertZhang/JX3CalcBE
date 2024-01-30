@@ -1,6 +1,7 @@
 #include "modules/task.h"
 #include "modules/web.h"
 #include "utils/config.h"
+#include "utils/json_schema.h"
 #include <asio.hpp>
 #include <chrono>
 #include <crow/mustache.h>
@@ -59,7 +60,25 @@ void Web::webEntry() {
 
     CROW_ROUTE(app, "/task")
         .methods("GET"_method)([this]() {
-            return crow::response{200, "application/json", DMTask::format()};
+            return crow::response{200, "application/json", task::schema()};
+        });
+
+    CROW_ROUTE(app, "/validate")
+        .methods("POST"_method)([this](const crow::request &req) {
+            if (req.body.empty())
+                return crow::response{400};
+            else {
+                nlohmann::json j;
+                try {
+                    j = nlohmann::json::parse(req.body);
+                } catch (...) {
+                    return crow::response{400, "json parse error."};
+                }
+                if (ns_utils::json_schema::validate(ns_utils::config::schemaTaskData, j))
+                    return crow::response{200, "OK"};
+                else
+                    return crow::response{400, "json invalid."};
+            }
         });
 
     CROW_ROUTE(app, "/task")
