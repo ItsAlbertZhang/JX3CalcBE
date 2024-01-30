@@ -1,7 +1,7 @@
 #include "frame/lua_static.h"
 #include "gdi.h"
-#include "global/config.h"
 #include "program/thread_web.h"
+#include "utils/config.h"
 #ifdef _WIN32
 #include <Windows.h>
 #endif
@@ -14,11 +14,11 @@ int main(int argc, char *argv[]) {
 #endif
     bool ret;
     // 初始化程序
-    nsg_config::init(argc, argv);
+    ns_utils::config::init(argc, argv);
     // 初始化接口
     ret = gdi::init(
-        nsg_config::pJX3,
-        nsg_config::pUnpack,
+        ns_utils::config::pJX3,
+        ns_utils::config::pUnpack,
         ns_frame::luaInit,
         ns_frame::luaFuncStaticToDynamic,
         static_cast<int>(gdi::Tab::COUNT)

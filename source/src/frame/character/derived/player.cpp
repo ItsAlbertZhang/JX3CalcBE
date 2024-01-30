@@ -1,6 +1,6 @@
 #include "frame/character/derived/player.h"
 #include "frame/event.h"
-#include "global/constexpr_log.h"
+#include "plugin/log.h"
 #include <random>
 
 #define UNREFERENCED_PARAMETER(P) (P)

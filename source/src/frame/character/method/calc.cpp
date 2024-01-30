@@ -2,8 +2,8 @@
 #include "frame/character/property/damage.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
-#include "global/constexpr_channelinterval.h"
-#include "global/constexpr_log.h"
+#include "plugin/channelinterval.h"
+#include "plugin/log.h"
 
 using namespace ns_frame;
 

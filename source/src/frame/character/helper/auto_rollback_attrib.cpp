@@ -2,7 +2,7 @@
 #include "frame/character/character.h"
 #include "frame/lua_runtime.h"
 #include "frame/ref/tab_attribute.h" // enumTabAttribute
-#include "global/constexpr_log.h"
+#include "plugin/log.h"
 
 using namespace ns_frame;
 using namespace ns_frame::ref;

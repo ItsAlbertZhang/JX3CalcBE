@@ -1,7 +1,7 @@
 #include "frame/global/skill.h"
 #include "frame/lua_runtime.h"
 #include "gdi.h"
-#include "global/constexpr_log.h"
+#include "plugin/log.h"
 
 #define UNREFERENCED_PARAMETER(P) (P)
 

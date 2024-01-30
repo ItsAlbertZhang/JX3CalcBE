@@ -1,7 +1,7 @@
 #include "frame/global/skillrecipe.h"
 #include "frame/lua_runtime.h"
 #include "gdi.h"
-#include "global/constexpr_log.h"
+#include "plugin/log.h"
 #include <tuple>
 
 using namespace ns_frame;

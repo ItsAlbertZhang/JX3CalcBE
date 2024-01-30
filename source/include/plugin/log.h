@@ -12,7 +12,8 @@ namespace fmt = std;
 #include <fmt/core.h>
 #endif
 
-namespace nsgc_log {
+namespace ns_plugin {
+namespace log {
 
 using format_args = fmt::format_args; // 消除编译器对于 #include <format> 和 namespace fmt = std 未使用的警告
 
@@ -34,10 +35,11 @@ public:
 inline thread_local Log info{"info"};
 inline thread_local Log error{"error"};
 
-} // namespace nsgc_log
+} // namespace log
+} // namespace ns_plugin
 
-#define CONSTEXPR_LOG_INFO(str, ...)  nsgc_log::info(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
-#define CONSTEXPR_LOG_ERROR(str, ...) nsgc_log::error(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
+#define CONSTEXPR_LOG_INFO(str, ...)  ns_plugin::log::info(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
+#define CONSTEXPR_LOG_ERROR(str, ...) ns_plugin::log::error(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
 
 #else // D_CONSTEXPR_LOG
 

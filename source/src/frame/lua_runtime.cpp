@@ -1,7 +1,7 @@
 #include "frame/lua_runtime.h"
 #include "frame/statics/lua_blacklist_files.h"
 #include "gdi.h"
-#include "global/constexpr_log.h"
+#include "plugin/log.h"
 
 #define UNREFERENCED_PARAMETER(P) (P)
 

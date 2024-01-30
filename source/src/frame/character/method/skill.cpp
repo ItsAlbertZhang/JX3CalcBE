@@ -2,7 +2,7 @@
 #include "frame/character/character.h"
 #include "frame/character/helper/auto_rollback_attribute.h"
 #include "frame/character/helper/runtime_castskill.h"
-#include "global/constexpr_log.h"
+#include "plugin/log.h"
 
 using namespace ns_frame;
 

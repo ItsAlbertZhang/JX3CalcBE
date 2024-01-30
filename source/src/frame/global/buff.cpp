@@ -1,6 +1,6 @@
 #include "frame/global/buff.h"
 #include "gdi.h"
-#include "global/constexpr_log.h"
+#include "plugin/log.h"
 
 using namespace ns_frame;
 

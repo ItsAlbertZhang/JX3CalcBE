@@ -13,7 +13,8 @@ namespace fmt = std;
 #include <fmt/core.h>
 #endif
 
-namespace nsgc_channelinterval {
+namespace ns_plugin {
+namespace channelinterval {
 
 class Item {
 
@@ -29,17 +30,18 @@ inline std::unordered_map<int, std::unordered_map<int, Item>> records;
 inline std::mutex                                             mtx;
 inline bool                                                   enable = false;
 
-void record(int skillID, int skillLevel, int base, int rand, double channelinterval, bool isBuff);
+void record(int skillID, int skillLevel, int base, int rand, double fChannelInterval, bool isBuff);
 void save();
 
-} // namespace nsgc_channelinterval
+} // namespace channelinterval
+} // namespace ns_plugin
 
-#define CONSTEXPR_CHANNELINTERVAL_RECORD(skillID, skillLevel, base, rand, channelinterval, isBuff) \
-    nsgc_channelinterval::record(skillID, skillLevel, base, rand, channelinterval, isBuff);
+#define CONSTEXPR_CHANNELINTERVAL_RECORD(skillID, skillLevel, base, rand, fChannelInterval, isBuff) \
+    ns_plugin::channelinterval::record(skillID, skillLevel, base, rand, fChannelInterval, isBuff);
 
 #else // D_CONSTEXPR_CHANNELINTERVAL
 
-#define CONSTEXPR_CHANNELINTERVAL_RECORD(skillID, skillLevel, base, rand, channelinterval, isBuff)
+#define CONSTEXPR_CHANNELINTERVAL_RECORD(skillID, skillLevel, base, rand, fChannelInterval, isBuff)
 
 #endif // D_CONSTEXPR_CHANNELINTERVAL
 

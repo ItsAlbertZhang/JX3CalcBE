@@ -6,7 +6,7 @@
 #include "frame/global/skill.h"
 #include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"
-#include "global/constexpr_log.h"
+#include "plugin/log.h"
 #include <memory> // std::unique_ptr
 #include <random>
 

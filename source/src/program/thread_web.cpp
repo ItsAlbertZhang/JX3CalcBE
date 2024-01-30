@@ -1,6 +1,6 @@
 #include "program/thread_web.h"
-#include "global/config.h"
 #include "program/task.h"
+#include "utils/config.h"
 #include <asio.hpp>
 #include <chrono>
 #include <crow/mustache.h>
@@ -43,7 +43,7 @@ void Web::webEntry() {
     std::cout << "Server started at http://127.0.0.1:12897 ." << std::endl;
     CROW_ROUTE(app, "/")
         .methods("GET"_method)([]() {
-            crow::mustache::set_base((nsg_config::pExeDir / "templates").string());
+            crow::mustache::set_base((ns_utils::config::pExeDir / "templates").string());
             crow::mustache::context    x;
             crow::mustache::template_t page = crow::mustache::load("index.html");
             crow::response             res{page.render(x)};

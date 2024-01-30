@@ -1,7 +1,7 @@
 #include "frame/character/character.h"
 #include "frame/event.h"
 #include "frame/lua_runtime.h"
-#include "global/constexpr_log.h"
+#include "plugin/log.h"
 
 using namespace ns_frame;
 

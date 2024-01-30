@@ -1,16 +1,16 @@
-#include "global/config.h"
+#include "utils/config.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-void nsg_config::init(int argc, char *argv[]) { // 初始化所有环境
+void ns_utils::config::init(int argc, char *argv[]) { // 初始化所有环境
     UNREFERENCED_PARAMETER(argc);
     pExeDir = fs::absolute(argv[0]).parent_path();
     load();
 }
 
-void nsg_config::load() { // 加载配置文件
+void ns_utils::config::load() { // 加载配置文件
     fs::path pathConfig = pExeDir / "config.json";
     if (!fs::exists(pathConfig)) {
         return;
