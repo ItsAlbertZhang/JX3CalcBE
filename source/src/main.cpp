@@ -1,6 +1,6 @@
 #include "frame/lua_static.h"
 #include "gdi.h"
-#include "program/thread_web.h"
+#include "modules/web.h"
 #include "utils/config.h"
 #ifdef _WIN32
 #include <Windows.h>

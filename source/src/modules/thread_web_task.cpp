@@ -2,10 +2,10 @@
 #include "frame/event.h"
 #include "frame/global/uibuff.h"
 #include "frame/global/uiskill.h"
+#include "modules/task.h"
+#include "modules/web.h"
 #include "plugin/channelinterval.h"
 #include "plugin/log.h"
-#include "program/task.h"
-#include "program/thread_web.h"
 #include "utils/config.h"
 #include <asio/co_spawn.hpp>
 #include <chrono>
