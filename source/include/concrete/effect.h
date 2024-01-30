@@ -1,7 +1,7 @@
 #ifndef CONCRETE_EFFECTS_ALL_H_
 #define CONCRETE_EFFECTS_ALL_H_
 
-#include "concrete/effects/base.h"
+#include "concrete/effect/base.h"
 #include <memory>
 #include <string>
 
@@ -26,7 +26,7 @@ inline const std::string EffectTypeRef[] = {
     // "武器·橙武",
 };
 
-inline std::unordered_map<std::string, EffectType> EffectTypeMap = {
+inline const std::unordered_map<std::string, EffectType> EffectTypeMap = {
     {"大附魔·腰", EffectType::大附魔·腰},
     {"大附魔·腕", EffectType::大附魔·腕},
     {"大附魔·鞋", EffectType::大附魔·鞋},
@@ -35,11 +35,7 @@ inline std::unordered_map<std::string, EffectType> EffectTypeMap = {
     {"武器·橙武", EffectType::武器·橙武},
 };
 
-class EffectManager {
-public:
-    EffectManager() = delete;
-    static std::shared_ptr<EffectBase> create(EffectType type);
-};
+std::shared_ptr<EffectBase> createEffect(EffectType type);
 
 } // namespace ns_concrete
 

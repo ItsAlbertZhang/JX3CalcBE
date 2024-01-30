@@ -1,4 +1,4 @@
-#include "concrete/effects/derived.h"
+#include "concrete/effect/derived.h"
 
 using namespace ns_concrete;
 

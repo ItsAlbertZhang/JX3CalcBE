@@ -13,30 +13,22 @@ enum class PlayerType {
     COUNT,
 };
 
-inline std::unordered_map<PlayerType, std::string> PlayerTypeMap = {
+inline const std::unordered_map<PlayerType, std::string> PlayerTypeMap = {
     {PlayerType::MjFysj, "焚影圣诀"},
 };
 
-class PlayerManager {
-public:
-    PlayerManager() = delete;
-    static std::unique_ptr<ns_frame::Player> create(PlayerType type, int delayNetwork, int delayKeyboard);
-};
+std::unique_ptr<ns_frame::Player> createPlayer(PlayerType type, int delayNetwork, int delayKeyboard);
 
 enum class NPCType {
     NPC124,
     COUNT,
 };
 
-inline std::unordered_map<NPCType, std::string> NPCTypeMap = {
+inline const std::unordered_map<NPCType, std::string> NPCTypeMap = {
     {NPCType::NPC124, "124级NPC目标"},
 };
 
-class NPCManager {
-public:
-    NPCManager() = delete;
-    static std::unique_ptr<ns_frame::NPC> create(NPCType type);
-};
+std::unique_ptr<ns_frame::NPC> createNPC(NPCType type);
 
 } // namespace ns_concrete
 

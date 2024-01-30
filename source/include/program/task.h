@@ -8,7 +8,7 @@
 #include <crow.h>
 #pragma warning(pop)
 
-#include "concrete/effects/base.h"
+#include "concrete/effect/base.h"
 #include "frame/character/property/attribute.h"
 #include <memory>
 #include <string>

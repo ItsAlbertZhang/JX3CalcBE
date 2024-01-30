@@ -1,4 +1,4 @@
-#include "concrete/character/all.h"
+#include "concrete/character.h"
 #include "frame/event.h"
 #include "frame/global/uibuff.h"
 #include "frame/global/uiskill.h"
@@ -121,8 +121,8 @@ void Web::urlTaskWs_onClose(crow::websocket::connection &conn) {
 static auto calc(const DMTask &arg) {
     static thread_local std::unordered_map<size_t, std::unique_ptr<ns_frame::MacroCustom>> map;
 
-    std::unique_ptr<ns_frame::Player> player = ns_concrete::PlayerManager::create(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
-    std::unique_ptr<ns_frame::NPC>    npc    = ns_concrete::NPCManager::create(ns_concrete::NPCType::NPC124);
+    std::unique_ptr<ns_frame::Player> player = ns_concrete::createPlayer(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
+    std::unique_ptr<ns_frame::NPC>    npc    = ns_concrete::createNPC(ns_concrete::NPCType::NPC124);
     player->targetSelect                     = npc.get();
     if (arg.useCustomMacro) {
         if (map.find(arg.custom_macro_hash) == map.end()) {

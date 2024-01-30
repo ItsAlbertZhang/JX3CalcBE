@@ -1,6 +1,6 @@
 #include "program/task.h"
-#include "concrete/character/all.h"
-#include "concrete/effects/all.h"
+#include "concrete/character.h"
+#include "concrete/effect.h"
 #include "frame/character/derived/player.h"
 #include "global/constexpr_log.h"
 #include <memory>
@@ -49,7 +49,7 @@ std::unique_ptr<DMTask> DMTask::create(const std::string &jsonstr) {
         // player
         switch (static_cast<ns_concrete::PlayerType>(j["player"].get<int>())) {
         case ns_concrete::PlayerType::MjFysj:
-            player = ns_concrete::PlayerManager::create(ns_concrete::PlayerType::MjFysj, 0, 0);
+            player = ns_concrete::createPlayer(ns_concrete::PlayerType::MjFysj, 0, 0);
             break;
         default:
             throw std::runtime_error("unknown player");
@@ -67,7 +67,7 @@ std::unique_ptr<DMTask> DMTask::create(const std::string &jsonstr) {
         for (auto &x : j["effects"].items()) {
             if (x.value().is_boolean() && x.value().get<bool>()) {
                 if (ns_concrete::EffectTypeMap.contains(x.key())) {
-                    effectList.emplace_back(ns_concrete::EffectManager::create(ns_concrete::EffectTypeMap[x.key()]));
+                    effectList.emplace_back(ns_concrete::createEffect(ns_concrete::EffectTypeMap.at(x.key())));
                 } else {
                     throw std::runtime_error("unknown effect");
                 }

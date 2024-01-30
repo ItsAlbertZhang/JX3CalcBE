@@ -1,7 +1,7 @@
 #ifndef CONCRETE_EFFECTS_DERIVED_H_
 #define CONCRETE_EFFECTS_DERIVED_H_
 
-#include "concrete/effects/base.h"
+#include "concrete/effect/base.h"
 
 namespace ns_concrete {
 

@@ -1,10 +1,10 @@
-#include "concrete/effects/all.h"
-#include "concrete/effects/derived.h"
+#include "concrete/effect.h"
+#include "concrete/effect/derived.h"
 #include <stdexcept>
 
 using namespace ns_concrete;
 
-std::shared_ptr<EffectBase> EffectManager::create(EffectType type) {
+std::shared_ptr<EffectBase> ns_concrete::createEffect(EffectType type) {
     switch (type) {
     case EffectType::大附魔·腰:
         return std::make_shared<Effect大附魔·腰>();
@@ -19,6 +19,6 @@ std::shared_ptr<EffectBase> EffectManager::create(EffectType type) {
     case EffectType::武器·橙武:
         return std::make_shared<Effect武器·橙武>();
     default:
-        throw std::runtime_error("unknown effect type");
+        return nullptr;
     }
 }
