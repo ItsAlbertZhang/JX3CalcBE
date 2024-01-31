@@ -1,9 +1,9 @@
+#include "modules/task.h"
 #include "concrete/character/character.h"
 #include "concrete/effect/effect.h"
 #include "frame/event.h"
 #include "frame/global/uibuff.h"
 #include "frame/global/uiskill.h"
-#include "modules/task.h"
 #include "plugin/channelinterval.h"
 #include "plugin/log.h"
 #include "utils/config.h"
@@ -22,8 +22,8 @@ namespace fmt = std;
 
 using namespace ns_modules;
 
-static int         calculate(const DMTask &arg);
-static int         output(const DMTask &arg, std::filesystem::path resfile);
+static int         calculate(const TaskData &arg);
+static int         output(const TaskData &arg, std::filesystem::path resfile);
 static std::string genID(int length = 6);
 
 nlohmann::json task::schemaAttribute() {
@@ -72,7 +72,7 @@ std::string task::schema() {
     return ns_utils::config::schemaTaskData.dump();
 }
 
-static DMTask createTaskData(const nlohmann::json &j) {
+static TaskData createTaskData(const nlohmann::json &j) {
     auto playerType = ns_concrete::PlayerTypeMap.at(j["player"].get<std::string>());
     // player. 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
     auto player     = ns_concrete::createPlayer(playerType, 0, 0);
@@ -91,7 +91,7 @@ static DMTask createTaskData(const nlohmann::json &j) {
         effectList.emplace_back(ns_concrete::createEffect(ns_concrete::EffectTypeMap.at(x.value())));
     }
 
-    return DMTask{
+    return TaskData{
         .delayNetwork   = j["delayNetwork"].get<int>(),
         .delayKeyboard  = j["delayKeyboard"].get<int>(),
         .fightTime      = j["fightTime"].get<int>(),
@@ -104,8 +104,6 @@ static DMTask createTaskData(const nlohmann::json &j) {
 }
 
 std::string task::create(const std::string &jsonstr) {
-    const std::filesystem::path p_res = ns_utils::config::pExeDir / "res.tab";
-
     using json = nlohmann::json;
     json j;
     try {
@@ -123,23 +121,31 @@ std::string task::create(const std::string &jsonstr) {
         }.dump();
     auto taskdata = createTaskData(j);
 
-    auto  id = genID();
-    auto &it = tasksCreated.emplace(id, std::make_unique<Task>(id, std::move(taskdata))).first->second;
-    pool.emplace(id, 1, it->futures, output, it->data, p_res);
-    pool.emplace(id, it->data.fightCount, it->futures, calculate, it->data);
-
+    auto id = genID();
+    tasksCreated.emplace(id, std::make_unique<Task>(id, std::move(taskdata)));
     return id;
 }
 
-static asio::awaitable<void> taskCoroutine(asio::io_context &io, crow::websocket::connection &conn, Task &task) {
-    asio::steady_timer         timer(io);
-    const std::chrono::seconds interval{1};
+static void asyncStop(crow::websocket::connection *conn) {
+    using namespace task;
+    tasksRunning.at(conn)->stop.store(true);
+    tasksRunning.at(conn)->futures.clear();
+    pool.erase(tasksRunning.at(conn)->id);
+    tasksCreated.erase(tasksRunning.at(conn)->id);
+    tasksRunning.erase(conn);
+}
 
+static asio::awaitable<void> asyncRun(asio::io_context &io, crow::websocket::connection &conn, Task &task) {
+    asio::steady_timer          timer(io);
+    const std::chrono::seconds  interval{1};
+    const std::filesystem::path p_res = ns_utils::config::pExeDir / "res.tab";
+
+    // 在线程池中创建任务
+    task::pool.emplace(task.id, 1, task.futures, output, task.data, p_res);
+    task::pool.emplace(task.id, task.data.fightCount, task.futures, calculate, task.data);
     // 处理第一个 output 任务
     int timespend = task.futures[0].get();
     conn.send_text(fmt::format("第一次计算花费时间: {}ms, 已将战斗记录保存至 res.tab\n", timespend));
-    for (size_t i = 1; i < task.futures.size() && !task.stop.load(); i++) {
-    }
     using ull           = unsigned long long;
     ull  damageAvg      = 0;
     int  idx            = 1; // 从 1 开始, 因为 0 已经处理过了
@@ -150,6 +156,11 @@ static asio::awaitable<void> taskCoroutine(asio::io_context &io, crow::websocket
             damageAvg += task.futures[idx].get();
             idx++;
         } else {
+            // 发送进度并异步等待前, 先检查是否需要停止
+            if (task.stop.load()) [[unlikely]] {
+                asyncStop(&conn);
+                co_return;
+            }
             if (idx > 1) [[likely]]
                 conn.send_text(fmt::format("({}/{})    当前速度: {} 次计算/s. 到目前为止的平均 DPS: {}\n", idx, task.data.fightCount, idx - idxBeforeSleep, damageAvg / (idx - 1)));
             idxBeforeSleep = idx;
@@ -170,25 +181,23 @@ static asio::awaitable<void> taskCoroutine(asio::io_context &io, crow::websocket
             timespendAvg / corecnt
         ));
     }
+    asyncStop(&conn);
 }
 
 void task::run(crow::websocket::connection *conn, const std::string &id) {
-    if (!tasksCreated.contains(id))
+    if (!tasksCreated.contains(id) || tasksCreated.at(id) == nullptr) [[unlikely]]
         return;
-    tasksRunning.emplace(conn, std::move(tasksCreated.at(id)));
-    asio::co_spawn(io, taskCoroutine(io, *conn, *tasksRunning.at(conn)), asio::detached);
+    auto &it = tasksRunning.emplace(conn, std::move(tasksCreated.at(id))).first->second;
+    asio::co_spawn(io, asyncRun(io, *conn, *it), asio::detached);
 }
 
 void task::stop(crow::websocket::connection *conn) {
-    if (!tasksRunning.contains(conn))
+    if (!tasksRunning.contains(conn)) [[unlikely]]
         return;
     tasksRunning.at(conn)->stop.store(true);
-    pool.erase(tasksRunning.at(conn)->id);
-    tasksCreated.erase(tasksRunning.at(conn)->id);
-    tasksRunning.erase(conn);
 }
 
-static auto calc(const DMTask &arg) {
+static auto calc(const TaskData &arg) {
     static thread_local std::unordered_map<size_t, std::unique_ptr<ns_frame::MacroCustom>> map;
 
     std::unique_ptr<ns_frame::Player> player = ns_concrete::createPlayer(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
@@ -215,7 +224,7 @@ static auto calc(const DMTask &arg) {
     return player;
 }
 
-static int calculate(const DMTask &arg) {
+static int calculate(const TaskData &arg) {
     auto player = calc(arg);
 
     unsigned long long sumDamage = 0;
@@ -225,7 +234,7 @@ static int calculate(const DMTask &arg) {
     return static_cast<int>(sumDamage / arg.fightTime);
 }
 
-static int output(const DMTask &arg, std::filesystem::path resfile) {
+static int output(const TaskData &arg, std::filesystem::path resfile) {
 #ifdef D_CONSTEXPR_LOG
     ns_plugin::log::info.enable  = true;
     ns_plugin::log::error.enable = true;

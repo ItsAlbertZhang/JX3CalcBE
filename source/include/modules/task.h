@@ -19,7 +19,7 @@
 
 namespace ns_modules {
 
-class DMTask {
+class TaskData {
 public:
     // json 数据区
     const int delayNetwork;
@@ -39,10 +39,10 @@ public:
 
 class Task {
 public:
-    Task(const std::string &id, const DMTask &data)
+    Task(const std::string &id, const TaskData &data)
         : id(id), data(data){};
     const std::string             id;
-    const DMTask                  data;
+    const TaskData                data;
     std::atomic<bool>             stop{false};
     std::vector<std::future<int>> futures;
 };
@@ -65,7 +65,6 @@ std::string schema();
 std::string create(const std::string &jsonstr);
 void        run(crow::websocket::connection *conn, const std::string &id);
 void        stop(crow::websocket::connection *conn);
-void        stop(const std::string &id);
 
 inline std::unordered_map<std::string, std::unique_ptr<Task>>                   tasksCreated;
 inline std::unordered_map<crow::websocket::connection *, std::unique_ptr<Task>> tasksRunning;

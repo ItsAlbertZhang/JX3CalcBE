@@ -91,7 +91,7 @@ class Pool {
                 map.emplace(id, node);
             }
             // 将任务添加到指定批次的任务队列中.
-            map.at(id)->tasks.emplace(task);
+            map.at(id)->tasks.emplace(std::move(task));
         }
 
         /**

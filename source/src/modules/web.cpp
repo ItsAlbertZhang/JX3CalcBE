@@ -1,5 +1,5 @@
-#include "modules/task.h"
 #include "modules/web.h"
+#include "modules/task.h"
 #include "utils/config.h"
 #include "utils/json_schema.h"
 #include <asio.hpp>
@@ -34,10 +34,8 @@ void web::run() {
 
 void web::stop() {
     using namespace task;
-    for (auto &task : tasksCreated)
-        task.second->stop.store(true);
     for (auto &task : tasksRunning)
-        task.second->stop.store(true);
+        task::stop(task.first);
     iostop.store(true);
     app.stop();
     threadWeb.join();
