@@ -10,45 +10,22 @@
 #include <crow/websocket.h>
 #pragma warning(pop)
 
-#include "modules/pool.h"
-#include "modules/task.h"
 #include <asio.hpp>
-#include <string>
 #include <thread>
-#include <unordered_map>
 
 namespace ns_modules {
 
-class Web {
-public:
-    Web(); // 构造 WebHandler 的同时, 会启动一个线程
-    virtual ~Web();
-    Web(const Web &)            = delete;
-    Web &operator=(const Web &) = delete;
-    Web(Web &&)                 = delete;
-    Web &operator=(Web &&)      = delete;
+namespace web {
 
-    void stop();
+inline std::thread threadWeb;
+void               entry();
 
-private:
-    std::thread webThread;
-    void        webEntry();
-    std::thread ioThread;
-    Pool        pool;
+inline crow::App<crow::CORSHandler> app;
 
-    crow::App<crow::CORSHandler> app;
+void run();
+void stop();
 
-    std::unordered_map<std::string, Task>                     tasks;
-    std::unordered_map<crow::websocket::connection *, Task *> wsmap;
-
-    asio::io_context  io;
-    std::atomic<bool> iostop{false};
-
-    std::string urlTask(const std::string &jsonstr);
-    void        urlTaskWs_onMessage(crow::websocket::connection &conn, const std::string &data, bool is_binary);
-    void        urlTaskWs_onClose(crow::websocket::connection &conn);
-    std::string genID(int length = 6);
-};
+} // namespace web
 
 } // namespace ns_modules
 

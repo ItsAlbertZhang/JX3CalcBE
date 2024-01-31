@@ -88,10 +88,7 @@ nlohmann::json ns_utils::config::schemaTaskDataInit() {
         {"type", "string"},
     };
 
-    ret["properties"]["attribute"] = {
-        {"type", "string"               },
-        {"enum", nlohmann::json::array()},
-    };
+    ret["properties"]["attribute"] = ns_modules::task::schemaAttribute();
     ret["required"].push_back("attribute");
 
     ret["properties"]["effects"] = {

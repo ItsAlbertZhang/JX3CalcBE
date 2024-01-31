@@ -10,28 +10,14 @@
 
 #include "concrete/effect/base.h"
 #include "frame/character/property/attribute.h"
+#include "modules/pool.h"
 #include <memory>
+#include <nlohmann/json.hpp>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace ns_modules {
-
-namespace task {
-
-enum class AttributeType {
-    // zero,
-    jx3box,
-    COUNT,
-};
-inline const std::unordered_map<std::string, AttributeType> AttributeTypeMap = {
-  // {"未启用",       AttributeType::zero  },
-    {"从JX3BOX导入", AttributeType::jx3box},
-};
-
-std::string schema();
-
-} // namespace task
 
 class DMTask {
 public:
@@ -62,7 +48,34 @@ public:
 };
 
 namespace task {
-std::unique_ptr<DMTask> create(const std::string &jsonstr);
+
+enum class AttributeType {
+    // zero,
+    jx3box,
+    COUNT,
+};
+inline const std::unordered_map<std::string, AttributeType> AttributeTypeMap = {
+  // {"未启用",       AttributeType::zero  },
+    {"从JX3BOX导入", AttributeType::jx3box},
+};
+nlohmann::json schemaAttribute();
+
+std::string schema();
+
+std::string create(const std::string &jsonstr);
+void        run(crow::websocket::connection *conn, const std::string &id);
+void        stop(crow::websocket::connection *conn);
+void        stop(const std::string &id);
+
+inline std::unordered_map<std::string, std::unique_ptr<Task>>                   tasksCreated;
+inline std::unordered_map<crow::websocket::connection *, std::unique_ptr<Task>> tasksRunning;
+
+inline Pool pool;
+
+inline std::thread       threadIO;
+inline asio::io_context  io;
+inline std::atomic<bool> iostop{false};
+
 } // namespace task
 
 } // namespace ns_modules

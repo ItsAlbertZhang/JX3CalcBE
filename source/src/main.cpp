@@ -32,13 +32,13 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    ns_modules::Web webHandler;
-    std::string     s;
+    ns_modules::web::run();
+    std::string s;
     while (std::getline(std::cin, s)) {
         if (s == "exit")
             break;
     }
-    webHandler.stop();
+    ns_modules::web::stop();
 
     return 0;
 }

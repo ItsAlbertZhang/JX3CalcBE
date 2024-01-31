@@ -13,7 +13,8 @@
 
 using namespace ns_modules;
 
-Web::Web() {
+void web::run() {
+    using namespace task;
     asio::co_spawn(
         io,
         [&]() -> asio::awaitable<void> {
@@ -25,46 +26,51 @@ Web::Web() {
         },
         asio::detached
     ); // 用于保持 io.run() 的运行
-    webThread = std::thread(&Web::webEntry, this);
-    ioThread  = std::thread([&]() {
+    threadWeb = std::thread(&web::entry);
+    threadIO  = std::thread([&]() {
         io.run();
     });
 }
 
-Web::~Web() {
-    for (auto &task : tasks)
-        task.second.stop.store(true);
+void web::stop() {
+    using namespace task;
+    for (auto &task : tasksCreated)
+        task.second->stop.store(true);
+    for (auto &task : tasksRunning)
+        task.second->stop.store(true);
     iostop.store(true);
-    webThread.join();
-    ioThread.join();
+    app.stop();
+    threadWeb.join();
+    threadIO.join();
 }
 
-void Web::webEntry() {
+void web::entry() {
     std::cout << "成功于 http://127.0.0.1:12897 上开启服务器, 按住 Ctrl 点击链接即可在浏览器中打开使用." << std::endl;
     std::cout << "Server started at http://127.0.0.1:12897 ." << std::endl;
     CROW_ROUTE(app, "/")
         .methods("GET"_method)([]() {
-            crow::mustache::set_base((ns_utils::config::pExeDir / "templates").string());
-            crow::mustache::context    x;
-            crow::mustache::template_t page = crow::mustache::load("index.html");
-            crow::response             res{page.render(x)};
+            // crow::mustache::set_base((ns_utils::config::pExeDir / "templates").string());
+            // crow::mustache::context    x;
+            // crow::mustache::template_t page = crow::mustache::load("index.html");
+            // crow::response             res{page.render(x)};
+            crow::response res{200, R"(<h1>Hello, world!</h1>)"};
             res.add_header("Content-Type", "text/html; charset=utf-8");
             return res;
         });
 
     CROW_ROUTE(app, "/setting")
-        .methods("POST"_method)([this](const crow::request &req) {
+        .methods("POST"_method)([](const crow::request &req) {
             UNREFERENCED_PARAMETER(req);
             return crow::response{400, "text/plain", "setting is unavailable now."};
         });
 
     CROW_ROUTE(app, "/task")
-        .methods("GET"_method)([this]() {
+        .methods("GET"_method)([]() {
             return crow::response{200, "application/json", task::schema()};
         });
 
-    CROW_ROUTE(app, "/validate")
-        .methods("POST"_method)([this](const crow::request &req) {
+    CROW_ROUTE(app, "/task/validate")
+        .methods("POST"_method)([](const crow::request &req) {
             if (req.body.empty())
                 return crow::response{400};
             else {
@@ -82,8 +88,8 @@ void Web::webEntry() {
         });
 
     CROW_ROUTE(app, "/task")
-        .methods("POST"_method)([this](const crow::request &req) {
-            std::string id = urlTask(req.body);
+        .methods("POST"_method)([](const crow::request &req) {
+            std::string id = task::create(req.body);
             if (id.empty())
                 return crow::response{400};
             else
@@ -98,31 +104,12 @@ void Web::webEntry() {
         .onclose([&](crow::websocket::connection &conn, const std::string &reason) {
             UNREFERENCED_PARAMETER(reason);
             CROW_LOG_INFO << "a websocket closed.";
-            urlTaskWs_onClose(conn);
+            task::stop(&conn);
         })
         .onmessage([&](crow::websocket::connection &conn, const std::string &data, bool is_binary) {
-            urlTaskWs_onMessage(conn, data, is_binary);
+            if (!is_binary)
+                task::run(&conn, data);
         });
 
     app.bindaddr("127.0.0.1").port(12897).multithreaded().run();
-}
-
-void Web::stop() {
-    app.stop();
-}
-
-std::string Web::genID(int length) {
-    const std::string CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-    std::random_device              random_device;
-    std::mt19937                    generator(random_device());
-    std::uniform_int_distribution<> distribution(0, static_cast<int>(CHARACTERS.size() - 1));
-
-    std::string random_string;
-    while (random_string.empty() || tasks.contains(random_string)) {
-        for (size_t i = 0; i < length; ++i) {
-            random_string += CHARACTERS[distribution(generator)];
-        }
-    }
-    return random_string;
 }

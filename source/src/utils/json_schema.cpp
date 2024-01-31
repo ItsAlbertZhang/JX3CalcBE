@@ -35,6 +35,17 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
             } else if (!validate(x.value(), json[x.key()])) [[unlikely]]
                 return false;
         }
+        if (schema.contains("enum")) {
+            bool flag = false;
+            for (auto &x : schema["enum"].items()) {
+                if (validate(x.value(), json)) {
+                    flag = true;
+                    break;
+                }
+            }
+            if (!flag) [[unlikely]]
+                return false;
+        }
         break;
     case JsonType::array:
         if (!json.is_array()) [[unlikely]]
@@ -47,6 +58,10 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
     case JsonType::string:
         if (!json.is_string()) [[unlikely]]
             return false;
+        if (schema.contains("const")) {
+            if (json.get<std::string>() != schema["const"].get<std::string>()) [[unlikely]]
+                return false;
+        }
         if (schema.contains("enum")) {
             bool flag = false;
             for (auto &x : schema["enum"].items()) {
@@ -62,6 +77,10 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
     case JsonType::integer:
         if (!json.is_number_integer()) [[unlikely]]
             return false;
+        if (schema.contains("const")) {
+            if (json.get<int>() != schema["const"].get<int>()) [[unlikely]]
+                return false;
+        }
         if (schema.contains("minimum")) {
             if (json.get<int>() < schema["minimum"].get<int>()) [[unlikely]]
                 return false;
@@ -83,6 +102,10 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
         }
         break;
     case JsonType::boolean:
+        if (schema.contains("const")) {
+            if (json.get<bool>() != schema["const"].get<bool>()) [[unlikely]]
+                return false;
+        }
         if (!json.is_boolean()) [[unlikely]]
             return false;
         break;
