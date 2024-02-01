@@ -29,15 +29,9 @@ static std::string genID(int length = 6);
 nlohmann::json task::schemaAttribute() {
     using json = nlohmann::json;
     json ret{
-        {"type",       "object"      },
-        {"properties", json::object()},
-        {"required",   json::array() },
-        {"enum",       json::array() },
+        {"type",  "object"     },
+        {"anyOf", json::array()},
     };
-    ret["properties"]["name"] = {
-        {"type", "string"},
-    };
-    ret["required"].push_back("name");
 
     // json zero{
     //     {"type",       "object"      },
@@ -46,8 +40,10 @@ nlohmann::json task::schemaAttribute() {
     // };
     // zero["properties"]["name"] = {
     //     {"type",  "string"   },
-    //     {"const", "未启用"},
+    //     {"const", task::AttributeTypeString[static_cast<int>(task::AttributeType::zero)]},
     // };
+    // zero["required"].push_back("name");
+    // ret["enum"].push_back(zero);
 
     json jx3box{
         {"type",       "object"      },
@@ -55,16 +51,16 @@ nlohmann::json task::schemaAttribute() {
         {"required",   json::array() },
     };
     jx3box["properties"]["name"] = {
-        {"type",  "string"         },
-        {"const", "从JX3BOX导入"},
+        {"type",  "string"                                                                },
+        {"const", task::AttributeTypeString[static_cast<int>(task::AttributeType::jx3box)]},
     };
+    jx3box["required"].push_back("name");
     jx3box["properties"]["id"] = {
         {"type", "integer"},
     };
     jx3box["required"].push_back("id");
-
-    // ret["enum"].push_back(zero);
     ret["enum"].push_back(jx3box);
+
     return ret;
 }
 

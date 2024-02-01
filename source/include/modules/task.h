@@ -54,6 +54,10 @@ enum class AttributeType {
     jx3box,
     COUNT,
 };
+inline const std::string AttributeTypeString[] = {
+    // "未启用",
+    "从JX3BOX导入",
+};
 inline const std::unordered_map<std::string, AttributeType> AttributeTypeMap = {
   // {"未启用",       AttributeType::zero  },
     {"从JX3BOX导入", AttributeType::jx3box},
