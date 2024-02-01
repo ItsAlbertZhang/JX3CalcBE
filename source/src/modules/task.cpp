@@ -40,7 +40,7 @@ nlohmann::json task::schemaAttribute() {
     // };
     // zero["properties"]["name"] = {
     //     {"type",  "string"   },
-    //     {"const", task::AttributeTypeString[static_cast<int>(task::AttributeType::zero)]},
+    //     {"const", "未启用"},
     // };
     // zero["required"].push_back("name");
     // ret["anyOf"].push_back(zero);
@@ -51,8 +51,8 @@ nlohmann::json task::schemaAttribute() {
         {"required",   json::array() },
     };
     jx3box["properties"]["name"] = {
-        {"type",  "string"                                                                },
-        {"const", task::AttributeTypeString[static_cast<int>(task::AttributeType::jx3box)]},
+        {"type",  "string"         },
+        {"const", "从JX3BOX导入"},
     };
     jx3box["required"].push_back("name");
     jx3box["properties"]["id"] = {
