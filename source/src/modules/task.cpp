@@ -43,7 +43,7 @@ nlohmann::json task::schemaAttribute() {
     //     {"const", task::AttributeTypeString[static_cast<int>(task::AttributeType::zero)]},
     // };
     // zero["required"].push_back("name");
-    // ret["enum"].push_back(zero);
+    // ret["anyOf"].push_back(zero);
 
     json jx3box{
         {"type",       "object"      },
@@ -59,7 +59,7 @@ nlohmann::json task::schemaAttribute() {
         {"type", "integer"},
     };
     jx3box["required"].push_back("id");
-    ret["enum"].push_back(jx3box);
+    ret["anyOf"].push_back(jx3box);
 
     return ret;
 }
