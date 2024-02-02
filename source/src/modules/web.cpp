@@ -64,7 +64,7 @@ void web::entry() {
 
     CROW_ROUTE(app, "/task")
         .methods("GET"_method)([]() {
-            return crow::response{200, "application/json", task::schema()};
+            return crow::response{200, "application/json", ns_utils::config::taskdata::genSchema()};
         });
 
     CROW_ROUTE(app, "/task/validate")
@@ -72,13 +72,14 @@ void web::entry() {
             if (req.body.empty())
                 return crow::response{400};
             else {
-                nlohmann::json j;
+                using json = nlohmann::json;
+                json j;
                 try {
-                    j = nlohmann::json::parse(req.body);
+                    j = json::parse(req.body);
                 } catch (...) {
                     return crow::response{400, "json parse error."};
                 }
-                if (ns_utils::json_schema::validate(ns_utils::config::schemaTaskData, j))
+                if (ns_utils::json_schema::validate(json::parse(ns_utils::config::taskdata::genSchema()), j))
                     return crow::response{200, "OK"};
                 else
                     return crow::response{400, "json invalid."};

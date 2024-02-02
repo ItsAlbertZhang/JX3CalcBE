@@ -31,19 +31,7 @@ void ns_utils::config::load() { // 加载配置文件
     }
 }
 
-void ns_utils::config::schemaTaskDataComplete(nlohmann::json &j) {
-    for (auto &x : ns_concrete::PlayerTypeMap) {
-        j["properties"]["player"]["enum"].push_back(x.first);
-    }
-    for (auto &x : ns_modules::task::AttributeTypeMap) {
-        j["properties"]["attribute"]["enum"].push_back(x.first);
-    }
-    for (auto &x : ns_concrete::EffectTypeMap) {
-        j["properties"]["effects"]["items"]["enum"].push_back(x.first);
-    }
-}
-
-nlohmann::json ns_utils::config::schemaTaskDataInit() {
+std::string ns_utils::config::taskdata::genSchema() {
     nlohmann::json ret{
         {"type",       "object"                },
         {"properties", nlohmann::json::object()},
@@ -54,39 +42,44 @@ nlohmann::json ns_utils::config::schemaTaskDataInit() {
         {"type", "string"               },
         {"enum", nlohmann::json::array()},
     };
+    for (auto &x : ns_concrete::PlayerTypeMap) {
+        ret["properties"]["player"]["enum"].push_back(x.first);
+    }
     ret["required"].push_back("player");
 
     ret["properties"]["delayNetwork"] = {
-        {"type",    "integer"},
-        {"minimum", 0        },
-        {"maximum", 1024     },
+        {"type",    "integer"      },
+        {"minimum", 0              },
+        {"maximum", maxDelayNetwork},
     };
     ret["required"].push_back("delayNetwork");
 
     ret["properties"]["delayKeyboard"] = {
-        {"type",    "integer"},
-        {"minimum", 0        },
-        {"maximum", 1024     },
+        {"type",    "integer"       },
+        {"minimum", 0               },
+        {"maximum", maxDelayKeyboard},
     };
     ret["required"].push_back("delayKeyboard");
 
     ret["properties"]["fightTime"] = {
-        {"type",    "integer"},
-        {"minimum", 0        },
-        {"maximum", 1 << 30  },
+        {"type",    "integer"   },
+        {"minimum", 0           },
+        {"maximum", maxFightTime},
     };
     ret["required"].push_back("fightTime");
 
     ret["properties"]["fightCount"] = {
-        {"type",    "integer"},
-        {"minimum", 0        },
-        {"maximum", 1 << 30  },
+        {"type",    "integer"    },
+        {"minimum", 0            },
+        {"maximum", maxFightCount},
     };
     ret["required"].push_back("fightCount");
 
-    ret["properties"]["customMacro"] = {
-        {"type", "string"},
-    };
+    if (allowCustomMacro) {
+        ret["properties"]["customMacro"] = {
+            {"type", "string"},
+        };
+    }
 
     ret["properties"]["attribute"] = ns_modules::task::schemaAttribute();
     ret["required"].push_back("attribute");
@@ -98,9 +91,10 @@ nlohmann::json ns_utils::config::schemaTaskDataInit() {
         {"type", "string"               },
         {"enum", nlohmann::json::array()},
     };
+    for (auto &x : ns_concrete::EffectTypeMap) {
+        ret["properties"]["effects"]["items"]["enum"].push_back(x.first);
+    }
     ret["required"].push_back("effects");
 
-    schemaTaskDataComplete(ret);
-
-    return ret;
+    return ret.dump();
 }

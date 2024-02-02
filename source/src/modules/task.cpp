@@ -40,7 +40,7 @@ nlohmann::json task::schemaAttribute() {
     // };
     // zero["properties"]["name"] = {
     //     {"type",  "string"   },
-    //     {"const", "未启用"},
+    //     {"const", AttributeTypeStr[static_cast<int>(AttributeType::zero)]},
     // };
     // zero["required"].push_back("name");
     // ret["anyOf"].push_back(zero);
@@ -51,8 +51,8 @@ nlohmann::json task::schemaAttribute() {
         {"required",   json::array() },
     };
     jx3box["properties"]["name"] = {
-        {"type",  "string"         },
-        {"const", "从JX3BOX导入"},
+        {"type",  "string"                                                 },
+        {"const", AttributeTypeStr[static_cast<int>(AttributeType::jx3box)]},
     };
     jx3box["required"].push_back("name");
     jx3box["properties"]["id"] = {
@@ -62,10 +62,6 @@ nlohmann::json task::schemaAttribute() {
     ret["anyOf"].push_back(jx3box);
 
     return ret;
-}
-
-std::string task::schema() {
-    return ns_utils::config::schemaTaskData.dump();
 }
 
 static TaskData createTaskData(const nlohmann::json &j) {
@@ -104,13 +100,13 @@ std::string task::create(const std::string &jsonstr) {
     json j;
     try {
         j = json::parse(jsonstr);
-    } catch (json::exception &e) {
+    } catch (...) {
         return json{
             {"status", "error"           },
             {"msg",    "json parse error"}
         }.dump();
     }
-    if (!ns_utils::json_schema::validate(ns_utils::config::schemaTaskData, j))
+    if (!ns_utils::json_schema::validate(json::parse(ns_utils::config::taskdata::genSchema()), j))
         return json{
             {"status", "error"       },
             {"msg",    "json invalid"}

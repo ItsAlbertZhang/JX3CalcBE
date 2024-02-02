@@ -28,16 +28,17 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
     case JsonType::object:
         if (!json.is_object()) [[unlikely]]
             return false;
-        for (auto &x : schema["properties"].items()) {
-            if (!json.contains(x.key())) [[unlikely]] {
-                if (schema["required"].contains(x.key())) [[unlikely]]
+        if (schema.contains("properties")) {
+            for (auto &x : schema["properties"].items()) {
+                if (!json.contains(x.key())) [[unlikely]] {
+                    if (schema["required"].contains(x.key())) [[unlikely]]
+                        return false;
+                } else if (!validate(x.value(), json[x.key()])) [[unlikely]]
                     return false;
-            } else if (!validate(x.value(), json[x.key()])) [[unlikely]]
-                return false;
-        }
-        if (schema.contains("enum")) {
+            }
+        } else if (schema.contains("anyOf")) {
             bool flag = false;
-            for (auto &x : schema["enum"].items()) {
+            for (auto &x : schema["anyOf"].items()) {
                 if (validate(x.value(), json)) {
                     flag = true;
                     break;
@@ -45,6 +46,8 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
             }
             if (!flag) [[unlikely]]
                 return false;
+        } else [[unlikely]] {
+            return false;
         }
         break;
     case JsonType::array:
