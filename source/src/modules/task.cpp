@@ -29,18 +29,19 @@ static std::string genID(int length = 6);
 nlohmann::json task::schemaAttribute() {
     using json = nlohmann::json;
     json ret{
-        {"type",  "object"     },
-        {"anyOf", json::array()},
+        {"type",  "object"            },
+        {"title", "属性输入方案"},
+        {"anyOf", json::array()       },
     };
 
     // json zero{};
 
     json jx3box{
         {"type",       "object"      },
-        {"required",   json::array() },
+        {"required",   {"idx", "pz"} },
+        {"sort",       {"pz"}        },
         {"properties", json::object()},
     };
-    jx3box["required"]          = {"idx", "pz"};
     int jx3boxidx               = static_cast<int>(AttributeType::jx3box);
     jx3box["properties"]["idx"] = {
         {"type",  "integer"                  },

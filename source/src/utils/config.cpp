@@ -36,6 +36,7 @@ std::string ns_utils::config::taskdata::genSchema() {
     json ret{
         {"type",       "object"      },
         {"required",   json::array() },
+        {"sort",       json::array() },
         {"properties", json::object()},
     };
 
@@ -50,10 +51,12 @@ std::string ns_utils::config::taskdata::genSchema() {
         ret["properties"]["player"]["list"].push_back(x);
     }
     ret["required"].push_back("player");
+    ret["sort"].push_back("player");
 
     ret["properties"]["delay"] = {
         {"type",       "object"               },
-        {"required",   {"keyboard", "network"}},
+        {"required",   {"network", "keyboard"}},
+        {"sort",       {"network", "keyboard"}},
         {"properties", json::object()         },
     };
     ret["properties"]["delay"]["properties"]["network"] = {
@@ -69,31 +72,36 @@ std::string ns_utils::config::taskdata::genSchema() {
         {"maximum", maxDelayKeyboard},
     };
     ret["required"].push_back("delay");
+    ret["sort"].push_back("delay");
 
     ret["properties"]["fight"] = {
         {"type",       "object"         },
         {"required",   {"time", "count"}},
+        {"sort",       {"time", "count"}},
         {"properties", json::object()   },
     };
-    ret["properties"]["fight"]["properties"]["fightTime"] = {
+    ret["properties"]["fight"]["properties"]["time"] = {
         {"type",    "integer"     },
         {"title",   "战斗时间"},
         {"minimum", 0             },
         {"maximum", maxFightTime  },
     };
-    ret["properties"]["fight"]["properties"]["fightCount"] = {
+    ret["properties"]["fight"]["properties"]["count"] = {
         {"type",    "integer"     },
         {"title",   "战斗次数"},
         {"minimum", 0             },
         {"maximum", maxFightCount },
     };
     ret["required"].push_back("fight");
+    ret["sort"].push_back("fight");
 
     ret["properties"]["attribute"] = ns_modules::task::schemaAttribute();
     ret["required"].push_back("attribute");
+    ret["sort"].push_back("attribute");
 
     ret["properties"]["effects"] = {
         {"type",  "array"       },
+        {"title", "增益选择"},
         {"items", json::object()},
     };
     ret["properties"]["effects"]["items"] = {
@@ -106,11 +114,14 @@ std::string ns_utils::config::taskdata::genSchema() {
         ret["properties"]["effects"]["items"]["list"].push_back(x);
     }
     ret["required"].push_back("effects");
+    ret["sort"].push_back("effects");
 
     if (allowCustomMacro) {
         ret["properties"]["customMacro"] = {
-            {"type", "string"},
+            {"type",  "string"      },
+            {"title", "自定义宏"}
         };
+        ret["sort"].push_back("customMacro");
     }
 
     return ret.dump();
