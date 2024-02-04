@@ -32,69 +32,86 @@ void ns_utils::config::load() { // 加载配置文件
 }
 
 std::string ns_utils::config::taskdata::genSchema() {
-    nlohmann::json ret{
-        {"type",       "object"                },
-        {"properties", nlohmann::json::object()},
-        {"required",   nlohmann::json::array() },
+    using json = nlohmann::json;
+    json ret{
+        {"type",       "object"      },
+        {"required",   json::array() },
+        {"properties", json::object()},
     };
 
     ret["properties"]["player"] = {
-        {"type", "string"               },
-        {"enum", nlohmann::json::array()},
+        {"type",    "integer"                        },
+        {"title",   "心法"                         },
+        {"minimum", 0                                },
+        {"maximum", ns_concrete::refPlayerType.size()},
+        {"list",    json::array()                    },
     };
-    for (auto &x : ns_concrete::PlayerTypeMap) {
-        ret["properties"]["player"]["enum"].push_back(x.first);
+    for (auto &x : ns_concrete::refPlayerType) {
+        ret["properties"]["player"]["list"].push_back(x);
     }
     ret["required"].push_back("player");
 
-    ret["properties"]["delayNetwork"] = {
+    ret["properties"]["delay"] = {
+        {"type",       "object"               },
+        {"required",   {"keyboard", "network"}},
+        {"properties", json::object()         },
+    };
+    ret["properties"]["delay"]["properties"]["network"] = {
         {"type",    "integer"      },
+        {"title",   "网络延迟" },
         {"minimum", 0              },
         {"maximum", maxDelayNetwork},
     };
-    ret["required"].push_back("delayNetwork");
-
-    ret["properties"]["delayKeyboard"] = {
+    ret["properties"]["delay"]["properties"]["keyboard"] = {
         {"type",    "integer"       },
+        {"title",   "按键间隔"  },
         {"minimum", 0               },
         {"maximum", maxDelayKeyboard},
     };
-    ret["required"].push_back("delayKeyboard");
+    ret["required"].push_back("delay");
 
-    ret["properties"]["fightTime"] = {
-        {"type",    "integer"   },
-        {"minimum", 0           },
-        {"maximum", maxFightTime},
+    ret["properties"]["fight"] = {
+        {"type",       "object"         },
+        {"required",   {"time", "count"}},
+        {"properties", json::object()   },
     };
-    ret["required"].push_back("fightTime");
+    ret["properties"]["fight"]["properties"]["fightTime"] = {
+        {"type",    "integer"     },
+        {"title",   "战斗时间"},
+        {"minimum", 0             },
+        {"maximum", maxFightTime  },
+    };
+    ret["properties"]["fight"]["properties"]["fightCount"] = {
+        {"type",    "integer"     },
+        {"title",   "战斗次数"},
+        {"minimum", 0             },
+        {"maximum", maxFightCount },
+    };
+    ret["required"].push_back("fight");
 
-    ret["properties"]["fightCount"] = {
-        {"type",    "integer"    },
-        {"minimum", 0            },
-        {"maximum", maxFightCount},
+    ret["properties"]["attribute"] = ns_modules::task::schemaAttribute();
+    ret["required"].push_back("attribute");
+
+    ret["properties"]["effects"] = {
+        {"type",  "array"       },
+        {"items", json::object()},
     };
-    ret["required"].push_back("fightCount");
+    ret["properties"]["effects"]["items"] = {
+        {"type",    "integer"                        },
+        {"minimum", 0                                },
+        {"maximum", ns_concrete::refEffectType.size()},
+        {"list",    json::array()                    },
+    };
+    for (auto &x : ns_concrete::refEffectType) {
+        ret["properties"]["effects"]["items"]["list"].push_back(x);
+    }
+    ret["required"].push_back("effects");
 
     if (allowCustomMacro) {
         ret["properties"]["customMacro"] = {
             {"type", "string"},
         };
     }
-
-    ret["properties"]["attribute"] = ns_modules::task::schemaAttribute();
-    ret["required"].push_back("attribute");
-
-    ret["properties"]["effects"] = {
-        {"type", "array"},
-    };
-    ret["properties"]["effects"]["items"] = {
-        {"type", "string"               },
-        {"enum", nlohmann::json::array()},
-    };
-    for (auto &x : ns_concrete::EffectTypeMap) {
-        ret["properties"]["effects"]["items"]["enum"].push_back(x.first);
-    }
-    ret["required"].push_back("effects");
 
     return ret.dump();
 }

@@ -3,18 +3,19 @@
 
 #include "frame/character/derived/npc.h"
 #include "frame/character/derived/player.h"
+#include <array>
 #include <memory>
 #include <unordered_map>
 
 namespace ns_concrete {
 
 enum class PlayerType {
-    MjFysj = 10242,
+    MjFysj,
     COUNT,
 };
 
-inline const std::unordered_map<std::string, PlayerType> PlayerTypeMap = {
-    {"焚影圣诀", PlayerType::MjFysj},
+inline constexpr std::array<std::string, static_cast<size_t>(PlayerType::COUNT)> refPlayerType = {
+    "焚影圣诀",
 };
 
 std::unique_ptr<ns_frame::Player> createPlayer(PlayerType type, int delayNetwork, int delayKeyboard);
@@ -24,8 +25,8 @@ enum class NPCType {
     COUNT,
 };
 
-inline const std::unordered_map<std::string, NPCType> NPCTypeMap = {
-    {"124级NPC目标", NPCType::NPC124},
+inline constexpr std::array<std::string, static_cast<size_t>(NPCType::COUNT)> refNPCType = {
+    "124级NPC目标",
 };
 
 std::unique_ptr<ns_frame::NPC> createNPC(NPCType type);

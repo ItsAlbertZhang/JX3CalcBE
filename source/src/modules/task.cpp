@@ -33,61 +33,58 @@ nlohmann::json task::schemaAttribute() {
         {"anyOf", json::array()},
     };
 
-    // json zero{
-    //     {"type",       "object"      },
-    //     {"properties", json::object()},
-    //     {"required",   json::array() },
-    // };
-    // zero["properties"]["name"] = {
-    //     {"type",  "string"   },
-    //     {"const", AttributeTypeStr[static_cast<int>(AttributeType::zero)]},
-    // };
-    // zero["required"].push_back("name");
-    // ret["anyOf"].push_back(zero);
+    // json zero{};
 
     json jx3box{
         {"type",       "object"      },
-        {"properties", json::object()},
         {"required",   json::array() },
+        {"properties", json::object()},
     };
-    jx3box["properties"]["name"] = {
-        {"type",  "string"                                                 },
-        {"const", AttributeTypeStr[static_cast<int>(AttributeType::jx3box)]},
+    jx3box["required"]          = {"idx", "pz"};
+    int jx3boxidx               = static_cast<int>(AttributeType::jx3box);
+    jx3box["properties"]["idx"] = {
+        {"type",  "integer"                  },
+        {"title", AttributeTypeStr[jx3boxidx]},
+        {"const", jx3boxidx                  },
     };
-    jx3box["required"].push_back("name");
-    jx3box["properties"]["id"] = {
-        {"type", "integer"},
+    jx3box["properties"]["pz"] = {
+        {"type",  "string"              },
+        {"title", "输入配装ID或URL"},
     };
-    jx3box["required"].push_back("id");
     ret["anyOf"].push_back(jx3box);
 
     return ret;
 }
 
 static TaskData createTaskData(const nlohmann::json &j) {
-    auto playerType = ns_concrete::PlayerTypeMap.at(j["player"].get<std::string>());
+    auto playerType = static_cast<ns_concrete::PlayerType>(j["player"].get<int>());
     // player. 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
     auto player     = ns_concrete::createPlayer(playerType, 0, 0);
 
-    auto attrType = task::AttributeTypeMap.at(j["attribute"]["name"].get<std::string>());
+    auto attrType = static_cast<task::AttributeType>(j["attribute"]["idx"].get<int>());
     switch (attrType) {
-    case task::AttributeType::jx3box:
-        player->attrImportFromJX3BOX(j["attribute"]["id"].get<int>());
-        break;
+    case task::AttributeType::jx3box: {
+        std::string pz = j["attribute"]["pz"].get<std::string>();
+        try {
+            int pzid = std::stoi(pz);
+            player->attrImportFromJX3BOX(pzid);
+        } catch (...) {
+        }
+    } break;
     default:
         break;
     }
 
     std::vector<std::shared_ptr<ns_concrete::EffectBase>> effectList;
     for (auto &x : j["effects"].items()) {
-        effectList.emplace_back(ns_concrete::createEffect(ns_concrete::EffectTypeMap.at(x.value())));
+        effectList.emplace_back(ns_concrete::createEffect(static_cast<ns_concrete::EffectType>(x.value().get<int>())));
     }
 
     return TaskData{
-        .delayNetwork   = j["delayNetwork"].get<int>(),
-        .delayKeyboard  = j["delayKeyboard"].get<int>(),
-        .fightTime      = j["fightTime"].get<int>(),
-        .fightCount     = j["fightCount"].get<int>(),
+        .delayNetwork   = j["delay"]["network"].get<int>(),
+        .delayKeyboard  = j["delay"]["keyboard"].get<int>(),
+        .fightTime      = j["fight"]["time"].get<int>(),
+        .fightCount     = j["fight"]["count"].get<int>(),
         .useCustomMacro = j.contains("customMacro"),
         .customMacro    = j.contains("customMacro") ? j["customMacro"].get<std::string>() : std::string(),
         .attrBackup     = player->chAttr,

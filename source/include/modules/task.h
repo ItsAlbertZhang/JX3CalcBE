@@ -58,10 +58,7 @@ inline std::string AttributeTypeStr[] = {
     // "未启用",
     "从JX3BOX导入",
 };
-inline const std::unordered_map<std::string, AttributeType> AttributeTypeMap = {
-  // {"未启用",       AttributeType::zero  },
-    {"从JX3BOX导入", AttributeType::jx3box},
-};
+
 nlohmann::json schemaAttribute();
 
 std::string create(const std::string &jsonstr);

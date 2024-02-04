@@ -30,10 +30,11 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
             return false;
         if (schema.contains("properties")) {
             for (auto &x : schema["properties"].items()) {
-                if (!json.contains(x.key())) [[unlikely]] {
+                if (!json.contains(x.key())) [[unlikely]] { // 如果目标 json 中没有这一属性, 则检查是否是 required
                     if (schema["required"].contains(x.key())) [[unlikely]]
-                        return false;
+                        return false; // 如果是 required, 则不符合要求
                 } else if (!validate(x.value(), json[x.key()])) [[unlikely]]
+                    // 如果目标 json 中有这一属性, 则检查该属性是否符合要求
                     return false;
             }
         } else if (schema.contains("anyOf")) {
@@ -61,21 +62,6 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
     case JsonType::string:
         if (!json.is_string()) [[unlikely]]
             return false;
-        if (schema.contains("const")) {
-            if (json.get<std::string>() != schema["const"].get<std::string>()) [[unlikely]]
-                return false;
-        }
-        if (schema.contains("enum")) {
-            bool flag = false;
-            for (auto &x : schema["enum"].items()) {
-                if (json.get<std::string>() == x.value().get<std::string>()) {
-                    flag = true;
-                    break;
-                }
-            }
-            if (!flag) [[unlikely]]
-                return false;
-        }
         break;
     case JsonType::integer:
         if (!json.is_number_integer()) [[unlikely]]
@@ -105,10 +91,6 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
         }
         break;
     case JsonType::boolean:
-        if (schema.contains("const")) {
-            if (json.get<bool>() != schema["const"].get<bool>()) [[unlikely]]
-                return false;
-        }
         if (!json.is_boolean()) [[unlikely]]
             return false;
         break;
