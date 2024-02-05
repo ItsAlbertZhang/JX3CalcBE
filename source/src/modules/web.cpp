@@ -110,5 +110,5 @@ void web::entry() {
                 task::run(&conn, data);
         });
 
-    app.bindaddr("127.0.0.1").port(12897).multithreaded().run();
+    app.bindaddr("0.0.0.0").port(12897).multithreaded().run();
 }
