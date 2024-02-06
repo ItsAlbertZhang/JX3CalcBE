@@ -22,19 +22,26 @@ const std::unordered_map<std::string, JsonType> JsonTypeMap = {
 };
 
 bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohmann::json &json) {
-    if (!JsonTypeMap.contains(schema["type"].get<std::string>())) [[unlikely]]
+    if (!JsonTypeMap.contains(schema["type"].get<std::string>())) [[unlikely]] {
         return false;
+    }
     switch (JsonTypeMap.at(schema["type"].get<std::string>())) {
     case JsonType::object:
-        if (!json.is_object()) [[unlikely]]
+        if (!json.is_object()) [[unlikely]] {
             return false;
+        }
         if (schema.contains("properties")) {
             for (auto &x : schema["properties"].items()) {
-                if (!json.contains(x.key()) &&
-                    std::find(schema["required"].begin(), schema["required"].end(), x.key()) != schema["required"].end()) [[unlikely]]
-                    return false; // 如果目标 json 中没有这一属性, 则检查是否是 required, 是则返回 false
-                else if (!validate(x.value(), json[x.key()])) [[unlikely]]
-                    return false; // 否则检查这一属性是否符合要求, 否则返回 false
+                if (!json.contains(x.key())) [[unlikely]] {
+                    // 如果目标 json 中没有这一属性
+                    if (std::find(schema["required"].begin(), schema["required"].end(), x.key()) != schema["required"].end()) [[unlikely]] {
+                        // 并且这一属性是 required
+                        return false; // 则返回 false
+                    }
+                } else if (!validate(x.value(), json[x.key()])) [[unlikely]] {
+                    // 如果目标 json 中有这一属性, 但是这一属性不符合要求
+                    return false; // 则返回 false
+                }
             }
         } else if (schema.contains("anyOf")) {
             bool flag = false;
@@ -44,38 +51,46 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
                     break;
                 }
             }
-            if (!flag) [[unlikely]]
+            if (!flag) [[unlikely]] {
                 return false;
+            }
         } else [[unlikely]] {
             return false;
         }
         break;
     case JsonType::array:
-        if (!json.is_array()) [[unlikely]]
+        if (!json.is_array()) [[unlikely]] {
             return false;
+        }
         for (auto &x : json.items()) {
-            if (!validate(schema["items"], x.value())) [[unlikely]]
+            if (!validate(schema["items"], x.value())) [[unlikely]] {
                 return false;
+            }
         }
         break;
     case JsonType::string:
-        if (!json.is_string()) [[unlikely]]
+        if (!json.is_string()) [[unlikely]] {
             return false;
+        }
         break;
     case JsonType::integer:
-        if (!json.is_number_integer()) [[unlikely]]
+        if (!json.is_number_integer()) [[unlikely]] {
             return false;
+        }
         if (schema.contains("const")) {
-            if (json.get<int>() != schema["const"].get<int>()) [[unlikely]]
+            if (json.get<int>() != schema["const"].get<int>()) [[unlikely]] {
                 return false;
+            }
         }
         if (schema.contains("minimum")) {
-            if (json.get<int>() < schema["minimum"].get<int>()) [[unlikely]]
+            if (json.get<int>() < schema["minimum"].get<int>()) [[unlikely]] {
                 return false;
+            }
         }
         if (schema.contains("maximum")) {
-            if (json.get<int>() > schema["maximum"].get<int>()) [[unlikely]]
+            if (json.get<int>() > schema["maximum"].get<int>()) [[unlikely]] {
                 return false;
+            }
         }
         if (schema.contains("enum")) {
             bool flag = false;
@@ -85,21 +100,25 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
                     break;
                 }
             }
-            if (!flag) [[unlikely]]
+            if (!flag) [[unlikely]] {
                 return false;
+            }
         }
         break;
     case JsonType::boolean:
-        if (!json.is_boolean()) [[unlikely]]
+        if (!json.is_boolean()) [[unlikely]] {
             return false;
+        }
         break;
     case JsonType::number:
-        if (!json.is_number()) [[unlikely]]
+        if (!json.is_number()) [[unlikely]] {
             return false;
+        }
         break;
     case JsonType::null:
-        if (!json.is_null()) [[unlikely]]
+        if (!json.is_null()) [[unlikely]] {
             return false;
+        }
         break;
     }
     return true;
