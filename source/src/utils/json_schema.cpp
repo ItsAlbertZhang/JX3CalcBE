@@ -30,12 +30,11 @@ bool ns_utils::json_schema::validate(const nlohmann::json &schema, const nlohman
             return false;
         if (schema.contains("properties")) {
             for (auto &x : schema["properties"].items()) {
-                if (!json.contains(x.key())) [[unlikely]] { // 如果目标 json 中没有这一属性, 则检查是否是 required
-                    if (schema["required"].contains(x.key())) [[unlikely]]
-                        return false; // 如果是 required, 则不符合要求
-                } else if (!validate(x.value(), json[x.key()])) [[unlikely]]
-                    // 如果目标 json 中有这一属性, 则检查该属性是否符合要求
-                    return false;
+                if (!json.contains(x.key()) &&
+                    std::find(schema["required"].begin(), schema["required"].end(), x.key()) != schema["required"].end()) [[unlikely]]
+                    return false; // 如果目标 json 中没有这一属性, 则检查是否是 required, 是则返回 false
+                else if (!validate(x.value(), json[x.key()])) [[unlikely]]
+                    return false; // 否则检查这一属性是否符合要求, 否则返回 false
             }
         } else if (schema.contains("anyOf")) {
             bool flag = false;
