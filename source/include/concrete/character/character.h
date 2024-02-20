@@ -5,7 +5,6 @@
 #include "frame/character/derived/player.h"
 #include <array>
 #include <memory>
-#include <unordered_map>
 
 namespace ns_concrete {
 
@@ -14,7 +13,7 @@ enum class PlayerType {
     COUNT,
 };
 
-inline constexpr std::array<std::string, static_cast<size_t>(PlayerType::COUNT)> refPlayerType = {
+inline const std::array<std::string, static_cast<size_t>(PlayerType::COUNT)> refPlayerType = {
     "焚影圣诀",
 };
 
@@ -25,7 +24,7 @@ enum class NPCType {
     COUNT,
 };
 
-inline constexpr std::array<std::string, static_cast<size_t>(NPCType::COUNT)> refNPCType = {
+inline const std::array<std::string, static_cast<size_t>(NPCType::COUNT)> refNPCType = {
     "124级NPC目标",
 };
 

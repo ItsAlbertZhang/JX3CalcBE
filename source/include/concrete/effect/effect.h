@@ -18,7 +18,7 @@ enum class EffectType {
     COUNT,
 };
 
-inline constexpr std::array<std::string, static_cast<size_t>(EffectType::COUNT)> refEffectType = {
+inline const std::array<std::string, static_cast<size_t>(EffectType::COUNT)> refEffectType = {
     "大附魔·腰",
     "大附魔·腕",
     "大附魔·鞋",
