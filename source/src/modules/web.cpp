@@ -3,7 +3,6 @@
 #include "utils/config.h"
 #include "utils/json_schema.h"
 #include <asio.hpp>
-#include <chrono>
 #include <crow/mustache.h>
 #include <iostream>
 #include <string>
@@ -14,32 +13,13 @@
 using namespace ns_modules;
 
 void web::run() {
-    using namespace task;
-    asio::co_spawn(
-        io,
-        [&]() -> asio::awaitable<void> {
-            asio::steady_timer timer(io);
-            while (!iostop.load()) {
-                timer.expires_after(std::chrono::seconds(1));
-                co_await timer.async_wait(asio::use_awaitable);
-            }
-        },
-        asio::detached
-    ); // 用于保持 io.run() 的运行
     threadWeb = std::thread(&web::entry);
-    threadIO  = std::thread([&]() {
-        io.run();
-    });
 }
 
 void web::stop() {
-    using namespace task;
-    for (auto &task : tasksRunning)
-        task::stop(task.first);
-    iostop.store(true);
+    task::server::stop();
     app.stop();
     threadWeb.join();
-    threadIO.join();
 }
 
 void web::entry() {
@@ -88,26 +68,19 @@ void web::entry() {
 
     CROW_ROUTE(app, "/task")
         .methods("POST"_method)([](const crow::request &req) {
-            std::string id = task::create(req.body);
-            if (id.empty())
-                return crow::response{400};
-            else
-                return crow::response{200, id};
+            auto id = task::create(req.body);
+            return crow::response{200, id.format()};
         });
 
     CROW_WEBSOCKET_ROUTE(app, "/task/ws")
         .onopen([&](crow::websocket::connection &conn) {
-            UNREFERENCED_PARAMETER(conn);
-            CROW_LOG_INFO << "a websocket opened.";
+            CROW_LOG_INFO << "Websocket connected.";
+            task::server::run(&conn);
         })
         .onclose([&](crow::websocket::connection &conn, const std::string &reason) {
             UNREFERENCED_PARAMETER(reason);
-            CROW_LOG_INFO << "a websocket closed.";
-            task::stop(&conn);
-        })
-        .onmessage([&](crow::websocket::connection &conn, const std::string &data, bool is_binary) {
-            if (!is_binary)
-                task::run(&conn, data);
+            CROW_LOG_INFO << "Websocket disconnected.";
+            task::server::stop();
         });
 
     app.bindaddr("0.0.0.0").port(12897).multithreaded().run();

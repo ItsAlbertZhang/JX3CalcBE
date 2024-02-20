@@ -20,13 +20,39 @@ namespace fmt = std;
 #include <fmt/core.h>
 #endif
 
-using namespace ns_modules;
+using namespace ns_modules::web::task;
 
-static int         calculate(const TaskData &arg);
-static int         output(const TaskData &arg, std::filesystem::path resfile);
+void ns_modules::web::task::server::run(crow::websocket::connection *conn) {
+    asio::co_spawn(
+        io,
+        [&]() -> asio::awaitable<void> {
+            asio::steady_timer timer(io);
+            while (!iostop.load()) {
+                timer.expires_after(std::chrono::seconds(1));
+                co_await timer.async_wait(asio::use_awaitable);
+            }
+        },
+        asio::detached
+    ); // 用于保持 io.run() 的运行
+    threadIO = std::thread([&]() {
+        io.run();
+    });
+
+    ns_modules::web::task::server::conn = conn;
+}
+
+void ns_modules::web::task::server::stop() {
+    for (auto &task : taskMap)
+        task::stop(task.first);
+    iostop.store(true);
+    threadIO.join();
+}
+
+static int         calculate(const Data &arg);
+static int         output(const Data &arg, std::filesystem::path resfile);
 static std::string genID(int length = 6);
 
-nlohmann::json task::schemaAttribute() {
+nlohmann::json ns_modules::web::task::schemaAttribute() {
     using json = nlohmann::json;
     json ret{
         {"type",  "object"            },
@@ -57,14 +83,14 @@ nlohmann::json task::schemaAttribute() {
     return ret;
 }
 
-static TaskData createTaskData(const nlohmann::json &j) {
+static Data createTaskData(const nlohmann::json &j) {
     auto playerType = static_cast<ns_concrete::PlayerType>(j["player"].get<int>());
     // player. 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
     auto player     = ns_concrete::createPlayer(playerType, 0, 0);
 
-    auto attrType = static_cast<task::AttributeType>(j["attribute"]["idx"].get<int>());
+    auto attrType = static_cast<AttributeType>(j["attribute"]["idx"].get<int>());
     switch (attrType) {
-    case task::AttributeType::jx3box: {
+    case AttributeType::jx3box: {
         std::string pz = j["attribute"]["pz"].get<std::string>();
         try {
             int pzid = std::stoi(pz);
@@ -81,7 +107,7 @@ static TaskData createTaskData(const nlohmann::json &j) {
         effectList.emplace_back(ns_concrete::createEffect(static_cast<ns_concrete::EffectType>(x.value().get<int>())));
     }
 
-    return TaskData{
+    return Data{
         .delayNetwork   = j["delay"]["network"].get<int>(),
         .delayKeyboard  = j["delay"]["keyboard"].get<int>(),
         .fightTime      = j["fight"]["time"].get<int>(),
@@ -93,49 +119,25 @@ static TaskData createTaskData(const nlohmann::json &j) {
     };
 }
 
-std::string task::create(const std::string &jsonstr) {
-    using json = nlohmann::json;
-    json j;
-    try {
-        j = json::parse(jsonstr);
-    } catch (...) {
-        return json{
-            {"status", "error"           },
-            {"msg",    "json parse error"}
-        }.dump();
-    }
-    if (!ns_utils::json_schema::validate(json::parse(ns_utils::config::taskdata::genSchema()), j))
-        return json{
-            {"status", "error"       },
-            {"msg",    "json invalid"}
-        }.dump();
-    auto taskdata = createTaskData(j);
-
-    auto id = genID();
-    tasksCreated.emplace(id, std::make_unique<Task>(id, std::move(taskdata)));
-    return id;
+static void asyncStop(Task &task) {
+    using namespace ns_modules::web::task;
+    task.stop.store(true);
+    task.futures.clear();
+    server::pool.erase(task.id);
+    server::taskMap.erase(task.id);
 }
 
-static void asyncStop(crow::websocket::connection *conn) {
-    using namespace task;
-    tasksRunning.at(conn)->stop.store(true);
-    tasksRunning.at(conn)->futures.clear();
-    pool.erase(tasksRunning.at(conn)->id);
-    tasksCreated.erase(tasksRunning.at(conn)->id);
-    tasksRunning.erase(conn);
-}
-
-static asio::awaitable<void> asyncRun(asio::io_context &io, crow::websocket::connection &conn, Task &task) {
+static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
     asio::steady_timer          timer(io);
     const std::chrono::seconds  interval{1};
     const std::filesystem::path p_res = ns_utils::config::pExeDir / "res.tab";
-
+    using namespace ns_modules::web::task;
     // 在线程池中创建任务
-    task::pool.emplace(task.id, 1, task.futures, output, task.data, p_res);
-    task::pool.emplace(task.id, task.data.fightCount, task.futures, calculate, task.data);
+    server::pool.emplace(task.id, 1, task.futures, output, task.data, p_res);
+    server::pool.emplace(task.id, task.data.fightCount, task.futures, calculate, task.data);
     // 处理第一个 output 任务
     int timespend = task.futures[0].get();
-    conn.send_text(fmt::format("第一次计算花费时间: {}ms, 已将战斗记录保存至 res.tab\n", timespend));
+    server::conn->send_text(fmt::format("第一次计算花费时间: {}ms, 已将战斗记录保存至 res.tab\n", timespend));
     using ull           = unsigned long long;
     ull  damageAvg      = 0;
     int  idx            = 1; // 从 1 开始, 因为 0 已经处理过了
@@ -146,13 +148,13 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, crow::websocket::con
             damageAvg += task.futures[idx].get();
             idx++;
         } else {
-            // 发送进度并异步等待前, 先检查是否需要停止
+            // // 发送进度并异步等待前, 先检查是否需要停止
             if (task.stop.load()) [[unlikely]] {
-                asyncStop(&conn);
+                asyncStop(task);
                 co_return;
             }
             if (idx > 1) [[likely]]
-                conn.send_text(fmt::format("({}/{})    当前速度: {} 次计算/s. 到目前为止的平均 DPS: {}\n", idx, task.data.fightCount, idx - idxBeforeSleep, damageAvg / (idx - 1)));
+                server::conn->send_text(fmt::format("({}/{})    当前速度: {} 次计算/s. 到目前为止的平均 DPS: {}\n", idx, task.data.fightCount, idx - idxBeforeSleep, damageAvg / (idx - 1)));
             idxBeforeSleep = idx;
             timer.expires_after(interval);
             co_await timer.async_wait(asio::use_awaitable);
@@ -163,7 +165,7 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, crow::websocket::con
 
         const unsigned int corecnt      = std::thread::hardware_concurrency();
         double             timespendAvg = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() * corecnt / static_cast<double>(task.data.fightCount));
-        conn.send_text(fmt::format(
+        server::conn->send_text(fmt::format(
             "平均 DPS: {}\n平均每次计算所需时间: {} ms.\n{} 核心并行计算下, 等效计算时间 {} ms.\n",
             damageAvg / task.data.fightCount,
             timespendAvg,
@@ -171,23 +173,49 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, crow::websocket::con
             timespendAvg / corecnt
         ));
     }
-    asyncStop(&conn);
+    asyncStop(task);
 }
 
-void task::run(crow::websocket::connection *conn, const std::string &id) {
-    if (!tasksCreated.contains(id) || tasksCreated.at(id) == nullptr) [[unlikely]]
+ResCreate ns_modules::web::task::create(const std::string &jsonstr) {
+    if (server::conn == nullptr) {
+        return ResCreate{
+            .status  = false,
+            .content = "websocket not connected.",
+        };
+    }
+    using json = nlohmann::json;
+    json j;
+    try {
+        j = json::parse(jsonstr);
+    } catch (...) {
+        return ResCreate{
+            .status  = false,
+            .content = "json parse error",
+        };
+    }
+    if (!ns_utils::json_schema::validate(json::parse(ns_utils::config::taskdata::genSchema()), j))
+        return ResCreate{
+            .status  = false,
+            .content = "json invalid",
+        };
+    auto taskdata = createTaskData(j);
+
+    auto  id = genID();
+    auto &it = server::taskMap.emplace(id, std::make_unique<Task>(id, std::move(taskdata))).first->second;
+    asio::co_spawn(server::io, asyncRun(server::io, *it), asio::detached);
+    return ResCreate{
+        .status  = true,
+        .content = id,
+    };
+}
+
+void ns_modules::web::task::stop(std::string id) {
+    if (!server::taskMap.contains(id)) [[unlikely]]
         return;
-    auto &it = tasksRunning.emplace(conn, std::move(tasksCreated.at(id))).first->second;
-    asio::co_spawn(io, asyncRun(io, *conn, *it), asio::detached);
+    server::taskMap.at(id)->stop.store(true); // 真正的停止操作在 asyncRun 中
 }
 
-void task::stop(crow::websocket::connection *conn) {
-    if (!tasksRunning.contains(conn)) [[unlikely]]
-        return;
-    tasksRunning.at(conn)->stop.store(true);
-}
-
-static auto calc(const TaskData &arg) {
+static auto calc(const Data &arg) {
     static thread_local std::unordered_map<size_t, std::unique_ptr<ns_frame::MacroCustom>> map;
 
     std::unique_ptr<ns_frame::Player> player = ns_concrete::createPlayer(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
@@ -214,7 +242,7 @@ static auto calc(const TaskData &arg) {
     return player;
 }
 
-static int calculate(const TaskData &arg) {
+static int calculate(const Data &arg) {
     auto player = calc(arg);
 
     unsigned long long sumDamage = 0;
@@ -224,7 +252,7 @@ static int calculate(const TaskData &arg) {
     return static_cast<int>(sumDamage / arg.fightTime);
 }
 
-static int output(const TaskData &arg, std::filesystem::path resfile) {
+static int output(const Data &arg, std::filesystem::path resfile) {
 #ifdef D_CONSTEXPR_LOG
     ns_plugin::log::info.enable  = true;
     ns_plugin::log::error.enable = true;
@@ -292,7 +320,7 @@ static std::string genID(int length) {
     std::uniform_int_distribution<> distribution(0, static_cast<int>(CHARACTERS.size() - 1));
 
     std::string random_string;
-    while (random_string.empty() || task::tasksCreated.contains(random_string)) {
+    while (random_string.empty() || ns_modules::web::task::server::taskMap.contains(random_string)) {
         for (size_t i = 0; i < length; ++i) {
             random_string += CHARACTERS[distribution(generator)];
         }

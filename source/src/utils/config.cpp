@@ -95,7 +95,7 @@ std::string ns_utils::config::taskdata::genSchema() {
     ret["required"].push_back("fight");
     ret["sort"].push_back("fight");
 
-    ret["properties"]["attribute"] = ns_modules::task::schemaAttribute();
+    ret["properties"]["attribute"] = ns_modules::web::task::schemaAttribute();
     ret["required"].push_back("attribute");
     ret["sort"].push_back("attribute");
 

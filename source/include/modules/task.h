@@ -19,62 +19,85 @@
 
 namespace ns_modules {
 
-class TaskData {
+namespace web {
+namespace task {
+
+class Data {
 public:
     // json 数据区
-    const int delayNetwork;
-    const int delayKeyboard;
-    const int fightTime;
-    const int fightCount;
+    int delayNetwork;
+    int delayKeyboard;
+    int fightTime;
+    int fightCount;
 
-    const bool        useCustomMacro = false;
-    const std::string customMacro;
+    bool        useCustomMacro = false;
+    std::string customMacro;
 
-    const ns_frame::ChAttr                                      attrBackup;
-    const std::vector<std::shared_ptr<ns_concrete::EffectBase>> effects;
+    ns_frame::ChAttr                                      attrBackup;
+    std::vector<std::shared_ptr<ns_concrete::EffectBase>> effects;
 
     // 根据 json 数据区计算得到的数据区
-    const size_t custom_macro_hash = std::hash<std::string>{}(customMacro);
+    size_t custom_macro_hash = std::hash<std::string>{}(customMacro);
 };
 
 class Task {
 public:
-    Task(const std::string &id, const TaskData &data)
+    Task(const std::string &id, const Data &data)
         : id(id), data(data){};
     const std::string             id;
-    const TaskData                data;
+    const Data                    data;
     std::atomic<bool>             stop{false};
     std::vector<std::future<int>> futures;
 };
-
-namespace task {
 
 enum class AttributeType {
     // zero,
     jx3box,
     COUNT,
 };
-inline std::string AttributeTypeStr[] = {
-    // "未启用",
+inline const std::unordered_map<std::string, AttributeType> AttributeTypeMap{
+  // {"未启用",       AttributeType::jx3box},
+    {"从JX3BOX导入", AttributeType::jx3box},
+};
+
+nlohmann::json           schemaAttribute();
+inline const std::string AttributeTypeStr[]{
+    // "zero",
     "从JX3BOX导入",
 };
 
-nlohmann::json schemaAttribute();
+class ResCreate {
+public:
+    bool        status = false;
+    std::string content;
+    std::string format() {
+        nlohmann::json j;
+        j["status"]  = status;
+        j["content"] = content;
+        return j.dump();
+    }
+};
+ResCreate create(const std::string &jsonstr);
+void      pause(std::string id);
+void      stop(std::string id);
 
-std::string create(const std::string &jsonstr);
-void        run(crow::websocket::connection *conn, const std::string &id);
-void        stop(crow::websocket::connection *conn);
+namespace server {
 
-inline std::unordered_map<std::string, std::unique_ptr<Task>>                   tasksCreated;
-inline std::unordered_map<crow::websocket::connection *, std::unique_ptr<Task>> tasksRunning;
+inline std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
 
-inline Pool pool;
+void run(crow::websocket::connection *conn); // 开始运行任务模块
+void stop();                                 // 停止任务模块
 
-inline std::thread       threadIO;
-inline asio::io_context  io;
-inline std::atomic<bool> iostop{false};
+inline Pool                         pool;
+inline std::thread                  threadIO;
+inline asio::io_context             io;
+inline std::atomic<bool>            iostop{false};
+inline crow::websocket::connection *conn;
+
+} // namespace server
 
 } // namespace task
+} // namespace web
 
 } // namespace ns_modules
 
