@@ -1,21 +1,23 @@
 #ifndef MODULES_TASK_H_
 #define MODULES_TASK_H_
 
+#include "concrete/effect/base.h"
+#include "frame/character/property/attribute.h"
+#include "frame/character/property/damage.h"
+#include "modules/pool.h"
+#include <memory>
+#include <mutex>
+#include <nlohmann/json.hpp>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
 #pragma warning(push, 0)
 #ifdef _WIN32
 #include <sdkddkver.h>
 #endif
 #include <crow.h>
 #pragma warning(pop)
-
-#include "concrete/effect/base.h"
-#include "frame/character/property/attribute.h"
-#include "modules/pool.h"
-#include <memory>
-#include <nlohmann/json.hpp>
-#include <string>
-#include <unordered_map>
-#include <vector>
 
 namespace ns_modules {
 
@@ -44,10 +46,16 @@ class Task {
 public:
     Task(const std::string &id, const Data &data)
         : id(id), data(data){};
-    const std::string             id;
-    const Data                    data;
-    std::atomic<bool>             stop{false};
-    std::vector<std::future<int>> futures;
+    const std::string               id;
+    const Data                      data;
+    std::atomic<bool>               stop{false};
+    std::vector<std::future<int>>   futures;
+    std::mutex                      mutex; // 用于保护 results 和 details, 被 io 线程和 web 线程同时访问
+    std::vector<int>                results;
+    std::vector<ns_frame::ChDamage> details;
+    int                             cntCompleted = 0;
+    int                             speedCurr    = 0;
+    std::string                     format();
 };
 
 enum class AttributeType {
@@ -80,14 +88,13 @@ namespace server {
 
 inline std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
 
-void run(crow::websocket::connection *conn); // 开始运行任务模块
-void stop();                                 // 停止任务模块
+void run();  // 开始运行任务模块
+void stop(); // 停止任务模块
 
-inline Pool                         pool;
-inline std::thread                  threadIO;
-inline asio::io_context             io;
-inline std::atomic<bool>            iostop{false};
-inline crow::websocket::connection *conn;
+inline Pool              pool;
+inline std::thread       threadIO;
+inline asio::io_context  io;
+inline std::atomic<bool> iostop{false};
 
 } // namespace server
 

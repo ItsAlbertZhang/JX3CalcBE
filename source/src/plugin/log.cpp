@@ -8,16 +8,18 @@
 using namespace ns_plugin::log;
 
 void Log::operator()(const std::string &newdata) {
-    if (enable)
+    if (enable) {
         data.append(newdata);
-    if (output)
-        std::cout << newdata << std::endl;
+        if (output)
+            std::cout << newdata << std::endl;
+    }
 }
 
 void Log::save() {
     std::ofstream file(ns_utils::config::pExeDir / ("log_" + name + ".tab"));
     file << data;
     file.close();
+    enable = false;
 }
 
 #endif // D_CONSTEXPR_LOG

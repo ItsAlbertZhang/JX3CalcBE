@@ -19,21 +19,17 @@ using format_args = fmt::format_args; // 消除编译器对于 #include <format>
 
 class Log {
 public:
-    Log(const std::string &name)
-        : name(name) {}
-
     std::string name;
     std::string data;
-    bool        enable = false;
+    bool        enable = true;
     bool        output = false;
 
     void operator()(const std::string &newdata);
     void save();
 };
 
-// 日志对顺序有要求, 因此使用 thread_local
-inline thread_local Log info{"info"};
-inline thread_local Log error{"error"};
+inline Log info{.name = "info"};
+inline Log error{.name = "error", .output = true};
 
 } // namespace log
 } // namespace ns_plugin

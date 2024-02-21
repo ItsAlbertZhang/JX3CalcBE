@@ -22,7 +22,7 @@ namespace fmt = std;
 
 using namespace ns_modules::web::task;
 
-void ns_modules::web::task::server::run(crow::websocket::connection *conn) {
+void ns_modules::web::task::server::run() {
     asio::co_spawn(
         io,
         [&]() -> asio::awaitable<void> {
@@ -37,8 +37,6 @@ void ns_modules::web::task::server::run(crow::websocket::connection *conn) {
     threadIO = std::thread([&]() {
         io.run();
     });
-
-    ns_modules::web::task::server::conn = conn;
 }
 
 void ns_modules::web::task::server::stop() {
@@ -48,8 +46,8 @@ void ns_modules::web::task::server::stop() {
     threadIO.join();
 }
 
-static int         calculate(const Data &arg);
-static int         output(const Data &arg, std::filesystem::path resfile);
+static int         calcBrief(const Data &arg);
+static int         calcDetail(const Data &data, ns_frame::ChDamage *detail);
 static std::string genID(int length = 6);
 
 Response ns_modules::web::task::validate(const std::string &jsonstr) {
@@ -193,7 +191,7 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
         .customMacro    = j.contains("customMacro") ? j["customMacro"].get<std::string>() : std::string(),
         .attrBackup     = player->chAttr,
         .effects        = std::move(effectList),
-    }; // 返回值隐式类型转换为 std::optional
+    }; // 返回值会被隐式类型转换为 std::optional
 }
 
 static void asyncStop(Task &task) {
@@ -201,7 +199,7 @@ static void asyncStop(Task &task) {
     task.stop.store(true);
     task.futures.clear();
     server::pool.erase(task.id);
-    server::taskMap.erase(task.id);
+    // server::taskMap.erase(task.id);
 }
 
 static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
@@ -210,57 +208,39 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
     const std::filesystem::path p_res = ns_utils::config::pExeDir / "res.tab";
     using namespace ns_modules::web::task;
     // 在线程池中创建任务
-    server::pool.emplace(task.id, 1, task.futures, output, task.data, p_res);
-    server::pool.emplace(task.id, task.data.fightCount, task.futures, calculate, task.data);
-    // 处理第一个 output 任务
-    int timespend = task.futures[0].get();
-    server::conn->send_text(fmt::format("第一次计算花费时间: {}ms, 已将战斗记录保存至 res.tab\n", timespend));
-    using ull           = unsigned long long;
-    ull  damageAvg      = 0;
-    int  idx            = 1; // 从 1 开始, 因为 0 已经处理过了
-    int  idxBeforeSleep = 1;
-    auto start          = std::chrono::steady_clock::now();
-    while (idx >= 0 && static_cast<std::vector<int>::size_type>(idx) < task.futures.size() && !task.stop.load()) [[likely]] {
-        if (task.futures[idx].wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
-            damageAvg += task.futures[idx].get();
-            idx++;
+    const int cntCalcDetail = task.data.fightCount > 10 ? 10 : task.data.fightCount;
+    task.details.resize(cntCalcDetail);
+    for (int i = 0; i < cntCalcDetail; i++) {
+        server::pool.emplace(task.id, 1, task.futures, calcDetail, task.data, &task.details[i]);
+    }
+    server::pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, task.data);
+    int cntPre = 0;
+    while (task.cntCompleted >= 0 && static_cast<std::vector<int>::size_type>(task.cntCompleted) < task.futures.size() && !task.stop.load()) [[likely]] {
+        if (task.futures[task.cntCompleted].wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
+            {
+                std::lock_guard<std::mutex> lock(task.mutex);
+                task.results.emplace_back(task.futures[task.cntCompleted].get());
+            }
+            task.cntCompleted++;
         } else {
-            // // 发送进度并异步等待前, 先检查是否需要停止
+            // 先检查是否需要停止
             if (task.stop.load()) [[unlikely]] {
                 asyncStop(task);
                 co_return;
             }
-            if (idx > 1) [[likely]]
-                server::conn->send_text(fmt::format("({}/{})    当前速度: {} 次计算/s. 到目前为止的平均 DPS: {}\n", idx, task.data.fightCount, idx - idxBeforeSleep, damageAvg / (idx - 1)));
-            idxBeforeSleep = idx;
+            {
+                std::lock_guard<std::mutex> lock(task.mutex);
+                task.speedCurr = task.cntCompleted - cntPre;
+            }
+            cntPre = task.cntCompleted;
             timer.expires_after(interval);
             co_await timer.async_wait(asio::use_awaitable);
         }
-    }
-    if (!task.stop.load()) {
-        auto end = std::chrono::steady_clock::now();
-
-        const unsigned int corecnt      = std::thread::hardware_concurrency();
-        double             timespendAvg = static_cast<double>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() * corecnt / static_cast<double>(task.data.fightCount));
-        server::conn->send_text(fmt::format(
-            "平均 DPS: {}\n平均每次计算所需时间: {} ms.\n{} 核心并行计算下, 等效计算时间 {} ms.\n",
-            damageAvg / task.data.fightCount,
-            timespendAvg,
-            corecnt,
-            timespendAvg / corecnt
-        ));
     }
     asyncStop(task);
 }
 
 Response ns_modules::web::task::create(const std::string &jsonstr) {
-    if (server::conn == nullptr) {
-        return Response{
-            .status  = false,
-            .content = "websocket not connected.",
-        };
-    }
-
     // 验证 json
     auto res = validate(jsonstr);
     if (!res.status) [[unlikely]]
@@ -317,74 +297,35 @@ static auto calc(const Data &arg) {
     return player;
 }
 
-static int calculate(const Data &arg) {
-    auto player = calc(arg);
+static int calcBrief(const Data &data) {
+    auto player = calc(data);
 
     unsigned long long sumDamage = 0;
-    for (auto &it : player->chDamage.damageList) {
+    for (auto &it : player->chDamage) {
         sumDamage += it.damageExcept;
     }
-    return static_cast<int>(sumDamage / arg.fightTime);
+
+    return static_cast<int>(sumDamage / data.fightTime);
 }
 
-static int output(const Data &arg, std::filesystem::path resfile) {
+static int calcDetail(const Data &data, ns_frame::ChDamage *detail) {
+    auto player = calc(data);
+
+    unsigned long long sumDamage = 0;
+    for (auto &it : player->chDamage) {
+        sumDamage += it.damageExcept;
+    }
+
+    *detail = std::move(player->chDamage);
 #ifdef D_CONSTEXPR_LOG
-    ns_plugin::log::info.enable  = true;
-    ns_plugin::log::error.enable = true;
-    ns_plugin::log::error.output = true;
-#endif
-#ifdef D_CONSTEXPR_CHANNELINTERVAL
-    ns_plugin::channelinterval::enable = true;
-#endif
-    auto start  = std::chrono::steady_clock::now();
-    auto player = calc(arg);
-    auto end    = std::chrono::steady_clock::now();
-#ifdef D_CONSTEXPR_CHANNELINTERVAL
-    ns_plugin::channelinterval::enable = false;
-    ns_plugin::channelinterval::save();
-#endif
-#ifdef D_CONSTEXPR_LOG
-    ns_plugin::log::info.enable  = false;
-    ns_plugin::log::error.enable = false;
-    ns_plugin::log::error.output = false;
     ns_plugin::log::info.save();
     ns_plugin::log::error.save();
 #endif
+#ifdef D_CONSTEXPR_CHANNELINTERVAL
+    ns_plugin::channelinterval::save();
+#endif
 
-    std::ofstream ofs{resfile};
-    ofs << "time\ttype\tID\tlv\tdmgBase\tdmgCri\tdmgExp\tcriRate\tname\n";
-    ns_frame::event_tick_t presentCurr = 0;
-    for (auto &it : player->chDamage.damageList) {
-        std::string name;
-        switch (it.source) {
-        case ns_frame::DamageSource::skill: {
-            const ns_frame::UISkill &skill = ns_frame::UISkillManager::get(it.id, it.level);
-            name                           = skill.Name;
-        } break;
-        case ns_frame::DamageSource::buff: {
-            const ns_frame::UIBuff &buff = ns_frame::UIBuffManager::get(it.id, it.level);
-            name                         = buff.Name;
-        } break;
-        default:
-            break;
-        }
-        if (it.tick != presentCurr) {
-            presentCurr = it.tick;
-            ofs << "\n";
-        }
-        ofs << std::fixed << std::setprecision(2) << it.tick / 1024.0 << "s\t"
-            << static_cast<int>(it.damageType) << "\t"
-            << it.id << "\t" << it.level << "\t"
-            << it.damageBase << "\t" << it.damageCritical << "\t" << it.damageExcept << "\t" << it.criticalRate << "\t"
-            << name << "\n";
-    }
-    ofs.close();
-    unsigned long long sumDamage = 0;
-    for (auto &it : player->chDamage.damageList) {
-        sumDamage += it.damageExcept;
-    }
-    // std::cout << "第一次计算 DPS: " << static_cast<int>(sumDamage / arg.fightTime) << std::endl;
-    return static_cast<int>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+    return static_cast<int>(sumDamage / data.fightTime);
 }
 
 static std::string genID(int length) {
@@ -401,4 +342,54 @@ static std::string genID(int length) {
         }
     }
     return random_string;
+}
+
+std::string Task::format() {
+    using json = nlohmann::json;
+    json j;
+    if (cntCompleted == 0) {
+        j["status"] = false;
+        return j.dump();
+    }
+
+    std::lock_guard<std::mutex> lock(mutex);
+
+    unsigned long long damageSum = 0;
+    for (int i = 0; i < cntCompleted; i++) {
+        damageSum += results[i];
+    }
+    j["dps"] = damageSum / cntCompleted;
+
+    j["details"] = json::array();
+    for (auto &everyFight : details) {
+        json objFight = json::array();
+        for (auto &everyDamage : everyFight) {
+            std::string name;
+            switch (everyDamage.source) {
+            case ns_frame::DamageSource::skill: {
+                const ns_frame::UISkill &skill = ns_frame::UISkillManager::get(everyDamage.id, everyDamage.level);
+                name                           = skill.Name;
+            } break;
+            case ns_frame::DamageSource::buff: {
+                const ns_frame::UIBuff &buff = ns_frame::UIBuffManager::get(everyDamage.id, everyDamage.level);
+                name                         = buff.Name;
+            } break;
+            default:
+                break;
+            }
+            json objDamage;
+            objDamage["time"]           = everyDamage.tick / 1024.0;
+            objDamage["type"]           = static_cast<int>(everyDamage.damageType);
+            objDamage["id"]             = everyDamage.id;
+            objDamage["level"]          = everyDamage.level;
+            objDamage["damageBase"]     = everyDamage.damageBase;
+            objDamage["damageCritical"] = everyDamage.damageCritical;
+            objDamage["damageExcept"]   = everyDamage.damageExcept;
+            objDamage["criticalRate"]   = everyDamage.criticalRate;
+            objDamage["name"]           = name;
+            objFight.emplace_back(objDamage);
+        }
+        j["details"].emplace_back(objFight);
+    }
+    return j.dump();
 }

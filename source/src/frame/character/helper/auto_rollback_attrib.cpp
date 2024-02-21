@@ -58,7 +58,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         auto [atCriticalStrike, atCriticalDamagePower] = src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel);
         // 注意计算伤害时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
-        src->chDamage.damageList.emplace_back(src->calcDamage(
+        src->chDamage.emplace_back(src->calcDamage(
             item->nID,
             item->nLevel,
             item->attr,
@@ -84,7 +84,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         auto [atCriticalStrike, atCriticalDamagePower] = src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel);
         // 注意计算伤害时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
-        src->chDamage.damageList.emplace_back(src->calcDamage(
+        src->chDamage.emplace_back(src->calcDamage(
             item->nID,
             item->nLevel,
             item->attr,

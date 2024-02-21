@@ -13,6 +13,12 @@
 
 namespace ns_modules {
 
+#if defined(D_CONSTEXPR_LOG) || defined(D_CONSTEXPR_CHANNELINTERVAL)
+inline constexpr unsigned int corecnt = 1;
+#else
+inline const unsigned int corecnt = std::thread::hardware_concurrency();
+#endif
+
 class Pool {
     class TaskList {
         class Node {
@@ -123,7 +129,6 @@ public:
         // std::function<void()> thread_cleanup = []() {}
     )
         : stop(false) {
-        unsigned int corecnt = std::thread::hardware_concurrency();
         for (unsigned int i = 0; i < corecnt; ++i)
             // workers.emplace_back([this, thread_init, thread_cleanup] {
             workers.emplace_back([this] {

@@ -14,5 +14,5 @@ RuntimeCastSkill::~RuntimeCastSkill() {
             it.caster->skillCast(it.caster->targetCurr, it.skillID, it.skillLevel);
         }
     }
-    self->chDamage.damageList.insert(self->chDamage.damageList.end(), damageList.begin(), damageList.end());
+    self->chDamage.insert(self->chDamage.end(), damageList.begin(), damageList.end());
 }

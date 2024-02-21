@@ -170,14 +170,14 @@ Damage Character::calcDamage(
     unsigned long long damageExcept   = (damage * (10000 - atCriticalStrike) + damageCritical * atCriticalStrike) / 10000;
 
     return Damage{
-        Event::now(),
-        isBuff ? DamageSource::buff : DamageSource::skill,
-        typeDamage,
-        recordID,
-        recordLevel,
-        static_cast<int>(damage),
-        static_cast<int>(damageCritical),
-        static_cast<int>(damageExcept),
-        atCriticalStrike
+        .tick           = Event::now(),
+        .source         = isBuff ? DamageSource::buff : DamageSource::skill,
+        .damageType     = typeDamage,
+        .id             = recordID,
+        .level          = recordLevel,
+        .damageBase     = static_cast<int>(damage),
+        .damageCritical = static_cast<int>(damageCritical),
+        .damageExcept   = static_cast<int>(damageExcept),
+        .criticalRate   = atCriticalStrike
     };
 }

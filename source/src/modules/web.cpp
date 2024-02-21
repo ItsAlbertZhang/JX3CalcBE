@@ -11,6 +11,7 @@
 using namespace ns_modules;
 
 void web::run() {
+    task::server::run();
     threadWeb = std::thread(&web::entry);
 }
 
@@ -42,15 +43,9 @@ void web::entry() {
             return crow::response{200, id.format()};
         });
 
-    CROW_WEBSOCKET_ROUTE(app, "/ws")
-        .onopen([&](crow::websocket::connection &conn) {
-            CROW_LOG_INFO << "Websocket connected.";
-            task::server::run(&conn);
-        })
-        .onclose([&](crow::websocket::connection &conn, const std::string &reason) {
-            UNREFERENCED_PARAMETER(reason);
-            CROW_LOG_INFO << "Websocket disconnected.";
-            task::server::stop();
+    CROW_ROUTE(app, "/query/<string>")
+        .methods("GET"_method)([](std::string id) {
+            return crow::response{200, "text/plain", task::server::taskMap.at(id)->format()};
         });
 
     app.bindaddr("0.0.0.0").port(12897).multithreaded().run();

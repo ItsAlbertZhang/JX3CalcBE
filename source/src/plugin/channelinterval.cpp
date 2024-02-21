@@ -8,7 +8,6 @@
 
 void ns_plugin::channelinterval::record(int skillID, int skillLevel, int base, int rand, double channelinterval, bool isBuff) {
     if (enable) {
-        std::lock_guard<std::mutex> lock(mtx);
         records[skillID][skillLevel] = {base, rand, channelinterval, isBuff};
     }
 }
@@ -28,6 +27,7 @@ void ns_plugin::channelinterval::save() {
         }
     }
     file.close();
+    enable = false;
 }
 
 #endif // D_CONSTEXPR_CHANNELINTERVAL

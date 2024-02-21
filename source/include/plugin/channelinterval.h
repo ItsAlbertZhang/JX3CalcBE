@@ -3,7 +3,6 @@
 
 #ifdef D_CONSTEXPR_CHANNELINTERVAL
 
-#include <mutex>
 #include <unordered_map>
 
 #ifdef _WIN32
@@ -25,10 +24,8 @@ public:
     bool   isBuff          = false;
 };
 
-// records 对顺序无要求, 因此使用线程锁
 inline std::unordered_map<int, std::unordered_map<int, Item>> records;
-inline std::mutex                                             mtx;
-inline bool                                                   enable = false;
+inline bool                                                   enable = true;
 
 void record(int skillID, int skillLevel, int base, int rand, double fChannelInterval, bool isBuff);
 void save();

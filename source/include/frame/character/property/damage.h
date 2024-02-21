@@ -24,20 +24,6 @@ enum class DamageSource {
 
 class Damage {
 public:
-    Damage(
-        event_tick_t tick,
-        DamageSource source,
-        DamageType   damageType,
-        int          id,
-        int          level,
-        int          damageBase,
-        int          damageCritical,
-        int          damageExcept,
-        int          criticalRate
-    )
-        : tick(tick), source(source), damageType(damageType), id(id), level(level),
-          damageBase(damageBase), damageCritical(damageCritical), damageExcept(damageExcept), criticalRate(criticalRate) {}
-
     event_tick_t tick;
     DamageSource source;
     DamageType   damageType;
@@ -49,10 +35,11 @@ public:
     int          criticalRate;
 };
 
-class ChDamage {
-public:
-    std::vector<Damage> damageList;
-};
+// class ChDamage {
+// public:
+//     std::vector<Damage> damageList;
+// };
+using ChDamage = std::vector<Damage>;
 
 } // namespace ns_frame
 
