@@ -2,9 +2,9 @@
 #define CONCRETE_EFFECTS_ALL_H_
 
 #include "concrete/effect/base.h"
-#include <array>
 #include <memory>
 #include <string>
+#include <unordered_map>
 
 namespace ns_concrete {
 
@@ -18,13 +18,12 @@ enum class EffectType {
     COUNT,
 };
 
-inline const std::array<std::string, static_cast<size_t>(EffectType::COUNT)> refEffectType = {
-    "大附魔·腰",
-    "大附魔·腕",
-    "大附魔·鞋",
-    "套装·技能",
-    "套装·特效",
-    // "武器·橙武",
+inline const std::unordered_map<std::string, EffectType> refEffectType{
+    {"大附魔·腰", EffectType::大附魔·腰},
+    {"大附魔·腕", EffectType::大附魔·腕},
+    {"大附魔·鞋", EffectType::大附魔·鞋},
+    {"套装·技能", EffectType::套装·技能},
+    {"套装·特效", EffectType::套装·特效},
 };
 
 std::shared_ptr<EffectBase> createEffect(EffectType type);

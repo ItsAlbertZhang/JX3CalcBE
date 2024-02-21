@@ -1,7 +1,5 @@
 #include "modules/web.h"
 #include "modules/task.h"
-#include "utils/config.h"
-#include "utils/json_schema.h"
 #include <asio.hpp>
 #include <crow/mustache.h>
 #include <iostream>
@@ -25,16 +23,6 @@ void web::stop() {
 void web::entry() {
     std::cout << "成功于 http://127.0.0.1:12897 上开启服务器, 按住 Ctrl 点击链接即可在浏览器中打开使用." << std::endl;
     std::cout << "Server started at http://127.0.0.1:12897 ." << std::endl;
-    CROW_ROUTE(app, "/")
-        .methods("GET"_method)([]() {
-            // crow::mustache::set_base((ns_utils::config::pExeDir / "templates").string());
-            // crow::mustache::context    x;
-            // crow::mustache::template_t page = crow::mustache::load("index.html");
-            // crow::response             res{page.render(x)};
-            crow::response res{200, R"(<h1>Hello, world!</h1>)"};
-            res.add_header("Content-Type", "text/html; charset=utf-8");
-            return res;
-        });
 
     CROW_ROUTE(app, "/setting")
         .methods("POST"_method)([](const crow::request &req) {
@@ -42,37 +30,19 @@ void web::entry() {
             return crow::response{400, "text/plain", "setting is unavailable now."};
         });
 
-    CROW_ROUTE(app, "/task")
+    CROW_ROUTE(app, "/version")
         .methods("GET"_method)([]() {
-            return crow::response{200, "application/json", ns_utils::config::taskdata::genSchema()};
+            static const std::string version = "24022101";
+            return crow::response{200, "text/plain", version};
         });
 
-    CROW_ROUTE(app, "/task/validate")
-        .methods("POST"_method)([](const crow::request &req) {
-            if (req.body.empty())
-                return crow::response{400};
-            else {
-                using json = nlohmann::json;
-                json j;
-                try {
-                    j = json::parse(req.body);
-                } catch (...) {
-                    return crow::response{400, "json parse error."};
-                }
-                if (ns_utils::json_schema::validate(json::parse(ns_utils::config::taskdata::genSchema()), j))
-                    return crow::response{200, "OK"};
-                else
-                    return crow::response{400, "json invalid."};
-            }
-        });
-
-    CROW_ROUTE(app, "/task")
+    CROW_ROUTE(app, "/create")
         .methods("POST"_method)([](const crow::request &req) {
             auto id = task::create(req.body);
             return crow::response{200, id.format()};
         });
 
-    CROW_WEBSOCKET_ROUTE(app, "/task/ws")
+    CROW_WEBSOCKET_ROUTE(app, "/ws")
         .onopen([&](crow::websocket::connection &conn) {
             CROW_LOG_INFO << "Websocket connected.";
             task::server::run(&conn);

@@ -19,7 +19,6 @@ inline int  maxFightTime     = 1 << 30; // 最大战斗时间
 inline int  maxFightCount    = 1 << 30; // 最大战斗次数
 inline bool allowCustomMacro = true;    // 是否允许自定义宏
 
-std::string genSchema();
 } // namespace taskdata
 
 // 初始化环境.

@@ -7,11 +7,11 @@
 #include "plugin/channelinterval.h"
 #include "plugin/log.h"
 #include "utils/config.h"
-#include "utils/json_schema.h"
 #include <asio/co_spawn.hpp>
 #include <chrono>
 #include <filesystem>
 #include <memory>
+#include <optional>
 
 #ifdef _WIN32
 #include <format>
@@ -52,71 +52,148 @@ static int         calculate(const Data &arg);
 static int         output(const Data &arg, std::filesystem::path resfile);
 static std::string genID(int length = 6);
 
-nlohmann::json ns_modules::web::task::schemaAttribute() {
+Response ns_modules::web::task::validate(const std::string &jsonstr) {
     using json = nlohmann::json;
-    json ret{
-        {"type",  "object"            },
-        {"title", "属性输入方案"},
-        {"anyOf", json::array()       },
+    // 解析 json
+    json j;
+    try {
+        j = json::parse(jsonstr);
+    } catch (...) {
+        return Response{
+            .status  = false,
+            .content = "json parse error",
+        };
+    }
+    // 检查字段
+    // 1. 检查必须字段
+    static const std::vector<std::string> required{
+        "player", "delayNetwork", "delayKeyboard", "fightTime", "fightCount", "attribute", "effects"
     };
-
-    // json zero{};
-
-    json jx3box{
-        {"type",       "object"      },
-        {"required",   {"idx", "pz"} },
-        {"sort",       {"pz"}        },
-        {"properties", json::object()},
-    };
-    int jx3boxidx               = static_cast<int>(AttributeType::jx3box);
-    jx3box["properties"]["idx"] = {
-        {"type",  "integer"                  },
-        {"title", AttributeTypeStr[jx3boxidx]},
-        {"const", jx3boxidx                  },
-    };
-    jx3box["properties"]["pz"] = {
-        {"type",  "string"              },
-        {"title", "输入配装ID或URL"},
-    };
-    ret["anyOf"].push_back(jx3box);
-
-    return ret;
-}
-
-static Data createTaskData(const nlohmann::json &j) {
-    auto playerType = static_cast<ns_concrete::PlayerType>(j["player"].get<int>());
-    // player. 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
-    auto player     = ns_concrete::createPlayer(playerType, 0, 0);
-
-    auto attrType = static_cast<AttributeType>(j["attribute"]["idx"].get<int>());
-    switch (attrType) {
+    for (auto &it : required) {
+        if (!j.contains(it)) {
+            return Response{
+                .status  = false,
+                .content = fmt::format("missing required field: {}", it),
+            };
+        }
+    }
+    // 2. 分别检查字段值
+    // 2.1 检查 player
+    if (!j["player"].is_string() || !ns_concrete::refPlayerType.contains(j["player"].get<std::string>())) {
+        return Response{
+            .status  = false,
+            .content = "player invalid",
+        };
+    }
+    // 2.2 检查 delayNetwork, delayKeyboard, fightTime, fightCount
+    if (!j["delayNetwork"].is_number_integer() || j["delayNetwork"].get<int>() < 0 ||
+        j["delayNetwork"].get<int>() > ns_utils::config::taskdata::maxDelayNetwork) {
+        return Response{
+            .status  = false,
+            .content = "delayNetwork invalid",
+        };
+    }
+    if (!j["delayKeyboard"].is_number_integer() || j["delayKeyboard"].get<int>() < 0 ||
+        j["delayKeyboard"].get<int>() > ns_utils::config::taskdata::maxDelayKeyboard) {
+        return Response{
+            .status  = false,
+            .content = "delayKeyboard invalid",
+        };
+    }
+    if (!j["fightTime"].is_number_integer() || j["fightTime"].get<int>() < 0 ||
+        j["fightTime"].get<int>() > ns_utils::config::taskdata::maxFightTime) {
+        return Response{
+            .status  = false,
+            .content = "fightTime invalid",
+        };
+    }
+    if (!j["fightCount"].is_number_integer() || j["fightCount"].get<int>() < 0 ||
+        j["fightCount"].get<int>() > ns_utils::config::taskdata::maxFightCount) {
+        return Response{
+            .status  = false,
+            .content = "fightCount invalid",
+        };
+    }
+    // 2.3 检查 attribute
+    if (!j["attribute"].contains("method") || !j["attribute"]["method"].is_string() ||
+        !refAttributeType.contains(j["attribute"]["method"].get<std::string>()) ||
+        !j["attribute"].contains("data") || !j["attribute"]["data"].is_object()) {
+        return Response{
+            .status  = false,
+            .content = "attribute method invalid",
+        };
+    }
+    AttributeType type = refAttributeType.at(j["attribute"]["method"].get<std::string>());
+    switch (type) {
     case AttributeType::jx3box: {
-        std::string pz = j["attribute"]["pz"].get<std::string>();
-        try {
-            int pzid = std::stoi(pz);
-            player->attrImportFromJX3BOX(pzid);
-        } catch (...) {
+        if (!j["attribute"]["data"].contains("pzid") || !j["attribute"]["data"]["pzid"].is_string()) {
+            return Response{
+                .status  = false,
+                .content = "attribute data invalid",
+            };
         }
     } break;
     default:
+        return Response{
+            .status  = false,
+            .content = "attribute data invalid",
+        };
+        break;
+    }
+    // 2.4 检查 effects
+    if (!j["effects"].is_array()) {
+        return Response{
+            .status  = false,
+            .content = "effects invalid",
+        };
+    }
+    for (auto &it : j["effects"]) {
+        if (!it.is_string() || !ns_concrete::refEffectType.contains(it.get<std::string>())) {
+            return Response{
+                .status  = false,
+                .content = fmt::format("effects invalid: {}", it.get<std::string>()),
+            };
+        }
+    }
+    // 检查完毕, 返回 true
+    return Response{
+        .status = true,
+    };
+}
+
+static std::optional<Data> createTaskData(const nlohmann::json &j) {
+    auto playerType = ns_concrete::refPlayerType.at(j["player"].get<std::string>());
+    // player. 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
+    auto player     = ns_concrete::createPlayer(playerType, 0, 0);
+
+    auto attrType = refAttributeType.at(j["attribute"]["method"].get<std::string>());
+    switch (attrType) {
+    case AttributeType::jx3box: {
+        std::string pzid = j["attribute"]["data"]["pzid"].get<std::string>();
+        if (!player->attrImportFromJX3BOX(pzid)) {
+            return std::nullopt;
+        }
+    } break;
+    default:
+        return std::nullopt;
         break;
     }
 
     std::vector<std::shared_ptr<ns_concrete::EffectBase>> effectList;
     for (auto &x : j["effects"].items()) {
-        effectList.emplace_back(ns_concrete::createEffect(static_cast<ns_concrete::EffectType>(x.value().get<int>())));
+        effectList.emplace_back(ns_concrete::createEffect(ns_concrete::refEffectType.at(x.value().get<std::string>())));
     }
 
     return Data{
-        .delayNetwork   = j["delay"]["network"].get<int>(),
-        .delayKeyboard  = j["delay"]["keyboard"].get<int>(),
-        .fightTime      = j["fight"]["time"].get<int>(),
-        .fightCount     = j["fight"]["count"].get<int>(),
+        .delayNetwork   = j["delayNetwork"].get<int>(),
+        .delayKeyboard  = j["delayKeyboard"].get<int>(),
+        .fightTime      = j["fightTime"].get<int>(),
+        .fightCount     = j["fightCount"].get<int>(),
         .useCustomMacro = j.contains("customMacro"),
         .customMacro    = j.contains("customMacro") ? j["customMacro"].get<std::string>() : std::string(),
         .attrBackup     = player->chAttr,
         .effects        = std::move(effectList),
-    };
+    }; // 返回值隐式类型转换为 std::optional
 }
 
 static void asyncStop(Task &task) {
@@ -176,34 +253,32 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
     asyncStop(task);
 }
 
-ResCreate ns_modules::web::task::create(const std::string &jsonstr) {
+Response ns_modules::web::task::create(const std::string &jsonstr) {
     if (server::conn == nullptr) {
-        return ResCreate{
+        return Response{
             .status  = false,
             .content = "websocket not connected.",
         };
     }
-    using json = nlohmann::json;
-    json j;
-    try {
-        j = json::parse(jsonstr);
-    } catch (...) {
-        return ResCreate{
-            .status  = false,
-            .content = "json parse error",
-        };
-    }
-    if (!ns_utils::json_schema::validate(json::parse(ns_utils::config::taskdata::genSchema()), j))
-        return ResCreate{
-            .status  = false,
-            .content = "json invalid",
-        };
+
+    // 验证 json
+    auto res = validate(jsonstr);
+    if (!res.status) [[unlikely]]
+        return res;
+    // 验证后, 使用时无需再次验证
+    using json    = nlohmann::json;
+    json j        = json::parse(jsonstr);
     auto taskdata = createTaskData(j);
+    if (!taskdata.has_value()) [[unlikely]]
+        return Response{
+            .status  = false,
+            .content = "An error occurred while creating task data. Please try again later.",
+        };
 
     auto  id = genID();
-    auto &it = server::taskMap.emplace(id, std::make_unique<Task>(id, std::move(taskdata))).first->second;
+    auto &it = server::taskMap.emplace(id, std::make_unique<Task>(id, std::move(taskdata.value()))).first->second;
     asio::co_spawn(server::io, asyncRun(server::io, *it), asio::detached);
-    return ResCreate{
+    return Response{
         .status  = true,
         .content = id,
     };

@@ -1,0 +1,15 @@
+{
+    "version": "24022101",
+    "player": "焚影圣诀",
+    "delayNetwork": 45,
+    "delayKeyboard": 20,
+    "fightTime": 300,
+    "fightCount": 1000,
+    "attribute": {
+        "method": "从JX3BOX导入",
+        "data": {
+            "pzid": "787136"
+        }
+    },
+    "effects": ["大附魔·腰", "大附魔·腕", "大附魔·鞋", "套装·技能", "套装·特效"]
+}

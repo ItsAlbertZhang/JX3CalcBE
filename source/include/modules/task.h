@@ -55,18 +55,12 @@ enum class AttributeType {
     jx3box,
     COUNT,
 };
-inline const std::unordered_map<std::string, AttributeType> AttributeTypeMap{
+inline const std::unordered_map<std::string, AttributeType> refAttributeType{
   // {"未启用",       AttributeType::jx3box},
     {"从JX3BOX导入", AttributeType::jx3box},
 };
 
-nlohmann::json           schemaAttribute();
-inline const std::string AttributeTypeStr[]{
-    // "zero",
-    "从JX3BOX导入",
-};
-
-class ResCreate {
+class Response {
 public:
     bool        status = false;
     std::string content;
@@ -77,9 +71,10 @@ public:
         return j.dump();
     }
 };
-ResCreate create(const std::string &jsonstr);
-void      pause(std::string id);
-void      stop(std::string id);
+Response validate(const std::string &jsonstr);
+Response create(const std::string &jsonstr);
+void     pause(std::string id);
+void     stop(std::string id);
 
 namespace server {
 

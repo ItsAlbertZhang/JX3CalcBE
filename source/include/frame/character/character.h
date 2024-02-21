@@ -62,8 +62,7 @@ public:
     static int        characterGetID(Character *character);
     static Character *characterGet(int nCharacterID);
     // attr
-    static bool       attrExportFromJX3BOX(int pzID, ChAttr &attr);
-    bool              attrImportFromJX3BOX(int pzID);
+    bool              attrImportFromJX3BOX(std::string pzID);
     bool              attrImportFromBackup(const ChAttr &attr);
     // buff
     void              buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);

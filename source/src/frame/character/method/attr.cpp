@@ -22,9 +22,9 @@ static inline int selectPrecise(const json &j, const std::string &key) {
 //     return 0;
 // }
 
-bool Character::attrExportFromJX3BOX(int pzID, ChAttr &attr) {
+bool Character::attrImportFromJX3BOX(std::string pzID) {
     static thread_local httplib::Client cli("http://cms.jx3box.com");
-    httplib::Result                     res = cli.Get("/api/cms/app/pz/" + std::to_string(pzID));
+    httplib::Result                     res = cli.Get("/api/cms/app/pz/" + pzID);
     if (res->status != 200) {
         return false;
     }
@@ -38,68 +38,64 @@ bool Character::attrExportFromJX3BOX(int pzID, ChAttr &attr) {
     }
     j = j["data"];
 
-    attr.atVitalityBase = selectPrecise(j, "Vitality"); // 体质
-    attr.atStrengthBase = selectPrecise(j, "Strength"); // 力道
-    attr.atAgilityBase  = selectPrecise(j, "Agility");  // 身法
-    attr.atSpiritBase   = selectPrecise(j, "Spirit");   // 根骨
-    attr.atSpunkBase    = selectPrecise(j, "Spunk");    // 元气
+    chAttr.atVitalityBase = selectPrecise(j, "Vitality"); // 体质
+    chAttr.atStrengthBase = selectPrecise(j, "Strength"); // 力道
+    chAttr.atAgilityBase  = selectPrecise(j, "Agility");  // 身法
+    chAttr.atSpiritBase   = selectPrecise(j, "Spirit");   // 根骨
+    chAttr.atSpunkBase    = selectPrecise(j, "Spunk");    // 元气
 
-    attr.atPhysicsAttackPowerBase = selectPrecise(j, "PhysicsAttackPowerBase"); // 外功基础攻击
-    attr.atSolarAttackPowerBase   = selectPrecise(j, "SolarAttackPowerBase");   // 阳性内功基础攻击
-    attr.atLunarAttackPowerBase   = selectPrecise(j, "LunarAttackPowerBase");   // 阴性内功基础攻击
-    attr.atNeutralAttackPowerBase = selectPrecise(j, "NeutralAttackPowerBase"); // 混元内功基础攻击
-    attr.atPoisonAttackPowerBase  = selectPrecise(j, "PoisonAttackPowerBase");  // 毒性内功基础攻击
-    attr.atTherapyPowerBase       = selectPrecise(j, "TherapyPowerBase");       // 治疗量
+    chAttr.atPhysicsAttackPowerBase = selectPrecise(j, "PhysicsAttackPowerBase"); // 外功基础攻击
+    chAttr.atSolarAttackPowerBase   = selectPrecise(j, "SolarAttackPowerBase");   // 阳性内功基础攻击
+    chAttr.atLunarAttackPowerBase   = selectPrecise(j, "LunarAttackPowerBase");   // 阴性内功基础攻击
+    chAttr.atNeutralAttackPowerBase = selectPrecise(j, "NeutralAttackPowerBase"); // 混元内功基础攻击
+    chAttr.atPoisonAttackPowerBase  = selectPrecise(j, "PoisonAttackPowerBase");  // 毒性内功基础攻击
+    chAttr.atTherapyPowerBase       = selectPrecise(j, "TherapyPowerBase");       // 治疗量
 
-    attr.atPhysicsCriticalStrike = selectPrecise(j, "PhysicsCriticalStrike"); // 外功会心等级
-    attr.atSolarCriticalStrike   = selectPrecise(j, "SolarCriticalStrike");   // 阳性内功会心等级
-    attr.atLunarCriticalStrike   = selectPrecise(j, "LunarCriticalStrike");   // 阴性内功会心等级
-    attr.atNeutralCriticalStrike = selectPrecise(j, "NeutralCriticalStrike"); // 混元内功会心等级
-    attr.atPoisonCriticalStrike  = selectPrecise(j, "PoisonCriticalStrike");  // 毒性内功会心等级
+    chAttr.atPhysicsCriticalStrike = selectPrecise(j, "PhysicsCriticalStrike"); // 外功会心等级
+    chAttr.atSolarCriticalStrike   = selectPrecise(j, "SolarCriticalStrike");   // 阳性内功会心等级
+    chAttr.atLunarCriticalStrike   = selectPrecise(j, "LunarCriticalStrike");   // 阴性内功会心等级
+    chAttr.atNeutralCriticalStrike = selectPrecise(j, "NeutralCriticalStrike"); // 混元内功会心等级
+    chAttr.atPoisonCriticalStrike  = selectPrecise(j, "PoisonCriticalStrike");  // 毒性内功会心等级
 
-    attr.atPhysicsCriticalDamagePowerBase = selectPrecise(j, "PhysicsCriticalDamagePower"); // 外功会心效果等级
-    attr.atSolarCriticalDamagePowerBase   = selectPrecise(j, "SolarCriticalDamagePower");   // 阳性内功会心效果等级
-    attr.atLunarCriticalDamagePowerBase   = selectPrecise(j, "LunarCriticalDamagePower");   // 阴性内功会心效果等级
-    attr.atNeutralCriticalDamagePowerBase = selectPrecise(j, "NeutralCriticalDamagePower"); // 混元内功会心效果等级
-    attr.atPoisonCriticalDamagePowerBase  = selectPrecise(j, "PoisonCriticalDamagePower");  // 毒性内功会心效果等级
+    chAttr.atPhysicsCriticalDamagePowerBase = selectPrecise(j, "PhysicsCriticalDamagePower"); // 外功会心效果等级
+    chAttr.atSolarCriticalDamagePowerBase   = selectPrecise(j, "SolarCriticalDamagePower");   // 阳性内功会心效果等级
+    chAttr.atLunarCriticalDamagePowerBase   = selectPrecise(j, "LunarCriticalDamagePower");   // 阴性内功会心效果等级
+    chAttr.atNeutralCriticalDamagePowerBase = selectPrecise(j, "NeutralCriticalDamagePower"); // 混元内功会心效果等级
+    chAttr.atPoisonCriticalDamagePowerBase  = selectPrecise(j, "PoisonCriticalDamagePower");  // 毒性内功会心效果等级
 
-    attr.atPhysicsOvercomeBase = selectPrecise(j, "PhysicsOvercomeBase"); // 外功基础破防等级
-    attr.atSolarOvercomeBase   = selectPrecise(j, "SolarOvercomeBase");   // 阳性内功破防等级
-    attr.atLunarOvercomeBase   = selectPrecise(j, "LunarOvercomeBase");   // 阴性内功破防等级
-    attr.atNeutralOvercomeBase = selectPrecise(j, "NeutralOvercomeBase"); // 混元内功破防等级
-    attr.atPoisonOvercomeBase  = selectPrecise(j, "PoisonOvercomeBase");  // 毒性内功破防等级
+    chAttr.atPhysicsOvercomeBase = selectPrecise(j, "PhysicsOvercomeBase"); // 外功基础破防等级
+    chAttr.atSolarOvercomeBase   = selectPrecise(j, "SolarOvercomeBase");   // 阳性内功破防等级
+    chAttr.atLunarOvercomeBase   = selectPrecise(j, "LunarOvercomeBase");   // 阴性内功破防等级
+    chAttr.atNeutralOvercomeBase = selectPrecise(j, "NeutralOvercomeBase"); // 混元内功破防等级
+    chAttr.atPoisonOvercomeBase  = selectPrecise(j, "PoisonOvercomeBase");  // 毒性内功破防等级
 
-    attr.atSurplusValueBase = selectPrecise(j, "SurplusValue"); // 破招值
-    attr.atStrainBase       = selectPrecise(j, "Strain");       // 无双等级
+    chAttr.atSurplusValueBase = selectPrecise(j, "SurplusValue"); // 破招值
+    chAttr.atStrainBase       = selectPrecise(j, "Strain");       // 无双等级
 
     // chAttr.atHasteBase = selectPrecise(j, "Haste"); // 基础加速等级
-    attr.atHasteBase = 95; // TODO: 加速酒还没做 (还有网络延迟)
+    chAttr.atHasteBase = 95; // TODO: 加速酒还没做 (还有网络延迟)
 
-    attr.atPhysicsShieldBase = selectPrecise(j, "PhysicsShieldBase"); // 外功基础防御等级
+    chAttr.atPhysicsShieldBase = selectPrecise(j, "PhysicsShieldBase"); // 外功基础防御等级
 
-    attr.atSolarMagicShieldBase   = selectPrecise(j, "SolarShieldBase");   // 阳性内功防御等级
-    attr.atLunarMagicShieldBase   = selectPrecise(j, "LunarShieldBase");   // 阴性内功防御等级
-    attr.atNeutralMagicShieldBase = selectPrecise(j, "NeutralShieldBase"); // 混元内功防御等级
-    attr.atPoisonMagicShieldBase  = selectPrecise(j, "PoisonShieldBase");  // 毒性内功防御等级
+    chAttr.atSolarMagicShieldBase   = selectPrecise(j, "SolarShieldBase");   // 阳性内功防御等级
+    chAttr.atLunarMagicShieldBase   = selectPrecise(j, "LunarShieldBase");   // 阴性内功防御等级
+    chAttr.atNeutralMagicShieldBase = selectPrecise(j, "NeutralShieldBase"); // 混元内功防御等级
+    chAttr.atPoisonMagicShieldBase  = selectPrecise(j, "PoisonShieldBase");  // 毒性内功防御等级
 
-    attr.atDodge = selectPrecise(j, "Dodge"); // 闪避等级
+    chAttr.atDodge = selectPrecise(j, "Dodge"); // 闪避等级
 
-    attr.atParryBase = selectPrecise(j, "Parry"); // 招架等级
+    chAttr.atParryBase = selectPrecise(j, "Parry"); // 招架等级
 
-    attr.atParryValueBase = selectPrecise(j, "ParryValue"); // 拆招值
+    chAttr.atParryValueBase = selectPrecise(j, "ParryValue"); // 拆招值
 
-    attr.atToughnessBase = selectPrecise(j, "Toughness"); // 御劲等级
+    chAttr.atToughnessBase = selectPrecise(j, "Toughness"); // 御劲等级
 
-    attr.atDecriticalDamagePowerBase = selectPrecise(j, "DecriticalDamage"); // 化劲等级
+    chAttr.atDecriticalDamagePowerBase = selectPrecise(j, "DecriticalDamage"); // 化劲等级
 
-    attr.atMeleeWeaponDamageBase = selectPrecise(j, "MeleeWeaponDamage");     // 武器伤害
-    attr.atMeleeWeaponDamageRand = selectPrecise(j, "MeleeWeaponDamageRand"); // 武器伤害浮动
+    chAttr.atMeleeWeaponDamageBase = selectPrecise(j, "MeleeWeaponDamage");     // 武器伤害
+    chAttr.atMeleeWeaponDamageRand = selectPrecise(j, "MeleeWeaponDamageRand"); // 武器伤害浮动
 
     return true;
-}
-
-bool Character::attrImportFromJX3BOX(int pzID) {
-    return attrExportFromJX3BOX(pzID, chAttr);
 }
 
 bool Character::attrImportFromBackup(const ChAttr &attr) {
