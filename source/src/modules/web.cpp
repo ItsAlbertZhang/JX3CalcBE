@@ -39,13 +39,29 @@ void web::entry() {
 
     CROW_ROUTE(app, "/create")
         .methods("POST"_method)([](const crow::request &req) {
-            auto id = task::create(req.body);
-            return crow::response{200, id.format()};
+            auto res = task::create(req.body);
+            return crow::response{200, "application/json", res.format()};
         });
 
-    CROW_ROUTE(app, "/query/<string>")
+    CROW_ROUTE(app, "/query/<string>/dps")
         .methods("GET"_method)([](std::string id) {
-            return crow::response{200, "text/plain", task::server::taskMap.at(id)->format()};
+            if (!task::server::taskMap.contains(id))
+                return crow::response{200, "application/json", R"({"status":-1,"content":"error task id"})"};
+            return crow::response{200, "application/json", task::server::taskMap.at(id)->queryDPS()};
+        });
+
+    CROW_ROUTE(app, "/query/<string>/damage-list")
+        .methods("GET"_method)([](std::string id) {
+            if (!task::server::taskMap.contains(id))
+                return crow::response{200, "application/json", R"({"status":-1,"content":"error task id"})"};
+            return crow::response{200, "application/json", task::server::taskMap.at(id)->queryDamageList()};
+        });
+
+    CROW_ROUTE(app, "/query/<string>/damage-analysis")
+        .methods("GET"_method)([](std::string id) {
+            if (!task::server::taskMap.contains(id))
+                return crow::response{200, "application/json", R"({"status":-1,"content":"error task id"})"};
+            return crow::response{200, "application/json", task::server::taskMap.at(id)->queryDamageAnalysis()};
         });
 
     app.bindaddr("0.0.0.0").port(12897).multithreaded().run();

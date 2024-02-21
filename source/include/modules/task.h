@@ -53,9 +53,13 @@ public:
     std::mutex                      mutex; // 用于保护 results 和 details, 被 io 线程和 web 线程同时访问
     std::vector<int>                results;
     std::vector<ns_frame::ChDamage> details;
-    int                             cntCompleted = 0;
-    int                             speedCurr    = 0;
-    std::string                     format();
+    int                             cntCompleted = 0; // 已完成的任务数, 同时也是当前任务的 idx
+    int                             speedCurr    = 0; // 当前速度
+
+    std::string queryDPS();
+    std::string queryDamageList();
+    std::string queryDamageAnalysis();
+    std::string queryDamageChart();
 };
 
 enum class AttributeType {
@@ -68,13 +72,24 @@ inline const std::unordered_map<std::string, AttributeType> refAttributeType{
     {"从JX3BOX导入", AttributeType::jx3box},
 };
 
+enum class ResponseStatus {
+    success,
+    parse_error,
+    missing_field,
+    invalid_player,
+    invalid_interger,
+    invalid_attribute_method,
+    invalid_attribute_data,
+    invalid_effects,
+    create_data_error,
+};
 class Response {
 public:
-    bool        status = false;
-    std::string content;
-    std::string format() {
+    ResponseStatus status;
+    std::string    content;
+    std::string    format() {
         nlohmann::json j;
-        j["status"]  = status;
+        j["status"]  = static_cast<int>(status);
         j["content"] = content;
         return j.dump();
     }

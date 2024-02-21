@@ -9,9 +9,9 @@
 #include "utils/config.h"
 #include <asio/co_spawn.hpp>
 #include <chrono>
-#include <filesystem>
 #include <memory>
 #include <optional>
+#include <unordered_map>
 
 #ifdef _WIN32
 #include <format>
@@ -21,6 +21,9 @@ namespace fmt = std;
 #endif
 
 using namespace ns_modules::web::task;
+using ull = unsigned long long;
+
+constexpr int CNT_DETAIL_TASKS = 10;
 
 void ns_modules::web::task::server::run() {
     asio::co_spawn(
@@ -58,7 +61,7 @@ Response ns_modules::web::task::validate(const std::string &jsonstr) {
         j = json::parse(jsonstr);
     } catch (...) {
         return Response{
-            .status  = false,
+            .status  = ResponseStatus::parse_error,
             .content = "json parse error",
         };
     }
@@ -70,7 +73,7 @@ Response ns_modules::web::task::validate(const std::string &jsonstr) {
     for (auto &it : required) {
         if (!j.contains(it)) {
             return Response{
-                .status  = false,
+                .status  = ResponseStatus::missing_field,
                 .content = fmt::format("missing required field: {}", it),
             };
         }
@@ -79,7 +82,7 @@ Response ns_modules::web::task::validate(const std::string &jsonstr) {
     // 2.1 检查 player
     if (!j["player"].is_string() || !ns_concrete::refPlayerType.contains(j["player"].get<std::string>())) {
         return Response{
-            .status  = false,
+            .status  = ResponseStatus::invalid_player,
             .content = "player invalid",
         };
     }
@@ -87,28 +90,28 @@ Response ns_modules::web::task::validate(const std::string &jsonstr) {
     if (!j["delayNetwork"].is_number_integer() || j["delayNetwork"].get<int>() < 0 ||
         j["delayNetwork"].get<int>() > ns_utils::config::taskdata::maxDelayNetwork) {
         return Response{
-            .status  = false,
+            .status  = ResponseStatus::invalid_interger,
             .content = "delayNetwork invalid",
         };
     }
     if (!j["delayKeyboard"].is_number_integer() || j["delayKeyboard"].get<int>() < 0 ||
         j["delayKeyboard"].get<int>() > ns_utils::config::taskdata::maxDelayKeyboard) {
         return Response{
-            .status  = false,
+            .status  = ResponseStatus::invalid_interger,
             .content = "delayKeyboard invalid",
         };
     }
     if (!j["fightTime"].is_number_integer() || j["fightTime"].get<int>() < 0 ||
         j["fightTime"].get<int>() > ns_utils::config::taskdata::maxFightTime) {
         return Response{
-            .status  = false,
+            .status  = ResponseStatus::invalid_interger,
             .content = "fightTime invalid",
         };
     }
     if (!j["fightCount"].is_number_integer() || j["fightCount"].get<int>() < 0 ||
         j["fightCount"].get<int>() > ns_utils::config::taskdata::maxFightCount) {
         return Response{
-            .status  = false,
+            .status  = ResponseStatus::invalid_interger,
             .content = "fightCount invalid",
         };
     }
@@ -117,7 +120,7 @@ Response ns_modules::web::task::validate(const std::string &jsonstr) {
         !refAttributeType.contains(j["attribute"]["method"].get<std::string>()) ||
         !j["attribute"].contains("data") || !j["attribute"]["data"].is_object()) {
         return Response{
-            .status  = false,
+            .status  = ResponseStatus::invalid_attribute_method,
             .content = "attribute method invalid",
         };
     }
@@ -126,36 +129,36 @@ Response ns_modules::web::task::validate(const std::string &jsonstr) {
     case AttributeType::jx3box: {
         if (!j["attribute"]["data"].contains("pzid") || !j["attribute"]["data"]["pzid"].is_string()) {
             return Response{
-                .status  = false,
+                .status  = ResponseStatus::invalid_attribute_data,
                 .content = "attribute data invalid",
             };
         }
     } break;
     default:
         return Response{
-            .status  = false,
-            .content = "attribute data invalid",
+            .status  = ResponseStatus::invalid_attribute_method,
+            .content = "attribute method invalid",
         };
         break;
     }
     // 2.4 检查 effects
     if (!j["effects"].is_array()) {
         return Response{
-            .status  = false,
+            .status  = ResponseStatus::invalid_effects,
             .content = "effects invalid",
         };
     }
     for (auto &it : j["effects"]) {
         if (!it.is_string() || !ns_concrete::refEffectType.contains(it.get<std::string>())) {
             return Response{
-                .status  = false,
+                .status  = ResponseStatus::invalid_effects,
                 .content = fmt::format("effects invalid: {}", it.get<std::string>()),
             };
         }
     }
     // 检查完毕, 返回 true
     return Response{
-        .status = true,
+        .status = ResponseStatus::success,
     };
 }
 
@@ -196,32 +199,32 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
 
 static void asyncStop(Task &task) {
     using namespace ns_modules::web::task;
-    task.stop.store(true);
     task.futures.clear();
     server::pool.erase(task.id);
-    // server::taskMap.erase(task.id);
+    server::taskMap.erase(task.id);
 }
 
 static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
-    asio::steady_timer          timer(io);
-    const std::chrono::seconds  interval{1};
-    const std::filesystem::path p_res = ns_utils::config::pExeDir / "res.tab";
     using namespace ns_modules::web::task;
+
     // 在线程池中创建任务
-    const int cntCalcDetail = task.data.fightCount > 10 ? 10 : task.data.fightCount;
+    const int cntCalcDetail = task.data.fightCount > CNT_DETAIL_TASKS ? CNT_DETAIL_TASKS : task.data.fightCount;
     task.details.resize(cntCalcDetail);
     for (int i = 0; i < cntCalcDetail; i++) {
         server::pool.emplace(task.id, 1, task.futures, calcDetail, task.data, &task.details[i]);
     }
     server::pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, task.data);
+
+    task.results.reserve(task.data.fightCount);
+    task.details.reserve(cntCalcDetail);
     int cntPre = 0;
-    while (task.cntCompleted >= 0 && static_cast<std::vector<int>::size_type>(task.cntCompleted) < task.futures.size() && !task.stop.load()) [[likely]] {
+    while (task.cntCompleted >= 0 && task.cntCompleted < task.data.fightCount && !task.stop.load()) [[likely]] {
         if (task.futures[task.cntCompleted].wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
             {
                 std::lock_guard<std::mutex> lock(task.mutex);
                 task.results.emplace_back(task.futures[task.cntCompleted].get());
+                task.cntCompleted++;
             }
-            task.cntCompleted++;
         } else {
             // 先检查是否需要停止
             if (task.stop.load()) [[unlikely]] {
@@ -233,17 +236,21 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
                 task.speedCurr = task.cntCompleted - cntPre;
             }
             cntPre = task.cntCompleted;
-            timer.expires_after(interval);
+            asio::steady_timer timer(io);
+            timer.expires_after(std::chrono::seconds{1});
             co_await timer.async_wait(asio::use_awaitable);
         }
     }
+    asio::steady_timer timer(io);
+    timer.expires_after(std::chrono::seconds{60}); // 等待 60 秒, 随后释放内存
+    co_await timer.async_wait(asio::use_awaitable);
     asyncStop(task);
 }
 
 Response ns_modules::web::task::create(const std::string &jsonstr) {
     // 验证 json
     auto res = validate(jsonstr);
-    if (!res.status) [[unlikely]]
+    if (res.status != ResponseStatus::success) [[unlikely]]
         return res;
     // 验证后, 使用时无需再次验证
     using json    = nlohmann::json;
@@ -251,7 +258,7 @@ Response ns_modules::web::task::create(const std::string &jsonstr) {
     auto taskdata = createTaskData(j);
     if (!taskdata.has_value()) [[unlikely]]
         return Response{
-            .status  = false,
+            .status  = ResponseStatus::create_data_error,
             .content = "An error occurred while creating task data. Please try again later.",
         };
 
@@ -259,7 +266,7 @@ Response ns_modules::web::task::create(const std::string &jsonstr) {
     auto &it = server::taskMap.emplace(id, std::make_unique<Task>(id, std::move(taskdata.value()))).first->second;
     asio::co_spawn(server::io, asyncRun(server::io, *it), asio::detached);
     return Response{
-        .status  = true,
+        .status  = ResponseStatus::success,
         .content = id,
     };
 }
@@ -300,7 +307,7 @@ static auto calc(const Data &arg) {
 static int calcBrief(const Data &data) {
     auto player = calc(data);
 
-    unsigned long long sumDamage = 0;
+    ull sumDamage = 0;
     for (auto &it : player->chDamage) {
         sumDamage += it.damageExcept;
     }
@@ -311,7 +318,7 @@ static int calcBrief(const Data &data) {
 static int calcDetail(const Data &data, ns_frame::ChDamage *detail) {
     auto player = calc(data);
 
-    unsigned long long sumDamage = 0;
+    ull sumDamage = 0;
     for (auto &it : player->chDamage) {
         sumDamage += it.damageExcept;
     }
@@ -344,23 +351,60 @@ static std::string genID(int length) {
     return random_string;
 }
 
-std::string Task::format() {
-    using json = nlohmann::json;
+using json = nlohmann::json;
+
+std::string Task::queryDPS() {
     json j;
-    if (cntCompleted == 0) {
-        j["status"] = false;
+    if (cntCompleted == 0) [[unlikely]] {
+        j["status"]  = 1; // 无数据
+        j["content"] = "No data available.";
         return j.dump();
     }
 
     std::lock_guard<std::mutex> lock(mutex);
 
-    unsigned long long damageSum = 0;
-    for (int i = 0; i < cntCompleted; i++) {
-        damageSum += results[i];
+    j["status"] = 0; // 成功
+    if (cntCompleted < data.fightCount) [[likely]] {
+        j["complete"] = false;
+    } else {
+        j["complete"] = true;
     }
-    j["dps"] = damageSum / cntCompleted;
 
-    j["details"] = json::array();
+    j["list"] = json::array();
+    ull avg   = 0; // 平均值
+    for (int i = 0; i < cntCompleted; i++) {
+        j["list"].emplace_back(results[i]);
+        avg += results[i];
+    }
+    avg /= cntCompleted;
+    j["avg"] = avg;
+
+    ull sd = 0; // 标准差
+    for (int i = 0; i < cntCompleted; i++) {
+        sd += (results[i] - avg) * (results[i] - avg);
+    }
+    sd      = static_cast<ull>(std::sqrt(sd / cntCompleted));
+    j["sd"] = sd;
+
+    j["speed"]   = speedCurr;
+    j["current"] = cntCompleted;
+    j["total"]   = data.fightCount;
+
+    return j.dump();
+}
+
+std::string Task::queryDamageList() {
+    json j;
+    if (cntCompleted < CNT_DETAIL_TASKS && cntCompleted < data.fightCount) [[unlikely]] {
+        j["status"]  = 1; // 数据不足
+        j["content"] = "Data not available. Try again later.";
+        return j.dump();
+    }
+
+    std::lock_guard<std::mutex> lock(mutex);
+
+    j["status"] = 0; // 成功
+    j["data"]   = json::array();
     for (auto &everyFight : details) {
         json objFight = json::array();
         for (auto &everyDamage : everyFight) {
@@ -390,6 +434,78 @@ std::string Task::format() {
             objFight.emplace_back(objDamage);
         }
         j["details"].emplace_back(objFight);
+    }
+    return j.dump();
+}
+
+std::string Task::queryDamageAnalysis() {
+    json j;
+    if (cntCompleted < CNT_DETAIL_TASKS && cntCompleted < data.fightCount) [[unlikely]] {
+        j["status"]  = 1; // 数据不足
+        j["content"] = "Data not available. Try again later.";
+        return j.dump();
+    }
+
+    std::lock_guard<std::mutex> lock(mutex);
+
+    j["status"] = 0; // 成功
+    j["data"]   = json::array();
+
+    class DamageAnalysisItem {
+    public:
+        int         id;
+        int         level;
+        std::string name;
+        int         damageMin;
+        int         damageMax;
+        int         damageSum;
+    };
+    std::unordered_map<int, std::unordered_map<int, DamageAnalysisItem>> damageAnalysisMap;
+    ull                                                                  sumDamage = 0;
+    for (auto &everyFight : details) {
+        for (auto &everyDamage : everyFight) {
+            if (!damageAnalysisMap.contains(everyDamage.id) || !damageAnalysisMap.at(everyDamage.id).contains(everyDamage.level)) {
+                std::string name;
+                switch (everyDamage.source) {
+                case ns_frame::DamageSource::skill: {
+                    const ns_frame::UISkill &skill = ns_frame::UISkillManager::get(everyDamage.id, everyDamage.level);
+                    name                           = skill.Name;
+                } break;
+                case ns_frame::DamageSource::buff: {
+                    const ns_frame::UIBuff &buff = ns_frame::UIBuffManager::get(everyDamage.id, everyDamage.level);
+                    name                         = buff.Name;
+                } break;
+                default:
+                    break;
+                }
+                damageAnalysisMap[everyDamage.id][everyDamage.level] = DamageAnalysisItem{
+                    .id        = everyDamage.id,
+                    .level     = everyDamage.level,
+                    .name      = name,
+                    .damageMin = everyDamage.damageBase,
+                    .damageMax = everyDamage.damageCritical,
+                    .damageSum = everyDamage.damageExcept,
+                };
+            } else {
+                damageAnalysisMap[everyDamage.id][everyDamage.level].damageMin = std::min(damageAnalysisMap[everyDamage.id][everyDamage.level].damageMin, everyDamage.damageBase);
+                damageAnalysisMap[everyDamage.id][everyDamage.level].damageMax = std::max(damageAnalysisMap[everyDamage.id][everyDamage.level].damageMax, everyDamage.damageCritical);
+                damageAnalysisMap[everyDamage.id][everyDamage.level].damageSum += everyDamage.damageExcept;
+            }
+            sumDamage += everyDamage.damageExcept;
+        }
+    }
+    for (auto &it1 : damageAnalysisMap) {
+        for (auto &it2 : it1.second) {
+            auto &it = it2.second;
+            json  objDamage;
+            objDamage["id"]         = it.id;
+            objDamage["level"]      = it.level;
+            objDamage["name"]       = it.name;
+            objDamage["damageMin"]  = it.damageMin;
+            objDamage["damageMax"]  = it.damageMax;
+            objDamage["proportion"] = static_cast<double>(it.damageSum) / sumDamage;
+            j["data"].emplace_back(objDamage);
+        }
     }
     return j.dump();
 }
