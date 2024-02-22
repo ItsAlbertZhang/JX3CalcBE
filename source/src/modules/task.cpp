@@ -25,7 +25,7 @@ using ull = unsigned long long;
 
 constexpr int CNT_DETAIL_TASKS = 10;
 
-void ns_modules::web::task::server::run() {
+void ns_modules::web::task::server::asyncrun() {
     asio::co_spawn(
         io,
         [&]() -> asio::awaitable<void> {
@@ -218,7 +218,7 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
     task.results.reserve(task.data.fightCount);
     task.details.reserve(cntCalcDetail);
     int cntPre = 0;
-    while (task.cntCompleted >= 0 && task.cntCompleted < task.data.fightCount && !task.stop.load()) [[likely]] {
+    while (!task.stop.load() && task.cntCompleted < task.data.fightCount) [[likely]] {
         if (task.futures[task.cntCompleted].wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
             {
                 std::lock_guard<std::mutex> lock(task.mutex);
@@ -226,11 +226,6 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
                 task.cntCompleted++;
             }
         } else {
-            // 先检查是否需要停止
-            if (task.stop.load()) [[unlikely]] {
-                asyncStop(task);
-                co_return;
-            }
             {
                 std::lock_guard<std::mutex> lock(task.mutex);
                 task.speedCurr = task.cntCompleted - cntPre;
@@ -241,9 +236,11 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
             co_await timer.async_wait(asio::use_awaitable);
         }
     }
-    asio::steady_timer timer(io);
-    timer.expires_after(std::chrono::seconds{60}); // 等待 60 秒, 随后释放内存
-    co_await timer.async_wait(asio::use_awaitable);
+    if (!task.stop.load()) { // 正常结束
+        asio::steady_timer timer(io);
+        timer.expires_after(std::chrono::seconds{60}); // 等待 60 秒, 随后释放内存
+        co_await timer.async_wait(asio::use_awaitable);
+    }
     asyncStop(task);
 }
 

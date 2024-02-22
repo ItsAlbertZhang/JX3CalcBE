@@ -104,8 +104,8 @@ namespace server {
 
 inline std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
 
-void run();  // 开始运行任务模块
-void stop(); // 停止任务模块
+void asyncrun(); // 非阻塞异步启动任务模块.
+void stop();     // 停止任务模块并同步等待其退出.
 
 inline Pool              pool;
 inline std::thread       threadIO;

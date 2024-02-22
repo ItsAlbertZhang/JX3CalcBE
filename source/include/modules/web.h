@@ -17,13 +17,14 @@ namespace ns_modules {
 
 namespace web {
 
-inline std::thread threadWeb;
-void               entry();
-
 inline crow::App<crow::CORSHandler> app;
+inline std::thread                  threadApp;
+void                                threadAppEntry(); // 在另一个线程中进入, 因此是非阻塞的.
 
-void run();
-void stop();
+inline crow::App<crow::CORSHandler> manager;
+void                                managerEntry(); // 在当前线程中进入, 因此是阻塞的.
+
+void run(); // 阻塞式启动 web 服务.
 
 } // namespace web
 

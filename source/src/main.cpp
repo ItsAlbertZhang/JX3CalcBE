@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     // 初始化接口
     bool ret = gdi::initLua(ns_frame::luaInit, ns_frame::luaFuncStaticToDynamic);
     if (!ret) {
-        std::cerr << "初始化失败" << std::endl;
+        std::cerr << "Init failed." << std::endl;
 #ifdef _WIN32
         system("pause");
 #endif
@@ -28,12 +28,6 @@ int main(int argc, char *argv[]) {
     }
 
     ns_modules::web::run();
-    std::string s;
-    while (std::getline(std::cin, s)) {
-        if (s == "exit")
-            break;
-    }
-    ns_modules::web::stop();
 
     return 0;
 }
