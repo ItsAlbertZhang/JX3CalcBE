@@ -1,5 +1,6 @@
 #include "modules/web.h"
 #include "modules/task.h"
+#include "utils/config.h"
 #include <asio.hpp>
 #include <crow/mustache.h>
 #include <iostream>
@@ -25,10 +26,15 @@ void web::entry() {
     std::cout << "成功于 http://127.0.0.1:12897 上开启服务器, 按住 Ctrl 点击链接即可在浏览器中打开使用." << std::endl;
     std::cout << "Server started at http://127.0.0.1:12897 ." << std::endl;
 
-    CROW_ROUTE(app, "/setting")
+    CROW_ROUTE(app, "/config")
         .methods("POST"_method)([](const crow::request &req) {
-            UNREFERENCED_PARAMETER(req);
-            return crow::response{400, "text/plain", "setting is unavailable now."};
+            static bool isConfigAvailable = true;
+            if (isConfigAvailable) {
+                isConfigAvailable = false;
+                ns_utils::config::initDataFromString(req.body);
+                return crow::response{200, "application/json", R"({"status":0,"content":"OK"})"};
+            }
+            return crow::response{200, "application/json", R"({"status":-1,"content":"config is unavailable now"})"};
         });
 
     CROW_ROUTE(app, "/version")

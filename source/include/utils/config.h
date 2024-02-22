@@ -7,9 +7,8 @@
 namespace ns_utils {
 namespace config {
 
-inline std::filesystem::path pExeDir; // 可执行文件所在目录的路径
-inline std::filesystem::path pUnpack; // 未打包的数据目录
-inline std::filesystem::path pJX3;    // 已打包的数据目录
+inline std::filesystem::path pExeDir;               // 可执行文件所在目录的路径
+inline bool                  dataAvailable = false; // 数据是否已经初始化
 
 namespace taskdata {
 
@@ -21,11 +20,14 @@ inline bool allowCustomMacro = true;    // 是否允许自定义宏
 
 } // namespace taskdata
 
-// 初始化环境.
-void init(int argc, char *argv[]);
+// 初始化 exe 目录
+void initExeDir(int argc, char *argv[]);
 
-// 加载配置文件
-void load();
+// 从配置文件中初始化数据
+void initDataFromLocalFile();
+
+// 从字符串中初始化数据, 并保存为配置文件
+void initDataFromString(const std::string &jsonstr);
 
 }; // namespace config
 } // namespace ns_utils

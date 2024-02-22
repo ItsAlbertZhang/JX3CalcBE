@@ -12,20 +12,15 @@ int main(int argc, char *argv[]) {
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
 #endif
-    bool ret;
+
     // 初始化程序
-    ns_utils::config::init(argc, argv);
+    ns_utils::config::initExeDir(argc, argv);
+    // 尝试从配置文件中初始化数据
+    ns_utils::config::initDataFromLocalFile();
     // 初始化接口
-    ret = gdi::init(
-        ns_utils::config::pJX3,
-        ns_utils::config::pUnpack,
-        ns_frame::luaInit,
-        ns_frame::luaFuncStaticToDynamic,
-        static_cast<int>(gdi::Tab::COUNT)
-    );
+    bool ret = gdi::initLua(ns_frame::luaInit, ns_frame::luaFuncStaticToDynamic);
     if (!ret) {
-        std::cout << "Error: 初始化失败! 请检查 config.json 中的游戏路径是否正确, 尤其检查正反斜杠问题 (路径的分隔使用正斜杠 '/' 或双反斜杠 '\\\\')." << std::endl;
-        std::cout << "Error: Init failed! Check config.json, especially the \"JX3Dir\" (use '/' or '\\\\' as path separator)." << std::endl;
+        std::cerr << "初始化失败" << std::endl;
 #ifdef _WIN32
         system("pause");
 #endif

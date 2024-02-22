@@ -1,7 +1,6 @@
 #ifndef LIB_GDI_H
 #define LIB_GDI_H
 
-#include <filesystem>
 #include <memory>
 #include <sol/sol.hpp>
 #include <string>
@@ -33,20 +32,23 @@ enum class Tab {
 using luaInit_t = std::shared_ptr<sol::state> (*)();
 
 /**
- * @brief 初始化 gdi 库
- * @param dataPathJX3           剑网3 (JX3) 目录. 该项可以为空, 但不可与 dataPathUnpacked 同时为空.
- * @param dataPathUnpacked      未打包的数据目录. 该项可以为空, 但不可与 dataPathJX3 同时为空.
- * @param luaInit               lua 初始化函数指针, 其应当在正确运行时返回 true.
- * @param luaFuncNeedConvert    需要从静态转换至动态的 lua 函数列表
- * @param tabCount              表的数量
- * @warning 这个函数只需要在主线程中调用一次!
+ * @brief 初始化 data.
+ * @param dataPathJX3    剑网3 (JX3) 目录. 该项可以为空, 但不可与 dataPathUnpack 同时为空.
+ * @param dataPathUnpack 未打包的数据目录. 该项可以为空, 但不可与 dataPathJX3 同时为空.
+ * @warning 传入的路径应当是 utf-8 编码的路径.
  */
-bool init(
-    const std::filesystem::path    &dataPathJX3,
-    const std::filesystem::path    &dataPathUnpacked,
+bool initData(
+    const std::string &dataPathJX3,
+    const std::string &dataPathUnpack
+);
+/**
+ * @brief 初始化 lua
+ * @param luaInit            lua 初始化函数指针, 其应当在正确运行时返回一个非 nullptr 的 std::shared_ptr<sol::state>
+ * @param luaFuncNeedConvert 需要从静态转换至动态的 lua 函数列表
+ */
+bool initLua(
     luaInit_t                       luaInit,
-    const std::vector<std::string> &luaFuncNeedConvert,
-    int                             tabCount
+    const std::vector<std::string> &luaFuncNeedConvert
 );
 
 /**

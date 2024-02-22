@@ -74,6 +74,7 @@ inline const std::unordered_map<std::string, AttributeType> refAttributeType{
 
 enum class ResponseStatus {
     success,
+    config_error,
     parse_error,
     missing_field,
     invalid_player,

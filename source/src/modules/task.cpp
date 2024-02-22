@@ -248,6 +248,12 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
 }
 
 Response ns_modules::web::task::create(const std::string &jsonstr) {
+    // 验证数据可用性
+    if (!ns_utils::config::dataAvailable) [[unlikely]]
+        return Response{
+            .status  = ResponseStatus::config_error,
+            .content = "Data not available. Please config.",
+        };
     // 验证 json
     auto res = validate(jsonstr);
     if (res.status != ResponseStatus::success) [[unlikely]]
