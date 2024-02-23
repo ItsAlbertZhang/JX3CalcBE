@@ -86,11 +86,11 @@ enum class ResponseStatus {
 class Response {
 public:
     ResponseStatus status;
-    std::string    content;
+    std::string    data;
     std::string    format() {
         nlohmann::json j;
-        j["status"]  = static_cast<int>(status);
-        j["content"] = content;
+        j["status"] = static_cast<int>(status);
+        j["data"]   = data;
         return j.dump();
     }
 };

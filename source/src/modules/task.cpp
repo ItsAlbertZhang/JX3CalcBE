@@ -61,8 +61,8 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         j = json::parse(jsonstr);
     } catch (...) {
         return Response{
-            .status  = ResponseStatus::parse_error,
-            .content = "json parse error",
+            .status = ResponseStatus::parse_error,
+            .data   = "json parse error",
         };
     }
     // 检查字段
@@ -73,8 +73,8 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
     for (auto &it : required) {
         if (!j.contains(it)) {
             return Response{
-                .status  = ResponseStatus::missing_field,
-                .content = fmt::format("missing required field: {}", it),
+                .status = ResponseStatus::missing_field,
+                .data   = fmt::format("missing required field: {}", it),
             };
         }
     }
@@ -82,37 +82,37 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
     // 2.1 检查 player
     if (!j["player"].is_string() || !ns_concrete::refPlayerType.contains(j["player"].get<std::string>())) {
         return Response{
-            .status  = ResponseStatus::invalid_player,
-            .content = "player invalid",
+            .status = ResponseStatus::invalid_player,
+            .data   = "player invalid",
         };
     }
     // 2.2 检查 delayNetwork, delayKeyboard, fightTime, fightCount
     if (!j["delayNetwork"].is_number_integer() || j["delayNetwork"].get<int>() < 0 ||
         j["delayNetwork"].get<int>() > ns_utils::config::taskdata::maxDelayNetwork) {
         return Response{
-            .status  = ResponseStatus::invalid_interger,
-            .content = "delayNetwork invalid",
+            .status = ResponseStatus::invalid_interger,
+            .data   = "delayNetwork invalid",
         };
     }
     if (!j["delayKeyboard"].is_number_integer() || j["delayKeyboard"].get<int>() < 0 ||
         j["delayKeyboard"].get<int>() > ns_utils::config::taskdata::maxDelayKeyboard) {
         return Response{
-            .status  = ResponseStatus::invalid_interger,
-            .content = "delayKeyboard invalid",
+            .status = ResponseStatus::invalid_interger,
+            .data   = "delayKeyboard invalid",
         };
     }
     if (!j["fightTime"].is_number_integer() || j["fightTime"].get<int>() < 0 ||
         j["fightTime"].get<int>() > ns_utils::config::taskdata::maxFightTime) {
         return Response{
-            .status  = ResponseStatus::invalid_interger,
-            .content = "fightTime invalid",
+            .status = ResponseStatus::invalid_interger,
+            .data   = "fightTime invalid",
         };
     }
     if (!j["fightCount"].is_number_integer() || j["fightCount"].get<int>() < 0 ||
         j["fightCount"].get<int>() > ns_utils::config::taskdata::maxFightCount) {
         return Response{
-            .status  = ResponseStatus::invalid_interger,
-            .content = "fightCount invalid",
+            .status = ResponseStatus::invalid_interger,
+            .data   = "fightCount invalid",
         };
     }
     // 2.3 检查 attribute
@@ -120,8 +120,8 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         !refAttributeType.contains(j["attribute"]["method"].get<std::string>()) ||
         !j["attribute"].contains("data") || !j["attribute"]["data"].is_object()) {
         return Response{
-            .status  = ResponseStatus::invalid_attribute_method,
-            .content = "attribute method invalid",
+            .status = ResponseStatus::invalid_attribute_method,
+            .data   = "attribute method invalid",
         };
     }
     AttributeType type = refAttributeType.at(j["attribute"]["method"].get<std::string>());
@@ -129,30 +129,30 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
     case AttributeType::jx3box: {
         if (!j["attribute"]["data"].contains("pzid") || !j["attribute"]["data"]["pzid"].is_string()) {
             return Response{
-                .status  = ResponseStatus::invalid_attribute_data,
-                .content = "attribute data invalid",
+                .status = ResponseStatus::invalid_attribute_data,
+                .data   = "attribute data invalid",
             };
         }
     } break;
     default:
         return Response{
-            .status  = ResponseStatus::invalid_attribute_method,
-            .content = "attribute method invalid",
+            .status = ResponseStatus::invalid_attribute_method,
+            .data   = "attribute method invalid",
         };
         break;
     }
     // 2.4 检查 effects
     if (!j["effects"].is_array()) {
         return Response{
-            .status  = ResponseStatus::invalid_effects,
-            .content = "effects invalid",
+            .status = ResponseStatus::invalid_effects,
+            .data   = "effects invalid",
         };
     }
     for (auto &it : j["effects"]) {
         if (!it.is_string() || !ns_concrete::refEffectType.contains(it.get<std::string>())) {
             return Response{
-                .status  = ResponseStatus::invalid_effects,
-                .content = fmt::format("effects invalid: {}", it.get<std::string>()),
+                .status = ResponseStatus::invalid_effects,
+                .data   = fmt::format("effects invalid: {}", it.get<std::string>()),
             };
         }
     }
@@ -248,8 +248,8 @@ Response ns_modules::task::create(const std::string &jsonstr) {
     // 验证数据可用性
     if (!ns_utils::config::dataAvailable) [[unlikely]]
         return Response{
-            .status  = ResponseStatus::config_error,
-            .content = "Data not available. Please config.",
+            .status = ResponseStatus::config_error,
+            .data   = "Data not available. Please config.",
         };
     // 验证 json
     auto res = validate(jsonstr);
@@ -261,16 +261,16 @@ Response ns_modules::task::create(const std::string &jsonstr) {
     auto taskdata = createTaskData(j);
     if (!taskdata.has_value()) [[unlikely]]
         return Response{
-            .status  = ResponseStatus::create_data_error,
-            .content = "An error occurred while creating task data. Please try again later.",
+            .status = ResponseStatus::create_data_error,
+            .data   = "An error occurred while creating task data. Please try again later.",
         };
 
     auto  id = genID();
     auto &it = server::taskMap.emplace(id, std::make_unique<Task>(id, std::move(taskdata.value()))).first->second;
     asio::co_spawn(server::io, asyncRun(server::io, *it), asio::detached);
     return Response{
-        .status  = ResponseStatus::success,
-        .content = id,
+        .status = ResponseStatus::success,
+        .data   = id,
     };
 }
 
@@ -359,39 +359,40 @@ using json = nlohmann::json;
 std::string Task::queryDPS() {
     json j;
     if (cntCompleted == 0) [[unlikely]] {
-        j["status"]  = 1; // 无数据
-        j["content"] = "No data available.";
+        j["status"] = 1; // 无数据
+        j["data"]   = "No data available.";
         return j.dump();
     }
 
     std::lock_guard<std::mutex> lock(mutex);
 
     j["status"] = 0; // 成功
+    j["data"]   = json::object();
     if (cntCompleted < data.fightCount) [[likely]] {
-        j["complete"] = false;
+        j["data"]["complete"] = false;
     } else {
-        j["complete"] = true;
+        j["data"]["complete"] = true;
     }
 
-    j["list"] = json::array();
-    ull avg   = 0; // 平均值
+    j["data"]["list"] = json::array();
+    ull avg           = 0; // 平均值
     for (int i = 0; i < cntCompleted; i++) {
-        j["list"].emplace_back(results[i]);
+        j["data"]["list"].emplace_back(results[i]);
         avg += results[i];
     }
     avg /= cntCompleted;
-    j["avg"] = avg;
+    j["data"]["avg"] = avg;
 
     ull sd = 0; // 标准差
     for (int i = 0; i < cntCompleted; i++) {
         sd += (results[i] - avg) * (results[i] - avg);
     }
-    sd      = static_cast<ull>(std::sqrt(sd / cntCompleted));
-    j["sd"] = sd;
+    sd              = static_cast<ull>(std::sqrt(sd / cntCompleted));
+    j["data"]["sd"] = sd;
 
-    j["speed"]   = speedCurr;
-    j["current"] = cntCompleted;
-    j["total"]   = data.fightCount;
+    j["data"]["speed"]   = speedCurr;
+    j["data"]["current"] = cntCompleted;
+    j["data"]["total"]   = data.fightCount;
 
     return j.dump();
 }
@@ -399,8 +400,8 @@ std::string Task::queryDPS() {
 std::string Task::queryDamageList() {
     json j;
     if (cntCompleted < CNT_DETAIL_TASKS && cntCompleted < data.fightCount) [[unlikely]] {
-        j["status"]  = 1; // 数据不足
-        j["content"] = "Data not available. Try again later.";
+        j["status"] = 1; // 数据不足
+        j["data"]   = "Data not available. Try again later.";
         return j.dump();
     }
 
@@ -436,7 +437,7 @@ std::string Task::queryDamageList() {
             objDamage["name"]           = name;
             objFight.emplace_back(objDamage);
         }
-        j["details"].emplace_back(objFight);
+        j["data"].emplace_back(objFight);
     }
     return j.dump();
 }
@@ -444,8 +445,8 @@ std::string Task::queryDamageList() {
 std::string Task::queryDamageAnalysis() {
     json j;
     if (cntCompleted < CNT_DETAIL_TASKS && cntCompleted < data.fightCount) [[unlikely]] {
-        j["status"]  = 1; // 数据不足
-        j["content"] = "Data not available. Try again later.";
+        j["status"] = 1; // 数据不足
+        j["data"]   = "Data not available. Try again later.";
         return j.dump();
     }
 
