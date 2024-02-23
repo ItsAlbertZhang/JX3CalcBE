@@ -20,12 +20,12 @@ namespace fmt = std;
 #include <fmt/core.h>
 #endif
 
-using namespace ns_modules::web::task;
+using namespace ns_modules::task;
 using ull = unsigned long long;
 
 constexpr int CNT_DETAIL_TASKS = 10;
 
-void ns_modules::web::task::server::asyncrun() {
+void ns_modules::task::server::asyncrun() {
     asio::co_spawn(
         io,
         [&]() -> asio::awaitable<void> {
@@ -42,7 +42,7 @@ void ns_modules::web::task::server::asyncrun() {
     });
 }
 
-void ns_modules::web::task::server::stop() {
+void ns_modules::task::server::stop() {
     for (auto &task : taskMap)
         task::stop(task.first);
     iostop.store(true);
@@ -53,7 +53,7 @@ static int         calcBrief(const Data &arg);
 static int         calcDetail(const Data &data, ns_frame::ChDamage *detail);
 static std::string genID(int length = 6);
 
-Response ns_modules::web::task::validate(const std::string &jsonstr) {
+Response ns_modules::task::validate(const std::string &jsonstr) {
     using json = nlohmann::json;
     // 解析 json
     json j;
@@ -198,14 +198,14 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
 }
 
 static void asyncStop(Task &task) {
-    using namespace ns_modules::web::task;
+    using namespace ns_modules::task;
     task.futures.clear();
     server::pool.erase(task.id);
     server::taskMap.erase(task.id);
 }
 
 static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
-    using namespace ns_modules::web::task;
+    using namespace ns_modules::task;
 
     // 在线程池中创建任务
     const int cntCalcDetail = task.data.fightCount > CNT_DETAIL_TASKS ? CNT_DETAIL_TASKS : task.data.fightCount;
@@ -244,7 +244,7 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
     asyncStop(task);
 }
 
-Response ns_modules::web::task::create(const std::string &jsonstr) {
+Response ns_modules::task::create(const std::string &jsonstr) {
     // 验证数据可用性
     if (!ns_utils::config::dataAvailable) [[unlikely]]
         return Response{
@@ -274,7 +274,7 @@ Response ns_modules::web::task::create(const std::string &jsonstr) {
     };
 }
 
-void ns_modules::web::task::stop(std::string id) {
+void ns_modules::task::stop(std::string id) {
     if (!server::taskMap.contains(id)) [[unlikely]]
         return;
     server::taskMap.at(id)->stop.store(true); // 真正的停止操作在 asyncRun 中
@@ -346,7 +346,7 @@ static std::string genID(int length) {
     std::uniform_int_distribution<> distribution(0, static_cast<int>(CHARACTERS.size() - 1));
 
     std::string random_string;
-    while (random_string.empty() || ns_modules::web::task::server::taskMap.contains(random_string)) {
+    while (random_string.empty() || ns_modules::task::server::taskMap.contains(random_string)) {
         for (size_t i = 0; i < length; ++i) {
             random_string += CHARACTERS[distribution(generator)];
         }

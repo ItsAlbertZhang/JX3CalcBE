@@ -21,7 +21,6 @@
 
 namespace ns_modules {
 
-namespace web {
 namespace task {
 
 class Data {
@@ -104,8 +103,8 @@ namespace server {
 
 inline std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
 
-void asyncrun(); // 非阻塞异步启动任务模块.
-void stop();     // 停止任务模块并同步等待其退出.
+void asyncrun(); // 非阻塞异步启动子线程任务模块.
+void stop();     // 停止子线程任务模块并同步等待其退出.
 
 inline Pool              pool;
 inline std::thread       threadIO;
@@ -115,7 +114,6 @@ inline std::atomic<bool> iostop{false};
 } // namespace server
 
 } // namespace task
-} // namespace web
 
 } // namespace ns_modules
 
