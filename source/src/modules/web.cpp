@@ -22,6 +22,13 @@ web::WebApp::WebApp() {
             return crow::response{200, "text/plain", version};
         });
 
+    CROW_ROUTE(app, "/available")
+        .methods("GET"_method)([]() {
+            const std::string t = R"({"status":0})";
+            const std::string f = R"({"status":-1})";
+            return crow::response{200, "application/json", ns_utils::config::dataAvailable ? t : f};
+        });
+
     CROW_ROUTE(app, "/create")
         .methods("POST"_method)([](const crow::request &req) {
             auto res = task::create(req.body);
