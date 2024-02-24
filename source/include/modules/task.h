@@ -109,7 +109,6 @@ void stop();     // 停止子线程任务模块并同步等待其退出.
 inline Pool              pool;
 inline std::thread       threadIO;
 inline asio::io_context  io;
-inline std::atomic<bool> iostop{false};
 
 } // namespace server
 

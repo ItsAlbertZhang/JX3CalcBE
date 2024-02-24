@@ -30,7 +30,7 @@ void ns_modules::task::server::asyncrun() {
         io,
         [&]() -> asio::awaitable<void> {
             asio::steady_timer timer(io);
-            while (!iostop.load()) {
+            while (true) {
                 timer.expires_after(std::chrono::seconds(1));
                 co_await timer.async_wait(asio::use_awaitable);
             }
@@ -45,7 +45,7 @@ void ns_modules::task::server::asyncrun() {
 void ns_modules::task::server::stop() {
     for (auto &task : taskMap)
         task::stop(task.first);
-    iostop.store(true);
+    io.stop();
     threadIO.join();
 }
 
