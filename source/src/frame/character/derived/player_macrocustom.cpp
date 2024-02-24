@@ -110,6 +110,7 @@ static void constructorBefore(MacroCustom *self) {
         "fMaxLife64", &Player::fMaxLife64,
         "fCurrentLife64", &Player::fCurrentLife64,
         "dwKungfuID", &Player::dwKungfuID,
+        "attrImportFromData", &Player::attrImportFromData,
         "attrImportFromJX3BOX", &Player::attrImportFromJX3BOX,
         "cast", &Player::cast,
         "skillActive", &Player::skillActive,

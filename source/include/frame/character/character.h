@@ -62,6 +62,7 @@ public:
     static int        characterGetID(Character *character);
     static Character *characterGet(int nCharacterID);
     // attr
+    bool              attrImportFromData(std::string dataJsonStr);
     bool              attrImportFromJX3BOX(std::string pzID);
     bool              attrImportFromBackup(const ChAttr &attr);
     // buff

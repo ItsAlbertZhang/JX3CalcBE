@@ -62,12 +62,12 @@ public:
 };
 
 enum class AttributeType {
-    // zero,
+    data,
     jx3box,
     COUNT,
 };
 inline const std::unordered_map<std::string, AttributeType> refAttributeType{
-  // {"未启用",       AttributeType::jx3box},
+    {"从数据导入", AttributeType::data  },
     {"从JX3BOX导入", AttributeType::jx3box},
 };
 
@@ -106,9 +106,9 @@ inline std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
 void asyncrun(); // 非阻塞异步启动子线程任务模块.
 void stop();     // 停止子线程任务模块并同步等待其退出.
 
-inline Pool              pool;
-inline std::thread       threadIO;
-inline asio::io_context  io;
+inline Pool             pool;
+inline std::thread      threadIO;
+inline asio::io_context io;
 
 } // namespace server
 

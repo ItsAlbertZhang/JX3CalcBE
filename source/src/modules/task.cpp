@@ -126,6 +126,8 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
     }
     AttributeType type = refAttributeType.at(j["attribute"]["method"].get<std::string>());
     switch (type) {
+    case AttributeType::data:
+        break;
     case AttributeType::jx3box: {
         if (!j["attribute"]["data"].contains("pzid") || !j["attribute"]["data"]["pzid"].is_string()) {
             return Response{
@@ -169,6 +171,12 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
 
     auto attrType = refAttributeType.at(j["attribute"]["method"].get<std::string>());
     switch (attrType) {
+    case AttributeType::data: {
+        std::string dataJsonStr = j["attribute"]["data"].dump();
+        if (!player->attrImportFromData(dataJsonStr)) {
+            return std::nullopt;
+        }
+    } break;
     case AttributeType::jx3box: {
         std::string pzid = j["attribute"]["data"]["pzid"].get<std::string>();
         if (!player->attrImportFromJX3BOX(pzid)) {
