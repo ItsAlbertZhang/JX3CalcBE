@@ -185,6 +185,12 @@ public:
     int getNeutralAttackPower() const; // 获取混元内功攻击
     int getPoisonAttackPower() const;  // 获取毒性内功攻击
 
+    int getPhysicsCriticalStrikeValue() const; // 获取外功会心等级. 结果为数值.
+    int getSolarCriticalStrikeValue() const;   // 获取阳性内功会心等级. 结果为数值.
+    int getLunarCriticalStrikeValue() const;   // 获取阴性内功会心等级. 结果为数值.
+    int getNeutralCriticalStrikeValue() const; // 获取混元内功会心等级. 结果为数值.
+    int getPoisonCriticalStrikeValue() const;  // 获取毒性内功会心等级. 结果为数值.
+
     int getPhysicsCriticalStrike() const; // 获取外功会心. 结果为万分数, 这符合游戏内的实际原理.
     int getSolarCriticalStrike() const;   // 获取阳性内功会心. 结果为万分数, 这符合游戏内的实际原理.
     int getLunarCriticalStrike() const;   // 获取阴性内功会心. 结果为万分数, 这符合游戏内的实际原理.

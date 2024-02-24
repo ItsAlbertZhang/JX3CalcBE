@@ -36,11 +36,17 @@ static void attrImport(Character *self, const json &j) {
     self->chAttr.atPoisonAttackPowerBase  = selectPrecise(j, "PoisonAttackPowerBase");  // 毒性内功基础攻击
     self->chAttr.atTherapyPowerBase       = selectPrecise(j, "TherapyPowerBase");       // 治疗量
 
-    self->chAttr.atPhysicsCriticalStrike = selectPrecise(j, "PhysicsCriticalStrike"); // 外功会心等级
-    self->chAttr.atSolarCriticalStrike   = selectPrecise(j, "SolarCriticalStrike");   // 阳性内功会心等级
-    self->chAttr.atLunarCriticalStrike   = selectPrecise(j, "LunarCriticalStrike");   // 阴性内功会心等级
-    self->chAttr.atNeutralCriticalStrike = selectPrecise(j, "NeutralCriticalStrike"); // 混元内功会心等级
-    self->chAttr.atPoisonCriticalStrike  = selectPrecise(j, "PoisonCriticalStrike");  // 毒性内功会心等级
+    // 额外处理心法转换的会心. 攻击和破防不需要额外处理, 因为这两者均区分基础/额外.
+    self->chAttr.atPhysicsCriticalStrike = 0; // 外功会心等级
+    self->chAttr.atPhysicsCriticalStrike = selectPrecise(j, "PhysicsCriticalStrike") - self->chAttr.getPhysicsCriticalStrikeValue();
+    self->chAttr.atSolarCriticalStrike   = 0; // 阳性内功会心等级
+    self->chAttr.atSolarCriticalStrike   = selectPrecise(j, "SolarCriticalStrike") - self->chAttr.getSolarCriticalStrikeValue();
+    self->chAttr.atLunarCriticalStrike   = 0; // 阴性内功会心等级
+    self->chAttr.atLunarCriticalStrike   = selectPrecise(j, "LunarCriticalStrike") - self->chAttr.getLunarCriticalStrikeValue();
+    self->chAttr.atNeutralCriticalStrike = 0; // 混元内功会心等级
+    self->chAttr.atNeutralCriticalStrike = selectPrecise(j, "NeutralCriticalStrike") - self->chAttr.getNeutralCriticalStrikeValue();
+    self->chAttr.atPoisonCriticalStrike  = 0; // 毒性内功会心等级
+    self->chAttr.atPoisonCriticalStrike  = selectPrecise(j, "PoisonCriticalStrike") - self->chAttr.getPoisonCriticalStrikeValue();
 
     self->chAttr.atPhysicsCriticalDamagePowerBase = selectPrecise(j, "PhysicsCriticalDamagePower"); // 外功会心效果等级
     self->chAttr.atSolarCriticalDamagePowerBase   = selectPrecise(j, "SolarCriticalDamagePower");   // 阳性内功会心效果等级

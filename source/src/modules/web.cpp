@@ -18,7 +18,7 @@ web::WebApp::WebApp() {
     task::server::asyncrun();
     CROW_ROUTE(app, "/version")
         .methods("GET"_method)([]() {
-            static const std::string version = "24022101";
+            static const std::string version = "24022501";
             return crow::response{200, "text/plain", version};
         });
 

@@ -53,40 +53,57 @@ int ChAttr::getPoisonAttackPower() const {
                (atPoisonAttackPowerPercent + atMagicAttackPowerPercent) / 1024;
 }
 
+// 会心等级
+int ChAttr::getPhysicsCriticalStrikeValue() const {
+    return atPhysicsCriticalStrike + atAllTypeCriticalStrike + atPhysicsCriticalStrikeAdd;
+}
+int ChAttr::getSolarCriticalStrikeValue() const {
+    return atSolarCriticalStrike + atAllTypeCriticalStrike + atMagicCriticalStrike + atSolarCriticalStrikeAdd +
+           atSpunkToSolarAndLunarCriticalStrikeCof * getSpunk() / 1024;
+}
+int ChAttr::getLunarCriticalStrikeValue() const {
+    return atLunarCriticalStrike + atAllTypeCriticalStrike + atMagicCriticalStrike + atLunarCriticalStrikeAdd +
+           atSpunkToSolarAndLunarCriticalStrikeCof * getSpunk() / 1024;
+}
+int ChAttr::getNeutralCriticalStrikeValue() const {
+    return atNeutralCriticalStrike + atAllTypeCriticalStrike + atMagicCriticalStrike + atNeutralCriticalStrikeAdd;
+}
+int ChAttr::getPoisonCriticalStrikeValue() const {
+    return atPoisonCriticalStrike + atAllTypeCriticalStrike + atMagicCriticalStrike + atPoisonCriticalStrikeAdd;
+}
+
 // 会心
 int ChAttr::getPhysicsCriticalStrike() const {
     int res;
-    res = atPhysicsCriticalStrike + atAllTypeCriticalStrike + atPhysicsCriticalStrikeAdd;
+    res = getPhysicsCriticalStrikeValue();
     res = static_cast<int>(res * 10000 / (GlobalParam::get().fCriticalStrikeParam * GlobalParam::levelCof(atLevel))) +
           atPhysicsCriticalStrikeBaseRate;
     return res;
 }
 int ChAttr::getSolarCriticalStrike() const {
     int res;
-    res = atSolarCriticalStrike + atAllTypeCriticalStrike + atMagicCriticalStrike + atSolarCriticalStrikeAdd +
-          atSpunkToSolarAndLunarCriticalStrikeCof * getSpunk() / 1024;
+    res = getSolarCriticalStrikeValue();
     res = static_cast<int>(res * 10000 / (GlobalParam::get().fCriticalStrikeParam * GlobalParam::levelCof(atLevel))) +
           atSolarCriticalStrikeBaseRate;
     return res;
 }
 int ChAttr::getLunarCriticalStrike() const {
     int res;
-    res = atLunarCriticalStrike + atAllTypeCriticalStrike + atMagicCriticalStrike + atLunarCriticalStrikeAdd +
-          atSpunkToSolarAndLunarCriticalStrikeCof * getSpunk() / 1024;
+    res = getLunarCriticalStrikeValue();
     res = static_cast<int>(res * 10000 / (GlobalParam::get().fCriticalStrikeParam * GlobalParam::levelCof(atLevel))) +
           atLunarCriticalStrikeBaseRate;
     return res;
 }
 int ChAttr::getNeutralCriticalStrike() const {
     int res;
-    res = atNeutralCriticalStrike + atAllTypeCriticalStrike + atMagicCriticalStrike + atNeutralCriticalStrikeAdd;
+    res = getNeutralCriticalStrikeValue();
     res = static_cast<int>(res * 10000 / (GlobalParam::get().fCriticalStrikeParam * GlobalParam::levelCof(atLevel))) +
           atNeutralCriticalStrikeBaseRate;
     return res;
 }
 int ChAttr::getPoisonCriticalStrike() const {
     int res;
-    res = atPoisonCriticalStrike + atAllTypeCriticalStrike + atMagicCriticalStrike + atPoisonCriticalStrikeAdd;
+    res = getPoisonCriticalStrikeValue();
     res = static_cast<int>(res * 10000 / (GlobalParam::get().fCriticalStrikeParam * GlobalParam::levelCof(atLevel))) +
           atPoisonCriticalStrikeBaseRate;
     return res;
