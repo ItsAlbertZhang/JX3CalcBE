@@ -190,7 +190,11 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
 
     std::vector<std::shared_ptr<ns_concrete::EffectBase>> effectList;
     for (auto &x : j["effects"].items()) {
-        effectList.emplace_back(ns_concrete::createEffect(ns_concrete::refEffectType.at(x.value().get<std::string>())));
+        auto effect = ns_concrete::createEffect(ns_concrete::refEffectType.at(x.value().get<std::string>()));
+        if (effect == nullptr) [[unlikely]] {
+            return std::nullopt; // 代码未出错的情况下, 不可能出现此情况, 因为 validate 已经验证过了
+        }
+        effectList.emplace_back(std::move(effect));
     }
 
     return Data{

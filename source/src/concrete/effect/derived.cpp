@@ -25,3 +25,12 @@ void Effect套装·特效::active(ns_frame::Character *obj) const {
 void Effect武器·橙武::active(ns_frame::Character *obj) const {
     obj->skilleventAdd(2421);
 }
+
+void Effect武器·水特效::active(ns_frame::Character *obj) const {
+    obj->chAttr.atPhysicsAttackPowerBase += 0; // 外功数值懒得找了, 后面如果做外功的水特效再补上
+    obj->chAttr.atMagicAttackPowerBase += 1170;
+}
+
+void Effect家园酒·加速::active(ns_frame::Character *obj) const {
+    obj->chAttr.atHasteBase += 286;
+}

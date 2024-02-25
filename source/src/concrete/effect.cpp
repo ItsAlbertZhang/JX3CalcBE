@@ -1,5 +1,5 @@
-#include "concrete/effect/derived.h"
 #include "concrete/effect/effect.h"
+#include "concrete/effect/derived.h"
 
 using namespace ns_concrete;
 
@@ -17,6 +17,10 @@ std::shared_ptr<EffectBase> ns_concrete::createEffect(EffectType type) {
         return std::make_shared<Effect套装·特效>();
     // case EffectType::武器·橙武:
     //     return std::make_shared<Effect武器·橙武>();
+    case EffectType::武器·水特效:
+        return std::make_shared<Effect武器·水特效>();
+    case EffectType::家园酒·加速:
+        return std::make_shared<Effect家园酒·加速>();
     default:
         return nullptr;
     }

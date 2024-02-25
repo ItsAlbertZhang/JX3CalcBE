@@ -63,8 +63,7 @@ static void attrImport(Character *self, const json &j) {
     self->chAttr.atSurplusValueBase = selectPrecise(j, "SurplusValue"); // 破招值
     self->chAttr.atStrainBase       = selectPrecise(j, "Strain");       // 无双等级
 
-    // self->chAttr.atHasteBase = selectPrecise(j, "Haste"); // 基础加速等级
-    self->chAttr.atHasteBase = 95; // TODO: 加速酒还没做 (还有网络延迟)
+    self->chAttr.atHasteBase = selectPrecise(j, "Haste"); // 基础加速等级
 
     self->chAttr.atPhysicsShieldBase = selectPrecise(j, "PhysicsShieldBase"); // 外功基础防御等级
 
