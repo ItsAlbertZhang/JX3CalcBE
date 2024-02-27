@@ -5,54 +5,83 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 namespace fs = std::filesystem;
+using namespace ns_utils;
+using json = nlohmann::json;
 
-// 初始化 exe 目录
-void ns_utils::config::initExeDir(int argc, char *argv[]) {
-    UNREFERENCED_PARAMETER(argc);
-    pExeDir = fs::absolute(argv[0]).parent_path();
-}
+const std::string version = "24022701";
 
-// 从配置文件中初始化数据
-void ns_utils::config::initDataFromLocalFile() {
-    fs::path pathConfig = pExeDir / "config.json";
-    if (!fs::exists(pathConfig)) {
-        return;
-    }
-    std::ifstream  fileConfig(pathConfig);
-    nlohmann::json j;
-    fileConfig >> j;
+static void
+initFromJson(const json &j) {
     std::string spJX3;
     std::string spUnpack;
-    if (j.contains("JX3Dir")) {
+    if (j.contains("JX3Dir") && j["JX3Dir"].is_string()) {
         spJX3 = j["JX3Dir"].get<std::string>();
     }
-    if (j.contains("UnpackDir")) {
+    if (j.contains("UnpackDir") && j["UnpackDir"].is_string()) {
         spUnpack = j["UnpackDir"].get<std::string>();
     }
-    gdi::initData(spJX3, spUnpack);
-    dataAvailable = true;
+    config::dataAvailable = gdi::initData(spJX3, spUnpack);
+
+    if (j.contains("maxDelayNetwork") && j["maxDelayNetwork"].is_number_integer()) {
+        config::taskdata::maxDelayNetwork = j["maxDelayNetwork"].get<int>();
+    }
+    if (j.contains("maxDelayKeyboard") && j["maxDelayKeyboard"].is_number_integer()) {
+        config::taskdata::maxDelayKeyboard = j["maxDelayKeyboard"].get<int>();
+    }
+    if (j.contains("maxFightTime") && j["maxFightTime"].is_number_integer()) {
+        config::taskdata::maxFightTime = j["maxFightTime"].get<int>();
+    }
+    if (j.contains("maxFightCount") && j["maxFightCount"].is_number_integer()) {
+        config::taskdata::maxFightCount = j["maxFightCount"].get<int>();
+    }
 }
 
-// 从字符串中初始化数据, 并保存为配置文件
-bool ns_utils::config::initDataFromString(const std::string &jsonstr) {
+void config::init(int argc, char *argv[]) {
+    UNREFERENCED_PARAMETER(argc);
+    pExeDir = fs::absolute(argv[0]).parent_path();
+    json     j;
+    fs::path pathConfig = pExeDir / "config.json";
+    if (fs::exists(pathConfig)) {
+        std::ifstream fileConfig(pathConfig);
+        fileConfig >> j;
+    }
+    initFromJson(j);
+}
+
+bool config::init(const std::string &jsonstr) {
     try {
-        nlohmann::json j = nlohmann::json::parse(jsonstr);
-        std::string    spJX3;
-        std::string    spUnpack;
-        if (j.contains("JX3Dir")) {
-            spJX3 = j["JX3Dir"].get<std::string>();
+        json     j;
+        fs::path pathConfig = pExeDir / "config.json";
+        if (fs::exists(pathConfig)) {
+            std::ifstream fileConfig{pathConfig};
+            fileConfig >> j;
         }
-        if (j.contains("UnpackDir")) {
-            spUnpack = j["UnpackDir"].get<std::string>();
+        j.update(json::parse(jsonstr));
+        initFromJson(j);
+        if (!dataAvailable) {
+            return false;
         }
-        gdi::initData(spJX3, spUnpack);
-        dataAvailable            = true;
-        // 将其保存为配置文件并覆盖
-        fs::path      pathConfig = pExeDir / "config.json";
-        std::ofstream fileConfig(pathConfig);
+        std::ofstream fileConfig{pathConfig};
         fileConfig << j.dump(4);
         return true;
     } catch (...) {
         return false;
     }
+}
+
+std::string config::status() {
+    json j;
+    j["status"] = dataAvailable ? 0 : -1;
+    if (dataAvailable) {
+
+        auto &data      = j["data"];
+        data["version"] = version;
+
+        auto &userinput               = data["userinput"];
+        userinput["maxDelayNetwork"]  = taskdata::maxDelayNetwork;
+        userinput["maxDelayKeyboard"] = taskdata::maxDelayKeyboard;
+        userinput["maxFightTime"]     = taskdata::maxFightTime;
+        userinput["maxFightCount"]    = taskdata::maxFightCount;
+    }
+    return j.dump();
 }

@@ -14,9 +14,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     // 初始化程序
-    ns_utils::config::initExeDir(argc, argv);
-    // 尝试从配置文件中初始化数据
-    ns_utils::config::initDataFromLocalFile();
+    ns_utils::config::init(argc, argv);
     // 初始化接口
     bool ret = gdi::initLua(ns_frame::luaInit, ns_frame::luaFuncStaticToDynamic);
     if (!ret) {

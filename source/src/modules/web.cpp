@@ -16,17 +16,10 @@ web::Web::~Web() {
 
 web::WebApp::WebApp() {
     task::server::asyncrun();
-    CROW_ROUTE(app, "/version")
-        .methods("GET"_method)([]() {
-            static const std::string version = "24022501";
-            return crow::response{200, "text/plain", version};
-        });
 
-    CROW_ROUTE(app, "/available")
+    CROW_ROUTE(app, "/status")
         .methods("GET"_method)([]() {
-            const std::string t = R"({"status":0})";
-            const std::string f = R"({"status":-1})";
-            return crow::response{200, "application/json", ns_utils::config::dataAvailable ? t : f};
+            return crow::response{200, "application/json", ns_utils::config::status()};
         });
 
     CROW_ROUTE(app, "/create")
@@ -66,7 +59,7 @@ web::WebApp::~WebApp() {
 web::WebManager::WebManager() {
     CROW_ROUTE(app, "/config")
         .methods("POST"_method)([](const crow::request &req) {
-            bool ret = ns_utils::config::initDataFromString(req.body);
+            bool ret = ns_utils::config::init(req.body);
             return crow::response{ret ? 200 : 400};
         });
 

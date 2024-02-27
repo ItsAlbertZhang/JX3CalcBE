@@ -20,14 +20,13 @@ inline bool allowCustomMacro = true;    // 是否允许自定义宏
 
 } // namespace taskdata
 
-// 初始化 exe 目录
-void initExeDir(int argc, char *argv[]);
-
-// 从配置文件中初始化数据
-void initDataFromLocalFile();
-
+// 从 main 函数中初始化数据
+void init(int argc, char *argv[]);
 // 从字符串中初始化数据, 并保存为配置文件
-bool initDataFromString(const std::string &jsonstr);
+bool init(const std::string &jsonstr);
+
+// 返回当前配置的状态
+std::string status();
 
 }; // namespace config
 } // namespace ns_utils
