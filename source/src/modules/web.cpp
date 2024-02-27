@@ -66,8 +66,8 @@ web::WebApp::~WebApp() {
 web::WebManager::WebManager() {
     CROW_ROUTE(app, "/config")
         .methods("POST"_method)([](const crow::request &req) {
-            ns_utils::config::initDataFromString(req.body);
-            return crow::response{200};
+            bool ret = ns_utils::config::initDataFromString(req.body);
+            return crow::response{ret ? 200 : 400};
         });
 
     CROW_ROUTE(app, "/stop")

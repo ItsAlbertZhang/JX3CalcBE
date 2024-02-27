@@ -87,33 +87,39 @@ static void attrImport(Character *self, const json &j) {
 }
 
 bool Character::attrImportFromData(std::string dataJsonStr) {
-    json j = json::parse(dataJsonStr);
-    if (!j.is_object()) {
+    try {
+        json j = json::parse(dataJsonStr);
+        if (!j.is_object()) {
+            return false;
+        }
+        attrImport(this, j);
+        return true;
+    } catch (...) {
         return false;
     }
-
-    attrImport(this, j);
-    return true;
 }
 
 bool Character::attrImportFromJX3BOX(std::string pzID) {
     static thread_local httplib::Client cli("http://cms.jx3box.com");
     httplib::Result                     res = cli.Get("/api/cms/app/pz/" + pzID);
-    if (res->status != 200) {
+    if (!res || res->status != 200) {
         return false;
     }
-    json j = json::parse(res->body);
-    if (!j.contains("code") || j["code"] != 0 || !j.contains("data") || !j["data"].is_object()) {
+    try {
+        json j = json::parse(res->body);
+        if (!j.contains("code") || j["code"] != 0 || !j.contains("data") || !j["data"].is_object()) {
+            return false;
+        }
+        j = j["data"];
+        if (!j.contains("data") || !j["data"].is_object()) {
+            return false;
+        }
+        j = j["data"];
+        attrImport(this, j);
+        return true;
+    } catch (...) {
         return false;
     }
-    j = j["data"];
-    if (!j.contains("data") || !j["data"].is_object()) {
-        return false;
-    }
-    j = j["data"];
-
-    attrImport(this, j);
-    return true;
 }
 
 bool Character::attrImportFromBackup(const ChAttr &attr) {

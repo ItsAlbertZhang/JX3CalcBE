@@ -34,20 +34,25 @@ void ns_utils::config::initDataFromLocalFile() {
 }
 
 // 从字符串中初始化数据, 并保存为配置文件
-void ns_utils::config::initDataFromString(const std::string &jsonstr) {
-    nlohmann::json j = nlohmann::json::parse(jsonstr);
-    std::string    spJX3;
-    std::string    spUnpack;
-    if (j.contains("JX3Dir")) {
-        spJX3 = j["JX3Dir"].get<std::string>();
+bool ns_utils::config::initDataFromString(const std::string &jsonstr) {
+    try {
+        nlohmann::json j = nlohmann::json::parse(jsonstr);
+        std::string    spJX3;
+        std::string    spUnpack;
+        if (j.contains("JX3Dir")) {
+            spJX3 = j["JX3Dir"].get<std::string>();
+        }
+        if (j.contains("UnpackDir")) {
+            spUnpack = j["UnpackDir"].get<std::string>();
+        }
+        gdi::initData(spJX3, spUnpack);
+        dataAvailable            = true;
+        // 将其保存为配置文件并覆盖
+        fs::path      pathConfig = pExeDir / "config.json";
+        std::ofstream fileConfig(pathConfig);
+        fileConfig << j.dump(4);
+        return true;
+    } catch (...) {
+        return false;
     }
-    if (j.contains("UnpackDir")) {
-        spUnpack = j["UnpackDir"].get<std::string>();
-    }
-    gdi::initData(spJX3, spUnpack);
-    dataAvailable            = true;
-    // 将其保存为配置文件并覆盖
-    fs::path      pathConfig = pExeDir / "config.json";
-    std::ofstream fileConfig(pathConfig);
-    fileConfig << j.dump(4);
 }

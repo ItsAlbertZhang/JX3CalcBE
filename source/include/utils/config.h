@@ -27,7 +27,7 @@ void initExeDir(int argc, char *argv[]);
 void initDataFromLocalFile();
 
 // 从字符串中初始化数据, 并保存为配置文件
-void initDataFromString(const std::string &jsonstr);
+bool initDataFromString(const std::string &jsonstr);
 
 }; // namespace config
 } // namespace ns_utils
