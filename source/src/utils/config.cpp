@@ -8,7 +8,7 @@ namespace fs = std::filesystem;
 using namespace ns_utils;
 using json = nlohmann::json;
 
-const std::string version = "24022701";
+const std::string version = "24022801";
 
 static void
 initFromJson(const json &j) {

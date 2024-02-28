@@ -376,7 +376,7 @@ std::string Task::queryDPS() {
         return j.dump();
     }
 
-    std::lock_guard<std::mutex> lock(mutex);
+    std::lock_guard<std::mutex> lock(mutex); // 上锁
 
     j["status"] = 0; // 成功
     j["data"]   = json::object();
@@ -395,12 +395,26 @@ std::string Task::queryDPS() {
     avg /= cntCompleted;
     j["data"]["avg"] = avg;
 
-    ull sd = 0; // 标准差
+    ull sd  = 0; // 标准差
+    int min = static_cast<int>(avg);
+    int max = static_cast<int>(avg);
+    int md  = 0;
     for (int i = 0; i < cntCompleted; i++) {
         sd += (results[i] - avg) * (results[i] - avg);
+        if (results[i] < min) {
+            min = results[i];
+            md  = static_cast<int>(avg - min);
+        } else if (results[i] > max) {
+            max = results[i];
+            md  = static_cast<int>(max - avg);
+        }
     }
-    sd              = static_cast<ull>(std::sqrt(sd / cntCompleted));
-    j["data"]["sd"] = sd;
+    sd = static_cast<ull>(std::sqrt(sd / cntCompleted));
+
+    j["data"]["sd"]  = sd;
+    j["data"]["min"] = min;
+    j["data"]["max"] = max;
+    j["data"]["md"]  = md;
 
     j["data"]["speed"]   = speedCurr;
     j["data"]["current"] = cntCompleted;
