@@ -46,5 +46,5 @@ void SkillEventManager::add(int ID) {
     skillevent.EventMask2   = std::stoi(skillevent.tab["EventMask2"]);
     skillevent.EventSkillID = std::stoi(skillevent.tab["EventSkillID"]);
     // 将 SkillEvent 存入缓存
-    data[ID] = std::move(skillevent);
+    data[ID]                = std::move(skillevent);
 }

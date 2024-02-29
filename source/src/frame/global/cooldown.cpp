@@ -27,12 +27,12 @@ void CooldownManager::add(int ID) {
     arg.emplace_back();
     arg[0]["ID"] = std::to_string(ID);
     gdi::tabSelect(gdi::Tab::cooldown, arg);
-    cooldown.tab = std::move(arg[0]);
+    cooldown.tab              = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     cooldown.DurationFrame    = static_cast<int>(std::stod(cooldown.tab["Duration"]) * 16 + 0.5);
     cooldown.MinDurationFrame = static_cast<int>(std::stod(cooldown.tab["MinDuration"]) * 16 + 0.5);
     cooldown.MaxDurationFrame = static_cast<int>(std::stod(cooldown.tab["MaxDuration"]) * 16 + 0.5);
     cooldown.MaxCount         = std::stoi(cooldown.tab["MaxCount"]);
     // 将 Cooldown 存入缓存
-    data[ID] = std::move(cooldown);
+    data[ID]                  = std::move(cooldown);
 }

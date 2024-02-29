@@ -16,6 +16,7 @@
 #ifdef _WIN32
 #include <sdkddkver.h>
 #endif
+#include <asio/io_context.hpp>
 #include <crow.h>
 #pragma warning(pop)
 
@@ -106,9 +107,14 @@ inline std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
 void asyncrun(); // 非阻塞异步启动子线程任务模块.
 void stop();     // 停止子线程任务模块并同步等待其退出.
 
-inline Pool             pool;
-inline std::thread      threadIO;
-inline asio::io_context io;
+inline Pool pool;
+/**
+ *  注意, pool 的构造晚于 taskMap. 这很重要:
+ *
+ */
+
+inline std::thread      ioThread;
+inline asio::io_context ioContext;
 
 } // namespace server
 

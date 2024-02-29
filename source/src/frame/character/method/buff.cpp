@@ -69,13 +69,13 @@ void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int 
         this->autoRollbackAttribList.emplace(static_cast<AutoRollbackAttrib *>(it.ptrAttrib));
         it.nLeftActiveCount = buff.Count * count;
         // 计算 interval
-        it.interval = buff.Interval * 1024 / (1024 + it.attr.getHaste());
-        it.interval = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
-        it.interval = it.interval < buff.MinInterval ? buff.MinInterval : it.interval;
+        it.interval         = buff.Interval * 1024 / (1024 + it.attr.getHaste());
+        it.interval         = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
+        it.interval         = it.interval < buff.MinInterval ? buff.MinInterval : it.interval;
         // 注册回调函数
-        it.tickActive = Event::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it);
+        it.tickActive       = Event::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it);
         // 其他工作
-        it.nStackNum = stacknum; // 将层数设置为 1
+        it.nStackNum        = stacknum; // 将层数设置为 1
     } else {
         // 当前存在该 buff
         // it.attr             = characterGet(buffSourceID)->chAttr; // 锁面板
@@ -85,9 +85,9 @@ void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int 
         }
         it.nLeftActiveCount = buff.Count * count; // 重置计数
         // 重新计算 interval
-        it.interval = buff.Interval * 1024 / (1024 + it.attr.getHaste());
-        it.interval = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
-        it.interval = it.interval < buff.MinInterval ? buff.MinInterval : it.interval;
+        it.interval         = buff.Interval * 1024 / (1024 + it.attr.getHaste());
+        it.interval         = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
+        it.interval         = it.interval < buff.MinInterval ? buff.MinInterval : it.interval;
         // 其他工作
         if (buff.IsStackable)
             it.nStackNum += stacknum; // 层数 +stacknum

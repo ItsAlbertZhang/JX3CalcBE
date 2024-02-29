@@ -27,9 +27,9 @@ constexpr int CNT_DETAIL_TASKS = 10;
 
 void ns_modules::task::server::asyncrun() {
     asio::co_spawn(
-        io,
+        ioContext,
         [&]() -> asio::awaitable<void> {
-            asio::steady_timer timer(io);
+            asio::steady_timer timer(ioContext);
             while (true) {
                 timer.expires_after(std::chrono::seconds(1));
                 co_await timer.async_wait(asio::use_awaitable);
@@ -37,16 +37,17 @@ void ns_modules::task::server::asyncrun() {
         },
         asio::detached
     ); // 用于保持 io.run() 的运行
-    threadIO = std::thread([&]() {
-        io.run();
+    ioThread = std::thread([&]() {
+        ioContext.run();
     });
 }
 
 void ns_modules::task::server::stop() {
     for (auto &task : taskMap)
         task::stop(task.first);
-    io.stop();
-    threadIO.join();
+    ioContext.stop();
+    ioThread.join();
+    pool.join();
 }
 
 static int         calcBrief(const Data &arg);
@@ -211,8 +212,6 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
 
 static void asyncStop(Task &task) {
     using namespace ns_modules::task;
-    task.futures.clear();
-    server::pool.erase(task.id);
     server::taskMap.erase(task.id);
 }
 
@@ -279,7 +278,7 @@ Response ns_modules::task::create(const std::string &jsonstr) {
 
     auto  id = genID();
     auto &it = server::taskMap.emplace(id, std::make_unique<Task>(id, std::move(taskdata.value()))).first->second;
-    asio::co_spawn(server::io, asyncRun(server::io, *it), asio::detached);
+    asio::co_spawn(server::ioContext, asyncRun(server::ioContext, *it), asio::detached);
     return Response{
         .status = ResponseStatus::success,
         .data   = id,
