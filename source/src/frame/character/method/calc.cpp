@@ -59,6 +59,7 @@ Damage Character::calcDamage(
     int              damageAddPercent,
     int              nChannelInterval,
     int              nWeaponDamagePercent,
+    bool             isCritical,
     bool             isSurplus,
     bool             isBuff,
     int              buffInterval,
@@ -178,6 +179,7 @@ Damage Character::calcDamage(
         .damageBase     = static_cast<int>(damage),
         .damageCritical = static_cast<int>(damageCritical),
         .damageExcept   = static_cast<int>(damageExcept),
-        .criticalRate   = atCriticalStrike
+        .criticalRate   = atCriticalStrike,
+        .isCritical     = isCritical,
     };
 }

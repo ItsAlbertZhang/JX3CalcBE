@@ -85,10 +85,11 @@ public:
         int              damageAddPercent,
         int              nChannelInterval,
         int              nWeaponDamagePercent,
-        bool             isSurplus    = false,
-        bool             isBuff       = false,
-        int              buffInterval = 1,
-        int              buffCount    = 1
+        bool             isCritical,
+        bool             isSurplus,
+        bool             isBuff,
+        int              buffInterval,
+        int              buffCount
     );
     std::tuple<int, int> calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel);
 

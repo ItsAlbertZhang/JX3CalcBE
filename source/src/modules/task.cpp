@@ -459,6 +459,7 @@ std::string Task::queryDamageList() {
             objDamage["damageCritical"] = everyDamage.damageCritical;
             objDamage["damageExcept"]   = everyDamage.damageExcept;
             objDamage["criticalRate"]   = everyDamage.criticalRate;
+            objDamage["isCritical"]     = everyDamage.isCritical;
             objDamage["name"]           = name;
             objFight.emplace_back(objDamage);
         }

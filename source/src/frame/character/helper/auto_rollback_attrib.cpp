@@ -3,6 +3,7 @@
 #include "frame/lua_runtime.h"
 #include "frame/ref/tab_attribute.h" // enumTabAttribute
 #include "plugin/log.h"
+#include <random>
 
 using namespace ns_frame;
 using namespace ns_frame::ref;
@@ -57,6 +58,10 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         Character *src                                 = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         auto [atCriticalStrike, atCriticalDamagePower] = src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel);
+        std::random_device              rd;
+        std::mt19937                    gen(rd());
+        std::uniform_int_distribution<> dis(0, 9999);
+        bool                            isCritical = dis(gen) < atCriticalStrike;
         // 注意计算伤害时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         src->chDamage.emplace_back(src->calcDamage(
             item->nID,
@@ -71,6 +76,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
             0,
             item->nChannelInterval,
             0,
+            isCritical,
             false,
             true,
             item->rawInterval,
@@ -83,6 +89,10 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         Character *src                                 = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         auto [atCriticalStrike, atCriticalDamagePower] = src->calcCritical(item->attr, item->dwCasterSkillID, item->dwCasterSkillLevel);
+        std::random_device              rd;
+        std::mt19937                    gen(rd());
+        std::uniform_int_distribution<> dis(0, 9999);
+        bool                            isCritical = dis(gen) < atCriticalStrike;
         // 注意计算伤害时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
         src->chDamage.emplace_back(src->calcDamage(
             item->nID,
@@ -97,6 +107,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
             0,
             item->nChannelInterval,
             0,
+            isCritical,
             false,
             true,
             item->rawInterval,

@@ -33,6 +33,7 @@ public:
     int          damageCritical;
     int          damageExcept;
     int          criticalRate;
+    bool         isCritical;
 };
 
 // class ChDamage {

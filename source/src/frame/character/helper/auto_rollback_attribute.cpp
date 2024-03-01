@@ -42,8 +42,11 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
                 DamageAddPercent,
                 static_cast<int>(skill.nChannelInterval),
                 skill.nWeaponDamagePercent,
+                isCritical,
                 false,
-                false
+                false,
+                1,
+                1
             ));
         }
         for (int idxTime = 0; idxTime < callSurplusDamage[idxType]; idxTime++) {
@@ -58,10 +61,13 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
                 0,
                 0,
                 DamageAddPercent,
-                1, // 破招伤害的调整是通过 atGlobalDamageFactor 实现的
+                1, // 破招伤害的调整是通过 atGlobalDamageFactor 实现的, 这符合游戏内的实际原理
                 0,
+                isCritical,
                 true,
-                false
+                false,
+                1,
+                1
             ));
         }
     }
