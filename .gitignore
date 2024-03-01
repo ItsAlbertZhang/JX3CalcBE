@@ -1,0 +1,29 @@
+# gitkeep
+!*.gitkeep
+
+# local
+JX3CalcBEgdi/
+
+# build
+build/*
+
+# bin
+bin/
+
+# OS
+.DS_Store
+
+# .vscode
+.vscode/*
+!.vscode/launch.json
+!.vscode/tasks.json
+!.vscode/c_cpp_properties.json
+
+
+# extensions
+
+# python virtualenv
+.pyenv/
+
+# clangd cache
+.cache/

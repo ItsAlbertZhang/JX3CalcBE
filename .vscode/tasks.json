@@ -1,0 +1,23 @@
+{
+    "options": {
+        "cwd": "${workspaceFolder}/build/"
+    },
+    "tasks": [
+        { "label": "windows_debug_cmake", "command": "cmake", "args": [ "..", "-G", "Ninja", "-DBUILD_MODE=Debug" ], },
+        { "label": "windows_debug_make", "command": "cmake", "args": [ "--build", ".", "--config", "Debug" ], },
+        { "label": "windows_debug_build", "dependsOrder": "sequence", "dependsOn": [ "windows_debug_cmake", "windows_debug_make" ], },
+
+        { "label": "windows_release_cmake", "command": "cmake", "args": [ "..", "-G", "Ninja", "-DBUILD_MODE=Release" ], },
+        { "label": "windows_release_make", "command": "cmake", "args": [ "--build", ".", "--config", "Release" ], },
+        { "label": "windows_release_build", "dependsOrder": "sequence", "dependsOn": [ "windows_release_cmake", "windows_release_make" ], },
+
+        { "label": "unix_debug_cmake", "command": "cmake", "args": [ "..", "-DBUILD_MODE=Debug" ], },
+        { "label": "unix_debug_make", "command": "cmake", "args": [ "--build", ".", "--", "-j16", ], },
+        { "label": "unix_debug_build", "dependsOrder": "sequence", "dependsOn": [ "unix_debug_cmake", "unix_debug_make" ], },
+
+        { "label": "unix_release_cmake", "command": "cmake", "args": [ "..", "-DBUILD_MODE=Release" ], },
+        { "label": "unix_release_make", "command": "cmake", "args": [ "--build", ".", "--", "-j16", ], },
+        { "label": "unix_release_build", "dependsOrder": "sequence", "dependsOn": [ "unix_release_cmake", "unix_release_make" ], },
+    ],
+    "version": "2.0.0"
+}

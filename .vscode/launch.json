@@ -1,0 +1,31 @@
+{
+    "configurations": [
+        {
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc.exe", "args": [ ],
+            "name": "windows_debug",
+            "type": "cppvsdbg",
+            "preLaunchTask": "windows_debug_build",
+            "console": "integratedTerminal",
+        },
+        {
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc.exe", "args": [ ],
+            "name": "windows_release",
+            "type": "cppvsdbg",
+            "preLaunchTask": "windows_release_build",
+            "console": "integratedTerminal",
+        },
+        {
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc", "args": [ ],
+            "name": "unix_debug",
+            "type": "lldb",
+            "preLaunchTask": "unix_debug_build",
+        },
+        {
+            "request": "launch", "cwd": "${workspaceFolder}/bin/", "program": "${workspaceFolder}/bin/jx3calc", "args": [ ],
+            "name": "unix_release",
+            "type": "lldb",
+            "preLaunchTask": "unix_release_build",
+        },
+    ],
+    "version": "2.0.0"
+}
