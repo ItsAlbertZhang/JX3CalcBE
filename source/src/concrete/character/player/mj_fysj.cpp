@@ -109,6 +109,9 @@ void MjFysj::macroRuntimeDefault() {
     case 2:
         macroDefault2();
         break;
+    case 3:
+        macroDefault3();
+        break;
     }
 }
 
@@ -129,14 +132,12 @@ void MjFysj::macroDefault0() {
 }
 
 void MjFysj::macroDefault1() {
-    if (nCurrentSunEnergy >= 10000 && nCurrentMoonEnergy >= 10000) {
-        macroIdx = 2;    // 切换至 2 号宏
-        macroDefault2(); // 执行一次 2 号宏
-        return;          // 直接返回, 不进行后续操作
-        // 在开头进行判断的原因是, 导致切换条件 (sun>=100&moon>=100) 的事件 (日月齐光·叁结束) 是发生在 GCD 中的, 而不是发生在宏内的. 因此, 无法在宏结束时进行判断.
-    }
-
     cast(3974); // 暗尘弥散
+    // 等隐身
+    if (!buffExist(25731, 1) && !buffExist(25721, 3)) {
+        delayCustom = delayRand / 2;
+        return;
+    }
     if (buffExist(25721, 3) && !buffExist(25716, 0) && nCurrentMoonEnergy >= 10000)
         cast(3969); // 光明相
     cast(34347);    // 悬象著明
@@ -153,9 +154,50 @@ void MjFysj::macroDefault1() {
         cast(3960); // 银月斩
         cast(3963); // 烈日斩
     }
+    if (buffExist(25721, 3) && (!buffExist(25716, 0)) && nCurrentMoonEnergy == 0) {
+        macroIdx = 2; // 切换至 2 号宏
+    }
 }
 
 void MjFysj::macroDefault2() {
+    if (nCurrentSunEnergy >= 10000 && nCurrentMoonEnergy >= 10000) {
+        if (highPing) {
+            cast(3963); // 烈日斩
+            if (nCurrentSunEnergy < 14000) {
+                delayCustom = delayRand / 2;
+                return;
+            }
+        }
+        highPing = false;
+        macroIdx = 3;    // 切换至 3 号宏
+        macroDefault3(); // 执行一次 3 号宏
+        return;          // 直接返回, 不进行后续操作
+        // 在开头进行判断的原因是, 导致切换条件 (sun>=100&moon>=100) 的事件 (日月齐光·叁结束) 是发生在 GCD 中的, 而不是发生在宏内的. 因此, 无法在宏结束时进行判断.
+    }
+    if (buffTimeLeftTick(25721, 3) < 5 * (1024 * 15 / 16 + delayBase + delayRand) && buffExist(9909, 0)) {
+        // 齐光剩余时间小于 5 个 GCD, 且手上的诛邪还没打出去, 换高延迟打法
+        highPing = true;
+    }
+    if (highPing) { // 高延迟打法
+        // 当 highPing 被标记时, 一定已经到了最后 5 个技能. 所以这里可以省去判定条件.
+        cast(3963);  // 烈日斩
+        cast(22890); // 诛邪镇魔
+        cast(3960);  // 银月斩
+        cast(3967);  // 净世破魔击
+    }
+    // 正常循环
+    if (nCurrentMoonEnergy <= 4000) {
+        cast(22890); // 诛邪镇魔
+    }
+    cast(3967); // 净世破魔击
+    if (nCurrentMoonEnergy <= 4000) {
+        cast(3979); // 驱夜断愁
+    }
+    cast(3963); // 烈日斩
+    cast(3960); // 银月斩
+}
+
+void MjFysj::macroDefault3() {
     if (nCurrentMoonEnergy >= 6000)
         cast(22890); // 诛邪镇魔
     if (nCurrentSunEnergy >= 10000)
