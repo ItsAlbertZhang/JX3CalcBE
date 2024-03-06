@@ -77,6 +77,7 @@ enum class ResponseStatus {
     config_error,
     parse_error,
     missing_field,
+    invalid_field,
     invalid_player,
     invalid_interger,
     invalid_attribute_method,

@@ -130,7 +130,6 @@ static void constructorBefore(MacroCustom *self) {
 }
 
 static void constructorAfter(MacroCustom *self) {
-    self->attrInit     = self->lua["AttrInit"];
     self->macroPrepare = self->lua["MacroPrepare"];
     int macroNum       = self->lua["MacroNum"].get<int>();
     for (int i = 0; i < macroNum; i++) {

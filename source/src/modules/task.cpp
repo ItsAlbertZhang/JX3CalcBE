@@ -67,7 +67,7 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         };
     }
     // 检查字段
-    // 1. 检查必须字段
+    // 1.1 检查必须字段
     static const std::vector<std::string> required{
         "player", "delayNetwork", "delayKeyboard", "fightTime", "fightCount", "attribute", "effects"
     };
@@ -78,6 +78,13 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
                 .data   = fmt::format("missing required field: {}", it),
             };
         }
+    }
+    // 1.2 检查不允许字段
+    if (j.contains("customMacro") && !ns_utils::config::taskdata::allowCustomMacro) {
+        return Response{
+            .status = ResponseStatus::invalid_field,
+            .data   = "customMacro not allowed",
+        };
     }
     // 2. 分别检查字段值
     // 2.1 检查 player
