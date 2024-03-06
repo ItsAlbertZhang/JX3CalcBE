@@ -4,6 +4,7 @@
 #include "concrete/effect/base.h"
 #include "frame/character/property/attribute.h"
 #include "frame/character/property/damage.h"
+#include "frame/custom/base.h"
 #include "modules/pool.h"
 #include <memory>
 #include <mutex>
@@ -32,14 +33,11 @@ public:
     int fightTime;
     int fightCount;
 
-    bool        useCustomMacro = false;
-    std::string customMacro;
-
     ns_frame::ChAttr                                      attrBackup;
     std::vector<std::shared_ptr<ns_concrete::EffectBase>> effects;
 
-    // 根据 json 数据区计算得到的数据区
-    size_t custom_macro_hash = std::hash<std::string>{}(customMacro);
+    ns_frame::enumCustom customType;
+    std::string          customString;
 };
 
 class Task {
@@ -83,6 +81,7 @@ enum class ResponseStatus {
     invalid_attribute_method,
     invalid_attribute_data,
     invalid_effects,
+    invalid_custom,
     create_data_error,
 };
 class Response {

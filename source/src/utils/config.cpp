@@ -33,8 +33,8 @@ static void initFromJson(const json &j) {
     if (j.contains("maxFightCount") && j["maxFightCount"].is_number_integer()) {
         config::taskdata::maxFightCount = j["maxFightCount"].get<int>();
     }
-    if (j.contains("allowCustomMacro") && j["allowCustomMacro"].is_boolean()) {
-        config::taskdata::allowCustomMacro = j["allowCustomMacro"].get<bool>();
+    if (j.contains("allowCustom") && j["allowCustom"].is_boolean()) {
+        config::taskdata::allowCustom = j["allowCustom"].get<bool>();
     }
 }
 
@@ -84,7 +84,7 @@ std::string config::status() {
         userinput["maxDelayKeyboard"] = taskdata::maxDelayKeyboard;
         userinput["maxFightTime"]     = taskdata::maxFightTime;
         userinput["maxFightCount"]    = taskdata::maxFightCount;
-        userinput["allowCustomMacro"] = taskdata::allowCustomMacro;
+        userinput["allowCustom"]      = taskdata::allowCustom;
     }
     return j.dump();
 }

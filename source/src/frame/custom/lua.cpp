@@ -1,23 +1,18 @@
+#include "frame/custom/lua.h"
 #include "frame/character/derived/player.h"
 
 using namespace ns_frame;
 
-static void constructorBefore(MacroCustom *self);
-static void constructorAfter(MacroCustom *self);
+static void constructorBefore(CustomLua *self);
+static void constructorAfter(CustomLua *self);
 
-MacroCustom::MacroCustom(const std::string &script) {
+CustomLua::CustomLua(const std::string &script) {
     constructorBefore(this);
     lua.script(script);
     constructorAfter(this);
 }
 
-MacroCustom::MacroCustom(const std::filesystem::path &scriptfile) {
-    constructorBefore(this);
-    lua.script_file(scriptfile.string());
-    constructorAfter(this);
-}
-
-static void constructorBefore(MacroCustom *self) {
+static void constructorBefore(CustomLua *self) {
     self->lua.open_libraries(sol::lib::base);
     // clang-format off
     self->lua.new_usertype<ChAttr>(
@@ -129,7 +124,7 @@ static void constructorBefore(MacroCustom *self) {
     // clang-format on
 }
 
-static void constructorAfter(MacroCustom *self) {
+static void constructorAfter(CustomLua *self) {
     self->macroPrepare = self->lua["MacroPrepare"];
     int macroNum       = self->lua["MacroNum"].get<int>();
     for (int i = 0; i < macroNum; i++) {
