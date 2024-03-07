@@ -76,7 +76,7 @@ std::shared_ptr<sol::state> ns_frame::luaInit() {
         "nChannelInterval", &Skill::nChannelInterval,
 
         "SetDelaySubSkill", &Skill::SetDelaySubSkill,
-        "AddAttribute", sol::overload(&Skill::AddAttribute_iiii, &Skill::AddAttribute_iisi, &Skill::AddAttribute_iidi),
+        "AddAttribute", sol::overload(&Skill::AddAttribute_iiii, &Skill::AddAttribute_iisi, &Skill::AddAttribute_iidi, &Skill::AddAttribute_iini),
 
         "AddSlowCheckSelfBuff", &Skill::AddSlowCheckSelfBuff,
         "AddSlowCheckDestBuff", &Skill::AddSlowCheckDestBuff,

@@ -14,7 +14,7 @@ enum class EffectType {
     大附魔·鞋,
     套装·技能,
     套装·特效,
-    // 武器·橙武,
+    武器·橙武,
     武器·水特效,
     家园酒·加速,
     COUNT,
@@ -26,7 +26,7 @@ inline const std::unordered_map<std::string, EffectType> refEffectType{
     {"大附魔·鞋",    EffectType::大附魔·鞋   },
     {"套装·技能",    EffectType::套装·技能   },
     {"套装·特效",    EffectType::套装·特效   },
- // {"武器·橙武", EffectType::武器·橙武},
+    {"武器·橙武",    EffectType::武器·橙武   },
     {"武器·水特效", EffectType::武器·水特效},
     {"家园酒·加速", EffectType::家园酒·加速},
 };

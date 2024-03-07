@@ -26,7 +26,7 @@ namespace fmt = std;
 using namespace ns_modules::task;
 using ull = unsigned long long;
 
-constexpr int CNT_DETAIL_TASKS = 10;
+constexpr int CNT_DETAIL_TASKS = 5;
 
 void ns_modules::task::server::asyncrun() {
     asio::co_spawn(
