@@ -133,9 +133,9 @@ void MjFysj::macroDefault0() {
 
 void MjFysj::macroDefault1() {
     cast(3974); // 暗尘弥散
-    // 等隐身
+    // 如果隐身没好, 等隐身
     if (!buffExist(25731, 1) && !buffExist(25721, 3)) {
-        delayCustom = delayRand / 2;
+        delayCustom = delayBase + delayRand / 2;
         return;
     }
     if (buffExist(25721, 3) && !buffExist(25716, 0) && nCurrentMoonEnergy >= 10000)
@@ -164,7 +164,7 @@ void MjFysj::macroDefault2() {
         if (highPing) {
             cast(3963); // 烈日斩
             if (nCurrentSunEnergy < 14000) {
-                delayCustom = delayRand / 2;
+                delayCustom = delayBase + delayRand / 2;
                 return;
             }
         }

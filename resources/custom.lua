@@ -1,8 +1,11 @@
-MacroNum = 3; -- 自定义宏数量.
+MacroNum = 4; -- 自定义宏数量.
 
+-- 自定义全局变量
 FirstSwitch = true;
+HighPing = false;
+
 function MacroPrepare(player)
-    -- print("here")
+    -- 起手准备
     player:cast(3974);
     if player.nMoonPowerValue == 0 and player.nSunPowerValue == 0 then
         if player.nCurrentMoonEnergy >= 10000 then
@@ -11,7 +14,9 @@ function MacroPrepare(player)
             player.nSunPowerValue = 1;
         end
     end
+    -- 初始化全局变量
     FirstSwitch = true;
+    HighPing = false;
 end
 
 function Macro0(player)
@@ -32,14 +37,12 @@ function Macro0(player)
 end
 
 function Macro1(player)
-    if player.nCurrentSunEnergy >= 10000 and player.nCurrentMoonEnergy >= 10000 then
-        player.macroIdx = 2; -- 切换至 2 号宏
-        Macro2(player);      -- 执行 2 号宏
-        return;              -- 直接返回, 不进行后续操作
-        -- 在开头进行判断的原因是, 导致切换条件 (sun>=100&moon>=100) 的事件 (日月齐光·叁结束) 是发生在 GCD 中的, 而不是发生在宏内的. 因此, 无法在宏结束时进行判断.
+    player:cast(3974); -- 暗尘弥散
+    -- 如果隐身没好, 等隐身
+    if not player:buffExist(25731, 1) and not player:buffExist(25721, 3) then
+        player.delayCustom = player.delayBase + player.delayRand / 2;
+        return;
     end
-
-    player:cast(3974);     -- 暗尘弥散
     if player:buffExist(25721, 3) and not player:buffExist(25716, 0) and player.nCurrentMoonEnergy >= 10000 then
         player:cast(3969); -- 光明相
     end
@@ -57,9 +60,50 @@ function Macro1(player)
         player:cast(3960);      -- 银月斩
         player:cast(3963);      -- 烈日斩
     end
+    if player:buffExist(25721, 3) and not player:buffExist(25716, 0) and player.nCurrentMoonEnergy == 0 then
+        player.macroIdx = 2; -- 切换至 2 号宏
+    end
 end
 
 function Macro2(player)
+    if player.nCurrentSunEnergy >= 10000 and player.nCurrentMoonEnergy >= 10000 then
+        if HighPing then
+            player:cast(3963); -- 烈日斩
+            if player.nCurrentSunEnergy < 14000 then
+                player.delayCustom = player.delayBase + player.delayRand / 2;
+                return;
+            end
+        end
+        HighPing = false;
+        player.macroIdx = 3; -- 切换至 3 号宏
+        Macro3();            -- 执行一次 3 号宏
+        return;              -- 直接返回, 不进行后续操作
+        -- 在开头进行判断的原因是, 导致切换条件 (sun>=100&moon>=100) 的事件 (日月齐光·叁结束) 是发生在 GCD 中的, 而不是发生在宏内的. 因此, 无法在宏结束时进行判断.
+    end
+    if player:buffTimeLeftTick(25721, 3) < 5 * (1024 * 15 / 16 + player.delayBase + player.delayRand) and player:buffExist(9909, 0) then
+        -- 齐光剩余时间小于 5 个 GCD, 且手上的诛邪还没打出去, 换高延迟打法
+        HighPing = true;
+    end
+    if HighPing then        -- 高延迟打法
+        -- 当 highPing 被标记时, 一定已经到了最后 5 个技能. 所以这里可以省去判定条件.
+        player:cast(3963);  -- 烈日斩
+        player:cast(22890); -- 诛邪镇魔
+        player:cast(3960);  -- 银月斩
+        player:cast(3967);  -- 净世破魔击
+    end
+    -- 正常循环
+    if player.nCurrentMoonEnergy <= 4000 then
+        player:cast(22890); -- 诛邪镇魔
+    end
+    player:cast(3967);      -- 净世破魔击
+    if player.nCurrentMoonEnergy <= 4000 then
+        player:cast(3979);  -- 驱夜断愁
+    end
+    player:cast(3963);      -- 烈日斩
+    player:cast(3960);      -- 银月斩
+end
+
+function Macro3(player)
     if player.nCurrentMoonEnergy >= 6000 then
         player:cast(22890); -- 诛邪镇魔
     end
