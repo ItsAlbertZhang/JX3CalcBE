@@ -447,10 +447,14 @@ std::string Task::queryDPS() {
     }
     sd = static_cast<ull>(std::sqrt(sd / cntCompleted));
 
-    j["data"]["sd"]  = sd;
-    j["data"]["min"] = min;
-    j["data"]["max"] = max;
-    j["data"]["md"]  = md;
+    const double z99  = 2.576;
+    int          ci99 = static_cast<int>(z99 * sd / std::sqrt(static_cast<double>(cntCompleted)));
+
+    j["data"]["sd"]   = sd;
+    j["data"]["min"]  = min;
+    j["data"]["max"]  = max;
+    j["data"]["md"]   = md;
+    j["data"]["ci99"] = ci99;
 
     j["data"]["speed"]   = speedCurr;
     j["data"]["current"] = cntCompleted;
