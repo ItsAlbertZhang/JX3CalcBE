@@ -8,10 +8,9 @@ namespace fs = std::filesystem;
 using namespace ns_utils;
 using json = nlohmann::json;
 
-const std::string version = "v1.0.0";
+const std::string version = "v1.0.1";
 
-static void
-initFromJson(const json &j) {
+static void initFromJson(const json &j) {
     std::string spJX3;
     std::string spUnpack;
     if (j.contains("JX3Dir") && j["JX3Dir"].is_string()) {
@@ -33,6 +32,9 @@ initFromJson(const json &j) {
     }
     if (j.contains("maxFightCount") && j["maxFightCount"].is_number_integer()) {
         config::taskdata::maxFightCount = j["maxFightCount"].get<int>();
+    }
+    if (j.contains("allowCustom") && j["allowCustom"].is_boolean()) {
+        config::taskdata::allowCustom = j["allowCustom"].get<bool>();
     }
 }
 
@@ -82,6 +84,7 @@ std::string config::status() {
         userinput["maxDelayKeyboard"] = taskdata::maxDelayKeyboard;
         userinput["maxFightTime"]     = taskdata::maxFightTime;
         userinput["maxFightCount"]    = taskdata::maxFightCount;
+        userinput["allowCustom"]      = taskdata::allowCustom;
     }
     return j.dump();
 }

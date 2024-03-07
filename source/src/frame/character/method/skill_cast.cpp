@@ -191,7 +191,8 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     Skill::SkillBindBuff bindbuff = skill.attrBindBuff;
 
     // 2.4.1 准备 SkillRecipe (后续的 2.5 步需要用到该资源)
-    std::set<const SkillRecipe *> skillrecipeList = this->skillrecipeGet(skillID, skill.RecipeType);
+    std::set<const SkillRecipe *> skillrecipeList     = this->skillrecipeGet(skillID, 0);
+    std::set<const SkillRecipe *> skillrecipeTypeList = this->skillrecipeGet(0, skill.RecipeType);
     std::vector<const Skill *>    recipeskillList;
     for (const auto &it : skillrecipeList) {
         const Skill *ptrSkill = SkillRecipeManager::getScriptSkill(it, &skill);
@@ -202,6 +203,15 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
             bindbuff.overload(ptrSkill->attrBindBuff);
         }
     }
+    for (const auto &it : skillrecipeTypeList) {
+        const Skill *ptrSkill = SkillRecipeManager::getScriptSkill(it, &skill);
+        if (nullptr != ptrSkill) {                  // 如果技能的秘籍存在对应技能
+            recipeskillList.emplace_back(ptrSkill); // 将秘籍的技能加入列表
+            // 使用 skillrecipeType 获取到的秘籍, 不重载当前的 CD 和 bindbuff.
+            // 例如, 无界测试服中, 银月斩通过秘籍的方式重载了 CD, 若子技能也随之重载 CD, 会导致子技能 CD 不满足条件无法释放.
+        }
+    }
+    skillrecipeList.insert(skillrecipeTypeList.begin(), skillrecipeTypeList.end());
 
     // 2.5 检查 CD
     if (!staticCheckCoolDown(this, cooldown))
@@ -386,23 +396,22 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
 }
 
 static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDown &cooldown) {
-    // TODO: 充能技能尚未实现. 即使 CD 有效, 也有可能能够 CastSkill
     if (cooldown.isValidPublicCoolDown) {
         if (self->chCooldown.cooldownList.find(cooldown.nPublicCoolDown) != self->chCooldown.cooldownList.end() &&
-            self->chCooldown.cooldownList[cooldown.nPublicCoolDown].isValid) {
+            self->chCooldown.cooldownList[cooldown.nPublicCoolDown].countAvailable == 0) {
             return false; // CD 存在于列表中且未冷却完毕, CastSkill 失败
         }
     }
     for (int i = 0; i < 3; i++) {
         if (cooldown.isValidNormalCoolDown[i]) {
             if (self->chCooldown.cooldownList.find(cooldown.nNormalCoolDownID[i]) != self->chCooldown.cooldownList.end() &&
-                self->chCooldown.cooldownList[cooldown.nNormalCoolDownID[i]].isValid) {
+                self->chCooldown.cooldownList[cooldown.nNormalCoolDownID[i]].countAvailable == 0) {
                 return false; // CD 存在于列表中且未冷却完毕, CastSkill 失败
             }
         }
         if (cooldown.isValidCheckCoolDown[i]) {
             if (self->chCooldown.cooldownList.find(cooldown.nCheckCoolDownID[i]) != self->chCooldown.cooldownList.end() &&
-                self->chCooldown.cooldownList[cooldown.nCheckCoolDownID[i]].isValid) {
+                self->chCooldown.cooldownList[cooldown.nCheckCoolDownID[i]].countAvailable == 0) {
                 return false; // CD 存在于列表中且未冷却完毕, CastSkill 失败
             }
         }

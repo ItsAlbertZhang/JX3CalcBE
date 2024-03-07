@@ -13,9 +13,11 @@ public:
     virtual int  normalAttack() override;
 
     bool macroSwitchedOnce = false;
+    bool highPing          = false;
     void macroDefault0();
     void macroDefault1();
     void macroDefault2();
+    void macroDefault3();
 };
 
 } // namespace ns_concrete

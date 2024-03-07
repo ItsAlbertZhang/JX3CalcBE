@@ -1,6 +1,7 @@
 #include "frame/global/buff.h"
 #include "frame/character/character.h"
 #include "frame/character/helper/auto_rollback_attrib.h"
+#include "frame/character/property/buff.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
 
@@ -252,4 +253,12 @@ void Character::buffSetNextActiveFrame(int buffIndex, int nextActiveFrame) {
     BuffItem *buff = this->chBuff.buffList.at(buffIndex);
     Event::cancel(buff->tickActive, callbackActiveBuff, this, buff);
     buff->tickActive = Event::add(nextActiveFrame * 1024 / 16, callbackActiveBuff, this, buff);
+}
+
+event_tick_t Character::buffTimeLeftTick(int buffID, int buffLevel) {
+    BuffItem *ret = buffGet(buffID, buffLevel);
+    if (ret != nullptr) {
+        return ret->nLeftFrame * 1024 / 16;
+    }
+    return 0;
 }

@@ -1,6 +1,8 @@
 #include "modules/task.h"
 #include "concrete/character/character.h"
 #include "concrete/effect/effect.h"
+#include "frame/custom/base.h"
+#include "frame/custom/lua.h"
 #include "frame/event.h"
 #include "frame/global/uibuff.h"
 #include "frame/global/uiskill.h"
@@ -11,6 +13,7 @@
 #include <chrono>
 #include <memory>
 #include <optional>
+#include <string>
 #include <unordered_map>
 
 #ifdef _WIN32
@@ -23,7 +26,7 @@ namespace fmt = std;
 using namespace ns_modules::task;
 using ull = unsigned long long;
 
-constexpr int CNT_DETAIL_TASKS = 10;
+constexpr int CNT_DETAIL_TASKS = 5;
 
 void ns_modules::task::server::asyncrun() {
     asio::co_spawn(
@@ -67,7 +70,7 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         };
     }
     // 检查字段
-    // 1. 检查必须字段
+    // 1.1 检查必须字段
     static const std::vector<std::string> required{
         "player", "delayNetwork", "delayKeyboard", "fightTime", "fightCount", "attribute", "effects"
     };
@@ -78,6 +81,13 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
                 .data   = fmt::format("missing required field: {}", it),
             };
         }
+    }
+    // 1.2 检查不允许字段
+    if (j.contains("custom") && !ns_utils::config::taskdata::allowCustom) {
+        return Response{
+            .status = ResponseStatus::invalid_field,
+            .data   = "custom not allowed",
+        };
     }
     // 2. 分别检查字段值
     // 2.1 检查 player
@@ -117,7 +127,8 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         };
     }
     // 2.3 检查 attribute
-    if (!j["attribute"].contains("method") || !j["attribute"]["method"].is_string() ||
+    if (!j["attribute"].is_object() ||
+        !j["attribute"].contains("method") || !j["attribute"]["method"].is_string() ||
         !refAttributeType.contains(j["attribute"]["method"].get<std::string>()) ||
         !j["attribute"].contains("data") || !j["attribute"]["data"].is_object()) {
         return Response{
@@ -159,6 +170,18 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
             };
         }
     }
+    // 2.5 检查 custom
+    if (j.contains("custom")) {
+        if (!j["custom"].is_object() ||
+            !j["custom"].contains("method") || !j["custom"]["method"].is_string() ||
+            !ns_frame::refCustom.contains(j["custom"]["method"].get<std::string>()) ||
+            !j["custom"].contains("data") || !j["custom"]["data"].is_string()) {
+            return Response{
+                .status = ResponseStatus::invalid_custom,
+                .data   = "custom method invalid",
+            };
+        }
+    }
     // 检查完毕, 返回 true
     return Response{
         .status = ResponseStatus::success,
@@ -166,6 +189,13 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
 }
 
 static std::optional<Data> createTaskData(const nlohmann::json &j) {
+    Data res{
+        .delayNetwork  = j["delayNetwork"].get<int>(),
+        .delayKeyboard = j["delayKeyboard"].get<int>(),
+        .fightTime     = j["fightTime"].get<int>(),
+        .fightCount    = j["fightCount"].get<int>(),
+    };
+
     auto playerType = ns_concrete::refPlayerType.at(j["player"].get<std::string>());
     // player. 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
     auto player     = ns_concrete::createPlayer(playerType, 0, 0);
@@ -188,6 +218,7 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
         return std::nullopt;
         break;
     }
+    res.attrBackup = player->chAttr;
 
     std::vector<std::shared_ptr<ns_concrete::EffectBase>> effectList;
     for (auto &x : j["effects"].items()) {
@@ -197,17 +228,18 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
         }
         effectList.emplace_back(std::move(effect));
     }
+    res.effects = std::move(effectList);
 
-    return Data{
-        .delayNetwork   = j["delayNetwork"].get<int>(),
-        .delayKeyboard  = j["delayKeyboard"].get<int>(),
-        .fightTime      = j["fightTime"].get<int>(),
-        .fightCount     = j["fightCount"].get<int>(),
-        .useCustomMacro = j.contains("customMacro"),
-        .customMacro    = j.contains("customMacro") ? j["customMacro"].get<std::string>() : std::string(),
-        .attrBackup     = player->chAttr,
-        .effects        = std::move(effectList),
-    }; // 返回值会被隐式类型转换为 std::optional
+    ns_frame::enumCustom custom = ns_frame::enumCustom::none;
+    std::string          customString;
+    if (j.contains("custom")) {
+        custom       = ns_frame::refCustom.at(j["custom"]["method"].get<std::string>());
+        customString = j["custom"]["data"].get<std::string>();
+    }
+    res.customType   = custom;
+    res.customString = customString;
+
+    return res;
 }
 
 static void asyncStop(Task &task) {
@@ -292,16 +324,21 @@ void ns_modules::task::stop(std::string id) {
 }
 
 static auto calc(const Data &arg) {
-    static thread_local std::unordered_map<size_t, std::unique_ptr<ns_frame::MacroCustom>> map;
-
     std::unique_ptr<ns_frame::Player> player = ns_concrete::createPlayer(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
     std::unique_ptr<ns_frame::NPC>    npc    = ns_concrete::createNPC(ns_concrete::NPCType::NPC124);
     player->targetSelect                     = npc.get();
-    if (arg.useCustomMacro) {
-        if (map.find(arg.custom_macro_hash) == map.end()) {
-            map.emplace(arg.custom_macro_hash, std::make_unique<ns_frame::MacroCustom>(arg.customMacro));
+    switch (arg.customType) {
+    case ns_frame::enumCustom::lua: {
+        player->customType = ns_frame::enumCustom::lua;
+        if (ns_frame::mapCustomLua.contains(arg.customString)) {
+            player->customLua = ns_frame::mapCustomLua.at(arg.customString).get();
+        } else {
+            player->customLua = ns_frame::mapCustomLua.emplace(arg.customString, std::make_unique<ns_frame::CustomLua>(arg.customString)).first->second.get();
         }
-        player->macroCustom = map.at(arg.custom_macro_hash).get();
+        break;
+    }
+    default:
+        break;
     }
     player->attrImportFromBackup(arg.attrBackup);
     for (auto &it : arg.effects) {
@@ -410,10 +447,14 @@ std::string Task::queryDPS() {
     }
     sd = static_cast<ull>(std::sqrt(sd / cntCompleted));
 
-    j["data"]["sd"]  = sd;
-    j["data"]["min"] = min;
-    j["data"]["max"] = max;
-    j["data"]["md"]  = md;
+    const double z99  = 2.576;
+    int          ci99 = static_cast<int>(z99 * sd / std::sqrt(static_cast<double>(cntCompleted)));
+
+    j["data"]["sd"]   = sd;
+    j["data"]["min"]  = min;
+    j["data"]["max"]  = max;
+    j["data"]["md"]   = md;
+    j["data"]["ci99"] = ci99;
 
     j["data"]["speed"]   = speedCurr;
     j["data"]["current"] = cntCompleted;

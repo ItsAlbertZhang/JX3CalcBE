@@ -90,6 +90,11 @@ void Skill::AddAttribute_iidi(int a, int b, double c, int d) {
     attrAttributes.emplace_back(a, b, c, d);
 }
 
+void Skill::AddAttribute_iini(int a, int b, std::optional<char> nil, int d) {
+    UNREFERENCED_PARAMETER(nil);
+    attrAttributes.emplace_back(a, b, 0, d);
+}
+
 void Skill::AddAttribute_iisi(int a, int b, std::string c, int d) {
     attrAttributes.emplace_back(a, b, c, d);
 }

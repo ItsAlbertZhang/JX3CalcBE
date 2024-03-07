@@ -70,6 +70,7 @@ public:
     void              buffFlushLeftFrame(BuffItem *item);
     BuffItem         *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
     BuffItem         *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
+    event_tick_t      buffTimeLeftTick(int buffID, int buffLevel);
 
     // calc
     Damage calcDamage(

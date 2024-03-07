@@ -13,18 +13,21 @@ Player::Player(int delayNetwork, int delayKeyboard)
 }
 
 static void callbackMacroDefault(void *self, void *nullparam);
-static void callbackMacroCustom(void *self, void *nullparam);
+static void callbackMacroCustomLua(void *self, void *nullparam);
 static void callbackNormalAttack(void *self, void *nullparam);
 
 void Player::macroRun() {
-    if (macroCustom == nullptr) {
+    switch (customType) {
+    case enumCustom::none:
         macroPrepareDefault();               // 起手
         callbackMacroDefault(this, nullptr); // 进入战斗
         callbackNormalAttack(this, nullptr); // 开启普通攻击
-    } else {
-        macroCustom->macroPrepare(this);     // 起手
-        callbackMacroCustom(this, nullptr);  // 进入战斗
-        callbackNormalAttack(this, nullptr); // 开启普通攻击
+        break;
+    case enumCustom::lua:
+        customLua->macroPrepare(this);         // 起手
+        callbackMacroCustomLua(this, nullptr); // 进入战斗
+        callbackNormalAttack(this, nullptr);   // 开启普通攻击
+        break;
     }
 }
 
@@ -61,15 +64,15 @@ static void callbackMacroDefault(void *self, void *nullparam) {
     Event::add(getDelay(player), callbackMacroDefault, self, nullptr);
 }
 
-static void callbackMacroCustom(void *self, void *nullparam) {
+static void callbackMacroCustomLua(void *self, void *nullparam) {
     UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
-    if (player->macroIdx >= static_cast<int>(player->macroCustom->macroRuntime.size())) {
+    if (player->macroIdx >= static_cast<int>(player->customLua->macroRuntime.size())) {
         CONSTEXPR_LOG_ERROR("macroIdx >= macroRuntime.size(){}", "");
         return;
     }
-    player->macroCustom->macroRuntime.at(player->macroIdx)(player);
-    Event::add(getDelay(player), callbackMacroCustom, self, nullptr);
+    player->customLua->macroRuntime.at(player->macroIdx)(player);
+    Event::add(getDelay(player), callbackMacroCustomLua, self, nullptr);
 }
 
 static void callbackNormalAttack(void *self, void *nullparam) {

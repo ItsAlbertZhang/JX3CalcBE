@@ -1,23 +1,18 @@
+#include "frame/custom/lua.h"
 #include "frame/character/derived/player.h"
 
 using namespace ns_frame;
 
-static void constructorBefore(MacroCustom *self);
-static void constructorAfter(MacroCustom *self);
+static void constructorBefore(CustomLua *self);
+static void constructorAfter(CustomLua *self);
 
-MacroCustom::MacroCustom(const std::string &script) {
+CustomLua::CustomLua(const std::string &script) {
     constructorBefore(this);
     lua.script(script);
     constructorAfter(this);
 }
 
-MacroCustom::MacroCustom(const std::filesystem::path &scriptfile) {
-    constructorBefore(this);
-    lua.script_file(scriptfile.string());
-    constructorAfter(this);
-}
-
-static void constructorBefore(MacroCustom *self) {
+static void constructorBefore(CustomLua *self) {
     self->lua.open_libraries(sol::lib::base);
     // clang-format off
     self->lua.new_usertype<ChAttr>(
@@ -109,9 +104,10 @@ static void constructorBefore(MacroCustom *self) {
         "bFightState", &Player::bFightState,
         "fMaxLife64", &Player::fMaxLife64,
         "fCurrentLife64", &Player::fCurrentLife64,
-        "dwKungfuID", &Player::dwKungfuID,
+
         "attrImportFromData", &Player::attrImportFromData,
         "attrImportFromJX3BOX", &Player::attrImportFromJX3BOX,
+        "buffTimeLeftTick", &Player::buffTimeLeftTick,
         "cast", &Player::cast,
         "skillActive", &Player::skillActive,
         "skillDeactive", &Player::skillDeactive,
@@ -120,6 +116,7 @@ static void constructorBefore(MacroCustom *self) {
         "skillrecipeRemove", &Player::skillrecipeRemove,
         "skilleventAdd", &Player::skilleventAdd,
         "skilleventRemove", &Player::skilleventRemove,
+        "dwKungfuID", &Player::dwKungfuID,
         "publicCooldownID", &Player::publicCooldownID,
         "delayBase", &Player::delayBase,
         "delayRand", &Player::delayRand,
@@ -129,8 +126,7 @@ static void constructorBefore(MacroCustom *self) {
     // clang-format on
 }
 
-static void constructorAfter(MacroCustom *self) {
-    self->attrInit     = self->lua["AttrInit"];
+static void constructorAfter(CustomLua *self) {
     self->macroPrepare = self->lua["MacroPrepare"];
     int macroNum       = self->lua["MacroNum"].get<int>();
     for (int i = 0; i < macroNum; i++) {

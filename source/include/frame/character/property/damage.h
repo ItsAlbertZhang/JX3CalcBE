@@ -1,11 +1,12 @@
 #ifndef FRAME_CHARACTER_PROPERTY_DAMAGE_H_
 #define FRAME_CHARACTER_PROPERTY_DAMAGE_H_
 
+#include <cstdint>
 #include <vector>
 
 namespace ns_frame {
 
-using event_tick_t = unsigned long long;
+using event_tick_t = int64_t;
 
 enum class DamageType {
     Physics,

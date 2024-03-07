@@ -1,11 +1,12 @@
 #ifndef FRAME_CHARACTER_PROPERTY_COOLDOWN_H_
 #define FRAME_CHARACTER_PROPERTY_COOLDOWN_H_
 
+#include <cstdint>
 #include <unordered_map>
 
 namespace ns_frame {
 
-using event_tick_t = unsigned long long;
+using event_tick_t = int64_t;
 
 class ChCooldown {
 public:
@@ -14,8 +15,9 @@ public:
      */
     class Item {
     public:
-        bool         isValid  = false;
-        event_tick_t tickOver = 0; // 结束 tick
+        int          countAvailable = 0; // 可用次数
+        event_tick_t tickOver       = 0; // 距离当前层冷却完毕的 tick
+        event_tick_t tickAdditional = 0; // 非当前层的总冷却 tick
     };
 
     /**

@@ -4,6 +4,7 @@
 #include "frame/ref/global_skill.h"
 #include <cstdint>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -164,6 +165,7 @@ public:
     void AddAttribute_iiii(int a, int b, int c, int d);
     void AddAttribute_iisi(int a, int b, std::string c, int d);
     void AddAttribute_iidi(int a, int b, double c, int d);
+    void AddAttribute_iini(int a, int b, std::optional<char> nil, int d);
 
     // 技能施放Buff需求
     void AddSlowCheckSelfBuff(int a, int b, int c, int d, int e);    // 需求自身Buff
