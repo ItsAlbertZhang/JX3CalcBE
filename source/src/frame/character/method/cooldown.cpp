@@ -76,8 +76,8 @@ void Character::cooldownModify(int cooldownID, int frame) {
         item->tickAdditional = 0;
         return;
     }
-    int cnt = delayToMaxCount / duration + 1; // 与满层的层数差. 至少是 1
-    delay   = delayToMaxCount % duration;     // 当前层的剩余冷却时间
+    int cnt = static_cast<int>(delayToMaxCount / duration) + 1; // 与满层的层数差. 至少是 1
+    delay   = delayToMaxCount % duration;                       // 当前层的剩余冷却时间
     if (cnt > cooldown.MaxCount) {
         // 如果与满层的层数差已经超出了最大可用次数
         delay += (cnt - cooldown.MaxCount) * duration; // 超出部分退还为当前层的剩余冷却时间
