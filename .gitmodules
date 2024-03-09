@@ -1,9 +1,6 @@
 [submodule "extern/cpp-httplib"]
 	path = extern/cpp-httplib
 	url = https://github.com/yhirose/cpp-httplib.git
-[submodule "extern/lua"]
-	path = extern/lua
-	url = https://github.com/lua/lua.git
 [submodule "extern/nlohmann-json"]
 	path = extern/nlohmann-json
 	url = https://github.com/nlohmann/json.git
