@@ -13,13 +13,18 @@
 #include <unordered_map>
 #include <vector>
 
-#pragma warning(push, 0)
+#pragma warning(push, 0)      // MSVC
+#pragma clang diagnostic push // Clang
+#pragma clang diagnostic ignored "-Weverything"
+
 #ifdef _WIN32
 #include <sdkddkver.h>
 #endif
 #include <asio/io_context.hpp>
 #include <crow.h>
-#pragma warning(pop)
+
+#pragma clang diagnostic pop // Clang
+#pragma warning(pop)         // MSVC
 
 namespace ns_modules {
 

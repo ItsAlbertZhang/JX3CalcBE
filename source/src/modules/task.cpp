@@ -11,17 +11,11 @@
 #include "utils/config.h"
 #include <asio/co_spawn.hpp>
 #include <chrono>
+#include <format>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
-
-#ifdef _WIN32
-#include <format>
-namespace fmt = std;
-#else
-#include <fmt/core.h>
-#endif
 
 using namespace ns_modules::task;
 using ull = unsigned long long;
@@ -78,7 +72,7 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         if (!j.contains(it)) {
             return Response{
                 .status = ResponseStatus::missing_field,
-                .data   = fmt::format("missing required field: {}", it),
+                .data   = std::format("missing required field: {}", it),
             };
         }
     }
@@ -166,7 +160,7 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         if (!it.is_string() || !ns_concrete::refEffectType.contains(it.get<std::string>())) {
             return Response{
                 .status = ResponseStatus::invalid_effects,
-                .data   = fmt::format("effects invalid: {}", it.get<std::string>()),
+                .data   = std::format("effects invalid: {}", it.get<std::string>()),
             };
         }
     }

@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF) # 设置 C++ 编译器不使用扩展特性
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # 导出编译命令, 用于 clangd
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Building in debug mode.")
     add_definitions(-DDEBUG)
     add_definitions(-DD_CONSTEXPR_LOG)
     add_definitions(-DD_CONSTEXPR_CHANNELINTERVAL)
@@ -36,7 +37,7 @@ else()
     message(FATAL_ERROR "Unsupported compiler type: ${CMAKE_CXX_COMPILER_ID}")
 endif()
 
-set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}") # 输出目录
+set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/build/bin/${CMAKE_BUILD_TYPE}") # 输出目录
 
 function(set_output_directory TYPE)
     set(CMAKE_${TYPE}_OUTPUT_DIRECTORY
@@ -55,22 +56,33 @@ set_output_directory(LIBRARY) # .dylib .so
 set_output_directory(ARCHIVE) # .lib .a
 
 # 处理 lua
-if(WIN32)
-    set(LUA_LIB_UNZIP_DIR "${CMAKE_BINARY_DIR}/lua")
-    if(NOT EXISTS ${LUA_LIB_UNZIP_DIR})
-        file(MAKE_DIRECTORY ${LUA_LIB_UNZIP_DIR})
-        set(LUA_LIB_URL "https://nchc.dl.sourceforge.net/project/luabinaries/5.4.2/Windows%20Libraries/Static/lua-5.4.2_Win64_vc17_lib.zip")
-        set(LUA_LIB_ZIP "${CMAKE_BINARY_DIR}/lua-5.4.2_Win64_vc17_lib.zip")
-        file(DOWNLOAD ${LUA_LIB_URL} ${LUA_LIB_ZIP} SHOW_PROGRESS)
-        execute_process(COMMAND tar -xf ${LUA_LIB_ZIP} -C ${LUA_LIB_UNZIP_DIR})
+set(LUA_LIB_DIR "${CMAKE_BINARY_DIR}/lua")
+
+function(download_lua URL FILE)
+    if(NOT EXISTS ${LUA_LIB_DIR})
+        file(MAKE_DIRECTORY ${LUA_LIB_DIR})
+        set(LUA_LIB_ZIP "${CMAKE_BINARY_DIR}/${FILE}")
+        message(STATUS "Downloading lua ...")
+        file(DOWNLOAD ${URL} ${LUA_LIB_ZIP} SHOW_PROGRESS)
+        execute_process(COMMAND tar -xf ${LUA_LIB_ZIP} -C ${LUA_LIB_DIR})
     endif()
+endfunction()
+
+if(WIN32)
+    download_lua("https://nchc.dl.sourceforge.net/project/luabinaries/5.4.2/Windows%20Libraries/Static/lua-5.4.2_Win64_vc17_lib.zip" "lua-5.4.2_Win64_vc17_lib.zip")
     find_library(
         LUA
         NAMES lua54
-        PATHS ${LUA_LIB_UNZIP_DIR})
-    include_directories("${LUA_LIB_UNZIP_DIR}/include")
+        PATHS "${LUA_LIB_DIR}")
+    include_directories("${LUA_LIB_DIR}/include")
 else()
-
+    download_lua("https://www.lua.org/ftp/lua-5.4.6.tar.gz" "lua-5.4.6.tar.gz")
+    execute_process(COMMAND bash -c "cd ${LUA_LIB_DIR}/lua-5.4.6 && make && make install INSTALL_TOP=../..")
+    find_library(
+        LUA
+        NAMES lua
+        PATHS "${LUA_LIB_DIR}/lib")
+    include_directories("${LUA_LIB_DIR}/include")
 endif()
 
 # jx3calc 和 gdi 通用头文件

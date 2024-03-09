@@ -5,13 +5,6 @@
 
 #include <unordered_map>
 
-#ifdef _WIN32
-#include <format>
-namespace fmt = std;
-#else
-#include <fmt/core.h>
-#endif
-
 namespace ns_plugin {
 namespace channelinterval {
 
