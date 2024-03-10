@@ -3,16 +3,15 @@
 
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
-#include <memory>
 #include <sol/sol.hpp>
 #include <string>
-#include <vector>
 
 namespace ns_frame {
 
-std::shared_ptr<sol::state> luaInit();
+sol::state *luaInit();
 
-extern const std::vector<std::string> luaFuncStaticToDynamic;
+extern const char *const luaFuncList[];
+extern const size_t      luaFuncListSize;
 
 class LuaGlobalFunction {
 public:

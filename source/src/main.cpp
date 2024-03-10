@@ -16,8 +16,8 @@ int main(int argc, char *argv[]) {
     // 初始化程序
     ns_utils::config::init(argc, argv);
     // 初始化接口
-    bool ret = gdi::initLua(ns_frame::luaInit, ns_frame::luaFuncStaticToDynamic);
-    if (!ret) {
+    int ret = gdi::luaInit(ns_frame::luaInit, ns_frame::luaFuncList, ns_frame::luaFuncListSize);
+    if (0 != ret) {
         std::cerr << "Init failed." << std::endl;
 #ifdef _WIN32
         system("pause");

@@ -1,6 +1,10 @@
 #include "frame/character/character.h"
-#include <httplib.h>
 #include <nlohmann/json.hpp>
+
+#pragma warning(push) // MSVC
+#pragma warning(disable : 4100)
+#include <httplib.h> // (:4795): warning C4100: “content_length”: 未引用的形参
+#pragma warning(pop) // MSVC
 
 using namespace ns_frame;
 using json = nlohmann::json;

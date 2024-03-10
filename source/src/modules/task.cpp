@@ -246,14 +246,13 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
 
     // 在线程池中创建任务
     const int cntCalcDetail = task.data.fightCount > CNT_DETAIL_TASKS ? CNT_DETAIL_TASKS : task.data.fightCount;
-    task.details.resize(cntCalcDetail);
+    task.details.resize(cntCalcDetail); // 注意, 此处不是 reserve, 因为获得的内存地址需要传递给线程池
     for (int i = 0; i < cntCalcDetail; i++) {
         server::pool.emplace(task.id, 1, task.futures, calcDetail, task.data, &task.details[i]);
     }
     server::pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, task.data);
 
     task.results.reserve(task.data.fightCount);
-    task.details.reserve(cntCalcDetail);
     int cntPre = 0;
     while (!task.stop.load() && task.cntCompleted < task.data.fightCount) [[likely]] {
         if (task.futures[task.cntCompleted].wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
@@ -389,7 +388,7 @@ static std::string genID(int length) {
 
     std::string random_string;
     while (random_string.empty() || ns_modules::task::server::taskMap.contains(random_string)) {
-        for (size_t i = 0; i < length; ++i) {
+        for (size_t i = 0; i < length; i++) {
             random_string += CHARACTERS[distribution(generator)];
         }
     }

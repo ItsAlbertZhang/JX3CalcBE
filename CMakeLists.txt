@@ -98,6 +98,7 @@ include_directories("${CMAKE_SOURCE_DIR}/extern/sol2/include")
 file(GLOB_RECURSE MAIN_SOURCES "${CMAKE_SOURCE_DIR}/source/src/*.cpp")
 add_executable(jx3calc ${MAIN_SOURCES}) # 编译为可执行文件
 target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/source/include")
+target_link_libraries(jx3calc PRIVATE ${LUA}) # 链接 lua 库
 
 # 构建 gdi
 if(EXISTS "${CMAKE_SOURCE_DIR}/JX3CalcBEgdi")

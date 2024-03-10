@@ -95,7 +95,7 @@ public:
         int  nBuffLevel[4] = {0, 0, 0, 0};
         void overload(const SkillBindBuff &other) {
             if (other.used) {
-                for (int i = 0; i < 4; ++i) {
+                for (int i = 0; i < 4; i++) {
                     if (other.isValid[i]) {
                         isValid[i]    = true;
                         nBuffID[i]    = other.nBuffID[i];
@@ -122,7 +122,7 @@ public:
                     isValidPublicCoolDown = true;
                     nPublicCoolDown       = other.nPublicCoolDown;
                 }
-                for (int i = 0; i < 3; ++i) {
+                for (int i = 0; i < 3; i++) {
                     if (other.isValidNormalCoolDown[i]) {
                         isValidNormalCoolDown[i] = true;
                         nNormalCoolDownID[i]     = other.nNormalCoolDownID[i];

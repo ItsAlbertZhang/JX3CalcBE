@@ -14,7 +14,7 @@
 
 using namespace ns_frame;
 
-const std::vector<std::string> ns_frame::luaFuncStaticToDynamic = {
+const char *const ns_frame::luaFuncList[]{
     // Skill
     "SetDelaySubSkill",
     "AddAttribute",
@@ -61,8 +61,9 @@ const std::vector<std::string> ns_frame::luaFuncStaticToDynamic = {
     "SetBuffLeftActiveCount",
     "SetBuffNextActiveFrame",
 };
+const size_t ns_frame::luaFuncListSize = sizeof(ns_frame::luaFuncList) / sizeof(ns_frame::luaFuncList[0]);
 
-std::shared_ptr<sol::state> ns_frame::luaInit() {
+sol::state *ns_frame::luaInit() {
     auto lua = LuaFunc::getLua();
     lua->open_libraries(sol::lib::base);
     lua->open_libraries(sol::lib::table);
@@ -296,7 +297,7 @@ std::shared_ptr<sol::state> ns_frame::luaInit() {
     }
     (*lua)["ABSORB_ATTRIBUTE_SHIELD_TYPE"] = ABSORB_ATTRIBUTE_SHIELD_TYPE;
 
-    return lua;
+    return lua.get();
 }
 
 void LuaGlobalFunction::Include(const std::string &filename) {

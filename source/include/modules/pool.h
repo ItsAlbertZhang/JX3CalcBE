@@ -142,7 +142,7 @@ public:
         // std::function<void()> thread_cleanup = []() {}
     )
         : stop(false) {
-        for (unsigned int i = 0; i < corecnt; ++i)
+        for (unsigned int i = 0; i < corecnt; i++)
             // workers.emplace_back([this, thread_init, thread_cleanup] {
             workers.emplace_back([this] {
                 // thread_init();
@@ -168,7 +168,7 @@ public:
         res.reserve(res.size() + count);
         {
             std::unique_lock<std::mutex> lock(queue_mutex); // 上锁
-            for (int i = 0; i < count; ++i) {
+            for (int i = 0; i < count; i++) {
                 auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
                 res.emplace_back(task->get_future());
                 tasks.emplace(id, [task]() { (*task)(); });
