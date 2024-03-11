@@ -27,6 +27,7 @@ public:
     std::string                                  Name;
 
     ref::enumSkillKindtype KindType;
+    bool                   IsPassiveSkill;
     bool                   HasCriticalStrike;
     uint32_t               SkillEventMask1;
     uint32_t               SkillEventMask2;

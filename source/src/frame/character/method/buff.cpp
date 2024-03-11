@@ -45,12 +45,13 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
     const Buff &buff    = BuffManager::get(buffID, buffLevel);
     if (this->chBuff.buffMap[buffSourceID][buffID].find(buffLevel) == this->chBuff.buffMap[buffSourceID][buffID].end()) {
         // 对于 buffSourceID 和 buffID, 直接使用 [] 运算符, 没有则直接创建.
-        this->chBuff.buffMap[buffSourceID][buffID].emplace(
+        auto it = this->chBuff.buffMap[buffSourceID][buffID].emplace(
             std::piecewise_construct,
             std::forward_as_tuple(buffLevel),
             std::forward_as_tuple(this->dwID, buff.Interval, buff.Count, buffID, buffLevel, static_cast<int>(this->chBuff.buffList.size()), buffSourceID)
         );
         // 原地插入. 通过这种方式插入的 key 和 value, 不是构造后移动至容器, 而是直接在容器内构造. 这可以避免 Item 的 const 属性出现问题.
+        this->chBuff.buffRef.emplace(buff.Name, &(it.first->second));
         newBuff = true;
     }
     BuffItem &it = this->chBuff.buffMap[buffSourceID][buffID].at(buffLevel);

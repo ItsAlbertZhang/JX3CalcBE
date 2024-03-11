@@ -31,7 +31,9 @@ void Character::skillDeactive(int skillID) {
 
 void Character::skillLearn(int skillID, int skillLevel) {
     this->chSkill.skillLearned[skillID] = skillLevel;
-    SkillManager::get(skillID, skillLevel);
+    const Skill &it                     = SkillManager::get(skillID, skillLevel);
+    if (!it.IsPassiveSkill)
+        chSkill.skillRef[it.Name] = skillID;
 }
 
 void Character::cast(int skillID) {

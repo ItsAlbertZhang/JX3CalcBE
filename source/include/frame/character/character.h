@@ -58,20 +58,34 @@ public:
     std::set<AutoRollbackAttribute *> autoRollbackAttributeList; // 自动回滚的魔法属性列表
 
     // ---------- 以下属性和方法未被游戏 lua 调用 ----------
-    int               dwKungfuID = 0;
+    int                           dwKungfuID = 0;
     // character
-    static int        characterGetID(Character *character);
-    static Character *characterGet(int nCharacterID);
+    static int                    characterGetID(Character *character);
+    static Character             *characterGet(int nCharacterID);
     // attr
-    bool              attrImportFromData(std::string dataJsonStr);
-    bool              attrImportFromJX3BOX(std::string pzID);
-    bool              attrImportFromBackup(const ChAttr &attr);
+    bool                          attrImportFromData(std::string dataJsonStr);
+    bool                          attrImportFromJX3BOX(std::string pzID);
+    bool                          attrImportFromBackup(const ChAttr &attr);
     // buff
-    void              buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
-    void              buffFlushLeftFrame(BuffItem *item);
-    BuffItem         *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
-    BuffItem         *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
-    event_tick_t      buffTimeLeftTick(int buffID, int buffLevel);
+    void                          buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
+    void                          buffFlushLeftFrame(BuffItem *item);
+    event_tick_t                  buffTimeLeftTick(int buffID, int buffLevel);
+    BuffItem                     *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
+    BuffItem                     *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
+    // skill
+    bool                          skillCast(Character *target, int skillID, int skillLevel);
+    void                          cast(int skillID);
+    void                          skillActive(int skillID);
+    void                          skillDeactive(int skillID);
+    void                          skillLearn(int skillID, int skillLevel);
+    // skillrecipe
+    void                          skillrecipeAdd(int recipeID, int recipeLevel);
+    void                          skillrecipeRemove(int recipeID, int recipeLevel);
+    std::set<const SkillRecipe *> skillrecipeGet(int skillID, int skillrecipeType);
+    // skillevent
+    void                          skilleventAdd(int eventID);
+    void                          skilleventRemove(int eventID);
+    std::set<const SkillEvent *>  skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2);
 
     // calc
     Damage calcDamage(
@@ -95,20 +109,16 @@ public:
     );
     std::tuple<int, int> calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel);
 
-    // skill
-    bool                          skillCast(Character *target, int skillID, int skillLevel);
-    void                          cast(int skillID);
-    void                          skillActive(int skillID);
-    void                          skillDeactive(int skillID);
-    void                          skillLearn(int skillID, int skillLevel);
-    // skillrecipe
-    void                          skillrecipeAdd(int recipeID, int recipeLevel);
-    void                          skillrecipeRemove(int recipeID, int recipeLevel);
-    std::set<const SkillRecipe *> skillrecipeGet(int skillID, int skillrecipeType);
-    // skillevent
-    void                          skilleventAdd(int eventID);
-    void                          skilleventRemove(int eventID);
-    std::set<const SkillEvent *>  skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2);
+    // macro parse
+    int    macroSkillRef(std::string skillName);
+    int    macroBuff(std::string buffName);
+    bool   macroNoBuff(std::string buffName);
+    double macroBufftime(std::string buffName);
+    int    macroTBuff(std::string buffName);
+    bool   macroTNoBuff(std::string buffName);
+    double macroTBufftime(std::string buffName);
+    int    macroSun();
+    int    macroMoon();
 
     // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua_static.cpp ----------
 
