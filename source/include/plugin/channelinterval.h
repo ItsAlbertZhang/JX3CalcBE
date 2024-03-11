@@ -20,7 +20,7 @@ public:
 inline std::unordered_map<int, std::unordered_map<int, Item>> records;
 inline bool                                                   enable = true;
 
-void record(int skillID, int skillLevel, int base, int rand, double fChannelInterval, bool isBuff);
+void record(int id, int level, int base, int rand, double fChannelInterval, bool isBuff);
 void save();
 
 } // namespace channelinterval

@@ -47,8 +47,8 @@ std::tuple<int, int> Character::calcCritical(const ChAttr &attrSelf, int skillID
 }
 
 Damage Character::calcDamage(
-    int              recordID,
-    int              recordLevel,
+    int              id,
+    int              level,
     const ChAttr    &attrSelf,
     const Character *target,
     DamageType       typeDamage,
@@ -133,8 +133,8 @@ Damage Character::calcDamage(
     unsigned long long damage = damageBase + damageRand / 2;
     if (isSurplus) {
         CONSTEXPR_CHANNELINTERVAL_RECORD(
-            recordID,
-            recordLevel,
+            id,
+            level,
             damageBase,
             damageRand,
             static_cast<double>(1) * (atGlobalDamageFactor + (1 << 20)) / (1 << 20),
@@ -143,8 +143,8 @@ Damage Character::calcDamage(
         damage = damage + atSurplus * 1;
     } else {
         CONSTEXPR_CHANNELINTERVAL_RECORD(
-            recordID,
-            recordLevel,
+            id,
+            level,
             damageBase,
             damageRand,
             static_cast<double>(1) * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 * (atGlobalDamageFactor + (1 << 20)) / (1 << 20),
@@ -172,14 +172,14 @@ Damage Character::calcDamage(
 
     return Damage{
         .tick           = Event::now(),
-        .source         = isBuff ? DamageSource::buff : DamageSource::skill,
         .damageType     = typeDamage,
-        .id             = recordID,
-        .level          = recordLevel,
+        .id             = id,
+        .level          = level,
         .damageBase     = static_cast<int>(damage),
         .damageCritical = static_cast<int>(damageCritical),
         .damageExcept   = static_cast<int>(damageExcept),
         .criticalRate   = atCriticalStrike,
         .isCritical     = isCritical,
+        .isBuff         = isBuff,
     };
 }

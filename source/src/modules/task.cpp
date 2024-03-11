@@ -4,8 +4,8 @@
 #include "frame/custom/base.h"
 #include "frame/custom/lua.h"
 #include "frame/event.h"
-#include "frame/global/uibuff.h"
-#include "frame/global/uiskill.h"
+#include "frame/global/buff.h"
+#include "frame/global/skill.h"
 #include "plugin/channelinterval.h"
 #include "plugin/log.h"
 #include "utils/config.h"
@@ -472,17 +472,10 @@ std::string Task::queryDamageList() {
         json objFight = json::array();
         for (auto &everyDamage : everyFight) {
             std::string name;
-            switch (everyDamage.source) {
-            case ns_frame::DamageSource::skill: {
-                const ns_frame::UISkill &skill = ns_frame::UISkillManager::get(everyDamage.id, everyDamage.level);
-                name                           = skill.Name;
-            } break;
-            case ns_frame::DamageSource::buff: {
-                const ns_frame::UIBuff &buff = ns_frame::UIBuffManager::get(everyDamage.id, everyDamage.level);
-                name                         = buff.Name;
-            } break;
-            default:
-                break;
+            if (everyDamage.isBuff) {
+                name = ns_frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
+            } else {
+                name = ns_frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
             }
             json objDamage;
             objDamage["time"]           = everyDamage.tick / 1024.0;
@@ -530,17 +523,10 @@ std::string Task::queryDamageAnalysis() {
         for (auto &everyDamage : everyFight) {
             if (!damageAnalysisMap.contains(everyDamage.id) || !damageAnalysisMap.at(everyDamage.id).contains(everyDamage.level)) {
                 std::string name;
-                switch (everyDamage.source) {
-                case ns_frame::DamageSource::skill: {
-                    const ns_frame::UISkill &skill = ns_frame::UISkillManager::get(everyDamage.id, everyDamage.level);
-                    name                           = skill.Name;
-                } break;
-                case ns_frame::DamageSource::buff: {
-                    const ns_frame::UIBuff &buff = ns_frame::UIBuffManager::get(everyDamage.id, everyDamage.level);
-                    name                         = buff.Name;
-                } break;
-                default:
-                    break;
+                if (everyDamage.isBuff) {
+                    name = ns_frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
+                } else {
+                    name = ns_frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
                 }
                 damageAnalysisMap[everyDamage.id][everyDamage.level] = DamageAnalysisItem{
                     .id        = everyDamage.id,

@@ -58,7 +58,8 @@ void SkillManager::add(int skillID, int skillLevel) {
     skill.TargetRelationSelf   = skill.tab["TargetRelationSelf"] == "1";
     skill.TargetRelationEnemy  = skill.tab["TargetRelationEnemy"] == "1";
     skill.RecipeType           = atoi(skill.tab["RecipeType"].c_str());
-    // 处理武器伤害. 目前推测: WeaponRequest 字段非 0 的技能默认拥有 1024 的武器伤害.
+    // 处理默认武器伤害.
+    // 目前推测: WeaponRequest 字段非 0 的技能默认拥有 1024 的武器伤害 (可以在后续 lua 的 getGetSkillLevelData 中被覆盖).
     // 注意: 拥有武器伤害不一定代表会造成武器伤害. 造成武器伤害与 AddAttribute 中的 CALL_PHYSICS_DAMAGE 有关.
     // 推测的依据:
     // 1. 部分技能并没有在 lua 中显式声明 nWeaponDamagePercent, 但是仍然可以造成武器伤害. (最简单的例子即为普通攻击)
@@ -71,7 +72,22 @@ void SkillManager::add(int skillID, int skillLevel) {
         LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData
     );
     if (res) {
-        // 成功执行, 将技能存入缓存
+        // 查询技能 UI
+        gdi::select_t arg;
+        arg.emplace_back();
+        arg[0]["SkillID"] = std::to_string(skillID);
+        arg[0]["Level"]   = std::to_string(skillLevel);
+        arg.emplace_back();
+        arg[1]["SkillID"] = std::to_string(skillID);
+        arg[1]["Level"]   = "0";
+        gdi::tabSelect(gdi::Tab::ui_skill, arg);
+        if (arg.size() == 0) {
+            skill.Name = "未知技能";
+        } else {
+            skill.ui   = std::move(arg[0]);
+            skill.Name = skill.ui["Name"];
+        }
+        // 将技能存入缓存
         data[skillID][skillLevel] = std::move(skill);
     } else {
         CONSTEXPR_LOG_ERROR("LuaFunc::getGetSkillLevelData(\"{}\") failed.", name);

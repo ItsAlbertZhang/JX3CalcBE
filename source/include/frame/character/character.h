@@ -75,8 +75,8 @@ public:
 
     // calc
     Damage calcDamage(
-        int              recordID,
-        int              recordLevel,
+        int              id,
+        int              level,
         const ChAttr    &attrSelf,
         const Character *target,
         DamageType       typeDamage,

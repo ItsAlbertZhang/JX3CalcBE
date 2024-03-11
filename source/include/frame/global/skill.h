@@ -23,6 +23,8 @@ class Skill {
 public:
     // ---------- 数据存放区 ----------
     std::unordered_map<std::string, std::string> tab; // skills.tab 中的数据
+    std::unordered_map<std::string, std::string> ui;  // ui_skill.tab 中的数据
+    std::string                                  Name;
 
     ref::enumSkillKindtype KindType;
     bool                   HasCriticalStrike;
