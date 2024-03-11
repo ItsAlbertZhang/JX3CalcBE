@@ -33,9 +33,13 @@ inline Log error{.name = "error", .output = true};
 
 #else // D_CONSTEXPR_LOG
 
-#define CONSTEXPR_LOG_INFO(str, ...)  (str)
-#define CONSTEXPR_LOG_ERROR(str, ...) (str)
-// (str) 的目的是在不影响性能的同时, 保证语句非置空, 以消除 MSVC 警告: “;”: 找到空的受控语句；这是否是有意的?
+#define CONSTEXPR_LOG_INFO(str, ...) \
+    do {                             \
+    } while (0)
+#define CONSTEXPR_LOG_ERROR(str, ...) \
+    do {                              \
+    } while (0)
+// do...while 的目的是在不影响性能的同时, 保证语句非置空, 以消除 MSVC 警告: “;”: 找到空的受控语句；这是否是有意的?
 
 #endif // D_CONSTEXPR_LOG
 

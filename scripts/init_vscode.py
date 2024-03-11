@@ -4,9 +4,6 @@ directory = ".vscode"
 if not os.path.exists(directory):
     os.makedirs(directory)
 
-settings: dict = {
-    "cmake.buildDirectory": "${workspaceFolder}/build/obj/${buildType}",
-}
 
 if os.name == "nt":
     settings_add = {
@@ -21,6 +18,9 @@ elif os.name == "posix":
 else:
     raise Exception("Unsupported OS")
 
+settings: dict = {
+    "cmake.buildDirectory": "${workspaceFolder}/build/obj/${buildType}",
+}
 settings.update(settings_add)
 with open(".vscode/settings.json", "w") as f:
     json.dump(settings, f, indent=4)

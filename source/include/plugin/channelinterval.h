@@ -31,8 +31,10 @@ void save();
 
 #else // D_CONSTEXPR_CHANNELINTERVAL
 
-#define CONSTEXPR_CHANNELINTERVAL_RECORD(skillID, skillLevel, base, rand, fChannelInterval, isBuff) (skillID)
-// (skillID) 的目的是在不影响性能的同时, 保证语句非置空, 以消除 MSVC 警告: “;”: 找到空的受控语句；这是否是有意的?
+#define CONSTEXPR_CHANNELINTERVAL_RECORD(skillID, skillLevel, base, rand, fChannelInterval, isBuff) \
+    do {                                                                                            \
+    } while (0)
+// do...while 的目的是在不影响性能的同时, 保证语句非置空, 以消除 MSVC 警告: “;”: 找到空的受控语句；这是否是有意的?
 
 #endif // D_CONSTEXPR_CHANNELINTERVAL
 
