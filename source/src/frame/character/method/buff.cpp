@@ -34,13 +34,11 @@ static void staticDelBuff(Character *self, BuffItem *it) {
     Event::cancel(it->tickActive, callbackActiveBuff, self, it); // 取出回调函数
 }
 
-void Character::buffAdd4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel) {
-    buffAdd7(buffSourceID, buffSourceLevel, buffID, buffLevel, 1, 0, 1);
+void Character::buffAddOptional(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, std::optional<int> count, std::optional<int> param6, std::optional<int> stacknum) {
+    buffAdd(buffSourceID, buffSourceLevel, buffID, buffLevel, count.value_or(1), param6.value_or(0), stacknum.value_or(1));
 }
-void Character::buffAdd5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count) {
-    buffAdd7(buffSourceID, buffSourceLevel, buffID, buffLevel, count, 0, 1);
-}
-void Character::buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum) {
+
+void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum) {
     UNREFERENCED_PARAMETER(buffSourceLevel);
     UNREFERENCED_PARAMETER(param6);
     bool        newBuff = false;
@@ -134,7 +132,7 @@ void Character::buffDelMultiGroupByID(int buffID) {
 void Character::buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel) {
     const Skill &skill = SkillManager::get(skillID, skillLevel);
     // const Buff  &buff  = BuffManager::get(buffID, buffLevel);
-    this->buffAdd4(buffSourceID, buffSourceLevel, buffID, buffLevel);
+    this->buffAdd(buffSourceID, buffSourceLevel, buffID, buffLevel);
     BuffItem &it          = this->chBuff.buffMap[buffSourceID][buffID].at(buffLevel);
     it.dwCasterSkillID    = skillID;
     it.dwCasterSkillLevel = skillLevel;

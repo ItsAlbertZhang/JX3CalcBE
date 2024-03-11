@@ -1,7 +1,6 @@
 #ifndef FRAME_LUA_RUNTIME_H_
 #define FRAME_LUA_RUNTIME_H_
 
-#include <memory>
 #include <sol/sol.hpp>
 #include <sol/state.hpp>
 #include <string>
@@ -19,7 +18,7 @@ class LuaFunc {
 public:
     LuaFunc() = delete; // 禁止创建类实例
 
-    static std::shared_ptr<sol::state> getLua();
+    static sol::state *getLua();
 
     enum class Enum {
         GetSkillLevelData,
@@ -59,7 +58,7 @@ private:
     /**
      * @brief lua 状态机和缓存数据, 不同线程之间数据不共享
      */
-    static inline thread_local std::shared_ptr<sol::state>                       lua = std::make_shared<sol::state>();
+    static inline thread_local sol::state                                        lua;
     static inline thread_local std::vector<std::string>                          filenameList;
     static inline thread_local std::unordered_map<std::string, int>              filenameMap;
     static inline thread_local std::vector<std::vector<sol::protected_function>> filefuncList;

@@ -8,8 +8,8 @@
 using namespace ns_frame;
 using namespace std;
 
-std::shared_ptr<sol::state> LuaFunc::getLua() {
-    return lua;
+sol::state *LuaFunc::getLua() {
+    return &lua;
 }
 
 int LuaFunc::getIndex(string &filename, bool reload) {

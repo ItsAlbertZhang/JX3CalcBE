@@ -2,7 +2,6 @@
 #define FRAME_LUA_STATIC_H_
 
 #include "frame/character/character.h"
-#include "frame/global/skill.h"
 #include <sol/sol.hpp>
 #include <string>
 
@@ -26,7 +25,6 @@ public:
     static int         GetValueByBits(int nValue, int nBit, int c);
     static int         SetValueByBits(int nValue, int nBit, int c, int nNewBitValue);
     static int         Random(int min, int max);
-    static void        AdditionalAttribute(ns_frame::Skill &skill);
     static void        Include(const std::string &filename);
     static void        ModityCDToUI(ns_frame::Character *character, int skillID, int c, int d);
     static void        RemoteCallToClient();

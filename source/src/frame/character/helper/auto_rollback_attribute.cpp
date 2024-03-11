@@ -113,7 +113,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 // 未做相关实现, 推测为解控
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_BUFF):
-                self->buffAdd4(self->dwID, self->nLevel, it.param1Int, it.param2);
+                self->buffAdd(self->dwID, self->nLevel, it.param1Int, it.param2);
                 break;
             case static_cast<int>(enumLuaAttributeType::DEL_SINGLE_BUFF_BY_ID_AND_LEVEL):
                 self->buffDel(it.param1Int, it.param2);
@@ -350,7 +350,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 this->self->bFightState = true;
                 break;
             case static_cast<int>(enumLuaAttributeType::CALL_BUFF):
-                target->buffAdd4(self->dwID, self->nLevel, it.param1Int, it.param2);
+                target->buffAdd(self->dwID, self->nLevel, it.param1Int, it.param2);
                 break;
             case static_cast<int>(enumLuaAttributeType::DASH):
                 // 未做相关实现, 推测为冲刺

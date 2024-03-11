@@ -23,16 +23,16 @@ static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int n
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
 static void        callbackDelaySubSkill(void *self, void *item);
 
-void Character::skillCast4(int skillID, int skillLevel, int type, int targetID) {
+void Character::skillCast(int skillID, int skillLevel, int type, int targetID) {
     UNREFERENCED_PARAMETER(type);
     skillCast(characterGet(targetID), skillID, skillLevel);
 }
 
-void Character::skillCast3(int skillID, int skillLevel, int targetID) {
+void Character::skillCast(int skillID, int skillLevel, int targetID) {
     skillCast(characterGet(targetID), skillID, skillLevel);
 }
 
-void Character::skillCast2(int skillID, int skillLevel) {
+void Character::skillCast(int skillID, int skillLevel) {
     if (skillCast(this->targetCurr, skillID, skillLevel)) {
         return;
     }
@@ -447,5 +447,5 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
 static void callbackDelaySubSkill(void *self, void *item) {
     Character                  *ptrSelf = static_cast<Character *>(self);
     const Skill::DelaySubSkill *ptrItem = static_cast<const Skill::DelaySubSkill *>(item);
-    ptrSelf->skillCast2(ptrItem->skillID, ptrItem->skillLevel);
+    ptrSelf->skillCast(ptrItem->skillID, ptrItem->skillLevel);
 }

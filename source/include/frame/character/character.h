@@ -11,6 +11,7 @@
 #include "frame/character/property/skillrecipe.h"
 #include "frame/ref/lua_other.h"
 #include <cstdint>
+#include <optional>
 #include <set>
 #include <string>
 #include <tuple>
@@ -95,8 +96,8 @@ public:
     std::tuple<int, int> calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel);
 
     // skill
-    void                          cast(int skillID);
     bool                          skillCast(Character *target, int skillID, int skillLevel);
+    void                          cast(int skillID);
     void                          skillActive(int skillID);
     void                          skillDeactive(int skillID);
     void                          skillLearn(int skillID, int skillLevel);
@@ -116,9 +117,8 @@ public:
     Character *characterGetSelect();
     // buff
     bool       buffExist(int buffID, int buffLevel);
-    void       buffAdd4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
-    void       buffAdd5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count);
-    void       buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum);
+    void       buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count = 1, int param6 = 0, int stacknum = 1);
+    void       buffAddOptional(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, std::optional<int> count, std::optional<int> param6, std::optional<int> stacknum);
     void       buffDel(int buffID, int buffLevel);
     void       buffDelGroup(int buffID, int buffLevel);
     void       buffDelMultiGroupByID(int buffID);
@@ -132,17 +132,17 @@ public:
     void       cooldownReset(int cooldownID);
     // skill
     int        skillGetLevel(int skillID);
-    void       skillCast2(int skillID, int skillLevel);
-    void       skillCast3(int skillID, int skillLevel, int targetID);
-    void       skillCast4(int skillID, int skillLevel, int type, int targetID);
+    void       skillCast(int skillID, int skillLevel);
+    void       skillCast(int skillID, int skillLevel, int targetID);
+    void       skillCast(int skillID, int skillLevel, int type, int targetID);
     void       skillCastXYZ(int skillID, int skillLevel, int x, int y, int z);
     // skillrecipe
     bool       skillrecipeExist(int RecipeID, int RecipeLevel);
     // scene
     ChScene   *sceneGet();
     // timer
-    void       timerSet3(int frame, std::string filename, int targetID);
-    void       timerSet4(int frame, std::string filename, int type, int targetID);
+    void       timerSet(int frame, std::string filename, int targetID);
+    void       timerSet(int frame, std::string filename, int type, int targetID);
     // other
     bool       otherIsFormationLeader();
     bool       otherIsInParty();

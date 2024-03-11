@@ -6,11 +6,6 @@
 
 using namespace ns_frame;
 
-void Character::skillLearn(int skillID, int skillLevel) {
-    this->chSkill.skillLearned[skillID] = skillLevel;
-    SkillManager::get(skillID, skillLevel);
-}
-
 void Character::skillActive(int skillID) {
     int skillLevel = skillGetLevel(skillID);
     if (skillLevel == 0) {
@@ -34,13 +29,18 @@ void Character::skillDeactive(int skillID) {
     }
 }
 
+void Character::skillLearn(int skillID, int skillLevel) {
+    this->chSkill.skillLearned[skillID] = skillLevel;
+    SkillManager::get(skillID, skillLevel);
+}
+
 void Character::cast(int skillID) {
     int skillLevel = skillGetLevel(skillID);
     if (skillLevel == 0) {
         return;
     }
     this->targetCurr = this->targetSelect;
-    skillCast2(skillID, skillLevel);
+    skillCast(skillID, skillLevel);
 }
 
 int Character::skillGetLevel(int skillID) {

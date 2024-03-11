@@ -82,21 +82,37 @@ void Skill::SetDelaySubSkill(int a, int b, int c) {
     attrDelaySubSkill.emplace_back(a, b, c);
 }
 
-void Skill::AddAttribute_iiii(int a, int b, int c, int d) {
+void Skill::AddAttribute(int a, int b, int c, int d) {
     attrAttributes.emplace_back(a, b, c, d);
 }
 
-void Skill::AddAttribute_iidi(int a, int b, double c, int d) {
+void Skill::AddAttribute(int a, int b, double c, int d) {
     attrAttributes.emplace_back(a, b, c, d);
 }
 
-void Skill::AddAttribute_iini(int a, int b, std::optional<char> nil, int d) {
+void Skill::AddAttribute(int a, int b, std::string c, int d) {
+    attrAttributes.emplace_back(a, b, c, d);
+}
+
+void Skill::AddAttribute(int a, int b, std::optional<char> nil, int d) {
+    // std::optional<char> 其实是 nil
+    // 出现于 scripts/skill/江湖/110级CW新增特效焚影伤害子技能.lua, 原代码如下:
+    /*
+tSkillData =
+{
+    {nDamageBase= 20, nDamageRand = 2, nCostMana = 0}, --level 1
+};
+...
+    skill.AddAttribute(
+        ATTRIBUTE_EFFECT_MODE.EFFECT_TO_SELF_AND_ROLLBACK,
+        ATTRIBUTE_TYPE.SKILL_LUNAR_DAMAGE,
+        tSkillData[dwSkillLevel].nDamage, // 注意这里不是 nDamageBase 而是 nDamage
+        0
+    );
+    */
+    // 只能说是非常离谱
     UNREFERENCED_PARAMETER(nil);
     attrAttributes.emplace_back(a, b, 0, d);
-}
-
-void Skill::AddAttribute_iisi(int a, int b, std::string c, int d) {
-    attrAttributes.emplace_back(a, b, c, d);
 }
 
 void Skill::AddSlowCheckSelfBuff(int a, int b, int c, int d, int e) {

@@ -191,7 +191,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c;
         break;
     case enumTabAttribute::atCallBuff:
-        self->buffAdd4(0, 99, attrib.valueAInt, attrib.valueBInt);
+        self->buffAdd(0, 99, attrib.valueAInt, attrib.valueBInt);
         break;
     case enumTabAttribute::atKnockedOffRate:
         // 未做相关实现, 推测为免疫击退
