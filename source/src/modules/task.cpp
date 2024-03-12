@@ -1,8 +1,6 @@
 #include "modules/task.h"
 #include "concrete/character/character.h"
 #include "concrete/effect/effect.h"
-#include "frame/custom/base.h"
-#include "frame/custom/lua.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
 #include "frame/global/skill.h"
@@ -45,6 +43,12 @@ void ns_modules::task::server::stop() {
     ioContext.stop();
     ioThread.join();
     pool.join();
+}
+
+ns_modules::task::Data::~Data() {
+    if (!customString.empty()) {
+        ns_frame::CustomLua::cancle(customString);
+    }
 }
 
 static int         calcBrief(const Data &arg);
@@ -130,11 +134,11 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
             .data   = "attribute method invalid",
         };
     }
-    AttributeType type = refAttributeType.at(j["attribute"]["method"].get<std::string>());
+    enumAttributeType type = refAttributeType.at(j["attribute"]["method"].get<std::string>());
     switch (type) {
-    case AttributeType::data:
+    case enumAttributeType::data:
         break;
-    case AttributeType::jx3box: {
+    case enumAttributeType::jx3box: {
         if (!j["attribute"]["data"].contains("pzid") || !j["attribute"]["data"]["pzid"].is_string()) {
             return Response{
                 .status = ResponseStatus::invalid_attribute_data,
@@ -168,7 +172,7 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
     if (j.contains("custom")) {
         if (!j["custom"].is_object() ||
             !j["custom"].contains("method") || !j["custom"]["method"].is_string() ||
-            !ns_frame::refCustom.contains(j["custom"]["method"].get<std::string>()) ||
+            !refCustom.contains(j["custom"]["method"].get<std::string>()) ||
             !j["custom"].contains("data") || !j["custom"]["data"].is_string()) {
             return Response{
                 .status = ResponseStatus::invalid_custom,
@@ -196,13 +200,13 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
 
     auto attrType = refAttributeType.at(j["attribute"]["method"].get<std::string>());
     switch (attrType) {
-    case AttributeType::data: {
+    case enumAttributeType::data: {
         std::string dataJsonStr = j["attribute"]["data"].dump();
         if (!player->attrImportFromData(dataJsonStr)) {
             return std::nullopt;
         }
     } break;
-    case AttributeType::jx3box: {
+    case enumAttributeType::jx3box: {
         std::string pzid = j["attribute"]["data"]["pzid"].get<std::string>();
         if (!player->attrImportFromJX3BOX(pzid)) {
             return std::nullopt;
@@ -224,14 +228,15 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
     }
     res.effects = std::move(effectList);
 
-    ns_frame::enumCustom custom = ns_frame::enumCustom::none;
-    std::string          customString;
     if (j.contains("custom")) {
-        custom       = ns_frame::refCustom.at(j["custom"]["method"].get<std::string>());
-        customString = j["custom"]["data"].get<std::string>();
+        switch (refCustom.at(j["custom"]["method"].get<std::string>())) {
+        case enumCustom::lua:
+            res.customString = j["custom"]["data"].get<std::string>();
+            break;
+        default:
+            break;
+        }
     }
-    res.customType   = custom;
-    res.customString = customString;
 
     return res;
 }
@@ -320,18 +325,8 @@ static auto calc(const Data &arg) {
     std::unique_ptr<ns_frame::Player> player = ns_concrete::createPlayer(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
     std::unique_ptr<ns_frame::NPC>    npc    = ns_concrete::createNPC(ns_concrete::NPCType::NPC124);
     player->targetSelect                     = npc.get();
-    switch (arg.customType) {
-    case ns_frame::enumCustom::lua: {
-        player->customType = ns_frame::enumCustom::lua;
-        if (ns_frame::mapCustomLua.contains(arg.customString)) {
-            player->customLua = ns_frame::mapCustomLua.at(arg.customString).get();
-        } else {
-            player->customLua = ns_frame::mapCustomLua.emplace(arg.customString, std::make_unique<ns_frame::CustomLua>(arg.customString)).first->second.get();
-        }
-        break;
-    }
-    default:
-        break;
+    if (!arg.customString.empty()) {
+        player->customLua = ns_frame::CustomLua::getCustomLua(arg.customString);
     }
     player->attrImportFromBackup(arg.attrBackup);
     for (auto &it : arg.effects) {

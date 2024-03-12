@@ -1,4 +1,3 @@
-#include "frame/custom/lua.h"
 #include "frame/character/derived/player.h"
 
 using namespace ns_frame;

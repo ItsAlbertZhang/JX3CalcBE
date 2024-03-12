@@ -4,7 +4,6 @@
 #include "concrete/effect/base.h"
 #include "frame/character/property/attribute.h"
 #include "frame/character/property/damage.h"
-#include "frame/custom/base.h"
 #include "modules/pool.h"
 #include <memory>
 #include <mutex>
@@ -32,6 +31,7 @@ namespace task {
 
 class Data {
 public:
+    ~Data();
     // json 数据区
     int delayNetwork;
     int delayKeyboard;
@@ -41,8 +41,7 @@ public:
     ns_frame::ChAttr                                      attrBackup;
     std::vector<std::shared_ptr<ns_concrete::EffectBase>> effects;
 
-    ns_frame::enumCustom customType;
-    std::string          customString;
+    std::string customString;
 };
 
 class Task {
@@ -65,14 +64,26 @@ public:
     std::string queryDamageChart();
 };
 
-enum class AttributeType {
+enum class enumAttributeType {
     data,
     jx3box,
     COUNT,
 };
-inline const std::unordered_map<std::string, AttributeType> refAttributeType{
-    {"从数据导入", AttributeType::data  },
-    {"从JX3BOX导入", AttributeType::jx3box},
+inline const std::unordered_map<std::string, enumAttributeType> refAttributeType{
+    {"从数据导入", enumAttributeType::data  },
+    {"从JX3BOX导入", enumAttributeType::jx3box},
+};
+
+enum class enumCustom {
+    none,
+    lua,
+    // jx3,
+};
+
+inline std::unordered_map<std::string, enumCustom> refCustom{
+    {"使用内置循环", enumCustom::none},
+    {"使用lua脚本",    enumCustom::lua },
+ // {"使用游戏内宏", enumCustom::jx3 },
 };
 
 enum class ResponseStatus {

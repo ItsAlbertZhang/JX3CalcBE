@@ -17,17 +17,14 @@ static void callbackMacroCustomLua(void *self, void *nullparam);
 static void callbackNormalAttack(void *self, void *nullparam);
 
 void Player::macroRun() {
-    switch (customType) {
-    case enumCustom::none:
+    if (nullptr == customLua) {
         macroPrepareDefault();               // 起手
         callbackMacroDefault(this, nullptr); // 进入战斗
         callbackNormalAttack(this, nullptr); // 开启普通攻击
-        break;
-    case enumCustom::lua:
+    } else {
         customLua->macroPrepare(this);         // 起手
         callbackMacroCustomLua(this, nullptr); // 进入战斗
         callbackNormalAttack(this, nullptr);   // 开启普通攻击
-        break;
     }
 }
 
