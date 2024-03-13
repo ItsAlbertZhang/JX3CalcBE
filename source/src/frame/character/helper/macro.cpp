@@ -3,10 +3,10 @@
 
 using namespace ns_frame;
 
-int Character::macroSkillRef(std::string skillName) {
+bool Character::macroSkillCast(std::string skillName) {
     if (!chSkill.skillRef.contains(skillName))
-        return -1;
-    return chSkill.skillRef.at(skillName);
+        return 0;
+    return cast(chSkill.skillRef.at(skillName));
 }
 
 int Character::macroBuff(std::string buffName) {
@@ -28,10 +28,10 @@ bool Character::macroNoBuff(std::string buffName) {
 }
 double Character::macroBufftime(std::string buffName) {
     if (!chBuff.buffRef.contains(buffName))
-        return -1.0;
+        return 0;
     auto range = chBuff.buffRef.equal_range(buffName);
     if (range.first == range.second)
-        return -1.0;
+        return 0;
     for (auto it = range.first; it != range.second; ++it) {
         BuffItem *item = it->second;
         if (item->isValid) {
@@ -39,7 +39,7 @@ double Character::macroBufftime(std::string buffName) {
             return static_cast<double>(item->nLeftFrame) / 16;
         }
     }
-    return -1.0;
+    return 0;
 }
 int Character::macroTBuff(std::string buffName) {
     return this->targetSelect->macroBuff(buffName);
@@ -49,10 +49,4 @@ bool Character::macroTNoBuff(std::string buffName) {
 }
 double Character::macroTBufftime(std::string buffName) {
     return this->targetSelect->macroBufftime(buffName);
-}
-int Character::macroSun() {
-    return nCurrentSunEnergy / 100;
-}
-int Character::macroMoon() {
-    return nCurrentMoonEnergy / 100;
 }

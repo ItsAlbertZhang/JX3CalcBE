@@ -58,6 +58,15 @@ static void constructorBefore(CustomLua *self) {
     chAttr["atMeleeWeaponDamageBase"]          = &ChAttr::atMeleeWeaponDamageBase;
     chAttr["atMeleeWeaponDamageRand"]          = &ChAttr::atMeleeWeaponDamageRand;
 
+    auto buff = self->lua.new_usertype<BuffItem>("Buff");
+
+    buff["nLevel"]           = &BuffItem::nLevel;
+    buff["nIndex"]           = &BuffItem::nIndex;
+    buff["nStackNum"]        = &BuffItem::nStackNum;
+    buff["nLeftActiveCount"] = &BuffItem::nLeftActiveCount;
+    buff["nNextActiveFrame"] = &BuffItem::nNextActiveFrame;
+    buff["nCustomValue"]     = &BuffItem::nCustomValue;
+
     auto player = self->lua.new_usertype<Player>("Player");
 
     player["chAttr"]                 = &Player::chAttr;
@@ -129,6 +138,14 @@ static void constructorBefore(CustomLua *self) {
     player["delayRand"]                      = &Player::delayRand;
     player["delayCustom"]                    = &Player::delayCustom;
     player["macroIdx"]                       = &Player::macroIdx;
+
+    player["macroSkillCast"] = &Player::macroSkillCast;
+    player["macroBuff"]      = &Player::macroBuff;
+    player["macroNoBuff"]    = &Player::macroNoBuff;
+    player["macroBufftime"]  = &Player::macroBufftime;
+    player["macroTBuff"]     = &Player::macroTBuff;
+    player["macroTNoBuff"]   = &Player::macroTNoBuff;
+    player["macroTBufftime"] = &Player::macroTBufftime;
 }
 
 static void constructorAfter(CustomLua *self) {

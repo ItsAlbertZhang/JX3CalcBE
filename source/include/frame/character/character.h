@@ -73,8 +73,10 @@ public:
     BuffItem                     *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
     BuffItem                     *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
     // skill
+    bool                          cast(int skillID);
     bool                          skillCast(Character *target, int skillID, int skillLevel);
-    void                          cast(int skillID);
+    event_tick_t                  skillCooldownLeftTick(int skillID);
+    int                           skillCountAvailable(int skillID);
     void                          skillActive(int skillID);
     void                          skillDeactive(int skillID);
     void                          skillLearn(int skillID, int skillLevel);
@@ -110,15 +112,13 @@ public:
     std::tuple<int, int> calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel);
 
     // macro parse
-    int    macroSkillRef(std::string skillName);
+    bool   macroSkillCast(std::string skillName);
     int    macroBuff(std::string buffName);
     bool   macroNoBuff(std::string buffName);
     double macroBufftime(std::string buffName);
     int    macroTBuff(std::string buffName);
     bool   macroTNoBuff(std::string buffName);
     double macroTBufftime(std::string buffName);
-    int    macroSun();
-    int    macroMoon();
 
     // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua_static.cpp ----------
 

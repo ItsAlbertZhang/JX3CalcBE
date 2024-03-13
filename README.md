@@ -33,7 +33,6 @@
 │  ├─lib     // gdi 库二进制文件与头文件
 │  └─src     // .cpp 文件
 ├─.clang-format // clang-format 配置文件 (代码格式化规范)
-├─.clangd       // clangd 配置文件
 ├─.gitignore
 ├─.gitmodules
 ├─CMakeLists.txt // CMake 配置文件
