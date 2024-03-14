@@ -1,6 +1,110 @@
 #include "frame/character/derived/player.h"
+#include <format>
+#include <vector>
 
 using namespace ns_frame;
+
+std::shared_ptr<CustomLua> CustomLua::get(const std::string &script) {
+    if (!mapCustomLua.contains(script)) {
+        mapCustomLua.emplace(script, std::make_shared<CustomLua>(script));
+    }
+    return mapCustomLua.at(script);
+}
+
+void CustomLua::cancel(const std::string &script) {
+    if (mapCustomLua.contains(script)) {
+        mapCustomLua.erase(script);
+    }
+}
+
+static std::vector<std::string> split(const std::string &s, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string              token;
+    std::istringstream       tokenStream(s);
+    while (std::getline(tokenStream, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
+}
+
+static std::string conditionConvert(const std::string &condition) {
+    // condition: buff:日月同辉=3&nobuff:诛邪镇魔|sun<20
+    std::string res = "(";
+    const char *p   = condition.c_str();
+    while (*p != '&' && *p != '|' && *p != '\0')
+        p++;
+    const std::string sub = condition.substr(0, p - condition.c_str());
+    if (sub.starts_with("buff:")) {
+        res += "player:macroBuff(\"";
+        const char *o = sub.c_str() + 5;
+        while (*o != '=' && *o != '<' && *o != '>' && *o != '\0')
+            o++;
+        res += sub.substr(5, o - sub.c_str() - 5) + "\")";
+        if (*o != '\0') {
+            res += *o;
+        }
+    } else if (sub.starts_with("nobuff:")) {
+        res += "player:macroNoBuff(\"";
+        res += sub.substr(7);
+    } else if (sub.starts_with("bufftime:")) {
+        res += "player:macroBufftime(\"";
+        const char *o = sub.c_str() + 9;
+        while (*o != '=' && *o != '<' && *o != '>' && *o != '\0')
+            o++;
+        res += sub.substr(9, o - sub.c_str() - 9) + "\")";
+        if (*o != '\0') {
+            res += *o;
+        }
+    } else if (sub.starts_with("tbuff:")) {
+        res += "player:macroTBuff(\"";
+        const char *o = sub.c_str() + 6;
+        while (*o != '=' && *o != '<' && *o != '>' && *o != '\0')
+            o++;
+        res += sub.substr(6, o - sub.c_str() - 6) + "\")";
+        if (*o != '\0') {
+            res += *o;
+        }
+    } else if (sub.starts_with("tnobuff:")) {
+        res += "player:macroTNoBuff(\"";
+        res += sub.substr(8);
+    } else if (sub.starts_with("tbufftime:")) {
+        res += "player:macroTBufftime(\"";
+        const char *o = sub.c_str() + 10;
+        while (*o != '=' && *o != '<' && *o != '>' && *o != '\0')
+            o++;
+        res += sub.substr(10, o - sub.c_str() - 10) + "\")";
+        if (*o != '\0') {
+            res += *o;
+        }
+    } else if (sub.starts_with("sun")) {
+        res += "player.nCurrentSunEnergy" + sub.substr(3) + "00";
+    } else if (sub.starts_with("moon")) {
+        res += "player.nCurrentMoonEnergy" + sub.substr(4) + "00";
+    }
+    return res + conditionConvert(condition.substr(p - condition.c_str() + 1)) + ")";
+}
+
+std::string CustomLua::parse(std::vector<std::string> macroList) {
+    std::string result;
+    result += std::format("function Init() end;\nMacroNum = {};\n", macroList.size());
+    for (size_t i = 0; i < macroList.size(); i++) {
+        result += std::format("function Macro{}(player)\n", i);
+        auto lines = split(macroList[i], '\n'); // 将字符串以 \n 为分隔符进行分割
+        for (const auto &line : lines) {
+            auto words     = split(line, ' '); // 将字符串以空格为分隔符进行分割
+            bool condition = words.size() == 3 && words[1].starts_with("[") && words[1].ends_with("]");
+            if (words[0] == "/cast") {
+                if (condition)
+                    result += "    if" + conditionConvert(words[1].substr(1, words[1].size() - 2)) + " then\n";
+                result += "        player:macroSkillCast(\"" + words[2] + "\");";
+                if (condition)
+                    result += "    end\n";
+            }
+        }
+        result += "end\n\n";
+    }
+    return result;
+}
 
 static void constructorBefore(CustomLua *self);
 static void constructorAfter(CustomLua *self);
@@ -149,8 +253,8 @@ static void constructorBefore(CustomLua *self) {
 }
 
 static void constructorAfter(CustomLua *self) {
-    self->macroPrepare = self->lua["MacroPrepare"];
-    int macroNum       = self->lua["MacroNum"].get<int>();
+    self->init   = self->lua["Init"];
+    int macroNum = self->lua["MacroNum"].get<int>();
     for (int i = 0; i < macroNum; i++) {
         self->macroRuntime.push_back(self->lua["Macro" + std::to_string(i)]);
     }

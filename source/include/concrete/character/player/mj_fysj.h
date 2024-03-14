@@ -8,9 +8,9 @@ namespace ns_concrete {
 class MjFysj : public ns_frame::Player {
 public:
     MjFysj(int delayNetwork, int delayKeyboard);
-    virtual void macroPrepareDefault() override;
-    virtual void macroRuntimeDefault() override;
+    virtual void prepare() override;
     virtual int  normalAttack() override;
+    virtual void macroDefault() override;
 
     bool macroSwitchedOnce = false;
     bool highPing          = false;

@@ -87,7 +87,7 @@ MjFysj::MjFysj(int delayNetwork, int delayKeyboard)
 }
 
 // virtual override
-void MjFysj::macroPrepareDefault() {
+void MjFysj::prepare() {
     cast(3974);
     if (nSunPowerValue == 0 && nMoonPowerValue == 0) {
         if (nCurrentMoonEnergy >= 10000)
@@ -98,7 +98,7 @@ void MjFysj::macroPrepareDefault() {
 }
 
 // virtual override
-void MjFysj::macroRuntimeDefault() {
+void MjFysj::macroDefault() {
     switch (macroIdx) {
     case 0:
         macroDefault0();

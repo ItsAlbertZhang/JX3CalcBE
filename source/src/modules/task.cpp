@@ -47,7 +47,7 @@ void ns_modules::task::server::stop() {
 
 ns_modules::task::Data::~Data() {
     if (!customString.empty()) {
-        ns_frame::CustomLua::cancle(customString);
+        ns_frame::CustomLua::cancel(customString);
     }
 }
 
@@ -326,7 +326,7 @@ static auto calc(const Data &arg) {
     std::unique_ptr<ns_frame::NPC>    npc    = ns_concrete::createNPC(ns_concrete::NPCType::NPC124);
     player->targetSelect                     = npc.get();
     if (!arg.customString.empty()) {
-        player->customLua = ns_frame::CustomLua::getCustomLua(arg.customString);
+        player->customLua = ns_frame::CustomLua::get(arg.customString);
     }
     player->attrImportFromBackup(arg.attrBackup);
     for (auto &it : arg.effects) {

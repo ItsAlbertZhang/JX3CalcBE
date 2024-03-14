@@ -1,23 +1,14 @@
-MacroNum = 4; -- 自定义宏数量.
-
 -- 自定义全局变量
 FirstSwitch = true;
 HighPing = false;
 
-function MacroPrepare(player)
-    -- 起手准备
-    player:cast(3974);
-    if player.nMoonPowerValue == 0 and player.nSunPowerValue == 0 then
-        if player.nCurrentMoonEnergy >= 10000 then
-            player.nMoonPowerValue = 1;
-        elseif player.nCurrentSunEnergy >= 10000 then
-            player.nSunPowerValue = 1;
-        end
-    end
+function Init()
     -- 初始化全局变量
     FirstSwitch = true;
     HighPing = false;
 end
+
+MacroNum = 4; -- 自定义宏数量.
 
 function Macro0(player)
     if player.nCurrentMoonEnergy >= 10000 or player.nCurrentMoonEnergy <= 2000 then
