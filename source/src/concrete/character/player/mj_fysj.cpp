@@ -141,7 +141,10 @@ void MjFysj::macroDefault1() {
     if (buffExist(25721, 3) && !buffExist(25716, 0) && nCurrentMoonEnergy >= 10000)
         cast(3969); // 光明相
     cast(34347);    // 悬象著明
-    cast(3966);     // 生死劫
+    if (buffExist(25716, 0)) {
+        cast(6800); // 特效腰坠
+    }
+    cast(3966); // 生死劫
 
     if (!buffExist(25721, 1)) { // 解决生死劫卡CD提前打破魔击的问题, 进行日月齐光·壹判定
         if (nCurrentMoonEnergy <= 4000) {

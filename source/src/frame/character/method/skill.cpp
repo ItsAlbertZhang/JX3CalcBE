@@ -19,7 +19,7 @@ bool Character::cast(int skillID) {
 }
 
 int Character::skillGetLevel(int skillID) {
-    if (this->chSkill.skillLearned.find(skillID) == this->chSkill.skillLearned.end()) {
+    if (!this->chSkill.skillLearned.contains(skillID)) {
         return 0;
     } else {
         return this->chSkill.skillLearned[skillID];

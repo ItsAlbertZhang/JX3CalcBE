@@ -205,6 +205,9 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case enumTabAttribute::atAllDamageAddPercent:
         self->chAttr.atAllDamageAddPercent += attrib.valueAInt * c;
         break;
+    case enumTabAttribute::atMagicOvercome:
+        self->chAttr.atMagicOvercome += attrib.valueAInt * c;
+        break;
     default:
         CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;

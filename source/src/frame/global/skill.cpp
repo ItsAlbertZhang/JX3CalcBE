@@ -73,6 +73,16 @@ void SkillManager::add(int skillID, int skillLevel) {
     bool        res            = LuaFunc::analysis(
         LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData
     );
+
+    // 装备技能. quick and dirty.
+    switch (skillID) {
+    case 6800: // 特效腰坠
+        skill.SetNormalCoolDown(1, 328);
+        break;
+    default:
+        break;
+    }
+
     if (res) {
         // 查询技能 UI
         gdi::select_t arg;
