@@ -1,5 +1,7 @@
 #include "frame/character/derived/player.h"
 #include <format>
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 using namespace ns_frame;
@@ -19,69 +21,98 @@ void CustomLua::cancel(const std::string &script) {
 
 static std::vector<std::string> split(const std::string &s, char delimiter) {
     std::vector<std::string> tokens;
-    std::string              token;
-    std::istringstream       tokenStream(s);
-    while (std::getline(tokenStream, token, delimiter)) {
-        tokens.push_back(token);
+
+    const char *p = s.c_str(), *q = s.c_str();
+    while (*p != '\0') {
+        if (*p == delimiter) {
+            tokens.emplace_back(q, p - q);
+            q = p + 1;
+        }
+        p++;
     }
+    tokens.emplace_back(q, p - q);
     return tokens;
 }
 
-static std::string conditionConvert(const std::string &condition) {
-    // condition: buff:日月同辉=3&nobuff:诛邪镇魔|sun<20
-    std::string res = "(";
-    const char *p   = condition.c_str();
-    while (*p != '&' && *p != '|' && *p != '\0')
-        p++;
-    const std::string sub = condition.substr(0, p - condition.c_str());
-    if (sub.starts_with("buff:")) {
-        res += "player:macroBuff(\"";
-        const char *o = sub.c_str() + 5;
-        while (*o != '=' && *o != '<' && *o != '>' && *o != '\0')
-            o++;
-        res += sub.substr(5, o - sub.c_str() - 5) + "\")";
-        if (*o != '\0') {
-            res += *o;
-        }
-    } else if (sub.starts_with("nobuff:")) {
-        res += "player:macroNoBuff(\"";
-        res += sub.substr(7);
-    } else if (sub.starts_with("bufftime:")) {
-        res += "player:macroBufftime(\"";
-        const char *o = sub.c_str() + 9;
-        while (*o != '=' && *o != '<' && *o != '>' && *o != '\0')
-            o++;
-        res += sub.substr(9, o - sub.c_str() - 9) + "\")";
-        if (*o != '\0') {
-            res += *o;
-        }
-    } else if (sub.starts_with("tbuff:")) {
-        res += "player:macroTBuff(\"";
-        const char *o = sub.c_str() + 6;
-        while (*o != '=' && *o != '<' && *o != '>' && *o != '\0')
-            o++;
-        res += sub.substr(6, o - sub.c_str() - 6) + "\")";
-        if (*o != '\0') {
-            res += *o;
-        }
-    } else if (sub.starts_with("tnobuff:")) {
-        res += "player:macroTNoBuff(\"";
-        res += sub.substr(8);
-    } else if (sub.starts_with("tbufftime:")) {
-        res += "player:macroTBufftime(\"";
-        const char *o = sub.c_str() + 10;
-        while (*o != '=' && *o != '<' && *o != '>' && *o != '\0')
-            o++;
-        res += sub.substr(10, o - sub.c_str() - 10) + "\")";
-        if (*o != '\0') {
-            res += *o;
-        }
-    } else if (sub.starts_with("sun")) {
-        res += "player.nCurrentSunEnergy" + sub.substr(3) + "00";
-    } else if (sub.starts_with("moon")) {
-        res += "player.nCurrentMoonEnergy" + sub.substr(4) + "00";
+static std::string convertRValBuff(const char *start, size_t len) {
+    if (0 == len) {
+        return ">0";
     }
-    return res + conditionConvert(condition.substr(p - condition.c_str() + 1)) + ")";
+    return std::string(start, len);
+}
+
+static std::string convertRValSunMoon(const char *start, size_t len) {
+    if (0 == len) {
+        return ">0";
+    }
+    std::string str{start + 1, len - 1};
+    if (str == "sun") {
+        str = "player.nCurrentSunEnergy";
+    } else if (str == "moon") {
+        str = "player.nCurrentMoonEnergy";
+    } else {
+        try {
+            str = std::to_string(std::stoi(str) * 100);
+        } catch (...) {
+        }
+    }
+    return std::format("{}{}", *start, str);
+}
+
+static std::string convertCondition(const char *cond) {
+    // cond: buff:日月同辉=3&nobuff:诛邪镇魔|sun<20
+    class CondType {
+    public:
+        const size_t      len;
+        const std::string name;
+        std::string (*convert)(const char *start, size_t len);
+    };
+    static const std::unordered_map<std::string, CondType> condMap = {
+        {"buff",      {4, "player:macroBuff", convertRValBuff}            },
+        {"nobuff",    {6, "player:macroNoBuff", nullptr}                  },
+        {"bufftime",  {8, "player:macroBufftime", nullptr}                },
+        {"tbuff",     {5, "player:macroTBuff", convertRValBuff}           },
+        {"tnobuff",   {7, "player:macroTNoBuff", nullptr}                 },
+        {"tbufftime", {9, "player:macroTBufftime", nullptr}               },
+        {"sun",       {3, "player.nCurrentSunEnergy", convertRValSunMoon} },
+        {"moon",      {4, "player.nCurrentMoonEnergy", convertRValSunMoon}},
+    };
+    if (*cond == '\0') {
+        return "";
+    }
+    // 检查条件类型
+    const CondType *type = nullptr;
+    for (const auto &[key, value] : condMap) {
+        if (strncmp(cond, key.c_str(), key.length()) == 0) {
+            type = &value;
+            break;
+        }
+    }
+    if (type == nullptr) {
+        return "";
+    }
+
+    // 计算
+    const char *end = cond;
+    while (*end != '&' && *end != '|' && *end != '\0')
+        end++; // end 指向 & 或 | 或 \0
+    const char *argument = cond + type->len;
+    const char *op       = argument;
+    while (op < end && *op != '=' && *op != '<' && *op != '>')
+        op++;
+    return std::format(
+        "({}{}{}{}{}{})",
+        type->name,    // 函数调用或成员变量
+        argument == op // 如果是带参数的函数调用, 补充参数
+            ? ""
+            : "(\"" + std::string(argument + 1, op - argument - 1) + "\")",
+        *op == '=' ? "=" : "",   // 如果操作符是等号, 补一个等号
+        type->convert == nullptr // 操作符和操作符右值
+            ? std::string(op, end - op)
+            : type->convert(op, end - op),
+        *end == '&' ? " and " : (*end == '|' ? " or " : ""), // 与下一个条件的连接符
+        convertCondition(end + 1)
+    );
 }
 
 std::string CustomLua::parse(std::vector<std::string> macroList) {
@@ -94,11 +125,29 @@ std::string CustomLua::parse(std::vector<std::string> macroList) {
             auto words     = split(line, ' '); // 将字符串以空格为分隔符进行分割
             bool condition = words.size() == 3 && words[1].starts_with("[") && words[1].ends_with("]");
             if (words[0] == "/cast") {
-                if (condition)
-                    result += "    if" + conditionConvert(words[1].substr(1, words[1].size() - 2)) + " then\n";
-                result += "        player:macroSkillCast(\"" + words[2] + "\");";
-                if (condition)
+                if (condition) {
+                    result += "    if" + convertCondition(words[1].substr(1, words[1].size() - 2).c_str()) + " then\n";
+                    result += "        player:macroSkillCast(\"" + words[2] + "\");\n";
                     result += "    end\n";
+                } else {
+                    result += "    player:macroSkillCast(\"" + words[1] + "\");\n";
+                }
+            } else if (words[0] == "/switch") {
+                int i = condition ? 2 : 1;
+                try {
+                    int newIdx = std::stoi(words[i]);
+                    if (newIdx < 0 || newIdx >= macroList.size()) {
+                        throw std::exception();
+                    }
+                    if (condition) {
+                        result += "    if" + convertCondition(words[1].substr(1, words[1].size() - 2).c_str()) + " then\n";
+                        result += "        player.macroIdx = " + std::to_string(newIdx) + ";\n";
+                        result += "    end\n";
+                    } else {
+                        result += "        player.macroIdx = " + std::to_string(newIdx) + ";\n";
+                    }
+                } catch (...) {
+                }
             }
         }
         result += "end\n\n";

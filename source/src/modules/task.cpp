@@ -1,6 +1,7 @@
 #include "modules/task.h"
 #include "concrete/character/character.h"
 #include "concrete/effect/effect.h"
+#include "frame/character/derived/player.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
 #include "frame/global/skill.h"
@@ -14,6 +15,7 @@
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 using namespace ns_modules::task;
 using ull = unsigned long long;
@@ -170,10 +172,33 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
     }
     // 2.5 检查 custom
     if (j.contains("custom")) {
+        bool invalid = false;
         if (!j["custom"].is_object() ||
             !j["custom"].contains("method") || !j["custom"]["method"].is_string() ||
             !refCustom.contains(j["custom"]["method"].get<std::string>()) ||
-            !j["custom"].contains("data") || !j["custom"]["data"].is_string()) {
+            !j["custom"].contains("data")) {
+            invalid = true;
+        }
+        switch (refCustom.at(j["custom"]["method"].get<std::string>())) {
+        case enumCustom::lua:
+            if (!j["custom"]["data"].is_string()) {
+                invalid = true;
+            }
+            break;
+        case enumCustom::jx3:
+            if (!j["custom"]["data"].is_array()) {
+                invalid = true;
+            } else {
+                for (auto &it : j["custom"]["data"]) {
+                    if (!it.is_string()) {
+                        invalid = true;
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+        if (invalid) {
             return Response{
                 .status = ResponseStatus::invalid_custom,
                 .data   = "custom method invalid",
@@ -233,7 +258,12 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
         case enumCustom::lua:
             res.customString = j["custom"]["data"].get<std::string>();
             break;
-        default:
+        case enumCustom::jx3:
+            std::vector<std::string> v;
+            for (auto &it : j["custom"]["data"]) {
+                v.emplace_back(it.get<std::string>());
+            }
+            res.customString = ns_frame::CustomLua::parse(v);
             break;
         }
     }
