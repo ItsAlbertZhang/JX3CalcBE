@@ -133,9 +133,9 @@ std::string CustomLua::parse(std::vector<std::string> macroList) {
                     result += "    player:macroSkillCast(\"" + words[1] + "\");\n";
                 }
             } else if (words[0] == "/switch") {
-                int i = condition ? 2 : 1;
+                int idx = condition ? 2 : 1;
                 try {
-                    int newIdx = std::stoi(words[i]);
+                    int newIdx = std::stoi(words[idx]);
                     if (newIdx < 0 || newIdx >= macroList.size()) {
                         throw std::exception();
                     }

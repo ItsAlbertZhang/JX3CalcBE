@@ -34,6 +34,7 @@ launch = {
             "program": "${command:cmake.launchTargetPath}",
             "args": [],
             "cwd": "${command:cmake.launchTargetDirectory}",
+            "console": "integratedTerminal",
         }
     ]
 }
