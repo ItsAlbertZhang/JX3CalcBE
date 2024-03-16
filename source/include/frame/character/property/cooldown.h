@@ -1,12 +1,10 @@
 #ifndef FRAME_CHARACTER_PROPERTY_COOLDOWN_H_
 #define FRAME_CHARACTER_PROPERTY_COOLDOWN_H_
 
-#include <cstdint>
+#include "frame/common/event.h"
 #include <unordered_map>
 
 namespace ns_frame {
-
-using event_tick_t = int64_t;
 
 class ChCooldown {
 public:

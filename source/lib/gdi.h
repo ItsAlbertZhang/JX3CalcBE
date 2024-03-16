@@ -11,7 +11,6 @@
 #define LIB_GDI_H
 
 #include <cstring>
-#include <iostream>
 #include <sol/sol.hpp>
 #include <string>
 #include <unordered_map>
@@ -71,6 +70,9 @@ enum class Tab {
     cooldown,
     skillrecipe,
     skillevent,
+    custom_armor,
+    custom_trinket,
+    custom_weapon,
     ui_skill,
     ui_buff,
     COUNT, // 用于计数, 请勿使用

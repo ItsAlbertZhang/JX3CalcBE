@@ -35,10 +35,13 @@ function Macro1(player)
         return;
     end
     if player:buffExist(25721, 3) and not player:buffExist(25716, 0) and player.nCurrentMoonEnergy >= 10000 then
-        player:cast(3969); -- 光明相
+        player:cast(3969);        -- 光明相
     end
-    player:cast(34347);    -- 悬象著明
-    player:cast(3966);     -- 生死劫
+    player:cast(34347);           -- 悬象著明
+    if player:buffExist(25716, 0) then
+        player:itemUse(1, 38789); -- 吹香雪
+    end
+    player:cast(3966);            -- 生死劫
     -- 避免生死劫卡CD
     if not player:buffExist(25721, 1) then
         if player.nCurrentMoonEnergy <= 4000 then

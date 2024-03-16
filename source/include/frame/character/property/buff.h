@@ -2,15 +2,13 @@
 #define FRAME_CHARACTER_PROPERTY_BUFF_H_
 
 #include "frame/character/property/attribute.h"
-#include <cstdint>
+#include "frame/common/event.h"
 #include <map>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace ns_frame {
-
-using event_tick_t = int64_t;
 
 class BuffItem {
 public:

@@ -5,6 +5,7 @@
 #include "frame/character/property/buff.h"
 #include "frame/character/property/cooldown.h"
 #include "frame/character/property/damage.h"
+#include "frame/character/property/item.h"
 #include "frame/character/property/scene.h"
 #include "frame/character/property/skill.h"
 #include "frame/character/property/skillevent.h"
@@ -49,6 +50,7 @@ public:
     ChBuff        chBuff;        // 角色 buff
     ChCooldown    chCooldown;    // 角色冷却
     ChDamage      chDamage;      // 角色伤害
+    ChItem        chItem;        // 角色物品
     ChSkill       chSkill;       // 角色技能
     ChSkillRecipe chSkillRecipe; // 角色技能秘籍
     ChSkillEvent  chSkillEvent;  // 角色技能事件
@@ -72,6 +74,11 @@ public:
     event_tick_t                  buffTimeLeftTick(int buffID, int buffLevel);
     BuffItem                     *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
     BuffItem                     *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
+    // item
+    void                          itemAdd(ItemType type, int ID);
+    void                          itemAdd(int type, int ID);
+    void                          itemUse(ItemType type, int ID);
+    void                          itemUse(int type, int ID);
     // skill
     bool                          cast(int skillID);
     bool                          skillCast(Character *target, int skillID, int skillLevel);

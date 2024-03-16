@@ -1,13 +1,12 @@
 #ifndef FRAME_EVENT_H_
 #define FRAME_EVENT_H_
 
-#include <cstdint>
+#include "frame/common/event.h"
 #include <set>
 #include <tuple>
 
 namespace ns_frame {
 
-using event_tick_t = int64_t;
 using event_func_t = void (*)(void *, void *);
 
 /**

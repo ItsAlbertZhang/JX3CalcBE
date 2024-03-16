@@ -1,4 +1,5 @@
 #include "concrete/effect/derived.h"
+#include "frame/common/item.h"
 
 using namespace ns_concrete;
 
@@ -23,10 +24,10 @@ void Effect套装·特效::active(ns_frame::Character *obj) const {
 }
 
 void Effect腰坠·特效::active(ns_frame::Character *obj) const {
-    // 暂时手动设置 CD, quick and dirty
     switch (obj->dwKungfuID) {
-    case 10242:                     // 焚影圣诀
-        obj->skillLearn(6800, 115); // 13950副本腰坠·风·灭虚
+    case 10242:
+        // 焚影圣诀
+        obj->itemAdd(ns_frame::ItemType::Trinket, 38789); // 吹香雪
         break;
     default:
         break;
@@ -35,7 +36,8 @@ void Effect腰坠·特效::active(ns_frame::Character *obj) const {
 
 void Effect武器·橙武::active(ns_frame::Character *obj) const {
     switch (obj->dwKungfuID) {
-    case 10242:                       // 焚影圣诀
+    case 10242:
+        // 焚影圣诀
         obj->skillrecipeAdd(1542, 1); // 驱夜伤害提高 5%
         obj->skillrecipeAdd(1543, 1); // 净世破魔击伤害提高 5%
         obj->skilleventAdd(2421);     // 触发特效

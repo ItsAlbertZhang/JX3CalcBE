@@ -277,6 +277,8 @@ static void constructorBefore(CustomLua *self) {
     player["attrImportFromData"]             = &Player::attrImportFromData;
     player["attrImportFromJX3BOX"]           = &Player::attrImportFromJX3BOX;
     player["buffTimeLeftTick"]               = &Player::buffTimeLeftTick;
+    player["itemAdd"]                        = static_cast<void (Character::*)(int, int)>(&Player::itemAdd);
+    player["itemUse"]                        = static_cast<void (Character::*)(int, int)>(&Player::itemUse);
     player["cast"]                           = &Player::cast;
     player["skillActive"]                    = &Player::skillActive;
     player["skillDeactive"]                  = &Player::skillDeactive;

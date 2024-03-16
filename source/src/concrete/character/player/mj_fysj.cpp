@@ -142,7 +142,7 @@ void MjFysj::macroDefault1() {
         cast(3969); // 光明相
     cast(34347);    // 悬象著明
     if (buffExist(25716, 0)) {
-        cast(6800); // 特效腰坠
+        itemUse(ns_frame::ItemType::Trinket, 38789); // 吹香雪
     }
     cast(3966); // 生死劫
 
