@@ -185,6 +185,9 @@ cmake --build ./build/obj/Release --config Release # 编译
 
 ```shell
 cmake -S. -B./build/obj/Release -G "Unix Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release # 构建
+# 如果需要在 Linux 服务器上支持 SSL 连接, 需要定义 CROW_ENABLE_SSL 宏.
+# 做法为: 为命令添加参数 -DCROW_ENABLE_SSL
+# 若如此做, 则需要在运行前将 fullchain.pem 和 privkey.pem 拷贝至二进制文件目录.
 cmake --build ./build/obj/Release --config Release -j 32 # 编译
 # 你可以将 -j 后的数字换成自己 CPU 的核心数以获取最快的编译速度.
 ```
