@@ -82,8 +82,8 @@ enum class enumCustom {
 
 inline std::unordered_map<std::string, enumCustom> refCustom{
   // {"使用内置循环", enumCustom::none},
-    {"使用lua脚本",    enumCustom::lua},
-    {"使用游戏内宏", enumCustom::jx3},
+    {"使用lua编程语言", enumCustom::lua},
+    {"使用游戏内宏",    enumCustom::jx3},
 };
 
 enum class ResponseStatus {
