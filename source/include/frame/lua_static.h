@@ -2,17 +2,15 @@
 #define FRAME_LUA_STATIC_H_
 
 #include "frame/character/character.h"
-#include "frame/global/skill.h"
-#include <memory>
 #include <sol/sol.hpp>
 #include <string>
-#include <vector>
 
 namespace ns_frame {
 
-std::shared_ptr<sol::state> luaInit();
+sol::state *luaInit();
 
-extern const std::vector<std::string> luaFuncStaticToDynamic;
+extern const char *const luaFuncList[];
+extern const size_t      luaFuncListSize;
 
 class LuaGlobalFunction {
 public:
@@ -27,7 +25,6 @@ public:
     static int         GetValueByBits(int nValue, int nBit, int c);
     static int         SetValueByBits(int nValue, int nBit, int c, int nNewBitValue);
     static int         Random(int min, int max);
-    static void        AdditionalAttribute(ns_frame::Skill &skill);
     static void        Include(const std::string &filename);
     static void        ModityCDToUI(ns_frame::Character *character, int skillID, int c, int d);
     static void        RemoteCallToClient();

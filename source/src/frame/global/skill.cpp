@@ -45,9 +45,11 @@ void SkillManager::add(int skillID, int skillLevel) {
         skill.tab = it->second.tab;
     }
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    skill.KindType             = ref::mapSkillKindtype.find(skill.tab["KindType"]) != ref::mapSkillKindtype.end()
-                                     ? ref::mapSkillKindtype.at(skill.tab["KindType"])
-                                     : ref::enumSkillKindtype::COUNT;
+    skill.KindType =
+        ref::mapSkillKindtype.find(skill.tab["KindType"]) != ref::mapSkillKindtype.end()
+            ? ref::mapSkillKindtype.at(skill.tab["KindType"])
+            : ref::enumSkillKindtype::COUNT;
+    skill.IsPassiveSkill       = skill.tab["IsPassiveSkill"] == "1";
     skill.HasCriticalStrike    = skill.tab["HasCriticalStrike"] == "1";
     skill.SkillEventMask1      = atoi(skill.tab["SkillEventMask1"].c_str());
     skill.SkillEventMask2      = atoi(skill.tab["SkillEventMask2"].c_str());
@@ -58,7 +60,8 @@ void SkillManager::add(int skillID, int skillLevel) {
     skill.TargetRelationSelf   = skill.tab["TargetRelationSelf"] == "1";
     skill.TargetRelationEnemy  = skill.tab["TargetRelationEnemy"] == "1";
     skill.RecipeType           = atoi(skill.tab["RecipeType"].c_str());
-    // 处理武器伤害. 目前推测: WeaponRequest 字段非 0 的技能默认拥有 1024 的武器伤害.
+    // 处理默认武器伤害.
+    // 目前推测: WeaponRequest 字段非 0 的技能默认拥有 1024 的武器伤害 (可以在后续 lua 的 getGetSkillLevelData 中被覆盖).
     // 注意: 拥有武器伤害不一定代表会造成武器伤害. 造成武器伤害与 AddAttribute 中的 CALL_PHYSICS_DAMAGE 有关.
     // 推测的依据:
     // 1. 部分技能并没有在 lua 中显式声明 nWeaponDamagePercent, 但是仍然可以造成武器伤害. (最简单的例子即为普通攻击)
@@ -70,8 +73,24 @@ void SkillManager::add(int skillID, int skillLevel) {
     bool        res            = LuaFunc::analysis(
         LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData
     );
+
     if (res) {
-        // 成功执行, 将技能存入缓存
+        // 查询技能 UI
+        gdi::select_t arg;
+        arg.emplace_back();
+        arg[0]["SkillID"] = std::to_string(skillID);
+        arg[0]["Level"]   = std::to_string(skillLevel);
+        arg.emplace_back();
+        arg[1]["SkillID"] = std::to_string(skillID);
+        arg[1]["Level"]   = "0";
+        gdi::tabSelect(gdi::Tab::ui_skill, arg);
+        if (arg.size() == 0) {
+            skill.Name = "未知技能";
+        } else {
+            skill.ui   = std::move(arg[0]);
+            skill.Name = skill.ui["Name"];
+        }
+        // 将技能存入缓存
         data[skillID][skillLevel] = std::move(skill);
     } else {
         CONSTEXPR_LOG_ERROR("LuaFunc::getGetSkillLevelData(\"{}\") failed.", name);
@@ -82,21 +101,37 @@ void Skill::SetDelaySubSkill(int a, int b, int c) {
     attrDelaySubSkill.emplace_back(a, b, c);
 }
 
-void Skill::AddAttribute_iiii(int a, int b, int c, int d) {
+void Skill::AddAttribute(int a, int b, int c, int d) {
     attrAttributes.emplace_back(a, b, c, d);
 }
 
-void Skill::AddAttribute_iidi(int a, int b, double c, int d) {
+void Skill::AddAttribute(int a, int b, double c, int d) {
     attrAttributes.emplace_back(a, b, c, d);
 }
 
-void Skill::AddAttribute_iini(int a, int b, std::optional<char> nil, int d) {
+void Skill::AddAttribute(int a, int b, std::string c, int d) {
+    attrAttributes.emplace_back(a, b, c, d);
+}
+
+void Skill::AddAttribute(int a, int b, std::optional<char> nil, int d) {
+    // std::optional<char> 其实是 nil
+    // 出现于 scripts/skill/江湖/110级CW新增特效焚影伤害子技能.lua, 原代码如下:
+    /*
+tSkillData =
+{
+    {nDamageBase= 20, nDamageRand = 2, nCostMana = 0}, --level 1
+};
+...
+    skill.AddAttribute(
+        ATTRIBUTE_EFFECT_MODE.EFFECT_TO_SELF_AND_ROLLBACK,
+        ATTRIBUTE_TYPE.SKILL_LUNAR_DAMAGE,
+        tSkillData[dwSkillLevel].nDamage, // 注意这里不是 nDamageBase 而是 nDamage
+        0
+    );
+    */
+    // 只能说是非常离谱
     UNREFERENCED_PARAMETER(nil);
     attrAttributes.emplace_back(a, b, 0, d);
-}
-
-void Skill::AddAttribute_iisi(int a, int b, std::string c, int d) {
-    attrAttributes.emplace_back(a, b, c, d);
 }
 
 void Skill::AddSlowCheckSelfBuff(int a, int b, int c, int d, int e) {

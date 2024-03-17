@@ -8,7 +8,7 @@ namespace fs = std::filesystem;
 using namespace ns_utils;
 using json = nlohmann::json;
 
-const std::string version = "v1.0.1";
+const std::string version = "v1.0.2";
 
 static void initFromJson(const json &j) {
     std::string spJX3;
@@ -19,7 +19,7 @@ static void initFromJson(const json &j) {
     if (j.contains("UnpackDir") && j["UnpackDir"].is_string()) {
         spUnpack = j["UnpackDir"].get<std::string>();
     }
-    config::dataAvailable = gdi::initData(spJX3, spUnpack);
+    config::dataAvailable = (0 == gdi::dataInit(spJX3.c_str(), spUnpack.c_str()));
 
     if (j.contains("maxDelayNetwork") && j["maxDelayNetwork"].is_number_integer()) {
         config::taskdata::maxDelayNetwork = j["maxDelayNetwork"].get<int>();

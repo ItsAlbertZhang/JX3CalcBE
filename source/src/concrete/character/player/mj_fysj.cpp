@@ -87,7 +87,7 @@ MjFysj::MjFysj(int delayNetwork, int delayKeyboard)
 }
 
 // virtual override
-void MjFysj::macroPrepareDefault() {
+void MjFysj::prepare() {
     cast(3974);
     if (nSunPowerValue == 0 && nMoonPowerValue == 0) {
         if (nCurrentMoonEnergy >= 10000)
@@ -98,7 +98,7 @@ void MjFysj::macroPrepareDefault() {
 }
 
 // virtual override
-void MjFysj::macroRuntimeDefault() {
+void MjFysj::macroDefault() {
     switch (macroIdx) {
     case 0:
         macroDefault0();
@@ -115,102 +115,122 @@ void MjFysj::macroRuntimeDefault() {
     }
 }
 
+// 宏0, 用于起手和进入大齐光的准备.
 void MjFysj::macroDefault0() {
     if (nCurrentMoonEnergy >= 10000 || nCurrentMoonEnergy <= 2000)
-        cast(3967); // 净世破魔击
+        cast(3967); // [moon>99&sun<21] 净世破魔击
     cast(3979);     // 驱夜断愁
     cast(3963);     // 烈日斩
     if (nCurrentSunEnergy >= 10000 && nCurrentMoonEnergy == 8000) {
-        macroIdx = 1; // 切换至 1 号宏
+        // 切换至 1 号宏
+        macroIdx = 1; // switch [sun>99&moon=80] 1
         if (macroSwitchedOnce == false) {
-            // 起手时, 早一些释放暗尘弥散, 以避免第二轮卡隐身CD
-            delayCustom       = 300; // 将下一次释放宏的时机设置至 300 tick 后
-            // 如果不进行设置, 那么下一次释放宏的时机会是 GCD 结束后 + 网络延迟 + 随机按键延迟.
+            // 起手时, 早一些释放暗尘弥散, 以避免第二轮卡隐身 CD
+            delayCustom       = 300; // 将下一次释放宏的时机设置至 300 tick 后. 1024 tick 为 1 秒.
+            // 如果不设置 player.delayCustom, 那么下一次释放宏的时机会是 公共 CD 冷却完成后 + 基础延迟 + 随机延迟
             macroSwitchedOnce = true; // 将起手标记置为 false
         }
     }
 }
 
+// 宏1, 用于 齐光3 前半部分.
 void MjFysj::macroDefault1() {
     cast(3974); // 暗尘弥散
     // 如果隐身没好, 等隐身
     if (!buffExist(25731, 1) && !buffExist(25721, 3)) {
-        delayCustom = delayBase + delayRand / 2;
-        return;
+        // 在本宏的全部过程中, 要么有 降灵尊 buff (25731,1), 要么有 齐光3 buff (25721,3). 如果两者都没有, 说明隐身没有成功释放.
+        return; // 直接返回, 不进行后续操作. 由于公共 CD 没有被触发, 因此下一次释放宏的时机为 基础延迟 + 随机延迟 后.
     }
     if (buffExist(25721, 3) && !buffExist(25716, 0) && nCurrentMoonEnergy >= 10000)
-        cast(3969); // 光明相
+        cast(3969); // [buff:齐光3 & nobuff:悬象(包括日和月) & moon>99] 光明相
     cast(34347);    // 悬象著明
-    cast(3966);     // 生死劫
-
-    if (!buffExist(25721, 1)) { // 解决生死劫卡CD提前打破魔击的问题, 进行日月齐光·壹判定
-        if (nCurrentMoonEnergy <= 4000) {
-            cast(22890); // 诛邪镇魔
-        }
-        cast(3967); // 净世破魔击
-        if (nCurrentMoonEnergy <= 4000) {
-            cast(3979); // 驱夜断愁
-        }
-        cast(3960); // 银月斩
-        cast(3963); // 烈日斩
+    if (buffExist(25716, 0)) {
+        itemUse(ns_frame::ItemType::Trinket, 38789); // [buff:悬象(包括日和月)] 吹香雪(特效腰坠)
     }
+    cast(3966); // 生死劫
+    // 如果生死劫没好, 等生死劫
+    if (buffExist(25721, 1)) {
+        // 生死劫会将齐光升至 2 阶. 如果此时仍有 齐光1 的 buff, 说明生死劫被卡 CD.
+        return; // 直接返回, 不进行后续操作. 由于公共 CD 没有被触发, 因此下一次释放宏的时机为 基础延迟 + 随机延迟 后.
+    }
+    if (nCurrentMoonEnergy <= 4000) {
+        cast(22890); // [moon<41] 诛邪镇魔
+    }
+    cast(3967); // 净世破魔击
+    if (nCurrentMoonEnergy <= 4000) {
+        cast(3979); // [moon<41] 驱夜断愁
+    }
+    cast(3960); // 银月斩
+    cast(3963); // 烈日斩
     if (buffExist(25721, 3) && (!buffExist(25716, 0)) && nCurrentMoonEnergy == 0) {
-        macroIdx = 2; // 切换至 2 号宏
+        // 切换至 2 号宏
+        macroIdx = 2; // switch [buff:齐光3 & nobuff:悬象(包括日和月) & moon=0] 2
     }
 }
 
+// 宏2, 用于 齐光3 后半部分.
 void MjFysj::macroDefault2() {
     if (nCurrentSunEnergy >= 10000 && nCurrentMoonEnergy >= 10000) {
+        // sun>=100&moon>=100, 说明 齐光3 结束返灵了. 走 齐光3 结束的流程.
         if (highPing) {
+            // 处理高延迟情况.
+            // 高延迟下, 即使 齐光3 结束返灵, 该日斩也必须打出, 否则会在小齐光部分开头卡月斩 CD.
             cast(3963); // 烈日斩
             if (nCurrentSunEnergy < 14000) {
-                delayCustom = delayBase + delayRand / 2;
-                return;
+                // 日斩打出 + 齐光3 结束返还 100 能量, nCurrentSunEnergy < 14000 说明日斩未成功释放.
+                return; // 直接返回, 不进行后续操作. 由于公共 CD 没有被触发, 因此下一次释放宏的时机为 基础延迟 + 随机延迟 后.
             }
         }
-        highPing = false;
-        macroIdx = 3;    // 切换至 3 号宏
-        macroDefault3(); // 执行一次 3 号宏
-        return;          // 直接返回, 不进行后续操作
-        // 在开头进行判断的原因是, 导致切换条件 (sun>=100&moon>=100) 的事件 (日月齐光·叁结束) 是发生在 GCD 中的, 而不是发生在宏内的. 因此, 无法在宏结束时进行判断.
+        // 如果没有返回, 说明日斩成功释放, 可以继续走 齐光3 结束的流程.
+        highPing = false; // 将高延迟标记重置为 false
+        macroIdx = 3;     // 切换至 3 号宏
+        macroDefault3();  // 执行一次 3 号宏
+        return;           // 直接返回, 不进行后续操作
+        // 在宏开始时进行判断的原因是, 导致切换条件 (sun>=100&moon>=100) 的事件 (齐光3 结束返灵) 是发生在公共 CD 中的,
+        // 而不是发生在宏内由宏内的技能导致的. 因此, 必须在宏开始时进行判断, 而不能在宏结束时进行判断.
     }
     if (buffTimeLeftTick(25721, 3) < 5 * (1024 * 15 / 16 + delayBase + delayRand) && buffExist(9909, 0)) {
         // 齐光剩余时间小于 5 个 GCD, 且手上的诛邪还没打出去, 换高延迟打法
-        highPing = true;
+        highPing = true; // 将高延迟标记置为 true
     }
-    if (highPing) { // 高延迟打法
+
+    // 高延迟打法
+    if (highPing) {
         // 当 highPing 被标记时, 一定已经到了最后 5 个技能. 所以这里可以省去判定条件.
         cast(3963);  // 烈日斩
         cast(22890); // 诛邪镇魔
         cast(3960);  // 银月斩
         cast(3967);  // 净世破魔击
     }
-    // 正常循环
+
+    // 正常打法
     if (nCurrentMoonEnergy <= 4000) {
-        cast(22890); // 诛邪镇魔
+        cast(22890); // [moon<41] 诛邪镇魔
     }
     cast(3967); // 净世破魔击
     if (nCurrentMoonEnergy <= 4000) {
-        cast(3979); // 驱夜断愁
+        cast(3979); // [moon<41] 驱夜断愁
     }
     cast(3963); // 烈日斩
-    cast(3960); // 银月斩
+    cast(3960); // 烈日斩
 }
 
+// 宏3, 用于 齐光3 结束后直至 齐光2 的结束阶段.
 void MjFysj::macroDefault3() {
     if (nCurrentMoonEnergy >= 6000)
-        cast(22890); // 诛邪镇魔
+        cast(22890); // [moon>59] 诛邪镇魔
     if (nCurrentSunEnergy >= 10000)
-        cast(3966); // 生死劫
+        cast(3966); // [sun>99] 生死劫
     cast(3967);     // 净世破魔击
     cast(3960);     // 银月斩
     if (nCurrentMoonEnergy >= 6000 || nCurrentSunEnergy >= 6000)
-        cast(3963); // 烈日斩
+        cast(3963); // [moon>59&sun>59] 烈日斩
     if (nCurrentMoonEnergy == 6000 && nCurrentSunEnergy == 4000)
-        cast(3962); // 赤日轮
+        cast(3962); // [moon=60&sun=40] 赤日轮
     if (nCurrentMoonEnergy >= 10000 && nCurrentSunEnergy < 10000 && !buffExist(25721, 0)) {
-        macroIdx = 0; // 切换至 0 号宏
-        // 在结尾进行判断的原因时, 导致切换条件 (moon>=100 & sun<100 & nobuff:25721) 的事件 (银月斩的释放) 是发生在宏内的. 因此, 可以在宏结束时进行判断.
+        // 切换至 0 号宏
+        macroIdx = 0; // switch [moon>99&sun<100&nobuff:齐光] 0
+        // 在结尾进行判断的原因是, 导致切换条件 (moon>99&sun<100&nobuff:齐光) 的事件 (银月斩的释放) 是发生在宏内的. 因此, 可以在宏结束时进行判断.
     }
 }
 

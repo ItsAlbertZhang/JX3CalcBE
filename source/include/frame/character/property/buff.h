@@ -2,14 +2,13 @@
 #define FRAME_CHARACTER_PROPERTY_BUFF_H_
 
 #include "frame/character/property/attribute.h"
-#include <cstdint>
+#include "frame/common/event.h"
 #include <map>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace ns_frame {
-
-using event_tick_t = int64_t;
 
 class BuffItem {
 public:
@@ -60,8 +59,9 @@ public:
      * @note 为最大化查找效率, 使用此结构.
      * @note 第三层使用 map 而非 unordered_map 是因为 buffGetWithCompareFlag 中需要使用 lower_bound 方法.
      */
-    std::unordered_map<int, std::unordered_map<int, std::map<int, BuffItem>>> buffMap;
-    std::vector<BuffItem *>                                                   buffList;
+    std::unordered_map<int, std::unordered_map<int, std::map<int, BuffItem>>> buffMap;  // buff 列表, 用于查找
+    std::vector<BuffItem *>                                                   buffList; // buff 列表, 用于遍历
+    std::unordered_multimap<std::string, BuffItem *>                          buffRef;  // buff 反查表, buff 名称 - BuffItem.
 
     /**
      * @brief 按插入时间排序的 buff 列表

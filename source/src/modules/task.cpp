@@ -1,27 +1,21 @@
 #include "modules/task.h"
 #include "concrete/character/character.h"
 #include "concrete/effect/effect.h"
-#include "frame/custom/base.h"
-#include "frame/custom/lua.h"
+#include "frame/character/derived/player.h"
 #include "frame/event.h"
-#include "frame/global/uibuff.h"
-#include "frame/global/uiskill.h"
+#include "frame/global/buff.h"
+#include "frame/global/skill.h"
 #include "plugin/channelinterval.h"
 #include "plugin/log.h"
 #include "utils/config.h"
 #include <asio/co_spawn.hpp>
 #include <chrono>
+#include <format>
 #include <memory>
 #include <optional>
 #include <string>
 #include <unordered_map>
-
-#ifdef _WIN32
-#include <format>
-namespace fmt = std;
-#else
-#include <fmt/core.h>
-#endif
+#include <vector>
 
 using namespace ns_modules::task;
 using ull = unsigned long long;
@@ -53,6 +47,12 @@ void ns_modules::task::server::stop() {
     pool.join();
 }
 
+ns_modules::task::Data::~Data() {
+    if (!customString.empty()) {
+        ns_frame::CustomLua::cancel(customString);
+    }
+}
+
 static int         calcBrief(const Data &arg);
 static int         calcDetail(const Data &data, ns_frame::ChDamage *detail);
 static std::string genID(int length = 6);
@@ -78,7 +78,7 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         if (!j.contains(it)) {
             return Response{
                 .status = ResponseStatus::missing_field,
-                .data   = fmt::format("missing required field: {}", it),
+                .data   = std::format("missing required field: {}", it),
             };
         }
     }
@@ -136,11 +136,11 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
             .data   = "attribute method invalid",
         };
     }
-    AttributeType type = refAttributeType.at(j["attribute"]["method"].get<std::string>());
+    enumAttributeType type = refAttributeType.at(j["attribute"]["method"].get<std::string>());
     switch (type) {
-    case AttributeType::data:
+    case enumAttributeType::data:
         break;
-    case AttributeType::jx3box: {
+    case enumAttributeType::jx3box: {
         if (!j["attribute"]["data"].contains("pzid") || !j["attribute"]["data"]["pzid"].is_string()) {
             return Response{
                 .status = ResponseStatus::invalid_attribute_data,
@@ -166,16 +166,39 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         if (!it.is_string() || !ns_concrete::refEffectType.contains(it.get<std::string>())) {
             return Response{
                 .status = ResponseStatus::invalid_effects,
-                .data   = fmt::format("effects invalid: {}", it.get<std::string>()),
+                .data   = std::format("effects invalid: {}", it.get<std::string>()),
             };
         }
     }
     // 2.5 检查 custom
     if (j.contains("custom")) {
+        bool invalid = false;
         if (!j["custom"].is_object() ||
             !j["custom"].contains("method") || !j["custom"]["method"].is_string() ||
-            !ns_frame::refCustom.contains(j["custom"]["method"].get<std::string>()) ||
-            !j["custom"].contains("data") || !j["custom"]["data"].is_string()) {
+            !refCustom.contains(j["custom"]["method"].get<std::string>()) ||
+            !j["custom"].contains("data")) {
+            invalid = true;
+        }
+        switch (refCustom.at(j["custom"]["method"].get<std::string>())) {
+        case enumCustom::lua:
+            if (!j["custom"]["data"].is_string()) {
+                invalid = true;
+            }
+            break;
+        case enumCustom::jx3:
+            if (!j["custom"]["data"].is_array()) {
+                invalid = true;
+            } else {
+                for (auto &it : j["custom"]["data"]) {
+                    if (!it.is_string()) {
+                        invalid = true;
+                        break;
+                    }
+                }
+            }
+            break;
+        }
+        if (invalid) {
             return Response{
                 .status = ResponseStatus::invalid_custom,
                 .data   = "custom method invalid",
@@ -202,13 +225,13 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
 
     auto attrType = refAttributeType.at(j["attribute"]["method"].get<std::string>());
     switch (attrType) {
-    case AttributeType::data: {
+    case enumAttributeType::data: {
         std::string dataJsonStr = j["attribute"]["data"].dump();
         if (!player->attrImportFromData(dataJsonStr)) {
             return std::nullopt;
         }
     } break;
-    case AttributeType::jx3box: {
+    case enumAttributeType::jx3box: {
         std::string pzid = j["attribute"]["data"]["pzid"].get<std::string>();
         if (!player->attrImportFromJX3BOX(pzid)) {
             return std::nullopt;
@@ -230,14 +253,20 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
     }
     res.effects = std::move(effectList);
 
-    ns_frame::enumCustom custom = ns_frame::enumCustom::none;
-    std::string          customString;
     if (j.contains("custom")) {
-        custom       = ns_frame::refCustom.at(j["custom"]["method"].get<std::string>());
-        customString = j["custom"]["data"].get<std::string>();
+        switch (refCustom.at(j["custom"]["method"].get<std::string>())) {
+        case enumCustom::lua:
+            res.customString = j["custom"]["data"].get<std::string>();
+            break;
+        case enumCustom::jx3:
+            std::vector<std::string> v;
+            for (auto &it : j["custom"]["data"]) {
+                v.emplace_back(it.get<std::string>());
+            }
+            res.customString = ns_frame::CustomLua::parse(v);
+            break;
+        }
     }
-    res.customType   = custom;
-    res.customString = customString;
 
     return res;
 }
@@ -252,14 +281,13 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
 
     // 在线程池中创建任务
     const int cntCalcDetail = task.data.fightCount > CNT_DETAIL_TASKS ? CNT_DETAIL_TASKS : task.data.fightCount;
-    task.details.resize(cntCalcDetail);
+    task.details.resize(cntCalcDetail); // 注意, 此处不是 reserve, 因为获得的内存地址需要传递给线程池
     for (int i = 0; i < cntCalcDetail; i++) {
         server::pool.emplace(task.id, 1, task.futures, calcDetail, task.data, &task.details[i]);
     }
     server::pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, task.data);
 
     task.results.reserve(task.data.fightCount);
-    task.details.reserve(cntCalcDetail);
     int cntPre = 0;
     while (!task.stop.load() && task.cntCompleted < task.data.fightCount) [[likely]] {
         if (task.futures[task.cntCompleted].wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
@@ -327,18 +355,8 @@ static auto calc(const Data &arg) {
     std::unique_ptr<ns_frame::Player> player = ns_concrete::createPlayer(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
     std::unique_ptr<ns_frame::NPC>    npc    = ns_concrete::createNPC(ns_concrete::NPCType::NPC124);
     player->targetSelect                     = npc.get();
-    switch (arg.customType) {
-    case ns_frame::enumCustom::lua: {
-        player->customType = ns_frame::enumCustom::lua;
-        if (ns_frame::mapCustomLua.contains(arg.customString)) {
-            player->customLua = ns_frame::mapCustomLua.at(arg.customString).get();
-        } else {
-            player->customLua = ns_frame::mapCustomLua.emplace(arg.customString, std::make_unique<ns_frame::CustomLua>(arg.customString)).first->second.get();
-        }
-        break;
-    }
-    default:
-        break;
+    if (!arg.customString.empty()) {
+        player->customLua = ns_frame::CustomLua::get(arg.customString);
     }
     player->attrImportFromBackup(arg.attrBackup);
     for (auto &it : arg.effects) {
@@ -395,7 +413,7 @@ static std::string genID(int length) {
 
     std::string random_string;
     while (random_string.empty() || ns_modules::task::server::taskMap.contains(random_string)) {
-        for (size_t i = 0; i < length; ++i) {
+        for (size_t i = 0; i < length; i++) {
             random_string += CHARACTERS[distribution(generator)];
         }
     }
@@ -479,17 +497,10 @@ std::string Task::queryDamageList() {
         json objFight = json::array();
         for (auto &everyDamage : everyFight) {
             std::string name;
-            switch (everyDamage.source) {
-            case ns_frame::DamageSource::skill: {
-                const ns_frame::UISkill &skill = ns_frame::UISkillManager::get(everyDamage.id, everyDamage.level);
-                name                           = skill.Name;
-            } break;
-            case ns_frame::DamageSource::buff: {
-                const ns_frame::UIBuff &buff = ns_frame::UIBuffManager::get(everyDamage.id, everyDamage.level);
-                name                         = buff.Name;
-            } break;
-            default:
-                break;
+            if (everyDamage.isBuff) {
+                name = ns_frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
+            } else {
+                name = ns_frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
             }
             json objDamage;
             objDamage["time"]           = everyDamage.tick / 1024.0;
@@ -537,17 +548,10 @@ std::string Task::queryDamageAnalysis() {
         for (auto &everyDamage : everyFight) {
             if (!damageAnalysisMap.contains(everyDamage.id) || !damageAnalysisMap.at(everyDamage.id).contains(everyDamage.level)) {
                 std::string name;
-                switch (everyDamage.source) {
-                case ns_frame::DamageSource::skill: {
-                    const ns_frame::UISkill &skill = ns_frame::UISkillManager::get(everyDamage.id, everyDamage.level);
-                    name                           = skill.Name;
-                } break;
-                case ns_frame::DamageSource::buff: {
-                    const ns_frame::UIBuff &buff = ns_frame::UIBuffManager::get(everyDamage.id, everyDamage.level);
-                    name                         = buff.Name;
-                } break;
-                default:
-                    break;
+                if (everyDamage.isBuff) {
+                    name = ns_frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
+                } else {
+                    name = ns_frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
                 }
                 damageAnalysisMap[everyDamage.id][everyDamage.level] = DamageAnalysisItem{
                     .id        = everyDamage.id,

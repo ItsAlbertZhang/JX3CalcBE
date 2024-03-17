@@ -1,6 +1,5 @@
 #include "frame/global/cooldown.h"
 #include "frame/character/character.h"
-#include "frame/character/property/buff.h"
 #include "frame/event.h"
 
 using namespace ns_frame;

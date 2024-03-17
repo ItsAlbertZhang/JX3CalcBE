@@ -3,19 +3,13 @@
 
 #ifdef D_CONSTEXPR_LOG
 
-#include <string>
-
-#ifdef _WIN32
 #include <format>
-namespace fmt = std;
-#else
-#include <fmt/core.h>
-#endif
+#include <string>
 
 namespace ns_plugin {
 namespace log {
 
-using format_args = fmt::format_args; // 消除编译器对于 #include <format> 和 namespace fmt = std 未使用的警告
+using format_args = std::format_args; // 消除编译器对于 #include <format> 和 namespace std = std 未使用的警告
 
 class Log {
 public:
@@ -34,13 +28,18 @@ inline Log error{.name = "error", .output = true};
 } // namespace log
 } // namespace ns_plugin
 
-#define CONSTEXPR_LOG_INFO(str, ...)  ns_plugin::log::info(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
-#define CONSTEXPR_LOG_ERROR(str, ...) ns_plugin::log::error(fmt::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
+#define CONSTEXPR_LOG_INFO(str, ...)  ns_plugin::log::info(std::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
+#define CONSTEXPR_LOG_ERROR(str, ...) ns_plugin::log::error(std::format("{}:{}: " str "\n", __FILE__, __LINE__, __VA_ARGS__));
 
 #else // D_CONSTEXPR_LOG
 
-#define CONSTEXPR_LOG_INFO(str, ...)
-#define CONSTEXPR_LOG_ERROR(str, ...)
+#define CONSTEXPR_LOG_INFO(str, ...) \
+    do {                             \
+    } while (0)
+#define CONSTEXPR_LOG_ERROR(str, ...) \
+    do {                              \
+    } while (0)
+// do...while 的目的是在不影响性能的同时, 保证语句非置空, 以消除 MSVC 警告: “;”: 找到空的受控语句；这是否是有意的?
 
 #endif // D_CONSTEXPR_LOG
 

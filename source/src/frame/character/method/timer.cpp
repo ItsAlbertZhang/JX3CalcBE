@@ -21,11 +21,15 @@ static void callbackSetTimer(void *self, void *param) {
         CONSTEXPR_LOG_ERROR("LuaFunc::getOnTimer() failed.{}", "");
 }
 
-void Character::timerSet3(int frame, std::string filename, int targetID) {
-    this->timerSet4(frame, filename, characterGet(targetID)->isPlayer ? 1 : 0, targetID);
+void Character::timerSet(int frame, std::string filename, int targetID) {
+    int  type = characterGet(targetID)->isPlayer ? 1 : 0;
+    Data data{
+        .data = {static_cast<uint16_t>(LuaFunc::getIndex(filename)), static_cast<uint16_t>(type), static_cast<uint32_t>(targetID)}
+    };
+    Event::add(frame * 1024 / 16, callbackSetTimer, this, data.param);
 }
 
-void Character::timerSet4(int frame, std::string filename, int type, int targetID) {
+void Character::timerSet(int frame, std::string filename, int type, int targetID) {
     Data data{
         .data = {static_cast<uint16_t>(LuaFunc::getIndex(filename)), static_cast<uint16_t>(type), static_cast<uint32_t>(targetID)}
     };

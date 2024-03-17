@@ -1,7 +1,6 @@
 #include "modules/web.h"
 #include "modules/task.h"
 #include "utils/config.h"
-#include <asio.hpp>
 #include <crow/mustache.h>
 #include <string>
 
@@ -49,6 +48,9 @@ web::WebApp::WebApp() {
             return crow::response{200, "application/json", task::server::taskMap.at(id)->queryDamageAnalysis()};
         });
 
+#ifdef CROW_ENABLE_SSL
+    app.ssl_file("fullchain.pem", "privkey.pem");
+#endif
     future = app.bindaddr("0.0.0.0").port(12897).multithreaded().run_async();
 }
 

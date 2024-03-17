@@ -6,9 +6,24 @@
 
 using namespace ns_frame;
 
-void Character::skillLearn(int skillID, int skillLevel) {
-    this->chSkill.skillLearned[skillID] = skillLevel;
-    SkillManager::get(skillID, skillLevel);
+bool Character::cast(int skillID) {
+    if (skillID <= 0) {
+        return false;
+    }
+    int skillLevel = skillGetLevel(skillID);
+    if (skillLevel <= 0) {
+        return false;
+    }
+    this->targetCurr = this->targetSelect;
+    return skillCast(targetCurr, skillID, skillLevel);
+}
+
+int Character::skillGetLevel(int skillID) {
+    if (!this->chSkill.skillLearned.contains(skillID)) {
+        return 0;
+    } else {
+        return this->chSkill.skillLearned[skillID];
+    }
 }
 
 void Character::skillActive(int skillID) {
@@ -34,19 +49,9 @@ void Character::skillDeactive(int skillID) {
     }
 }
 
-void Character::cast(int skillID) {
-    int skillLevel = skillGetLevel(skillID);
-    if (skillLevel == 0) {
-        return;
-    }
-    this->targetCurr = this->targetSelect;
-    skillCast2(skillID, skillLevel);
-}
-
-int Character::skillGetLevel(int skillID) {
-    if (this->chSkill.skillLearned.find(skillID) == this->chSkill.skillLearned.end()) {
-        return 0;
-    } else {
-        return this->chSkill.skillLearned[skillID];
-    }
+void Character::skillLearn(int skillID, int skillLevel) {
+    this->chSkill.skillLearned[skillID] = skillLevel;
+    const Skill &it                     = SkillManager::get(skillID, skillLevel);
+    if (!it.IsPassiveSkill)
+        chSkill.skillRef[it.Name] = skillID;
 }

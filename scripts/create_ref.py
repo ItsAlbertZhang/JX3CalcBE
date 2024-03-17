@@ -103,6 +103,7 @@ tab_attribute: list[str] = [
     "atLunarCriticalStrikeBaseRate",
     "atLunarDamageCoefficient",
     "atMagicCriticalDamagePowerBaseKiloNumRate",
+    "atMagicOvercome",
     "atMoveSpeedPercent",
     "atNoLimitChangeSkillIcon",
     "atSetSelectableType",

@@ -1,12 +1,10 @@
 #ifndef FRAME_CHARACTER_PROPERTY_DAMAGE_H_
 #define FRAME_CHARACTER_PROPERTY_DAMAGE_H_
 
-#include <cstdint>
+#include "frame/common/event.h"
 #include <vector>
 
 namespace ns_frame {
-
-using event_tick_t = int64_t;
 
 enum class DamageType {
     Physics,
@@ -17,16 +15,9 @@ enum class DamageType {
     COUNT,
 };
 
-enum class DamageSource {
-    skill,
-    buff,
-    COUNT,
-};
-
 class Damage {
 public:
     event_tick_t tick;
-    DamageSource source;
     DamageType   damageType;
     int          id;
     int          level;
@@ -35,6 +26,7 @@ public:
     int          damageExcept;
     int          criticalRate;
     bool         isCritical;
+    bool         isBuff;
 };
 
 // class ChDamage {

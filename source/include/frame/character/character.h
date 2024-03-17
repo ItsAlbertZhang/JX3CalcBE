@@ -5,12 +5,14 @@
 #include "frame/character/property/buff.h"
 #include "frame/character/property/cooldown.h"
 #include "frame/character/property/damage.h"
+#include "frame/character/property/item.h"
 #include "frame/character/property/scene.h"
 #include "frame/character/property/skill.h"
 #include "frame/character/property/skillevent.h"
 #include "frame/character/property/skillrecipe.h"
 #include "frame/ref/lua_other.h"
 #include <cstdint>
+#include <optional>
 #include <set>
 #include <string>
 #include <tuple>
@@ -48,6 +50,7 @@ public:
     ChBuff        chBuff;        // 角色 buff
     ChCooldown    chCooldown;    // 角色冷却
     ChDamage      chDamage;      // 角色伤害
+    ChItem        chItem;        // 角色物品
     ChSkill       chSkill;       // 角色技能
     ChSkillRecipe chSkillRecipe; // 角色技能秘籍
     ChSkillEvent  chSkillEvent;  // 角色技能事件
@@ -57,25 +60,46 @@ public:
     std::set<AutoRollbackAttribute *> autoRollbackAttributeList; // 自动回滚的魔法属性列表
 
     // ---------- 以下属性和方法未被游戏 lua 调用 ----------
-    int               dwKungfuID = 0;
+    int                           dwKungfuID = 0;
     // character
-    static int        characterGetID(Character *character);
-    static Character *characterGet(int nCharacterID);
+    static int                    characterGetID(Character *character);
+    static Character             *characterGet(int nCharacterID);
     // attr
-    bool              attrImportFromData(std::string dataJsonStr);
-    bool              attrImportFromJX3BOX(std::string pzID);
-    bool              attrImportFromBackup(const ChAttr &attr);
+    bool                          attrImportFromData(std::string dataJsonStr);
+    bool                          attrImportFromJX3BOX(std::string pzID);
+    bool                          attrImportFromBackup(const ChAttr &attr);
     // buff
-    void              buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
-    void              buffFlushLeftFrame(BuffItem *item);
-    BuffItem         *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
-    BuffItem         *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
-    event_tick_t      buffTimeLeftTick(int buffID, int buffLevel);
+    void                          buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
+    void                          buffFlushLeftFrame(BuffItem *item);
+    event_tick_t                  buffTimeLeftTick(int buffID, int buffLevel);
+    BuffItem                     *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
+    BuffItem                     *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
+    // item
+    void                          itemAdd(ItemType type, int ID);
+    void                          itemAdd(int type, int ID);
+    void                          itemUse(ItemType type, int ID);
+    void                          itemUse(int type, int ID);
+    // skill
+    bool                          cast(int skillID);
+    bool                          skillCast(Character *target, int skillID, int skillLevel);
+    event_tick_t                  skillCooldownLeftTick(int skillID);
+    int                           skillCountAvailable(int skillID);
+    void                          skillActive(int skillID);
+    void                          skillDeactive(int skillID);
+    void                          skillLearn(int skillID, int skillLevel);
+    // skillrecipe
+    void                          skillrecipeAdd(int recipeID, int recipeLevel);
+    void                          skillrecipeRemove(int recipeID, int recipeLevel);
+    std::set<const SkillRecipe *> skillrecipeGet(int skillID, int skillrecipeType);
+    // skillevent
+    void                          skilleventAdd(int eventID);
+    void                          skilleventRemove(int eventID);
+    std::set<const SkillEvent *>  skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2);
 
     // calc
     Damage calcDamage(
-        int              recordID,
-        int              recordLevel,
+        int              id,
+        int              level,
         const ChAttr    &attrSelf,
         const Character *target,
         DamageType       typeDamage,
@@ -94,20 +118,14 @@ public:
     );
     std::tuple<int, int> calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel);
 
-    // skill
-    void                          cast(int skillID);
-    bool                          skillCast(Character *target, int skillID, int skillLevel);
-    void                          skillActive(int skillID);
-    void                          skillDeactive(int skillID);
-    void                          skillLearn(int skillID, int skillLevel);
-    // skillrecipe
-    void                          skillrecipeAdd(int recipeID, int recipeLevel);
-    void                          skillrecipeRemove(int recipeID, int recipeLevel);
-    std::set<const SkillRecipe *> skillrecipeGet(int skillID, int skillrecipeType);
-    // skillevent
-    void                          skilleventAdd(int eventID);
-    void                          skilleventRemove(int eventID);
-    std::set<const SkillEvent *>  skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2);
+    // macro parse
+    bool   macroSkillCast(std::string skillName);
+    int    macroBuff(std::string buffName);
+    bool   macroNoBuff(std::string buffName);
+    double macroBufftime(std::string buffName);
+    int    macroTBuff(std::string buffName);
+    bool   macroTNoBuff(std::string buffName);
+    double macroTBufftime(std::string buffName);
 
     // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua_static.cpp ----------
 
@@ -116,9 +134,8 @@ public:
     Character *characterGetSelect();
     // buff
     bool       buffExist(int buffID, int buffLevel);
-    void       buffAdd4(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel);
-    void       buffAdd5(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count);
-    void       buffAdd7(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count, int param6, int stacknum);
+    void       buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count = 1, int param6 = 0, int stacknum = 1);
+    void       buffAddOptional(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, std::optional<int> count, std::optional<int> param6, std::optional<int> stacknum);
     void       buffDel(int buffID, int buffLevel);
     void       buffDelGroup(int buffID, int buffLevel);
     void       buffDelMultiGroupByID(int buffID);
@@ -132,17 +149,17 @@ public:
     void       cooldownReset(int cooldownID);
     // skill
     int        skillGetLevel(int skillID);
-    void       skillCast2(int skillID, int skillLevel);
-    void       skillCast3(int skillID, int skillLevel, int targetID);
-    void       skillCast4(int skillID, int skillLevel, int type, int targetID);
+    void       skillCast(int skillID, int skillLevel);
+    void       skillCast(int skillID, int skillLevel, int targetID);
+    void       skillCast(int skillID, int skillLevel, int type, int targetID);
     void       skillCastXYZ(int skillID, int skillLevel, int x, int y, int z);
     // skillrecipe
     bool       skillrecipeExist(int RecipeID, int RecipeLevel);
     // scene
     ChScene   *sceneGet();
     // timer
-    void       timerSet3(int frame, std::string filename, int targetID);
-    void       timerSet4(int frame, std::string filename, int type, int targetID);
+    void       timerSet(int frame, std::string filename, int targetID);
+    void       timerSet(int frame, std::string filename, int type, int targetID);
     // other
     bool       otherIsFormationLeader();
     bool       otherIsInParty();

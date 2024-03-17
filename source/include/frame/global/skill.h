@@ -23,8 +23,11 @@ class Skill {
 public:
     // ---------- 数据存放区 ----------
     std::unordered_map<std::string, std::string> tab; // skills.tab 中的数据
+    std::unordered_map<std::string, std::string> ui;  // ui_skill.tab 中的数据
+    std::string                                  Name;
 
     ref::enumSkillKindtype KindType;
+    bool                   IsPassiveSkill;
     bool                   HasCriticalStrike;
     uint32_t               SkillEventMask1;
     uint32_t               SkillEventMask2;
@@ -95,7 +98,7 @@ public:
         int  nBuffLevel[4] = {0, 0, 0, 0};
         void overload(const SkillBindBuff &other) {
             if (other.used) {
-                for (int i = 0; i < 4; ++i) {
+                for (int i = 0; i < 4; i++) {
                     if (other.isValid[i]) {
                         isValid[i]    = true;
                         nBuffID[i]    = other.nBuffID[i];
@@ -122,7 +125,7 @@ public:
                     isValidPublicCoolDown = true;
                     nPublicCoolDown       = other.nPublicCoolDown;
                 }
-                for (int i = 0; i < 3; ++i) {
+                for (int i = 0; i < 3; i++) {
                     if (other.isValidNormalCoolDown[i]) {
                         isValidNormalCoolDown[i] = true;
                         nNormalCoolDownID[i]     = other.nNormalCoolDownID[i];
@@ -162,10 +165,10 @@ public:
     // ---------- GetSkillLevelData 中操作的属性 ----------
     void SetDelaySubSkill(int a, int b, int c);
 
-    void AddAttribute_iiii(int a, int b, int c, int d);
-    void AddAttribute_iisi(int a, int b, std::string c, int d);
-    void AddAttribute_iidi(int a, int b, double c, int d);
-    void AddAttribute_iini(int a, int b, std::optional<char> nil, int d);
+    void AddAttribute(int a, int b, int c, int d);
+    void AddAttribute(int a, int b, double c, int d);
+    void AddAttribute(int a, int b, std::string c, int d);
+    void AddAttribute(int a, int b, std::optional<char> nil, int d);
 
     // 技能施放Buff需求
     void AddSlowCheckSelfBuff(int a, int b, int c, int d, int e);    // 需求自身Buff

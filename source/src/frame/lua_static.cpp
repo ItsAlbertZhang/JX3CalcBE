@@ -6,6 +6,7 @@
 #include "frame/ref/lua_attribute_type.h"
 #include "frame/ref/lua_other.h"
 #include "plugin/log.h"
+#include <optional>
 #include <random>
 #include <sol/sol.hpp>
 #include <string>
@@ -14,7 +15,7 @@
 
 using namespace ns_frame;
 
-const std::vector<std::string> ns_frame::luaFuncStaticToDynamic = {
+const char *const ns_frame::luaFuncList[]{
     // Skill
     "SetDelaySubSkill",
     "AddAttribute",
@@ -61,178 +62,174 @@ const std::vector<std::string> ns_frame::luaFuncStaticToDynamic = {
     "SetBuffLeftActiveCount",
     "SetBuffNextActiveFrame",
 };
+const size_t ns_frame::luaFuncListSize = sizeof(ns_frame::luaFuncList) / sizeof(ns_frame::luaFuncList[0]);
 
-std::shared_ptr<sol::state> ns_frame::luaInit() {
+sol::state *ns_frame::luaInit() {
     auto lua = LuaFunc::getLua();
     lua->open_libraries(sol::lib::base);
     lua->open_libraries(sol::lib::table);
 
-    // clang-format off
-    
-    lua->new_usertype<Skill>(
-        "Skill",
-        "dwSkillID", &Skill::dwSkillID,
-        "dwLevel", &Skill::dwLevel,
-        "nChannelInterval", &Skill::nChannelInterval,
+    // lua 类型
 
-        "SetDelaySubSkill", &Skill::SetDelaySubSkill,
-        "AddAttribute", sol::overload(&Skill::AddAttribute_iiii, &Skill::AddAttribute_iisi, &Skill::AddAttribute_iidi, &Skill::AddAttribute_iini),
+    auto skill = lua->new_usertype<Skill>("Skill");
 
-        "AddSlowCheckSelfBuff", &Skill::AddSlowCheckSelfBuff,
-        "AddSlowCheckDestBuff", &Skill::AddSlowCheckDestBuff,
-        "AddSlowCheckSelfOwnBuff", &Skill::AddSlowCheckSelfOwnBuff,
-        "AddSlowCheckDestOwnBuff", &Skill::AddSlowCheckDestOwnBuff,
-
-        "AddCheckSelfLearntSkill", &Skill::AddCheckSelfLearntSkill,
-
-        "BindBuff", &Skill::BindBuff,
-
-        "SetPublicCoolDown", &Skill::SetPublicCoolDown,
-        "SetNormalCoolDown", &Skill::SetNormalCoolDown,
-        "SetCheckCoolDown", &Skill::SetCheckCoolDown,
-
-        "dwLevelUpExp", &Skill::dwLevelUpExp,
-        "nExpAddOdds", &Skill::nExpAddOdds,
-        "nPlayerLevelLimit", &Skill::nPlayerLevelLimit,
-
-        "nBaseThreat", &Skill::nBaseThreat,
-
-        "nCostLife", &Skill::nCostLife,
-        "nCostMana", &Skill::nCostMana,
-        "nCostStamina", &Skill::nCostStamina,
-        "nCostItemType", &Skill::nCostItemType,
-        "nCostItemIndex", &Skill::nCostItemIndex,
-        "nCostSprintPower", &Skill::nCostSprintPower,
-
-        "bIsAccumulate", &Skill::bIsAccumulate,
-
-        "SetSubsectionSkill", &Skill::SetSubsectionSkill,
-        "nChainBranch", &Skill::nChainBranch,
-        "nChainDepth", &Skill::nChainDepth,
-
-        "nMinRadius", &Skill::nMinRadius,
-        "nMaxRadius", &Skill::nMaxRadius,
-
-        "nProtectRadius", &Skill::nProtectRadius,
-        "nHeight", &Skill::nHeight,
-        "nRectWidth", &Skill::nRectWidth,
-        "nAngleRange", &Skill::nAngleRange,
-        "bFullAngleInAir", &Skill::bFullAngleInAir,
-        "nAreaRadius", &Skill::nAreaRadius,
-        "nTargetCountLimit", &Skill::nTargetCountLimit,
-        "bIgnorePrepareState", &Skill::bIgnorePrepareState,
-
-        "nPrepareFrames", &Skill::nPrepareFrames,
-        "nChannelFrame", &Skill::nChannelFrame,
-        "nBulletVelocity", &Skill::nBulletVelocity,
-
-        "bIsSunMoonPower", &Skill::bIsSunMoonPower,
-        "SetSunSubsectionSkill", &Skill::SetSunSubsectionSkill,
-        "SetMoonSubsectionSkill", &Skill::SetMoonSubsectionSkill,
-        "bIsFormationSkill", &Skill::bIsFormationSkill,
-        "nFormationRange", &Skill::nFormationRange,
-        "nLeastFormationPopulation", &Skill::nLeastFormationPopulation,
-
-        "nTargetLifePercentMin", &Skill::nTargetLifePercentMin,
-        "nTargetLifePercentMax", &Skill::nTargetLifePercentMax,
-
-        "nSelfLifePercentMin", &Skill::nSelfLifePercentMin,
-        "nSelfLifePercentMax", &Skill::nSelfLifePercentMax,
-
-        "nBeatBackRate", &Skill::nBeatBackRate,
-        "nBrokenRate", &Skill::nBrokenRate,
-        "nBreakRate", &Skill::nBreakRate,
-        "nDismountingRate", &Skill::nDismountingRate,
-
-        "nWeaponDamagePercent", &Skill::nWeaponDamagePercent
+    skill["dwSkillID"]        = &Skill::dwSkillID;
+    skill["dwLevel"]          = &Skill::dwLevel;
+    skill["nChannelInterval"] = &Skill::nChannelInterval;
+    skill["SetDelaySubSkill"] = &Skill::SetDelaySubSkill;
+    skill["AddAttribute"]     = sol::overload(
+        static_cast<void (Skill::*)(int, int, int, int)>(&Skill::AddAttribute),
+        static_cast<void (Skill::*)(int, int, double, int)>(&Skill::AddAttribute),
+        static_cast<void (Skill::*)(int, int, std::string, int)>(&Skill::AddAttribute),
+        static_cast<void (Skill::*)(int, int, std::optional<char>, int)>(&Skill::AddAttribute)
+        // std::optional<char> 其实是 nil
+        // 注意需要保证 std::optional<char> 位于最后, 防止其优先级高于 std::string 而被先匹配
     );
+    skill["AddSlowCheckSelfBuff"]      = &Skill::AddSlowCheckSelfBuff;
+    skill["AddSlowCheckDestBuff"]      = &Skill::AddSlowCheckDestBuff;
+    skill["AddSlowCheckSelfOwnBuff"]   = &Skill::AddSlowCheckSelfOwnBuff;
+    skill["AddSlowCheckDestOwnBuff"]   = &Skill::AddSlowCheckDestOwnBuff;
+    skill["AddCheckSelfLearntSkill"]   = &Skill::AddCheckSelfLearntSkill;
+    skill["BindBuff"]                  = &Skill::BindBuff;
+    skill["SetPublicCoolDown"]         = &Skill::SetPublicCoolDown;
+    skill["SetNormalCoolDown"]         = &Skill::SetNormalCoolDown;
+    skill["SetCheckCoolDown"]          = &Skill::SetCheckCoolDown;
+    skill["dwLevelUpExp"]              = &Skill::dwLevelUpExp;
+    skill["nExpAddOdds"]               = &Skill::nExpAddOdds;
+    skill["nPlayerLevelLimit"]         = &Skill::nPlayerLevelLimit;
+    skill["nBaseThreat"]               = &Skill::nBaseThreat;
+    skill["nCostLife"]                 = &Skill::nCostLife;
+    skill["nCostMana"]                 = &Skill::nCostMana;
+    skill["nCostStamina"]              = &Skill::nCostStamina;
+    skill["nCostItemType"]             = &Skill::nCostItemType;
+    skill["nCostItemIndex"]            = &Skill::nCostItemIndex;
+    skill["nCostSprintPower"]          = &Skill::nCostSprintPower;
+    skill["bIsAccumulate"]             = &Skill::bIsAccumulate;
+    skill["SetSubsectionSkill"]        = &Skill::SetSubsectionSkill;
+    skill["nChainBranch"]              = &Skill::nChainBranch;
+    skill["nChainDepth"]               = &Skill::nChainDepth;
+    skill["nMinRadius"]                = &Skill::nMinRadius;
+    skill["nMaxRadius"]                = &Skill::nMaxRadius;
+    skill["nProtectRadius"]            = &Skill::nProtectRadius;
+    skill["nHeight"]                   = &Skill::nHeight;
+    skill["nRectWidth"]                = &Skill::nRectWidth;
+    skill["nAngleRange"]               = &Skill::nAngleRange;
+    skill["bFullAngleInAir"]           = &Skill::bFullAngleInAir;
+    skill["nAreaRadius"]               = &Skill::nAreaRadius;
+    skill["nTargetCountLimit"]         = &Skill::nTargetCountLimit;
+    skill["bIgnorePrepareState"]       = &Skill::bIgnorePrepareState;
+    skill["nPrepareFrames"]            = &Skill::nPrepareFrames;
+    skill["nChannelFrame"]             = &Skill::nChannelFrame;
+    skill["nBulletVelocity"]           = &Skill::nBulletVelocity;
+    skill["bIsSunMoonPower"]           = &Skill::bIsSunMoonPower;
+    skill["SetSunSubsectionSkill"]     = &Skill::SetSunSubsectionSkill;
+    skill["SetMoonSubsectionSkill"]    = &Skill::SetMoonSubsectionSkill;
+    skill["bIsFormationSkill"]         = &Skill::bIsFormationSkill;
+    skill["nFormationRange"]           = &Skill::nFormationRange;
+    skill["nLeastFormationPopulation"] = &Skill::nLeastFormationPopulation;
+    skill["nTargetLifePercentMin"]     = &Skill::nTargetLifePercentMin;
+    skill["nTargetLifePercentMax"]     = &Skill::nTargetLifePercentMax;
+    skill["nSelfLifePercentMin"]       = &Skill::nSelfLifePercentMin;
+    skill["nSelfLifePercentMax"]       = &Skill::nSelfLifePercentMax;
+    skill["nBeatBackRate"]             = &Skill::nBeatBackRate;
+    skill["nBrokenRate"]               = &Skill::nBrokenRate;
+    skill["nBreakRate"]                = &Skill::nBreakRate;
+    skill["nDismountingRate"]          = &Skill::nDismountingRate;
+    skill["nWeaponDamagePercent"]      = &Skill::nWeaponDamagePercent;
 
-    lua->new_usertype<Character>(
-        "Character",
-        "GetSelectCharacter", &Character::characterGetSelect,
-        "GetSkillTarget", &Character::characterGetTargetID,
-        "IsHaveBuff", &Character::buffExist,
-        "GetBuff", &Character::buffGet,
-        "GetBuffByOwner", &Character::buffGetByOwner,
-        "AddBuff", sol::overload(&Character::buffAdd4, &Character::buffAdd5, &Character::buffAdd7),
-        "DelBuff", &Character::buffDel,
-        "DelGroupBuff", &Character::buffDelGroup,
-        "DelMultiGroupBuffByID", &Character::buffDelMultiGroupByID,
-        "SetBuffLeftActiveCount", &Character::buffSetLeftActiveCount,
-        "SetBuffNextActiveFrame", &Character::buffSetNextActiveFrame,
-        "ClearCDTime", &Character::cooldownClearTime,
-        "ModifyCoolDown", &Character::cooldownModify,
-        "ResetCD", &Character::cooldownReset,
-        "GetSkillLevel", &Character::skillGetLevel,
-        "CastSkill", sol::overload(&Character::skillCast2, &Character::skillCast3, &Character::skillCast4),
-        "CastSkillXYZ", &Character::skillCastXYZ,
-        "IsSkillRecipeActive", &Character::skillrecipeExist,
-        "GetScene", &Character::sceneGet,
-        "SetTimer", sol::overload(&Character::timerSet3, &Character::timerSet4),
-        "IsFormationLeader", &Character::otherIsFormationLeader,
-        "IsInParty", &Character::otherIsInParty,
-        "GetKungfuMountID", &Character::otherGetKungfuMountID,
-        "GetMapID", &Character::otherGetMapID,
-        "ClearAllNpcThreat", &Character::otherClearAllNpcThreat,
-        "CreatePublicShadow", &Character::otherCreatePublicShadow,
-        "DestroyPublicShadow", &Character::otherDestroyPublicShadow,
-        "DoAction", &Character::otherDoAction,
-        "PlayPublicShadowAnimation", &Character::otherPlayPublicShadowAnimation,
-        "dwID", &Character::dwID,
-        "nLevel", &Character::nLevel,
-        "nX", &Character::nX, "nY", &Character::nY, "nZ", &Character::nZ,
-        "nRoleType", &Character::nRoleType,
-        "nTouchRange", &Character::nTouchRange,
-        "nCurrentSunEnergy", &Character::nCurrentSunEnergy,
-        "nCurrentMoonEnergy", &Character::nCurrentMoonEnergy,
-        "nSunPowerValue", &Character::nSunPowerValue,
-        "nMoonPowerValue", &Character::nMoonPowerValue,
-        "bSurplusAutoCast", &Character::bSurplusAutoCast,
-        "bSurplusAutoReplenish", &Character::bSurplusAutoReplenish,
-        "bFightState", &Character::bFightState,
-        "fMaxLife64", &Character::fMaxLife64,
-        "fCurrentLife64", &Character::fCurrentLife64
+    auto character = lua->new_usertype<Character>("Character");
+
+    character["GetSelectCharacter"]     = &Character::characterGetSelect;
+    character["GetSkillTarget"]         = &Character::characterGetTargetID;
+    character["IsHaveBuff"]             = &Character::buffExist;
+    character["GetBuff"]                = &Character::buffGet;
+    character["GetBuffByOwner"]         = &Character::buffGetByOwner;
+    character["AddBuff"]                = &Character::buffAddOptional;
+    character["DelBuff"]                = &Character::buffDel;
+    character["DelGroupBuff"]           = &Character::buffDelGroup;
+    character["DelMultiGroupBuffByID"]  = &Character::buffDelMultiGroupByID;
+    character["SetBuffLeftActiveCount"] = &Character::buffSetLeftActiveCount;
+    character["SetBuffNextActiveFrame"] = &Character::buffSetNextActiveFrame;
+    character["ClearCDTime"]            = &Character::cooldownClearTime;
+    character["ModifyCoolDown"]         = &Character::cooldownModify;
+    character["ResetCD"]                = &Character::cooldownReset;
+    character["GetSkillLevel"]          = &Character::skillGetLevel;
+    character["CastSkill"]              = sol::overload(
+        static_cast<void (Character::*)(int, int)>(&Character::skillCast),
+        static_cast<void (Character::*)(int, int, int)>(&Character::skillCast),
+        static_cast<void (Character::*)(int, int, int, int)>(&Character::skillCast)
     );
-
-    lua->new_usertype<BuffItem>(
-        "Buff",
-        "nLevel", &BuffItem::nLevel,
-        "nIndex", &BuffItem::nIndex,
-        "nStackNum", &BuffItem::nStackNum,
-        "nLeftActiveCount", &BuffItem::nLeftActiveCount,
-        "nNextActiveFrame", &BuffItem::nNextActiveFrame,
-        "nCustomValue", &BuffItem::nCustomValue
+    character["CastSkillXYZ"]        = &Character::skillCastXYZ;
+    character["IsSkillRecipeActive"] = &Character::skillrecipeExist;
+    character["GetScene"]            = &Character::sceneGet;
+    character["SetTimer"]            = sol::overload(
+        static_cast<void (Character::*)(int, std::string, int)>(&Character::timerSet),
+        static_cast<void (Character::*)(int, std::string, int, int)>(&Character::timerSet)
     );
+    character["IsFormationLeader"]         = &Character::otherIsFormationLeader;
+    character["IsInParty"]                 = &Character::otherIsInParty;
+    character["GetKungfuMountID"]          = &Character::otherGetKungfuMountID;
+    character["GetMapID"]                  = &Character::otherGetMapID;
+    character["ClearAllNpcThreat"]         = &Character::otherClearAllNpcThreat;
+    character["CreatePublicShadow"]        = &Character::otherCreatePublicShadow;
+    character["DestroyPublicShadow"]       = &Character::otherDestroyPublicShadow;
+    character["DoAction"]                  = &Character::otherDoAction;
+    character["PlayPublicShadowAnimation"] = &Character::otherPlayPublicShadowAnimation;
+    character["dwID"]                      = &Character::dwID;
+    character["nLevel"]                    = &Character::nLevel;
+    character["nX"]                        = &Character::nX;
+    character["nY"]                        = &Character::nY;
+    character["nZ"]                        = &Character::nZ;
+    character["nRoleType"]                 = &Character::nRoleType;
+    character["nTouchRange"]               = &Character::nTouchRange;
+    character["nCurrentSunEnergy"]         = &Character::nCurrentSunEnergy;
+    character["nCurrentMoonEnergy"]        = &Character::nCurrentMoonEnergy;
+    character["nSunPowerValue"]            = &Character::nSunPowerValue;
+    character["nMoonPowerValue"]           = &Character::nMoonPowerValue;
+    character["bSurplusAutoCast"]          = &Character::bSurplusAutoCast;
+    character["bSurplusAutoReplenish"]     = &Character::bSurplusAutoReplenish;
+    character["bFightState"]               = &Character::bFightState;
+    character["fMaxLife64"]                = &Character::fMaxLife64;
+    character["fCurrentLife64"]            = &Character::fCurrentLife64;
 
-    lua->new_usertype<ChScene>(
-        "Scene",
-        "nType", &ChScene::nType
-    );
+    auto buff                = lua->new_usertype<BuffItem>("Buff");
+    buff["nLevel"]           = &BuffItem::nLevel;
+    buff["nIndex"]           = &BuffItem::nIndex;
+    buff["nStackNum"]        = &BuffItem::nStackNum;
+    buff["nLeftActiveCount"] = &BuffItem::nLeftActiveCount;
+    buff["nNextActiveFrame"] = &BuffItem::nNextActiveFrame;
+    buff["nCustomValue"]     = &BuffItem::nCustomValue;
 
-    // clang-format on
+    auto scene     = lua->new_usertype<ChScene>("Scene");
+    scene["nType"] = &ChScene::nType;
 
-    lua->set_function("Include", LuaGlobalFunction::Include);
-    lua->set_function("GetPlayer", LuaGlobalFunction::GetPlayer);
-    lua->set_function("GetNpc", LuaGlobalFunction::GetNpc);
-    lua->set_function("IsPlayer", LuaGlobalFunction::IsPlayer);
-    lua->set_function("AdditionalAttribute", LuaGlobalFunction::AdditionalAttribute);
-    lua->set_function("IsLangKeXingMap", LuaGlobalFunction::IsLangKeXingMap);
-    lua->set_function("ModityCDToUI", LuaGlobalFunction::ModityCDToUI);
-    lua->set_function("CheckInTongWar", LuaGlobalFunction::CheckInTongWar);
-    lua->set_function("IsTreasureBattleFieldMap", LuaGlobalFunction::IsTreasureBattleFieldMap);
-    lua->set_function("GetValueByBits", LuaGlobalFunction::GetValueByBits);
-    lua->set_function("SetValueByBits", LuaGlobalFunction::SetValueByBits);
-    lua->set_function("RemoteCallToClient", LuaGlobalFunction::RemoteCallToClient);
-    lua->set_function("GetDistanceSq", LuaGlobalFunction::GetDistanceSq);
-    lua->set_function("Random", LuaGlobalFunction::Random);
-    lua->set_function("GetEditorString", LuaGlobalFunction::GetEditorString);
-    lua->set_function("IsClient", LuaGlobalFunction::IsClient);
+    // lua 函数
+
+    (*lua)["Include"]                  = LuaGlobalFunction::Include;
+    (*lua)["GetPlayer"]                = LuaGlobalFunction::GetPlayer;
+    (*lua)["GetNpc"]                   = LuaGlobalFunction::GetNpc;
+    (*lua)["IsPlayer"]                 = LuaGlobalFunction::IsPlayer;
+    (*lua)["IsLangKeXingMap"]          = LuaGlobalFunction::IsLangKeXingMap;
+    (*lua)["ModityCDToUI"]             = LuaGlobalFunction::ModityCDToUI;
+    (*lua)["CheckInTongWar"]           = LuaGlobalFunction::CheckInTongWar;
+    (*lua)["IsTreasureBattleFieldMap"] = LuaGlobalFunction::IsTreasureBattleFieldMap;
+    (*lua)["GetValueByBits"]           = LuaGlobalFunction::GetValueByBits;
+    (*lua)["SetValueByBits"]           = LuaGlobalFunction::SetValueByBits;
+    (*lua)["RemoteCallToClient"]       = LuaGlobalFunction::RemoteCallToClient;
+    (*lua)["GetDistanceSq"]            = LuaGlobalFunction::GetDistanceSq;
+    (*lua)["Random"]                   = LuaGlobalFunction::Random;
+    (*lua)["GetEditorString"]          = LuaGlobalFunction::GetEditorString;
+    (*lua)["IsClient"]                 = LuaGlobalFunction::IsClient;
+
+    // lua 常量
 
     (*lua)["CONSUME_BASE"]          = 100;
     (*lua)["LENGTH_BASE"]           = 64;
     (*lua)["MELEE_ATTACK_DISTANCE"] = 4 * 64;
     (*lua)["GLOBAL"]                = lua->create_table();
     (*lua)["GLOBAL"]["GAME_FPS"]    = 16;
+
+    // lua 表
 
     sol::table AttributeType = lua->create_table();
     for (int i = 0; i < static_cast<int>(ref::enumLuaAttributeType::COUNT); i++) {
@@ -314,16 +311,6 @@ Character *LuaGlobalFunction::GetNpc(int nCharacterID) {
 
 bool LuaGlobalFunction::IsPlayer(int nCharacterID) {
     return Character::characterGet(nCharacterID)->isPlayer;
-}
-
-void LuaGlobalFunction::AdditionalAttribute(Skill &skill) {
-    // 出现于 Skill.lh, 其本应被 Include 包含. 但 Include 实际上置空, 因此在此处实现相关逻辑.
-    skill.AddAttribute_iiii(
-        static_cast<int>(ref::enumLuaAttributeEffectMode::EFFECT_TO_SELF_AND_ROLLBACK),
-        static_cast<int>(ref::enumLuaAttributeType::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE),
-        100,
-        0
-    );
 }
 
 bool LuaGlobalFunction::IsLangKeXingMap(int mapID) {

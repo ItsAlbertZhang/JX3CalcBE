@@ -2,13 +2,19 @@
 #define MODULES_WEB_H_
 
 #include <future>
-#pragma warning(push, 0)
+
+#pragma warning(push, 0)      // MSVC
+#pragma clang diagnostic push // Clang
+#pragma clang diagnostic ignored "-Weverything"
+
 #ifdef _WIN32
 #include <sdkddkver.h>
 #endif
 #include <crow.h>
 #include <crow/middlewares/cors.h>
-#pragma warning(pop)
+
+#pragma clang diagnostic pop // Clang
+#pragma warning(pop)         // MSVC
 
 namespace ns_modules {
 

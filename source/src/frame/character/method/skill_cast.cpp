@@ -14,25 +14,16 @@
 
 using namespace ns_frame;
 
-static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill);
-static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue);
-static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
-static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
-static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDown &cooldown);
-static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int nCoolDownAdd);
-static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
-static void        callbackDelaySubSkill(void *self, void *item);
-
-void Character::skillCast4(int skillID, int skillLevel, int type, int targetID) {
+void Character::skillCast(int skillID, int skillLevel, int type, int targetID) {
     UNREFERENCED_PARAMETER(type);
     skillCast(characterGet(targetID), skillID, skillLevel);
 }
 
-void Character::skillCast3(int skillID, int skillLevel, int targetID) {
+void Character::skillCast(int skillID, int skillLevel, int targetID) {
     skillCast(characterGet(targetID), skillID, skillLevel);
 }
 
-void Character::skillCast2(int skillID, int skillLevel) {
+void Character::skillCast(int skillID, int skillLevel) {
     if (skillCast(this->targetCurr, skillID, skillLevel)) {
         return;
     }
@@ -141,6 +132,18 @@ end
 
 */
 
+static void callbackDelaySubSkill(void *self, void *item);
+
+static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill);
+static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue);
+static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
+static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
+static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int nCoolDownAdd);
+static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
+
+static inline event_tick_t         staticCooldownLeftTick(Character *self, const Skill::SkillCoolDown &cooldown);
+static inline Skill::SkillCoolDown staticGetCooldown(Character *self, int skillID);
+
 bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     CONSTEXPR_LOG_INFO("Try to CastSkill: {} # {}", skillID, skillLevel);
 
@@ -214,7 +217,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     skillrecipeList.insert(skillrecipeTypeList.begin(), skillrecipeTypeList.end());
 
     // 2.5 检查 CD
-    if (!staticCheckCoolDown(this, cooldown))
+    if (staticCooldownLeftTick(this, cooldown) > 0)
         return false;
 
     // ---------- 检查完毕, 释放技能 ----------
@@ -299,6 +302,31 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     // 10. (自动执行) 析构 SkillRecipe: ScriptFile. 秘籍加成的 attribute 在这里回滚.
     // 11. (自动执行) 析构 魔法属性. 魔法属性的 attribute 在这里回滚.
     // 12. (自动执行) 析构 技能运行时资源: RuntimeCastSkill. 添加至 runtime 的技能队列中的技能被依次执行, 随后添加至 runtime 的伤害被添加至 chDamage.
+}
+
+event_tick_t Character::skillCooldownLeftTick(int skillID) {
+    Skill::SkillCoolDown cooldown = staticGetCooldown(this, skillID);
+    return staticCooldownLeftTick(this, cooldown);
+}
+
+int Character::skillCountAvailable(int skillID) {
+    Skill::SkillCoolDown cooldown = staticGetCooldown(this, skillID);
+    int                  ret      = 0;
+    for (int i = 0; i < 3; i++) {
+        if (cooldown.isValidNormalCoolDown[i] && chCooldown.cooldownList.contains(cooldown.nNormalCoolDownID[i])) {
+            const int a = chCooldown.cooldownList.at(cooldown.nNormalCoolDownID[i]).countAvailable;
+            if (a > ret) {
+                ret = a;
+            }
+        }
+    }
+    return ret;
+}
+
+static void callbackDelaySubSkill(void *self, void *item) {
+    Character                  *ptrSelf = static_cast<Character *>(self);
+    const Skill::DelaySubSkill *ptrItem = static_cast<const Skill::DelaySubSkill *>(item);
+    ptrSelf->skillCast(ptrItem->skillID, ptrItem->skillLevel);
 }
 
 static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {
@@ -395,30 +423,6 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
     return false;
 }
 
-static inline bool staticCheckCoolDown(Character *self, const Skill::SkillCoolDown &cooldown) {
-    if (cooldown.isValidPublicCoolDown) {
-        if (self->chCooldown.cooldownList.find(cooldown.nPublicCoolDown) != self->chCooldown.cooldownList.end() &&
-            self->chCooldown.cooldownList[cooldown.nPublicCoolDown].countAvailable == 0) {
-            return false; // CD 存在于列表中且未冷却完毕, CastSkill 失败
-        }
-    }
-    for (int i = 0; i < 3; i++) {
-        if (cooldown.isValidNormalCoolDown[i]) {
-            if (self->chCooldown.cooldownList.find(cooldown.nNormalCoolDownID[i]) != self->chCooldown.cooldownList.end() &&
-                self->chCooldown.cooldownList[cooldown.nNormalCoolDownID[i]].countAvailable == 0) {
-                return false; // CD 存在于列表中且未冷却完毕, CastSkill 失败
-            }
-        }
-        if (cooldown.isValidCheckCoolDown[i]) {
-            if (self->chCooldown.cooldownList.find(cooldown.nCheckCoolDownID[i]) != self->chCooldown.cooldownList.end() &&
-                self->chCooldown.cooldownList[cooldown.nCheckCoolDownID[i]].countAvailable == 0) {
-                return false; // CD 存在于列表中且未冷却完毕, CastSkill 失败
-            }
-        }
-    }
-    return true;
-}
-
 static inline void staticTriggerCoolDown(Character *self, int cooldownID, int cooldownAdd) {
     const Cooldown &cooldown      = CooldownManager::get(cooldownID);
     // 计算 CD 时间
@@ -444,8 +448,48 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
     }
 }
 
-static void callbackDelaySubSkill(void *self, void *item) {
-    Character                  *ptrSelf = static_cast<Character *>(self);
-    const Skill::DelaySubSkill *ptrItem = static_cast<const Skill::DelaySubSkill *>(item);
-    ptrSelf->skillCast2(ptrItem->skillID, ptrItem->skillLevel);
+static inline event_tick_t staticCooldownLeftTick(Character *self, const Skill::SkillCoolDown &cooldown) {
+    if (cooldown.isValidPublicCoolDown) {
+        if (self->chCooldown.cooldownList.contains(cooldown.nPublicCoolDown) &&
+            self->chCooldown.cooldownList[cooldown.nPublicCoolDown].countAvailable == 0) {
+            // Public CD 存在于列表中且未冷却完毕, 返回剩余时间
+            return self->chCooldown.cooldownList[cooldown.nPublicCoolDown].tickOver - Event::now();
+        }
+    }
+    for (int i = 0; i < 3; i++) {
+        if (cooldown.isValidNormalCoolDown[i]) {
+            if (self->chCooldown.cooldownList.contains(cooldown.nNormalCoolDownID[i]) &&
+                self->chCooldown.cooldownList[cooldown.nNormalCoolDownID[i]].countAvailable == 0) {
+                // Normal CD 存在于列表中且未冷却完毕, 返回剩余时间
+                return self->chCooldown.cooldownList[cooldown.nNormalCoolDownID[i]].tickOver - Event::now();
+            }
+        }
+        if (cooldown.isValidCheckCoolDown[i]) {
+            if (self->chCooldown.cooldownList.contains(cooldown.nCheckCoolDownID[i]) &&
+                self->chCooldown.cooldownList[cooldown.nCheckCoolDownID[i]].countAvailable == 0) {
+                // Check CD 存在于列表中且未冷却完毕, 返回剩余时间
+                return self->chCooldown.cooldownList[cooldown.nCheckCoolDownID[i]].tickOver - Event::now();
+            }
+        }
+    }
+    return 0;
+}
+
+static inline Skill::SkillCoolDown staticGetCooldown(Character *self, int skillID) {
+    // 获取技能
+    int skillLevel = self->skillGetLevel(skillID);
+    if (skillLevel == 0) {
+        return Skill::SkillCoolDown{};
+    }
+    const Skill                  &skill           = SkillManager::get(skillID, skillLevel);
+    Skill::SkillCoolDown          cooldown        = skill.attrCoolDown;
+    std::set<const SkillRecipe *> skillrecipeList = self->skillrecipeGet(skillID, 0);
+    for (const auto &it : skillrecipeList) {
+        const Skill *ptrSkill = SkillRecipeManager::getScriptSkill(it, &skill);
+        if (nullptr != ptrSkill) { // 如果技能的秘籍存在对应技能
+            // 使用秘籍的技能重载当前的 CD 和 bindbuff
+            cooldown.overload(ptrSkill->attrCoolDown);
+        }
+    }
+    return cooldown;
 }

@@ -191,7 +191,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c;
         break;
     case enumTabAttribute::atCallBuff:
-        self->buffAdd4(0, 99, attrib.valueAInt, attrib.valueBInt);
+        self->buffAdd(0, 99, attrib.valueAInt, attrib.valueBInt);
         break;
     case enumTabAttribute::atKnockedOffRate:
         // 未做相关实现, 推测为免疫击退
@@ -204,6 +204,9 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         break;
     case enumTabAttribute::atAllDamageAddPercent:
         self->chAttr.atAllDamageAddPercent += attrib.valueAInt * c;
+        break;
+    case enumTabAttribute::atMagicOvercome:
+        self->chAttr.atMagicOvercome += attrib.valueAInt * c;
         break;
     default:
         CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)], attrib.valueAInt);

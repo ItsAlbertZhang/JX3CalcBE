@@ -17,17 +17,15 @@ static void callbackMacroCustomLua(void *self, void *nullparam);
 static void callbackNormalAttack(void *self, void *nullparam);
 
 void Player::macroRun() {
-    switch (customType) {
-    case enumCustom::none:
-        macroPrepareDefault();               // 起手
+    if (nullptr == customLua) {
+        prepare();                           // 起手
         callbackMacroDefault(this, nullptr); // 进入战斗
         callbackNormalAttack(this, nullptr); // 开启普通攻击
-        break;
-    case enumCustom::lua:
-        customLua->macroPrepare(this);         // 起手
+    } else {
+        customLua->init();                     // 初始化
+        prepare();                             // 起手
         callbackMacroCustomLua(this, nullptr); // 进入战斗
         callbackNormalAttack(this, nullptr);   // 开启普通攻击
-        break;
     }
 }
 
@@ -60,7 +58,7 @@ inline static ns_frame::event_tick_t getDelay(Player *player) {
 static void callbackMacroDefault(void *self, void *nullparam) {
     UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
-    player->macroRuntimeDefault();
+    player->macroDefault();
     Event::add(getDelay(player), callbackMacroDefault, self, nullptr);
 }
 

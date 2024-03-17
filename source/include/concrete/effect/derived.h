@@ -30,6 +30,11 @@ public:
     virtual void active(ns_frame::Character *obj) const override;
 };
 
+class Effect腰坠·特效 : public EffectBase {
+public:
+    virtual void active(ns_frame::Character *obj) const override;
+};
+
 class Effect武器·橙武 : public EffectBase {
 public:
     virtual void active(ns_frame::Character *obj) const override;

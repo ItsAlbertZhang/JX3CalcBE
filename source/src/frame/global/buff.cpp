@@ -77,47 +77,22 @@ void BuffManager::add(int buffID, int buffLevel) {
             }
         }
     }
-    // static const std::string attribName[] = {"Begin", "Active", "EndTime"};
-    // static int attribCount[3]; // 3 = sizeof(attribName)
-    // static bool isFieldCountInit = false;
-    // if (!isFieldCountInit) {
-    //     // 初始化 attribCount. 当前版本下, 三个字段的数量分别为 15, 2, 2.
-    //     for (int i = 0; i < 3; i++) { // 3 = sizeof(attribName)
-    //         int cnt = 1;
-    //         while (buff.tab.find(attribName[i] + "Attrib" + std::to_string(cnt)) != buff.tab.end()) { // BeginAttrib1, BeginAttrib2, ...
-    //             cnt++;
-    //         }
-    //         attribCount[i] = cnt - 1;
-    //     }
-    //     isFieldCountInit = true;
-    // }
-    // for (int i = 0; i < 3; i++) {
-    //     for (int j = 0; j < attribCount[i]; j++) {
-    //         std::string name = buff.tab[attribName[i] + "Attrib" + std::to_string(j + 1)];        // BeginAttrib1, BeginAttrib2, ...
-    //         std::string valueA = buff.tab[attribName[i] + "Value" + std::to_string(j + 1) + "A"]; // BeginValue1A, BeginValue2A, ...
-    //         std::string valueB = buff.tab[attribName[i] + "Value" + std::to_string(j + 1) + "B"]; // BeginValue1B, BeginValue2B, ...
-    //         // valueB 的数字形态. 之所以不用 std::stoi, 是因为 tab 表中存在有 valueB 为字符串的情况 (与此同时 valueA 为空, 怕是策划填错了位置)
-    //         int valueBInt = atoi(valueB.c_str());
-    //         TabEnum::BuffAttrib type = getAttribType(name); // BeginAttrib1 的枚举类型
-    //         std::vector<Buff::Attrib> *attrib;
-    //         switch (i) {
-    //         case 0:
-    //             attrib = &buff.BeginAttrib;
-    //             break;
-    //         case 1:
-    //             attrib = &buff.ActiveAttrib;
-    //             break;
-    //         case 2:
-    //             attrib = &buff.EndTimeAttrib;
-    //             break;
-    //         }
-    //         if (TabAdditional::buffAttribIsValue[static_cast<int>(type)]) {
-    //             attrib->emplace_back(type, std::stoi(valueA), valueBInt);
-    //         } else {
-    //             attrib->emplace_back(type, valueA, valueBInt);
-    //         }
-    //     }
-    // }
+
+    // 查询 Buff UI
+    arg.clear();
+    arg.emplace_back();
+    arg[0]["BuffID"] = std::to_string(buffID);
+    arg[0]["Level"]  = std::to_string(buffLevel);
+    arg.emplace_back();
+    arg[1]["BuffID"] = std::to_string(buffID);
+    arg[1]["Level"]  = "0";
+    gdi::tabSelect(gdi::Tab::ui_buff, arg);
+    if (arg.size() == 0) {
+        buff.Name = "未知技能";
+    } else {
+        buff.ui   = std::move(arg[0]);
+        buff.Name = buff.ui["Name"];
+    }
 
     // 将 Buff 存入缓存
     data[std::make_tuple(buffID, buffLevel)] = std::move(buff);
