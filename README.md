@@ -10,6 +10,7 @@
 
 - `gdi.dll` : MSVC 19.39.33521.0 (Visual Studio Installer 中显示为 MSVC v143)
 - `libgdi.dylib` : Homebrew clang version 17.0.6
+- `libgdi.so` : Ubuntu clang version 17.0.6
 
 ## 文件结构
 
@@ -123,7 +124,7 @@ export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
 
 ```shell
 source ~/.zshrc # 重启终端
-clang --versoin # 请确保版本高于 17.0
+clang --versoin # 应正确输出版本信息
 ```
 
 #### Step 3: 配置构建工具
@@ -142,7 +143,7 @@ cmake --version # 应正确输出版本信息
 ```shell
 sudo apt update
 sudo apt install -y clang cmake
-clang --version # 请确保版本高于 17.0
+clang --version # 应正确输出版本信息
 ```
 
 ## 编译运行
@@ -185,12 +186,31 @@ cmake --build ./build/obj/Release --config Release # 编译
 
 ```shell
 cmake -S. -B./build/obj/Release -G "Unix Makefiles" -DCMAKE_BUILD_TYPE:STRING=Release # 构建
-# 如果需要在 Linux 服务器上支持 SSL 连接, 需要定义 CROW_ENABLE_SSL 宏.
-# 做法为: 为命令添加参数 -DCROW_ENABLE_SSL
-# 若如此做, 则需要在运行前将 fullchain.pem 和 privkey.pem 拷贝至二进制文件目录.
 cmake --build ./build/obj/Release --config Release -j 32 # 编译
 # 你可以将 -j 后的数字换成自己 CPU 的核心数以获取最快的编译速度.
 ```
+
+##### (可选) 手动指定 C COMPILER 与 CXX COMPILER
+
+在 Unix 下, 你可能需要手动指定你想使用的 C COMPILER 与 CXX COMPILER.
+
+在 **构建** 命令后添加如下参数:
+
+```shell 
+-DCMAKE_C_COMPILER=/usr/bin/clang-17 -DCMAKE_CXX_COMPILER=/usr/bin/clang++-17
+```
+
+##### (可选) 支持 SSL 连接
+
+如果需要在 Linux 服务器上支持 SSL 连接, 需要定义 CROW_ENABLE_SSL 宏.
+
+在 **构建** 命令后添加如下参数:
+
+```shell
+-DCROW_ENABLE_SSL
+```
+
+若如此做, 则需要在运行前将 fullchain.pem 和 privkey.pem 拷贝至二进制文件目录.
 
 ### Step 3: 运行
 

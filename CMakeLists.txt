@@ -77,7 +77,7 @@ if(WIN32)
     include_directories("${LUA_LIB_DIR}/include")
 else()
     download_lua("https://www.lua.org/ftp/lua-5.4.6.tar.gz" "lua-5.4.6.tar.gz")
-    execute_process(COMMAND bash -c "cd ${LUA_LIB_DIR}/lua-5.4.6 && make && make install INSTALL_TOP=../..")
+    execute_process(COMMAND bash -c "cd ${LUA_LIB_DIR}/lua-5.4.6 && make CC=${CMAKE_C_COMPILER} MYCFLAGS='-std=gnu99 -fPIC' && make install INSTALL_TOP=../..")
     find_library(
         LUA
         NAMES lua

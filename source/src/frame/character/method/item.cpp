@@ -1,6 +1,7 @@
 #include "frame/global/item.h"
 #include "frame/character/character.h"
 #include "frame/global/cooldown.h"
+#include <stdexcept>
 
 using namespace ns_frame;
 
