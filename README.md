@@ -12,6 +12,10 @@
 - `libgdi.dylib` : Homebrew clang version 17.0.6
 - `libgdi.so` : Ubuntu clang version 17.0.6
 
+> 对于 Windows 和 Mac OS, 请确保系统和编译器已升级至最新版本.
+> 
+> 对于 Linux, `libgdi.so` 目前存在已知的兼容性问题, 将会在后续修复.
+
 ## 文件结构
 
 ```
@@ -207,7 +211,7 @@ cmake --build ./build/obj/Release --config Release -j 32 # 编译
 在 **构建** 命令后添加如下参数:
 
 ```shell
--DCROW_ENABLE_SSL
+-DCROW_ENABLE_SSL=
 ```
 
 若如此做, 则需要在运行前将 fullchain.pem 和 privkey.pem 拷贝至二进制文件目录.
