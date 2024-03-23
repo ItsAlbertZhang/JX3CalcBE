@@ -61,41 +61,43 @@ public:
     std::set<AutoRollbackAttribute *> autoRollbackAttributeList; // 自动回滚的魔法属性列表
 
     // ---------- 以下属性和方法未被游戏 lua 调用 ----------
-    int                           dwKungfuID = 0;
+    int dwKungfuID = 0;
+
     // character
-    static int                    characterGetID(Character *character);
-    static Character             *characterGet(int nCharacterID);
+    static auto characterGet(int nCharacterID) -> Character *;
+    static int  characterGetID(Character *character);
+
     // attr
-    bool                          attrImportFromData(std::string dataJsonStr);
-    bool                          attrImportFromJX3BOX(std::string pzID);
-    bool                          attrImportFromBackup(const ChAttr &attr);
+    bool attrImportFromData(std::string dataJsonStr);
+    bool attrImportFromJX3BOX(std::string pzID);
+    bool attrImportFromBackup(const ChAttr &attr);
     // buff
-    void                          buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
-    void                          buffFlushLeftFrame(BuffItem *item);
-    event_tick_t                  buffTimeLeftTick(int buffID, int buffLevel);
-    BuffItem                     *buffGetWithCompareFlag(int buffID, int buffLevel, int flag);
-    BuffItem                     *buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag);
+    auto buffTimeLeftTick(int buffID, int buffLevel) -> event_tick_t;
+    auto buffGetWithCompareFlag(int buffID, int buffLevel, int flag) -> BuffItem *;
+    auto buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag) -> BuffItem *;
+    void buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
+    void buffFlushLeftFrame(BuffItem *item);
     // item
-    void                          itemAdd(ItemType type, int ID);
-    void                          itemAdd(int type, int ID);
-    void                          itemUse(ItemType type, int ID);
-    void                          itemUse(int type, int ID);
+    void itemAdd(ItemType type, int ID);
+    void itemAdd(int type, int ID);
+    void itemUse(ItemType type, int ID);
+    void itemUse(int type, int ID);
     // skill
-    bool                          cast(int skillID);
-    bool                          skillCast(Character *target, int skillID, int skillLevel);
-    event_tick_t                  skillCooldownLeftTick(int skillID);
-    int                           skillCountAvailable(int skillID);
-    void                          skillActive(int skillID);
-    void                          skillDeactive(int skillID);
-    void                          skillLearn(int skillID, int skillLevel);
+    auto skillCooldownLeftTick(int skillID) -> event_tick_t;
+    bool cast(int skillID);
+    bool skillCast(Character *target, int skillID, int skillLevel);
+    int  skillCountAvailable(int skillID);
+    void skillActive(int skillID);
+    void skillDeactive(int skillID);
+    void skillLearn(int skillID, int skillLevel);
     // skillrecipe
-    void                          skillrecipeAdd(int recipeID, int recipeLevel);
-    void                          skillrecipeRemove(int recipeID, int recipeLevel);
-    std::set<const SkillRecipe *> skillrecipeGet(int skillID, int skillrecipeType);
+    auto skillrecipeGet(int skillID, int skillrecipeType) -> std::set<const SkillRecipe *>;
+    void skillrecipeAdd(int recipeID, int recipeLevel);
+    void skillrecipeRemove(int recipeID, int recipeLevel);
     // skillevent
-    void                          skilleventAdd(int eventID);
-    void                          skilleventRemove(int eventID);
-    std::set<const SkillEvent *>  skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2);
+    auto skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2) -> std::set<const SkillEvent *>;
+    void skilleventAdd(int eventID);
+    void skilleventRemove(int eventID);
 
     // calc
     Damage calcDamage(
@@ -131,46 +133,46 @@ public:
     // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua_static.cpp ----------
 
     // character
-    int        characterGetTargetID();
-    Character *characterGetSelect();
+    auto characterGetSelect() -> Character *;
+    int  characterGetTargetID();
     // buff
-    bool       buffExist(int buffID, int buffLevel);
-    void       buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count = 1, int param6 = 0, int stacknum = 1);
-    void       buffAddOptional(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, std::optional<int> count, std::optional<int> param6, std::optional<int> stacknum);
-    void       buffDel(int buffID, int buffLevel);
-    void       buffDelGroup(int buffID, int buffLevel);
-    void       buffDelMultiGroupByID(int buffID);
-    void       buffSetLeftActiveCount(int buffIndex, int count);
-    void       buffSetNextActiveFrame(int buffIndex, int nextActiveFrame);
-    BuffItem  *buffGet(int buffID, int buffLevel);
-    BuffItem  *buffGetByOwner(int buffID, int buffLevel, int sourceID);
+    auto buffGet(int buffID, int buffLevel) -> BuffItem *;
+    auto buffGetByOwner(int buffID, int buffLevel, int sourceID) -> BuffItem *;
+    bool buffExist(int buffID, int buffLevel);
+    void buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count = 1, int param6 = 0, int stacknum = 1);
+    void buffAddOptional(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, std::optional<int> count, std::optional<int> param6, std::optional<int> stacknum);
+    void buffDel(int buffID, int buffLevel);
+    void buffDelGroup(int buffID, int buffLevel);
+    void buffDelMultiGroupByID(int buffID);
+    void buffSetLeftActiveCount(int buffIndex, int count);
+    void buffSetNextActiveFrame(int buffIndex, int nextActiveFrame);
     // cooldown
-    void       cooldownClearTime(int cooldownID);
-    void       cooldownModify(int cooldownID, int frame);
-    void       cooldownReset(int cooldownID);
+    void cooldownClearTime(int cooldownID);
+    void cooldownModify(int cooldownID, int frame);
+    void cooldownReset(int cooldownID);
     // skill
-    int        skillGetLevel(int skillID);
-    void       skillCast(int skillID, int skillLevel);
-    void       skillCast(int skillID, int skillLevel, int targetID);
-    void       skillCast(int skillID, int skillLevel, int type, int targetID);
-    void       skillCastXYZ(int skillID, int skillLevel, int x, int y, int z);
+    int  skillGetLevel(int skillID);
+    void skillCast(int skillID, int skillLevel);
+    void skillCast(int skillID, int skillLevel, int targetID);
+    void skillCast(int skillID, int skillLevel, int type, int targetID);
+    void skillCastXYZ(int skillID, int skillLevel, int x, int y, int z);
     // skillrecipe
-    bool       skillrecipeExist(int RecipeID, int RecipeLevel);
+    bool skillrecipeExist(int RecipeID, int RecipeLevel);
     // scene
-    ChScene   *sceneGet();
+    auto sceneGet() -> ChScene *;
     // timer
-    void       timerSet(int frame, std::string filename, int targetID);
-    void       timerSet(int frame, std::string filename, int type, int targetID);
+    void timerSet(int frame, std::string filename, int targetID);
+    void timerSet(int frame, std::string filename, int type, int targetID);
     // other
-    bool       otherIsFormationLeader();
-    bool       otherIsInParty();
-    int        otherGetKungfuMountID();
-    int        otherGetMapID();
-    void       otherClearAllNpcThreat();
-    void       otherCreatePublicShadow(int a, int roletype, int dwID, int nX, int nY, int nZ, bool b);
-    void       otherDestroyPublicShadow(int a, bool b);
-    void       otherDoAction(int a, int b);
-    void       otherPlayPublicShadowAnimation(int a, int b, bool c, bool d);
+    bool otherIsFormationLeader();
+    bool otherIsInParty();
+    int  otherGetKungfuMountID();
+    int  otherGetMapID();
+    void otherClearAllNpcThreat();
+    void otherCreatePublicShadow(int a, int roletype, int dwID, int nX, int nY, int nZ, bool b);
+    void otherDestroyPublicShadow(int a, bool b);
+    void otherDoAction(int a, int b);
+    void otherPlayPublicShadowAnimation(int a, int b, bool c, bool d);
 
     //  ---------- 被游戏 lua 调用的属性, 通常为匈牙利命名法 ----------
     int    dwID;                          // 角色 ID
