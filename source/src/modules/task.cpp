@@ -1,6 +1,7 @@
 #include "modules/task.h"
-#include "concrete/character/character.h"
-#include "concrete/effect/effect.h"
+#include "concrete/effect.h"
+#include "concrete/npc.h"
+#include "concrete/player.h"
 #include "frame/character/derived/player.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
@@ -92,7 +93,7 @@ Response modules::task::validate(const std::string &jsonstr) {
     }
     // 2. 分别检查字段值
     // 2.1 检查 player
-    if (!j["player"].is_string() || !concrete::refPlayerType.contains(j["player"].get<std::string>())) {
+    if (!j["player"].is_string() || !concrete::player::refType.contains(j["player"].get<std::string>())) {
         return Response{
             .status = ResponseStatus::invalid_player,
             .data   = "player invalid",
@@ -164,7 +165,7 @@ Response modules::task::validate(const std::string &jsonstr) {
         };
     }
     for (auto &it : j["effects"]) {
-        if (!it.is_string() || !concrete::refEffectType.contains(it.get<std::string>())) {
+        if (!it.is_string() || !concrete::effect::refType.contains(it.get<std::string>())) {
             return Response{
                 .status = ResponseStatus::invalid_effects,
                 .data   = std::format("effects invalid: {}", it.get<std::string>()),
@@ -214,15 +215,15 @@ Response modules::task::validate(const std::string &jsonstr) {
 
 static std::optional<Data> createTaskData(const nlohmann::json &j) {
     Data res{
+        .playerType    = concrete::player::refType.at(j["player"].get<std::string>()),
         .delayNetwork  = j["delayNetwork"].get<int>(),
         .delayKeyboard = j["delayKeyboard"].get<int>(),
         .fightTime     = j["fightTime"].get<int>(),
         .fightCount    = j["fightCount"].get<int>(),
     };
 
-    auto playerType = concrete::refPlayerType.at(j["player"].get<std::string>());
     // player. 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
-    auto player     = concrete::createPlayer(playerType, 0, 0);
+    auto player = concrete::create(res.playerType, 0, 0);
 
     auto attrType = refAttributeType.at(j["attribute"]["method"].get<std::string>());
     switch (attrType) {
@@ -244,9 +245,9 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
     }
     res.attrBackup = player->chAttr;
 
-    std::vector<std::shared_ptr<concrete::EffectBase>> effectList;
+    std::vector<std::shared_ptr<concrete::effect::Base>> effectList;
     for (auto &x : j["effects"].items()) {
-        auto effect = concrete::createEffect(concrete::refEffectType.at(x.value().get<std::string>()));
+        auto effect = concrete::create(concrete::effect::refType.at(x.value().get<std::string>()));
         if (effect == nullptr) [[unlikely]] {
             return std::nullopt; // 代码未出错的情况下, 不可能出现此情况, 因为 validate 已经验证过了
         }
@@ -353,8 +354,8 @@ void modules::task::stop(std::string id) {
 }
 
 static auto calc(const Data &arg) {
-    std::unique_ptr<frame::Player> player = concrete::createPlayer(concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
-    std::unique_ptr<frame::NPC>    npc    = concrete::createNPC(concrete::NPCType::NPC124);
+    std::unique_ptr<frame::Player> player = concrete::create(arg.playerType, arg.delayNetwork, arg.delayKeyboard);
+    std::unique_ptr<frame::NPC>    npc    = concrete::create(concrete::npc::Type::NPC124);
     player->targetSelect                  = npc.get();
     if (!arg.customString.empty()) {
         player->customLua = frame::CustomLua::get(arg.customString);

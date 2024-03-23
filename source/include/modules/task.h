@@ -1,7 +1,8 @@
 #ifndef MODULES_TASK_H_
 #define MODULES_TASK_H_
 
-#include "concrete/effect/base.h"
+#include "concrete/effect.h"
+#include "concrete/player.h"
 #include "frame/character/property/attribute.h"
 #include "frame/character/property/damage.h"
 #include "modules/pool.h"
@@ -33,14 +34,16 @@ namespace task {
 class Data {
 public:
     ~Data();
-    // json 数据区
+
+    concrete::player::Type playerType;
+
     int delayNetwork;
     int delayKeyboard;
     int fightTime;
     int fightCount;
 
-    frame::ChAttr                                      attrBackup;
-    std::vector<std::shared_ptr<concrete::EffectBase>> effects;
+    frame::ChAttr                                        attrBackup;
+    std::vector<std::shared_ptr<concrete::effect::Base>> effects;
 
     std::string customString;
 };
