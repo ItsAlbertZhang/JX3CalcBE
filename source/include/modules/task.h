@@ -25,7 +25,8 @@
 #pragma clang diagnostic pop // Clang
 #pragma warning(pop)         // MSVC
 
-namespace ns_modules {
+namespace jx3calc {
+namespace modules {
 
 namespace task {
 
@@ -38,8 +39,8 @@ public:
     int fightTime;
     int fightCount;
 
-    ns_frame::ChAttr                                      attrBackup;
-    std::vector<std::shared_ptr<ns_concrete::EffectBase>> effects;
+    frame::ChAttr                                      attrBackup;
+    std::vector<std::shared_ptr<concrete::EffectBase>> effects;
 
     std::string customString;
 };
@@ -48,15 +49,15 @@ class Task {
 public:
     Task(const std::string &id, const Data &data)
         : id(id), data(data){};
-    const std::string               id;
-    const Data                      data;
-    std::atomic<bool>               stop{false};
-    std::vector<std::future<int>>   futures;
-    std::mutex                      mutex; // 用于保护 results 和 details, 被 io 线程和 web 线程同时访问
-    std::vector<int>                results;
-    std::vector<ns_frame::ChDamage> details;
-    int                             cntCompleted = 0; // 已完成的任务数, 同时也是当前任务的 idx
-    int                             speedCurr    = 0; // 当前速度
+    const std::string             id;
+    const Data                    data;
+    std::atomic<bool>             stop{false};
+    std::vector<std::future<int>> futures;
+    std::mutex                    mutex; // 用于保护 results 和 details, 被 io 线程和 web 线程同时访问
+    std::vector<int>              results;
+    std::vector<frame::ChDamage>  details;
+    int                           cntCompleted = 0; // 已完成的任务数, 同时也是当前任务的 idx
+    int                           speedCurr    = 0; // 当前速度
 
     std::string queryDPS();
     std::string queryDamageList();
@@ -136,6 +137,7 @@ inline asio::io_context ioContext;
 
 } // namespace task
 
-} // namespace ns_modules
+} // namespace modules
+} // namespace jx3calc
 
 #endif // MODULES_TASK_H_

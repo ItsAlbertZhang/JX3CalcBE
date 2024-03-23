@@ -4,7 +4,8 @@
 #include "frame/common/event.h"
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class ChCooldown {
 public:
@@ -25,6 +26,7 @@ public:
     std::unordered_map<int, Item> cooldownList;
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_PROPERTY_COOLDOWN_H_

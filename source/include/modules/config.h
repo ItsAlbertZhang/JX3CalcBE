@@ -1,10 +1,11 @@
-#ifndef UTILS_CONFIG_H_
-#define UTILS_CONFIG_H_
+#ifndef MODULES_CONFIG_H_
+#define MODULES_CONFIG_H_
 
 #include <filesystem>
 #include <nlohmann/json.hpp>
 
-namespace ns_utils {
+namespace jx3calc {
+namespace modules {
 namespace config {
 
 inline std::filesystem::path pExeDir;               // 可执行文件所在目录的路径
@@ -29,6 +30,7 @@ bool init(const std::string &jsonstr);
 std::string status();
 
 }; // namespace config
-} // namespace ns_utils
+} // namespace modules
+} // namespace jx3calc
 
-#endif // UTILS_CONFIG_H_
+#endif // MODULES_CONFIG_H_

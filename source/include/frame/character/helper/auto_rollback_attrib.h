@@ -4,7 +4,8 @@
 #include "frame/character/property/buff.h"
 #include "frame/global/buff.h"
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class Character;
 
@@ -33,6 +34,7 @@ private:
     void handle(const Buff::Attrib &attrib, bool isRollback);
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIB_H_

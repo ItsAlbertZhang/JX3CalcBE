@@ -9,7 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief 技能类
@@ -288,6 +289,7 @@ private:
     static void add(int skillID, int skillLevel);
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_GLOBAL_SKILL_H_

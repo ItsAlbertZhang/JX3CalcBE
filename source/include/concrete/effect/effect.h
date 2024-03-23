@@ -6,7 +6,8 @@
 #include <string>
 #include <unordered_map>
 
-namespace ns_concrete {
+namespace jx3calc {
+namespace concrete {
 
 enum class EffectType {
     大附魔·腰,
@@ -35,6 +36,7 @@ inline const std::unordered_map<std::string, EffectType> refEffectType{
 
 std::shared_ptr<EffectBase> createEffect(EffectType type);
 
-} // namespace ns_concrete
+} // namespace concrete
+} // namespace jx3calc
 
 #endif // CONCRETE_EFFECTS_ALL_H_

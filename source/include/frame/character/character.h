@@ -19,7 +19,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class AutoRollbackAttrib;
 class AutoRollbackAttribute;
@@ -192,6 +193,7 @@ private:
     static inline thread_local std::unordered_map<Character *, int> characterMap;  // 角色表
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_H_

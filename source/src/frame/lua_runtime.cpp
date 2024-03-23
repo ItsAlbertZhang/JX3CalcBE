@@ -5,7 +5,8 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 using namespace std;
 
 sol::state *LuaFunc::getLua() {

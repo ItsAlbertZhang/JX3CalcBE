@@ -12,7 +12,8 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 void Character::skillCast(int skillID, int skillLevel, int type, int targetID) {
     UNREFERENCED_PARAMETER(type);

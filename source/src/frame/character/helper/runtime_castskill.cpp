@@ -1,7 +1,8 @@
 #include "frame/character/helper/runtime_castskill.h"
 #include "frame/character/character.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 RuntimeCastSkill::~RuntimeCastSkill() {
     // 执行技能队列

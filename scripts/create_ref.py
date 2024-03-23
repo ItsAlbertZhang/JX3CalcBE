@@ -136,7 +136,8 @@ for key, value in map_to_create.items():
 
 """
     output += """\
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 namespace ref {
 
 """
@@ -168,7 +169,8 @@ namespace ref {
 
     output += """\
 } // namespace ref
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 """
     output += f"""\

@@ -1,6 +1,7 @@
 #include "concrete/character/player/mj_fysj.h"
 
-using namespace ns_concrete;
+using namespace jx3calc;
+using namespace concrete;
 
 MjFysj::MjFysj(int delayNetwork, int delayKeyboard)
     : Player(delayNetwork, delayKeyboard) {
@@ -145,7 +146,7 @@ void MjFysj::macroDefault1() {
         cast(3969); // [buff:齐光3 & nobuff:悬象(包括日和月) & moon>99] 光明相
     cast(34347);    // 悬象著明
     if (buffExist(25716, 0)) {
-        itemUse(ns_frame::ItemType::Trinket, 38789); // [buff:悬象(包括日和月)] 吹香雪(特效腰坠)
+        itemUse(frame::ItemType::Trinket, 38789); // [buff:悬象(包括日和月)] 吹香雪(特效腰坠)
     }
     cast(3966); // 生死劫
     // 如果生死劫没好, 等生死劫

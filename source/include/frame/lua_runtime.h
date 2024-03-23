@@ -7,7 +7,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief LuaFunc 类
@@ -68,6 +69,7 @@ private:
     static void               add(const std::string &filename);
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_LUA_RUNTIME_H_

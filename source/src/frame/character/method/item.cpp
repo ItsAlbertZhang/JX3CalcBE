@@ -3,7 +3,8 @@
 #include "frame/global/cooldown.h"
 #include <stdexcept>
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 void Character::itemAdd(ItemType type, int ID) {
     if (type == ItemType::COUNT) {

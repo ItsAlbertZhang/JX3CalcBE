@@ -4,7 +4,8 @@
 #include "frame/common/event.h"
 #include <vector>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 enum class DamageType {
     Physics,
@@ -35,6 +36,7 @@ public:
 // };
 using ChDamage = std::vector<Damage>;
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_PROPERTY_DAMAGE_H_

@@ -3,7 +3,8 @@
 
 #include <mutex>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief 全局系数
@@ -61,6 +62,7 @@ private:
     static inline std::mutex   mutex; // 互斥锁
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_GLOBAL_GLOBALPARAM_H_

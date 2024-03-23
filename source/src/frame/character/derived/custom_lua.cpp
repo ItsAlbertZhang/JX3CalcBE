@@ -4,7 +4,8 @@
 #include <unordered_map>
 #include <vector>
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 std::shared_ptr<CustomLua> CustomLua::get(const std::string &script) {
     if (!mapCustomLua.contains(script)) {

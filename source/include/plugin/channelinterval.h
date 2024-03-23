@@ -5,7 +5,8 @@
 
 #include <unordered_map>
 
-namespace ns_plugin {
+namespace jx3calc {
+namespace plugin {
 namespace channelinterval {
 
 class Item {
@@ -24,10 +25,11 @@ void record(int id, int level, int base, int rand, double fChannelInterval, bool
 void save();
 
 } // namespace channelinterval
-} // namespace ns_plugin
+} // namespace plugin
+} // namespace jx3calc
 
 #define CONSTEXPR_CHANNELINTERVAL_RECORD(skillID, skillLevel, base, rand, fChannelInterval, isBuff) \
-    ns_plugin::channelinterval::record(skillID, skillLevel, base, rand, fChannelInterval, isBuff);
+    plugin::channelinterval::record(skillID, skillLevel, base, rand, fChannelInterval, isBuff);
 
 #else // D_CONSTEXPR_CHANNELINTERVAL
 

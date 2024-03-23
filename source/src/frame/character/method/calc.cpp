@@ -5,7 +5,8 @@
 #include "plugin/channelinterval.h"
 #include "plugin/log.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 std::tuple<int, int> Character::calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel) {
     // TODO: 目标御劲降低会心率和会心效果.

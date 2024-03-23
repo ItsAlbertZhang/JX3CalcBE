@@ -2,9 +2,10 @@
 #include "frame/character/character.h"
 #include "frame/event.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
-static event_tick_t calcDuration(Character *self, const ns_frame::Cooldown &cooldown) {
+static event_tick_t calcDuration(Character *self, const frame::Cooldown &cooldown) {
     int durationFrame = cooldown.DurationFrame * 1024 / (1024 + self->chAttr.getHaste());
     durationFrame     = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
     durationFrame     = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
@@ -13,11 +14,11 @@ static event_tick_t calcDuration(Character *self, const ns_frame::Cooldown &cool
 
 static void callbackModifyCoolDown(void *selfPtr, void *cooldownID) {
     // 利用 void * 传递一个 int 值, 避免内存的申请与回收.
-    Character                  *self     = (Character *)selfPtr;
-    int                         ID       = static_cast<int>(reinterpret_cast<intptr_t>(cooldownID));
+    Character               *self     = (Character *)selfPtr;
+    int                      ID       = static_cast<int>(reinterpret_cast<intptr_t>(cooldownID));
     // self->chCooldown.cooldownList[ID].isValid = false;
-    const ns_frame::Cooldown   &cooldown = CooldownManager::get(ID); // Global
-    ns_frame::ChCooldown::Item &item     = self->chCooldown.cooldownList[ID];
+    const frame::Cooldown   &cooldown = CooldownManager::get(ID); // Global
+    frame::ChCooldown::Item &item     = self->chCooldown.cooldownList[ID];
     item.countAvailable += 1;
     if (item.countAvailable < cooldown.MaxCount) {
         // 重新计算 duration, 实现受加速影响的充能技能的动态 duration
@@ -30,12 +31,12 @@ static void callbackModifyCoolDown(void *selfPtr, void *cooldownID) {
     }
 }
 
-static ns_frame::ChCooldown::Item *getOrCreate(Character *self, const ns_frame::Cooldown &cooldown) {
+static frame::ChCooldown::Item *getOrCreate(Character *self, const frame::Cooldown &cooldown) {
     if (self->chCooldown.cooldownList.contains(cooldown.ID)) {
         return &self->chCooldown.cooldownList[cooldown.ID];
     } else {
-        ns_frame::ChCooldown::Item *res = &self->chCooldown.cooldownList[cooldown.ID];
-        res->countAvailable             = cooldown.MaxCount;
+        frame::ChCooldown::Item *res = &self->chCooldown.cooldownList[cooldown.ID];
+        res->countAvailable          = cooldown.MaxCount;
         return res;
     }
 }
@@ -44,8 +45,8 @@ void Character::cooldownClearTime(int cooldownID) {
     if (this->chCooldown.cooldownList.find(cooldownID) == this->chCooldown.cooldownList.end()) {
         return;
     }
-    ChCooldown::Item         &item     = this->chCooldown.cooldownList.at(cooldownID);
-    const ns_frame::Cooldown &cooldown = CooldownManager::get(cooldownID); // Global
+    ChCooldown::Item      &item     = this->chCooldown.cooldownList.at(cooldownID);
+    const frame::Cooldown &cooldown = CooldownManager::get(cooldownID); // Global
     if (item.countAvailable < cooldown.MaxCount) {
         Event::cancel(item.tickOver, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
         item.countAvailable = cooldown.MaxCount;
@@ -57,9 +58,9 @@ void Character::cooldownModify(int cooldownID, int frame) {
     if (0 == frame) {
         return;
     }
-    const ns_frame::Cooldown   &cooldown = CooldownManager::get(cooldownID); // Global
-    ns_frame::ChCooldown::Item *item     = getOrCreate(this, cooldown);
-    event_tick_t                delay    = 0;
+    const frame::Cooldown   &cooldown = CooldownManager::get(cooldownID); // Global
+    frame::ChCooldown::Item *item     = getOrCreate(this, cooldown);
+    event_tick_t             delay    = 0;
     if (item->countAvailable < cooldown.MaxCount) {
         // 若该 CD 正在冷却, 则取消 Event
         delay = Event::cancel(item->tickOver, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
@@ -88,8 +89,8 @@ void Character::cooldownModify(int cooldownID, int frame) {
 }
 
 void Character::cooldownReset(int cooldownID) {
-    const ns_frame::Cooldown   &cooldown = CooldownManager::get(cooldownID); // Global
-    ns_frame::ChCooldown::Item *item     = getOrCreate(this, cooldown);
+    const frame::Cooldown   &cooldown = CooldownManager::get(cooldownID); // Global
+    frame::ChCooldown::Item *item     = getOrCreate(this, cooldown);
     if (item->countAvailable < cooldown.MaxCount) {
         // 若该 CD 正在冷却, 则取消 Event
         Event::cancel(item->tickOver, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));

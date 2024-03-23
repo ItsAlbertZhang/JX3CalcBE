@@ -3,13 +3,15 @@
 
 #include "frame/character/derived/npc.h"
 
-namespace ns_concrete {
+namespace jx3calc {
+namespace concrete {
 
-class NPC124 : public ns_frame::NPC {
+class NPC124 : public frame::NPC {
 public:
     NPC124();
 };
 
-} // namespace ns_concrete
+} // namespace concrete
+} // namespace jx3calc
 
 #endif // CONCRETE_CHARACTER_NPC_124_H_

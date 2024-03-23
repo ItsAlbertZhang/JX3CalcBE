@@ -8,7 +8,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief Buff 类
@@ -96,6 +97,7 @@ private:
     static void add(int buffID, int buffLevel);
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_GLOBAL_BUFF_H_

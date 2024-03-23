@@ -3,7 +3,8 @@
 #include "frame/lua_runtime.h"
 #include "plugin/log.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 union Data {
     struct {

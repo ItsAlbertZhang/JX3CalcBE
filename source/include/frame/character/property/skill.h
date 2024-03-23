@@ -4,7 +4,8 @@
 #include <string>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class ChSkill {
 public:
@@ -22,6 +23,7 @@ public:
     std::unordered_map<std::string, int>  skillRef;     // 技能反查表, 技能名 - 技能 ID.
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_PROPERTY_SKILL_H_

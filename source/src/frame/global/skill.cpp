@@ -5,7 +5,8 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 const Skill &SkillManager::get(int skillID, int skillLevel) {
     // 若技能 ID 不存在, 则添加

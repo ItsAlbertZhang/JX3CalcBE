@@ -6,7 +6,8 @@
 #include <string>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief SkillRecipe 类
@@ -76,6 +77,7 @@ private:
     static void addScriptSkill(const SkillRecipe *skillrecipe, const Skill *skill);
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_GLOBAL_SKILLRECIPE_H_

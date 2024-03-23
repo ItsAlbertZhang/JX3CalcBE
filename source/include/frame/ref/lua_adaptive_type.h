@@ -3,7 +3,8 @@
 
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 namespace ref {
 
 enum class enumLuaAdaptiveType {
@@ -23,6 +24,7 @@ inline const std::unordered_map<enumLuaAdaptiveKungfuID, enumLuaAdaptiveType> ma
     {enumLuaAdaptiveKungfuID::mj_fysj, enumLuaAdaptiveType::lunar}
 };
 } // namespace ref
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_REF_LUA_ADAPTIVE_TYPE_H_

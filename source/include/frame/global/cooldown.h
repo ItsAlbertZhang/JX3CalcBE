@@ -5,7 +5,8 @@
 #include <string>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief Cooldown 类
@@ -57,6 +58,7 @@ private:
     static void add(int ID);
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_GLOBAL_COOLDOWN_H_

@@ -5,10 +5,12 @@
 #include <array>
 #include <set>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 using ChItem = std::array<std::set<int>, static_cast<size_t>(ItemType::COUNT)>;
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_PROPERTY_ITEM_H_

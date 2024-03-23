@@ -10,7 +10,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ns_modules {
+namespace jx3calc {
+namespace modules {
 
 #if defined(D_CONSTEXPR_LOG) || defined(D_CONSTEXPR_CHANNELINTERVAL)
 inline constexpr unsigned int corecnt = 1;
@@ -211,6 +212,7 @@ private:
     bool                     stop;
 };
 
-} // namespace ns_modules
+} // namespace modules
+} // namespace jx3calc
 
 #endif // MODULES_POOL_H_

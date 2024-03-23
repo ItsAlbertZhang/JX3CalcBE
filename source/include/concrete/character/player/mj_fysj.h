@@ -3,9 +3,10 @@
 
 #include "frame/character/derived/player.h"
 
-namespace ns_concrete {
+namespace jx3calc {
+namespace concrete {
 
-class MjFysj : public ns_frame::Player {
+class MjFysj : public frame::Player {
 public:
     MjFysj(int delayNetwork, int delayKeyboard);
     virtual void prepare() override;
@@ -20,6 +21,7 @@ public:
     void macroDefault3();
 };
 
-} // namespace ns_concrete
+} // namespace concrete
+} // namespace jx3calc
 
 #endif // CONCRETE_CHARACTER_PLAYER_MJFYSJ_H_

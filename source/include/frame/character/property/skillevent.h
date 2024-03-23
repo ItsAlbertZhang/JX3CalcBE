@@ -5,7 +5,8 @@
 #include <set>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class SkillEvent;
 
@@ -26,6 +27,7 @@ public:
     ItemType data[static_cast<int>(ref::enumSkilleventEventtype::COUNT)];
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_PROPERTY_SKILLEVENT_H_

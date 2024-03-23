@@ -1,7 +1,8 @@
 #include "frame/global/skillevent.h"
 #include "frame/character/character.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 void Character::skilleventAdd(int eventID) {
     const SkillEvent &skillevent = SkillEventManager::get(eventID);

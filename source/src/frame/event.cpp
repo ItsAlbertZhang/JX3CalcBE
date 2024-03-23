@@ -1,6 +1,7 @@
 #include "frame/event.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 bool Event::run() {
     if (eventList.empty()) {

@@ -3,11 +3,13 @@
 
 #include "frame/character/character.h"
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class NPC : public Character {
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_DERIVED_NPC_H_

@@ -4,7 +4,8 @@
 #include "frame/character/property/damage.h"
 #include "frame/global/skill.h"
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class Character;
 class RuntimeCastSkill;
@@ -40,6 +41,7 @@ private:
     void handle(bool isRollback);
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_

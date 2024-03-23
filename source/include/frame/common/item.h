@@ -1,7 +1,8 @@
 #ifndef FRAME_COMMON_ITEM_H_
 #define FRAME_COMMON_ITEM_H_
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 enum class ItemType {
     Armor,
@@ -10,6 +11,7 @@ enum class ItemType {
     COUNT,
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_COMMON_ITEM_H_

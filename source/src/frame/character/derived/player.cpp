@@ -5,7 +5,8 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 Player::Player(int delayNetwork, int delayKeyboard)
     : Character(), delayBase(delayNetwork), delayRand(delayKeyboard) {
@@ -30,7 +31,7 @@ void Player::macroRun() {
 }
 
 // 计算网络延迟和按键延迟
-inline static ns_frame::event_tick_t getDelayAdd(Player *player) {
+inline static frame::event_tick_t getDelayAdd(Player *player) {
     std::random_device              rd;
     std::mt19937                    gen(rd());
     std::uniform_int_distribution<> dis(0, player->delayRand);
@@ -38,17 +39,17 @@ inline static ns_frame::event_tick_t getDelayAdd(Player *player) {
 }
 
 // 计算下一次技能延迟
-inline static ns_frame::event_tick_t getDelay(Player *player) {
-    ns_frame::event_tick_t delay = 0;
+inline static frame::event_tick_t getDelay(Player *player) {
+    frame::event_tick_t delay = 0;
     if (player->delayCustom > 0) {
         // 优先使用自定义延迟
         delay               = player->delayCustom;
         player->delayCustom = 0;
     } else if (player->publicCooldownID > 0) {
         // 其次使用 GCD
-        ns_frame::event_tick_t over = player->chCooldown.cooldownList.at(player->publicCooldownID).tickOver;
-        ns_frame::event_tick_t now  = ns_frame::Event::now();
-        delay                       = over > now ? over - now : 0; // 当前无技能可放, 将延迟设为 0.
+        frame::event_tick_t over = player->chCooldown.cooldownList.at(player->publicCooldownID).tickOver;
+        frame::event_tick_t now  = frame::Event::now();
+        delay                    = over > now ? over - now : 0; // 当前无技能可放, 将延迟设为 0.
     }
     // 加上网络延迟和按键延迟
     delay += getDelayAdd(player);

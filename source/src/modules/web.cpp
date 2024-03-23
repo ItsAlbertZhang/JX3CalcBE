@@ -1,12 +1,13 @@
 #include "modules/web.h"
+#include "modules/config.h"
 #include "modules/task.h"
-#include "utils/config.h"
 #include <crow/mustache.h>
 #include <string>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_modules;
+using namespace jx3calc;
+using namespace modules;
 
 web::Web::~Web() {
     app.stop();
@@ -18,7 +19,7 @@ web::WebApp::WebApp() {
 
     CROW_ROUTE(app, "/status")
         .methods("GET"_method)([]() {
-            return crow::response{200, "application/json", ns_utils::config::status()};
+            return crow::response{200, "application/json", modules::config::status()};
         });
 
     CROW_ROUTE(app, "/create")
@@ -61,7 +62,7 @@ web::WebApp::~WebApp() {
 web::WebManager::WebManager() {
     CROW_ROUTE(app, "/config")
         .methods("POST"_method)([](const crow::request &req) {
-            bool ret = ns_utils::config::init(req.body);
+            bool ret = modules::config::init(req.body);
             return crow::response{ret ? 200 : 400};
         });
 

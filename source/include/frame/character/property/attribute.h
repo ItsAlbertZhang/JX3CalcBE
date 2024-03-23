@@ -3,7 +3,8 @@
 
 #include <cstring>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 /**
  * @brief ChAttr 类
  * @note 作为 Character 类的一个属性, 其作用是封装, 避免 Character 类过于臃肿.
@@ -235,6 +236,7 @@ public:
     int atMaxSunEnergy  = 0; // 最大日灵
     int atMaxMoonEnergy = 0; // 最大月魂
 };
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_PROPERTY_ATTRIBUTE_H_

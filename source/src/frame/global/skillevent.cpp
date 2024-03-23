@@ -1,7 +1,8 @@
 #include "frame/global/skillevent.h"
 #include "gdi.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 const SkillEvent &SkillEventManager::get(int ID) {
     // 若 SkillEvent ID 不存在, 则添加

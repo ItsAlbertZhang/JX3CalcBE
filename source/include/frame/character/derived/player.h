@@ -4,7 +4,8 @@
 #include "frame/character/character.h"
 #include <sol/sol.hpp>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class CustomLua {
 public:
@@ -41,6 +42,7 @@ public:
     void macroRun();
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_DERIVED_PLAYER_H_

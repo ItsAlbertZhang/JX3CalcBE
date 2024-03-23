@@ -1,6 +1,7 @@
 #include "concrete/character/npc/npc124.h"
 
-using namespace ns_concrete;
+using namespace jx3calc;
+using namespace concrete;
 
 NPC124::NPC124() {
     nLevel                     = 124;

@@ -2,7 +2,8 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 int Character::otherGetMapID() {
     return 0;

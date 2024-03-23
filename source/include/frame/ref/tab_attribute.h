@@ -4,7 +4,8 @@
 #include <string>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 namespace ref {
 
 enum class enumTabAttribute {
@@ -106,6 +107,7 @@ inline const std::unordered_map<std::string, enumTabAttribute> mapTabAttribute =
 };
 
 } // namespace ref
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_REF_TAB_ATTRIBUTE_H_

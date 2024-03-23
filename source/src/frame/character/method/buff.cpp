@@ -7,7 +7,8 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 static void staticDelBuff(Character *self, BuffItem *it);
 

@@ -4,7 +4,8 @@
 #include <string>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 namespace ref {
 
 enum class enumSkilleventEventtype {
@@ -62,5 +63,6 @@ inline const std::unordered_map<std::string, enumSkilleventCastertarget> mapSkil
 };
 
 } // namespace ref
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 #endif // FRAME_REF_GLOBAL_SKILLEVENT_H_

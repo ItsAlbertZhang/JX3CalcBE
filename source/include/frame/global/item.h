@@ -6,7 +6,9 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
-namespace ns_frame {
+
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief Item 类
@@ -58,6 +60,7 @@ private:
     static void add(ItemType type, int ID);
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_GLOBAL_ITEM_H_

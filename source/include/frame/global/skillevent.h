@@ -7,7 +7,8 @@
 #include <string>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief SkillEvent 类
@@ -65,6 +66,7 @@ private:
     static void add(int ID);
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_GLOBAL_SKILLEVENT_H_

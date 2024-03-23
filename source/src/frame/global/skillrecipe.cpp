@@ -4,7 +4,8 @@
 #include "plugin/log.h"
 #include <tuple>
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 const SkillRecipe &SkillRecipeManager::getRecipe(int RecipeID, int RecipeLevel) {
     // 若不存在, 则添加

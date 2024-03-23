@@ -3,7 +3,8 @@
 #include <cstdlib>
 #include <stdexcept>
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 const Item &ItemManager::get(ItemType type, int ID) {
     // 若 Item ID 不存在, 则添加

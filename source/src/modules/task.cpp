@@ -5,9 +5,9 @@
 #include "frame/event.h"
 #include "frame/global/buff.h"
 #include "frame/global/skill.h"
+#include "modules/config.h"
 #include "plugin/channelinterval.h"
 #include "plugin/log.h"
-#include "utils/config.h"
 #include <asio/co_spawn.hpp>
 #include <chrono>
 #include <format>
@@ -17,12 +17,13 @@
 #include <unordered_map>
 #include <vector>
 
-using namespace ns_modules::task;
+using namespace jx3calc;
+using namespace modules::task;
 using ull = unsigned long long;
 
 constexpr int CNT_DETAIL_TASKS = 5;
 
-void ns_modules::task::server::asyncrun() {
+void modules::task::server::asyncrun() {
     asio::co_spawn(
         ioContext,
         [&]() -> asio::awaitable<void> {
@@ -39,7 +40,7 @@ void ns_modules::task::server::asyncrun() {
     });
 }
 
-void ns_modules::task::server::stop() {
+void modules::task::server::stop() {
     for (auto &task : taskMap)
         task::stop(task.first);
     ioContext.stop();
@@ -47,17 +48,17 @@ void ns_modules::task::server::stop() {
     pool.join();
 }
 
-ns_modules::task::Data::~Data() {
+modules::task::Data::~Data() {
     if (!customString.empty()) {
-        ns_frame::CustomLua::cancel(customString);
+        frame::CustomLua::cancel(customString);
     }
 }
 
 static int         calcBrief(const Data &arg);
-static int         calcDetail(const Data &data, ns_frame::ChDamage *detail);
+static int         calcDetail(const Data &data, frame::ChDamage *detail);
 static std::string genID(int length = 6);
 
-Response ns_modules::task::validate(const std::string &jsonstr) {
+Response modules::task::validate(const std::string &jsonstr) {
     using json = nlohmann::json;
     // 解析 json
     json j;
@@ -83,7 +84,7 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         }
     }
     // 1.2 检查不允许字段
-    if (j.contains("custom") && !ns_utils::config::taskdata::allowCustom) {
+    if (j.contains("custom") && !modules::config::taskdata::allowCustom) {
         return Response{
             .status = ResponseStatus::invalid_field,
             .data   = "custom not allowed",
@@ -91,7 +92,7 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
     }
     // 2. 分别检查字段值
     // 2.1 检查 player
-    if (!j["player"].is_string() || !ns_concrete::refPlayerType.contains(j["player"].get<std::string>())) {
+    if (!j["player"].is_string() || !concrete::refPlayerType.contains(j["player"].get<std::string>())) {
         return Response{
             .status = ResponseStatus::invalid_player,
             .data   = "player invalid",
@@ -99,28 +100,28 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
     }
     // 2.2 检查 delayNetwork, delayKeyboard, fightTime, fightCount
     if (!j["delayNetwork"].is_number_integer() || j["delayNetwork"].get<int>() < 0 ||
-        j["delayNetwork"].get<int>() > ns_utils::config::taskdata::maxDelayNetwork) {
+        j["delayNetwork"].get<int>() > modules::config::taskdata::maxDelayNetwork) {
         return Response{
             .status = ResponseStatus::invalid_interger,
             .data   = "delayNetwork invalid",
         };
     }
     if (!j["delayKeyboard"].is_number_integer() || j["delayKeyboard"].get<int>() < 0 ||
-        j["delayKeyboard"].get<int>() > ns_utils::config::taskdata::maxDelayKeyboard) {
+        j["delayKeyboard"].get<int>() > modules::config::taskdata::maxDelayKeyboard) {
         return Response{
             .status = ResponseStatus::invalid_interger,
             .data   = "delayKeyboard invalid",
         };
     }
     if (!j["fightTime"].is_number_integer() || j["fightTime"].get<int>() < 0 ||
-        j["fightTime"].get<int>() > ns_utils::config::taskdata::maxFightTime) {
+        j["fightTime"].get<int>() > modules::config::taskdata::maxFightTime) {
         return Response{
             .status = ResponseStatus::invalid_interger,
             .data   = "fightTime invalid",
         };
     }
     if (!j["fightCount"].is_number_integer() || j["fightCount"].get<int>() < 0 ||
-        j["fightCount"].get<int>() > ns_utils::config::taskdata::maxFightCount) {
+        j["fightCount"].get<int>() > modules::config::taskdata::maxFightCount) {
         return Response{
             .status = ResponseStatus::invalid_interger,
             .data   = "fightCount invalid",
@@ -163,7 +164,7 @@ Response ns_modules::task::validate(const std::string &jsonstr) {
         };
     }
     for (auto &it : j["effects"]) {
-        if (!it.is_string() || !ns_concrete::refEffectType.contains(it.get<std::string>())) {
+        if (!it.is_string() || !concrete::refEffectType.contains(it.get<std::string>())) {
             return Response{
                 .status = ResponseStatus::invalid_effects,
                 .data   = std::format("effects invalid: {}", it.get<std::string>()),
@@ -219,9 +220,9 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
         .fightCount    = j["fightCount"].get<int>(),
     };
 
-    auto playerType = ns_concrete::refPlayerType.at(j["player"].get<std::string>());
+    auto playerType = concrete::refPlayerType.at(j["player"].get<std::string>());
     // player. 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
-    auto player     = ns_concrete::createPlayer(playerType, 0, 0);
+    auto player     = concrete::createPlayer(playerType, 0, 0);
 
     auto attrType = refAttributeType.at(j["attribute"]["method"].get<std::string>());
     switch (attrType) {
@@ -243,9 +244,9 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
     }
     res.attrBackup = player->chAttr;
 
-    std::vector<std::shared_ptr<ns_concrete::EffectBase>> effectList;
+    std::vector<std::shared_ptr<concrete::EffectBase>> effectList;
     for (auto &x : j["effects"].items()) {
-        auto effect = ns_concrete::createEffect(ns_concrete::refEffectType.at(x.value().get<std::string>()));
+        auto effect = concrete::createEffect(concrete::refEffectType.at(x.value().get<std::string>()));
         if (effect == nullptr) [[unlikely]] {
             return std::nullopt; // 代码未出错的情况下, 不可能出现此情况, 因为 validate 已经验证过了
         }
@@ -263,7 +264,7 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
             for (auto &it : j["custom"]["data"]) {
                 v.emplace_back(it.get<std::string>());
             }
-            res.customString = ns_frame::CustomLua::parse(v);
+            res.customString = frame::CustomLua::parse(v);
             break;
         }
     }
@@ -272,12 +273,12 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
 }
 
 static void asyncStop(Task &task) {
-    using namespace ns_modules::task;
+    using namespace modules::task;
     server::taskMap.erase(task.id);
 }
 
 static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
-    using namespace ns_modules::task;
+    using namespace modules::task;
 
     // 在线程池中创建任务
     const int cntCalcDetail = task.data.fightCount > CNT_DETAIL_TASKS ? CNT_DETAIL_TASKS : task.data.fightCount;
@@ -315,9 +316,9 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
     asyncStop(task);
 }
 
-Response ns_modules::task::create(const std::string &jsonstr) {
+Response modules::task::create(const std::string &jsonstr) {
     // 验证数据可用性
-    if (!ns_utils::config::dataAvailable) [[unlikely]]
+    if (!modules::config::dataAvailable) [[unlikely]]
         return Response{
             .status = ResponseStatus::config_error,
             .data   = "Data not available. Please config.",
@@ -345,27 +346,27 @@ Response ns_modules::task::create(const std::string &jsonstr) {
     };
 }
 
-void ns_modules::task::stop(std::string id) {
+void modules::task::stop(std::string id) {
     if (!server::taskMap.contains(id)) [[unlikely]]
         return;
     server::taskMap.at(id)->stop.store(true); // 真正的停止操作在 asyncRun 中
 }
 
 static auto calc(const Data &arg) {
-    std::unique_ptr<ns_frame::Player> player = ns_concrete::createPlayer(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
-    std::unique_ptr<ns_frame::NPC>    npc    = ns_concrete::createNPC(ns_concrete::NPCType::NPC124);
-    player->targetSelect                     = npc.get();
+    std::unique_ptr<frame::Player> player = concrete::createPlayer(concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
+    std::unique_ptr<frame::NPC>    npc    = concrete::createNPC(concrete::NPCType::NPC124);
+    player->targetSelect                  = npc.get();
     if (!arg.customString.empty()) {
-        player->customLua = ns_frame::CustomLua::get(arg.customString);
+        player->customLua = frame::CustomLua::get(arg.customString);
     }
     player->attrImportFromBackup(arg.attrBackup);
     for (auto &it : arg.effects) {
         it->active(player.get());
     }
-    ns_frame::Event::clear();
+    frame::Event::clear();
     player->macroRun();
-    while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * arg.fightTime)) {
-        bool ret = ns_frame::Event::run();
+    while (frame::Event::now() < static_cast<frame::event_tick_t>(1024 * arg.fightTime)) {
+        bool ret = frame::Event::run();
         if (!ret)
             break;
     }
@@ -384,7 +385,7 @@ static int calcBrief(const Data &data) {
     return static_cast<int>(sumDamage / data.fightTime);
 }
 
-static int calcDetail(const Data &data, ns_frame::ChDamage *detail) {
+static int calcDetail(const Data &data, frame::ChDamage *detail) {
     auto player = calc(data);
 
     ull sumDamage = 0;
@@ -394,11 +395,11 @@ static int calcDetail(const Data &data, ns_frame::ChDamage *detail) {
 
     *detail = std::move(player->chDamage);
 #ifdef D_CONSTEXPR_LOG
-    ns_plugin::log::info.save();
-    ns_plugin::log::error.save();
+    plugin::log::info.save();
+    plugin::log::error.save();
 #endif
 #ifdef D_CONSTEXPR_CHANNELINTERVAL
-    ns_plugin::channelinterval::save();
+    plugin::channelinterval::save();
 #endif
 
     return static_cast<int>(sumDamage / data.fightTime);
@@ -412,7 +413,7 @@ static std::string genID(int length) {
     std::uniform_int_distribution<> distribution(0, static_cast<int>(CHARACTERS.size() - 1));
 
     std::string random_string;
-    while (random_string.empty() || ns_modules::task::server::taskMap.contains(random_string)) {
+    while (random_string.empty() || modules::task::server::taskMap.contains(random_string)) {
         for (size_t i = 0; i < length; i++) {
             random_string += CHARACTERS[distribution(generator)];
         }
@@ -498,9 +499,9 @@ std::string Task::queryDamageList() {
         for (auto &everyDamage : everyFight) {
             std::string name;
             if (everyDamage.isBuff) {
-                name = ns_frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
+                name = frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
             } else {
-                name = ns_frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
+                name = frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
             }
             json objDamage;
             objDamage["time"]           = everyDamage.tick / 1024.0;
@@ -549,9 +550,9 @@ std::string Task::queryDamageAnalysis() {
             if (!damageAnalysisMap.contains(everyDamage.id) || !damageAnalysisMap.at(everyDamage.id).contains(everyDamage.level)) {
                 std::string name;
                 if (everyDamage.isBuff) {
-                    name = ns_frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
+                    name = frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
                 } else {
-                    name = ns_frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
+                    name = frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
                 }
                 damageAnalysisMap[everyDamage.id][everyDamage.level] = DamageAnalysisItem{
                     .id        = everyDamage.id,

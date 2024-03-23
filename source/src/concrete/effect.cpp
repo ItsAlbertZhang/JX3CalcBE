@@ -1,9 +1,10 @@
 #include "concrete/effect/effect.h"
 #include "concrete/effect/derived.h"
 
-using namespace ns_concrete;
+using namespace jx3calc;
+using namespace concrete;
 
-std::shared_ptr<EffectBase> ns_concrete::createEffect(EffectType type) {
+std::shared_ptr<EffectBase> concrete::createEffect(EffectType type) {
     switch (type) {
     case EffectType::大附魔·腰:
         return std::make_shared<Effect大附魔·腰>();

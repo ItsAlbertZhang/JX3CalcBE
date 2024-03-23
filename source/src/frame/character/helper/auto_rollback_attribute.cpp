@@ -8,8 +8,9 @@
 #include "plugin/log.h"
 #include <random>
 
-using namespace ns_frame;
-using namespace ns_frame::ref;
+using namespace jx3calc;
+using namespace frame;
+using namespace frame::ref;
 
 AutoRollbackAttribute::AutoRollbackAttribute(Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill)
     : self(self), target(target), runtime(runtime), skill(skill) {

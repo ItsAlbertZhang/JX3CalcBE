@@ -5,8 +5,9 @@
 #include "plugin/log.h"
 #include <random>
 
-using namespace ns_frame;
-using namespace ns_frame::ref;
+using namespace jx3calc;
+using namespace frame;
+using namespace ref;
 
 AutoRollbackAttrib::AutoRollbackAttrib(Character *self, BuffItem *item, const Buff &buff)
     : self(self), item(item), buff(buff) {

@@ -1,12 +1,14 @@
-#include "utils/config.h"
+#include "modules/config.h"
 #include "gdi.h"
 #include <fstream>
 #include <nlohmann/json.hpp>
 
 #define UNREFERENCED_PARAMETER(P) (P)
+
+using namespace jx3calc;
+using namespace modules;
+using json   = nlohmann::json;
 namespace fs = std::filesystem;
-using namespace ns_utils;
-using json = nlohmann::json;
 
 const std::string version = "v1.0.2";
 

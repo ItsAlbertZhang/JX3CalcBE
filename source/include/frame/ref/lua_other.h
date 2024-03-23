@@ -1,7 +1,8 @@
 #ifndef FRAME_REF_LUA_OTHER_H_
 #define FRAME_REF_LUA_OTHER_H_
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 namespace ref {
 
 enum class enumLuaAbsorbAttributeShieldType {
@@ -124,6 +125,7 @@ inline const char *refLuaMoveState[] = {
 };
 
 } // namespace ref
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_REF_LUA_OTHER_H_

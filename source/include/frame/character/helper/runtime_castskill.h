@@ -5,7 +5,8 @@
 #include <queue>
 #include <vector>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class Character;
 
@@ -38,6 +39,7 @@ public:
     std::vector<Damage>           damageList;
 };
 
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_

@@ -16,7 +16,8 @@
 #pragma clang diagnostic pop // Clang
 #pragma warning(pop)         // MSVC
 
-namespace ns_modules {
+namespace jx3calc {
+namespace modules {
 
 namespace web {
 
@@ -44,6 +45,7 @@ void                     run();
 
 } // namespace web
 
-} // namespace ns_modules
+} // namespace modules
+} // namespace jx3calc
 
 #endif // MODULES_WEB_H_

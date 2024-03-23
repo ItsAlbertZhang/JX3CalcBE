@@ -6,7 +6,8 @@
 #include <httplib.h> // (:4795): warning C4100: “content_length”: 未引用的形参
 #pragma warning(pop) // MSVC
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 using json = nlohmann::json;
 
 static inline int selectPrecise(const json &j, const std::string &key) {

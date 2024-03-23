@@ -1,7 +1,8 @@
 #ifndef FRAME_REF_LUA_ATTRIBUTE_TYPE_H_
 #define FRAME_REF_LUA_ATTRIBUTE_TYPE_H_
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 namespace ref {
 
 enum class enumLuaAttributeType {
@@ -147,6 +148,7 @@ inline const char *refLuaAttributeType[] = {
 };
 
 } // namespace ref
-} // namespace ns_frame
+} // namespace frame
+} // namespace jx3calc
 
 #endif // FRAME_REF_LUA_ATTRIBUTE_TYPE_H_

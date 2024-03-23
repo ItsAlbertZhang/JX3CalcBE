@@ -13,9 +13,10 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
-const char *const ns_frame::luaFuncList[]{
+const char *const frame::luaFuncList[]{
     // Skill
     "SetDelaySubSkill",
     "AddAttribute",
@@ -62,9 +63,9 @@ const char *const ns_frame::luaFuncList[]{
     "SetBuffLeftActiveCount",
     "SetBuffNextActiveFrame",
 };
-const size_t ns_frame::luaFuncListSize = sizeof(ns_frame::luaFuncList) / sizeof(ns_frame::luaFuncList[0]);
+const size_t frame::luaFuncListSize = sizeof(frame::luaFuncList) / sizeof(frame::luaFuncList[0]);
 
-sol::state *ns_frame::luaInit() {
+sol::state *frame::luaInit() {
     auto lua = LuaFunc::getLua();
     lua->open_libraries(sol::lib::base);
     lua->open_libraries(sol::lib::table);
@@ -318,7 +319,7 @@ bool LuaGlobalFunction::IsLangKeXingMap(int mapID) {
     return false;
 }
 
-void LuaGlobalFunction::ModityCDToUI(ns_frame::Character *character, int skillID, int c, int d) {
+void LuaGlobalFunction::ModityCDToUI(frame::Character *character, int skillID, int c, int d) {
     UNREFERENCED_PARAMETER(character);
     UNREFERENCED_PARAMETER(skillID);
     UNREFERENCED_PARAMETER(c);
@@ -326,7 +327,7 @@ void LuaGlobalFunction::ModityCDToUI(ns_frame::Character *character, int skillID
     return;
 }
 
-bool LuaGlobalFunction::CheckInTongWar(ns_frame::Character *character) {
+bool LuaGlobalFunction::CheckInTongWar(frame::Character *character) {
     UNREFERENCED_PARAMETER(character);
     return false;
 }
