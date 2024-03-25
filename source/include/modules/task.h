@@ -83,7 +83,6 @@ enum class enumCustom {
     lua,
     jx3,
 };
-
 inline std::unordered_map<std::string, enumCustom> refCustom{
   // {"使用内置循环", enumCustom::none},
     {"使用lua编程语言", enumCustom::lua},
@@ -115,28 +114,23 @@ public:
         return j.dump();
     }
 };
-Response validate(const std::string &jsonstr);
-Response create(const std::string &jsonstr);
-void     pause(std::string id);
-void     stop(std::string id);
 
-namespace server {
+class Server {
+public:
+    Server();  // 构造函数会非阻塞异步启动子线程任务模块.
+    ~Server(); // 析构函数会停止子线程任务模块并同步等待其退出.
+    auto validate(const std::string &jsonstr) -> Response;
+    auto create(const std::string &jsonstr) -> Response;
+    void pause(std::string id);
+    void stop(std::string id);
 
-inline std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
+    std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
+    Pool                                                   pool;
 
-void asyncrun(); // 非阻塞异步启动子线程任务模块.
-void stop();     // 停止子线程任务模块并同步等待其退出.
-
-inline Pool pool;
-/**
- *  注意, pool 的构造晚于 taskMap. 这很重要:
- *
- */
-
-inline std::thread      ioThread;
-inline asio::io_context ioContext;
-
-} // namespace server
+private:
+    std::thread      ioThread;
+    asio::io_context ioContext;
+};
 
 } // namespace task
 

@@ -24,10 +24,10 @@ using ull = unsigned long long;
 
 constexpr int CNT_DETAIL_TASKS = 5;
 
-void modules::task::server::asyncrun() {
+Server::Server() {
     asio::co_spawn(
         ioContext,
-        [&]() -> asio::awaitable<void> {
+        [this]() -> asio::awaitable<void> {
             asio::steady_timer timer(ioContext);
             while (true) {
                 timer.expires_after(std::chrono::seconds(1));
@@ -36,30 +36,33 @@ void modules::task::server::asyncrun() {
         },
         asio::detached
     ); // 用于保持 io.run() 的运行
-    ioThread = std::thread([&]() {
+    ioThread = std::thread([this]() {
         ioContext.run();
     });
 }
 
-void modules::task::server::stop() {
+Server::~Server() {
     for (auto &task : taskMap)
-        task::stop(task.first);
+        stop(task.first);
+    // 任务结束是异步的 (每秒检查一次), 因此需要等待 1 秒以上. 等待 1.5 秒.
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     ioContext.stop();
     ioThread.join();
     pool.join();
 }
 
-modules::task::Data::~Data() {
+Data::~Data() {
     if (!customString.empty()) {
         frame::CustomLua::cancel(customString);
     }
 }
 
-static int         calcBrief(const Data &arg);
-static int         calcDetail(const Data &data, frame::ChDamage *detail);
-static std::string genID(int length = 6);
+static int calcBrief(const Data &arg);
+static int calcDetail(const Data &data, frame::ChDamage *detail);
+template <typename TypeValue>
+static std::string genID(const std::unordered_map<std::string, TypeValue> &map, int length = 6);
 
-Response modules::task::validate(const std::string &jsonstr) {
+auto Server::validate(const std::string &jsonstr) -> Response {
     using json = nlohmann::json;
     // 解析 json
     json j;
@@ -273,21 +276,21 @@ static std::optional<Data> createTaskData(const nlohmann::json &j) {
     return res;
 }
 
-static void asyncStop(Task &task) {
+static void asyncStop(Server *self, Task &task) {
     using namespace modules::task;
-    server::taskMap.erase(task.id);
+    self->taskMap.erase(task.id);
 }
 
-static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
+static asio::awaitable<void> asyncRun(Server *self, asio::io_context &io, Task &task) {
     using namespace modules::task;
 
     // 在线程池中创建任务
     const int cntCalcDetail = task.data.fightCount > CNT_DETAIL_TASKS ? CNT_DETAIL_TASKS : task.data.fightCount;
     task.details.resize(cntCalcDetail); // 注意, 此处不是 reserve, 因为获得的内存地址需要传递给线程池
     for (int i = 0; i < cntCalcDetail; i++) {
-        server::pool.emplace(task.id, 1, task.futures, calcDetail, task.data, &task.details[i]);
+        self->pool.emplace(task.id, 1, task.futures, calcDetail, task.data, &task.details[i]);
     }
-    server::pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, task.data);
+    self->pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, task.data);
 
     task.results.reserve(task.data.fightCount);
     int cntPre = 0;
@@ -314,10 +317,10 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
         timer.expires_after(std::chrono::seconds{60}); // 等待 60 秒, 随后释放内存
         co_await timer.async_wait(asio::use_awaitable);
     }
-    asyncStop(task);
+    asyncStop(self, task);
 }
 
-Response modules::task::create(const std::string &jsonstr) {
+auto modules::task::Server::create(const std::string &jsonstr) -> Response {
     // 验证数据可用性
     if (!modules::config::dataAvailable) [[unlikely]]
         return Response{
@@ -338,19 +341,19 @@ Response modules::task::create(const std::string &jsonstr) {
             .data   = "An error occurred while creating task data. Please try again later.",
         };
 
-    auto  id = genID();
-    auto &it = server::taskMap.emplace(id, std::make_unique<Task>(id, std::move(taskdata.value()))).first->second;
-    asio::co_spawn(server::ioContext, asyncRun(server::ioContext, *it), asio::detached);
+    auto  id = genID(taskMap);
+    auto &it = taskMap.emplace(id, std::make_unique<Task>(id, std::move(taskdata.value()))).first->second;
+    asio::co_spawn(ioContext, asyncRun(this, ioContext, *it), asio::detached);
     return Response{
         .status = ResponseStatus::success,
         .data   = id,
     };
 }
 
-void modules::task::stop(std::string id) {
-    if (!server::taskMap.contains(id)) [[unlikely]]
+void modules::task::Server::stop(std::string id) {
+    if (!taskMap.contains(id)) [[unlikely]]
         return;
-    server::taskMap.at(id)->stop.store(true); // 真正的停止操作在 asyncRun 中
+    taskMap.at(id)->stop.store(true); // 真正的停止操作在 asyncRun 中
 }
 
 static auto calc(const Data &arg) {
@@ -406,7 +409,8 @@ static int calcDetail(const Data &data, frame::ChDamage *detail) {
     return static_cast<int>(sumDamage / data.fightTime);
 }
 
-static std::string genID(int length) {
+template <typename TValue>
+static std::string genID(const std::unordered_map<std::string, TValue> &map, int length) {
     const std::string CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
     std::random_device              random_device;
@@ -414,7 +418,7 @@ static std::string genID(int length) {
     std::uniform_int_distribution<> distribution(0, static_cast<int>(CHARACTERS.size() - 1));
 
     std::string random_string;
-    while (random_string.empty() || modules::task::server::taskMap.contains(random_string)) {
+    while (random_string.empty() || map.contains(random_string)) {
         for (size_t i = 0; i < length; i++) {
             random_string += CHARACTERS[distribution(generator)];
         }
