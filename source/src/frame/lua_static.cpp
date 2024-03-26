@@ -66,7 +66,7 @@ const char *const frame::luaFuncList[]{
 const size_t frame::luaFuncListSize = sizeof(frame::luaFuncList) / sizeof(frame::luaFuncList[0]);
 
 sol::state *frame::luaInit() {
-    auto lua = LuaFunc::getLua();
+    auto lua = LuaCpp::getLuaState();
     lua->open_libraries(sol::lib::base);
     lua->open_libraries(sol::lib::table);
 
@@ -206,21 +206,21 @@ sol::state *frame::luaInit() {
 
     // lua 函数
 
-    (*lua)["Include"]                  = LuaGlobalFunction::Include;
-    (*lua)["GetPlayer"]                = LuaGlobalFunction::GetPlayer;
-    (*lua)["GetNpc"]                   = LuaGlobalFunction::GetNpc;
-    (*lua)["IsPlayer"]                 = LuaGlobalFunction::IsPlayer;
-    (*lua)["IsLangKeXingMap"]          = LuaGlobalFunction::IsLangKeXingMap;
-    (*lua)["ModityCDToUI"]             = LuaGlobalFunction::ModityCDToUI;
-    (*lua)["CheckInTongWar"]           = LuaGlobalFunction::CheckInTongWar;
-    (*lua)["IsTreasureBattleFieldMap"] = LuaGlobalFunction::IsTreasureBattleFieldMap;
-    (*lua)["GetValueByBits"]           = LuaGlobalFunction::GetValueByBits;
-    (*lua)["SetValueByBits"]           = LuaGlobalFunction::SetValueByBits;
-    (*lua)["RemoteCallToClient"]       = LuaGlobalFunction::RemoteCallToClient;
-    (*lua)["GetDistanceSq"]            = LuaGlobalFunction::GetDistanceSq;
-    (*lua)["Random"]                   = LuaGlobalFunction::Random;
-    (*lua)["GetEditorString"]          = LuaGlobalFunction::GetEditorString;
-    (*lua)["IsClient"]                 = LuaGlobalFunction::IsClient;
+    (*lua)["Include"]                  = &LuaGlobalFunc::Include;
+    (*lua)["GetPlayer"]                = &LuaGlobalFunc::GetPlayer;
+    (*lua)["GetNpc"]                   = &LuaGlobalFunc::GetNpc;
+    (*lua)["IsPlayer"]                 = &LuaGlobalFunc::IsPlayer;
+    (*lua)["IsLangKeXingMap"]          = &LuaGlobalFunc::IsLangKeXingMap;
+    (*lua)["ModityCDToUI"]             = &LuaGlobalFunc::ModityCDToUI;
+    (*lua)["CheckInTongWar"]           = &LuaGlobalFunc::CheckInTongWar;
+    (*lua)["IsTreasureBattleFieldMap"] = &LuaGlobalFunc::IsTreasureBattleFieldMap;
+    (*lua)["GetValueByBits"]           = &LuaGlobalFunc::GetValueByBits;
+    (*lua)["SetValueByBits"]           = &LuaGlobalFunc::SetValueByBits;
+    (*lua)["RemoteCallToClient"]       = &LuaGlobalFunc::RemoteCallToClient;
+    (*lua)["GetDistanceSq"]            = &LuaGlobalFunc::GetDistanceSq;
+    (*lua)["Random"]                   = &LuaGlobalFunc::Random;
+    (*lua)["GetEditorString"]          = &LuaGlobalFunc::GetEditorString;
+    (*lua)["IsClient"]                 = &LuaGlobalFunc::IsClient;
 
     // lua 常量
 
@@ -297,29 +297,29 @@ sol::state *frame::luaInit() {
     return lua;
 }
 
-void LuaGlobalFunction::Include(const std::string &filename) {
-    LuaFunc::include(filename);
+void LuaGlobalFunc::Include(const std::string &filename) {
+    LuaCpp::include(filename);
     return;
 }
 
-Character *LuaGlobalFunction::GetPlayer(int nCharacterID) {
+Character *LuaGlobalFunc::GetPlayer(int nCharacterID) {
     return Character::characterGet(nCharacterID);
 }
 
-Character *LuaGlobalFunction::GetNpc(int nCharacterID) {
+Character *LuaGlobalFunc::GetNpc(int nCharacterID) {
     return Character::characterGet(nCharacterID);
 }
 
-bool LuaGlobalFunction::IsPlayer(int nCharacterID) {
+bool LuaGlobalFunc::IsPlayer(int nCharacterID) {
     return Character::characterGet(nCharacterID)->isPlayer;
 }
 
-bool LuaGlobalFunction::IsLangKeXingMap(int mapID) {
+bool LuaGlobalFunc::IsLangKeXingMap(int mapID) {
     UNREFERENCED_PARAMETER(mapID);
     return false;
 }
 
-void LuaGlobalFunction::ModityCDToUI(frame::Character *character, int skillID, int c, int d) {
+void LuaGlobalFunc::ModityCDToUI(frame::Character *character, int skillID, int c, int d) {
     UNREFERENCED_PARAMETER(character);
     UNREFERENCED_PARAMETER(skillID);
     UNREFERENCED_PARAMETER(c);
@@ -327,12 +327,12 @@ void LuaGlobalFunction::ModityCDToUI(frame::Character *character, int skillID, i
     return;
 }
 
-bool LuaGlobalFunction::CheckInTongWar(frame::Character *character) {
+bool LuaGlobalFunc::CheckInTongWar(frame::Character *character) {
     UNREFERENCED_PARAMETER(character);
     return false;
 }
 
-bool LuaGlobalFunction::IsTreasureBattleFieldMap(int mapID) {
+bool LuaGlobalFunc::IsTreasureBattleFieldMap(int mapID) {
     UNREFERENCED_PARAMETER(mapID);
     return false;
 }
@@ -352,7 +352,7 @@ function CustomFunction.GetValueByBit(nValue, nBit)
     --return math.floor(nValue / 2 ^ nBit) % 2
 end
 ``` */
-int LuaGlobalFunction::GetValueByBits(int nValue, int nBit, int c) {
+int LuaGlobalFunc::GetValueByBits(int nValue, int nBit, int c) {
     UNREFERENCED_PARAMETER(c);
     if (nBit > 31 || nBit < 0) {
         CONSTEXPR_LOG_ERROR(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error{}", "");
@@ -394,7 +394,7 @@ function CustomFunction.SetValueByBit(nValue, nBit, nNewBitValue)
     --end
 end
 ``` */
-int LuaGlobalFunction::SetValueByBits(int nValue, int nBit, int c, int nNewBitValue) {
+int LuaGlobalFunc::SetValueByBits(int nValue, int nBit, int c, int nNewBitValue) {
     UNREFERENCED_PARAMETER(c);
     if (nNewBitValue > 1 || nNewBitValue < 0) {
         CONSTEXPR_LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,{}", "");
@@ -407,25 +407,25 @@ int LuaGlobalFunction::SetValueByBits(int nValue, int nBit, int c, int nNewBitVa
     return (nValue & ~(1 << nBit)) | (nNewBitValue << nBit);
 }
 
-void LuaGlobalFunction::RemoteCallToClient() {
+void LuaGlobalFunc::RemoteCallToClient() {
     return;
 }
 
-int LuaGlobalFunction::GetDistanceSq(int pX, int pY, int pZ, int tX, int tY, int tZ) {
+int LuaGlobalFunc::GetDistanceSq(int pX, int pY, int pZ, int tX, int tY, int tZ) {
     return (pX - tX) * (pX - tX) + (pY - tY) * (pY - tY) + (pZ - tZ) * (pZ - tZ);
 }
 
-int LuaGlobalFunction::Random(int min, int max) {
+int LuaGlobalFunc::Random(int min, int max) {
     std::random_device              rd;
     std::mt19937                    gen(rd());
     std::uniform_int_distribution<> dis(min, max);
     return static_cast<int>(dis(gen));
 }
 
-std::string LuaGlobalFunction::GetEditorString(int a, int b) {
+std::string LuaGlobalFunc::GetEditorString(int a, int b) {
     return std::to_string(a) + "-" + std::to_string(b);
 }
 
-bool LuaGlobalFunction::IsClient() {
+bool LuaGlobalFunc::IsClient() {
     return false;
 }

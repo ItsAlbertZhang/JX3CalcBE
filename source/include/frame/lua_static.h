@@ -13,25 +13,23 @@ sol::state *luaInit();
 extern const char *const luaFuncList[];
 extern const size_t      luaFuncListSize;
 
-class LuaGlobalFunction {
-public:
-    LuaGlobalFunction() = delete;
-    static bool        CheckInTongWar(frame::Character *character);
-    static bool        IsLangKeXingMap(int mapID);
-    static bool        IsClient();
-    static bool        IsPlayer(int nCharacterID);
-    static bool        IsTreasureBattleFieldMap(int mapID);
-    static int         GetDistanceSq(int pX, int pY, int pZ, int tX, int tY, int tZ);
-    static std::string GetEditorString(int a, int b);
-    static int         GetValueByBits(int nValue, int nBit, int c);
-    static int         SetValueByBits(int nValue, int nBit, int c, int nNewBitValue);
-    static int         Random(int min, int max);
-    static void        Include(const std::string &filename);
-    static void        ModityCDToUI(frame::Character *character, int skillID, int c, int d);
-    static void        RemoteCallToClient();
-    static Character  *GetPlayer(int nCharacterID);
-    static Character  *GetNpc(int nCharacterID);
-};
+namespace LuaGlobalFunc {
+bool        CheckInTongWar(frame::Character *character);
+bool        IsLangKeXingMap(int mapID);
+bool        IsClient();
+bool        IsPlayer(int nCharacterID);
+bool        IsTreasureBattleFieldMap(int mapID);
+int         GetDistanceSq(int pX, int pY, int pZ, int tX, int tY, int tZ);
+std::string GetEditorString(int a, int b);
+int         GetValueByBits(int nValue, int nBit, int c);
+int         SetValueByBits(int nValue, int nBit, int c, int nNewBitValue);
+int         Random(int min, int max);
+void        Include(const std::string &filename);
+void        ModityCDToUI(frame::Character *character, int skillID, int c, int d);
+void        RemoteCallToClient();
+Character  *GetPlayer(int nCharacterID);
+Character  *GetNpc(int nCharacterID);
+}; // namespace LuaGlobalFunc
 
 } // namespace frame
 } // namespace jx3calc

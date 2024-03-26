@@ -70,12 +70,12 @@ void SkillRecipeManager::addScriptSkill(const SkillRecipe *skillrecipe, const Sk
     scriptskill.dwSkillID = skill->dwSkillID;
     scriptskill.dwLevel   = skill->dwLevel;
     std::string path      = "scripts/skill/" + skillrecipe->tab.at("ScriptFile");
-    bool        res       = LuaFunc::analysis(
-        LuaFunc::getGetSkillRecipeData(path)(
+    bool        res       = LuaCpp::analysis(
+        LuaCpp::getGetSkillRecipeData(path)(
             scriptskill, skillrecipe->RecipeID, skillrecipe->RecipeLevel
         ),
         path,
-        LuaFunc::Enum::GetSkillRecipeData
+        LuaCpp::Func::GetSkillRecipeData
     );
     if (res) {
         // 成功执行, 将技能添加到 ScriptSkill 中

@@ -94,14 +94,14 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 std::string paramStr      = "scripts/" + it.param1Str;
                 int         dwCharacterID = Character::characterGetID(self);
                 int         dwSkillSrcID  = Character::characterGetID(self);
-                if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
+                if (!LuaCpp::analysis(LuaCpp::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaCpp::Func::Apply))
                     CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
             } break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
                 std::string paramStr      = "scripts/" + it.param1Str;
                 int         dwCharacterID = Character::characterGetID(self);
                 int         dwSkillSrcID  = Character::characterGetID(self);
-                if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
+                if (!LuaCpp::analysis(LuaCpp::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaCpp::Func::Apply))
                     CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
             } break;
             case static_cast<int>(enumLuaAttributeType::CURRENT_SUN_ENERGY):
@@ -180,7 +180,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     std::string paramStr      = "scripts/" + it.param1Str;
                     int         dwCharacterID = Character::characterGetID(self);
                     int         dwSkillSrcID  = Character::characterGetID(self);
-                    if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
+                    if (!LuaCpp::analysis(LuaCpp::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaCpp::Func::Apply))
                         CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
                 }
             } break;
@@ -189,7 +189,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     std::string paramStr      = "scripts/" + it.param1Str;
                     int         dwCharacterID = Character::characterGetID(self);
                     int         dwSkillSrcID  = Character::characterGetID(self);
-                    if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
+                    if (!LuaCpp::analysis(LuaCpp::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaCpp::Func::Apply))
                         CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
                 }
             } break;
@@ -300,14 +300,14 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 std::string paramStr      = "scripts/" + it.param1Str;
                 int         dwCharacterID = Character::characterGetID(target);
                 int         dwSkillSrcID  = Character::characterGetID(self);
-                if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
+                if (!LuaCpp::analysis(LuaCpp::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, LuaCpp::Func::Apply))
                     CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
             } break;
             case static_cast<int>(enumLuaAttributeType::EXECUTE_SCRIPT_WITH_PARAM): {
                 std::string paramStr      = "scripts/" + it.param1Str;
                 int         dwCharacterID = Character::characterGetID(target);
                 int         dwSkillSrcID  = Character::characterGetID(self);
-                if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
+                if (!LuaCpp::analysis(LuaCpp::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, LuaCpp::Func::Apply))
                     CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
             } break;
             case static_cast<int>(enumLuaAttributeType::CALL_PHYSICS_DAMAGE):

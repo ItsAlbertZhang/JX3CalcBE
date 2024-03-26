@@ -71,8 +71,8 @@ void SkillManager::add(int skillID, int skillLevel) {
     skill.nWeaponDamagePercent = !skill.tab["WeaponRequest"].empty() && skill.tab["WeaponRequest"] != "0" ? 1024 : 0;
     // 执行 GetSkillLevelData
     std::string name           = "scripts/skill/" + skill.tab["ScriptFile"];
-    bool        res            = LuaFunc::analysis(
-        LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData
+    bool        res            = LuaCpp::analysis(
+        LuaCpp::getGetSkillLevelData(name)(skill), name, LuaCpp::Func::GetSkillLevelData
     );
 
     if (res) {
