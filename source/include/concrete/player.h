@@ -1,5 +1,4 @@
-#ifndef CONCRETE_PLAYER_H
-#define CONCRETE_PLAYER_H
+#pragma once
 
 #include "frame/character/derived/player.h"
 #include <memory>
@@ -28,5 +27,3 @@ auto create(player::Type type, int delayNetwork, int delayKeyboard) -> std::uniq
 
 } // namespace concrete
 } // namespace jx3calc
-
-#endif // CONCRETE_PLAYER_H

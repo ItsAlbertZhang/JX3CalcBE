@@ -1,7 +1,6 @@
-#ifndef FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
-#define FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
+#pragma once
 
-#include "frame/character/property/damage.h"
+#include "frame/common/damage.h"
 #include "frame/global/skill.h"
 
 namespace jx3calc {
@@ -43,5 +42,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_

@@ -1,5 +1,4 @@
-#ifndef FRAME_CHARACTER_PROPERTY_BUFF_H_
-#define FRAME_CHARACTER_PROPERTY_BUFF_H_
+#pragma once
 
 #include "frame/character/property/attribute.h"
 #include "frame/common/event.h"
@@ -74,5 +73,3 @@ public:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_PROPERTY_BUFF_H_

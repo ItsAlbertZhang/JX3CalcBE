@@ -1,5 +1,4 @@
-#ifndef FRAME_GLOBAL_COOLDOWN_H_
-#define FRAME_GLOBAL_COOLDOWN_H_
+#pragma once
 
 #include <mutex>
 #include <string>
@@ -60,5 +59,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_GLOBAL_COOLDOWN_H_

@@ -1,4 +1,4 @@
-#include "frame/lua_static.h"
+#include "frame/lua/statics.h"
 #include "gdi.h"
 #include "modules/config.h"
 #include "modules/web.h"
@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     // 初始化程序
     modules::config::init(argc, argv);
     // 初始化接口
-    int ret = gdi::luaInit(frame::luaInit, frame::luaFuncList, frame::luaFuncListSize);
+    int ret = gdi::luaInit(frame::lua::statics::luaInit, frame::lua::statics::luaFuncList, frame::lua::statics::luaFuncListSize);
     if (0 != ret) {
         std::cerr << "Init failed." << std::endl;
 #ifdef _WIN32

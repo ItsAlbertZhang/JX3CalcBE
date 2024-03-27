@@ -1,5 +1,4 @@
-#ifndef FRAME_GLOBAL_SKILLRECIPE_H_
-#define FRAME_GLOBAL_SKILLRECIPE_H_
+#pragma once
 
 #include "frame/global/skill.h"
 #include <mutex>
@@ -79,5 +78,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_GLOBAL_SKILLRECIPE_H_

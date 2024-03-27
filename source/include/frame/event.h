@@ -1,5 +1,4 @@
-#ifndef FRAME_EVENT_H_
-#define FRAME_EVENT_H_
+#pragma once
 
 #include "frame/common/event.h"
 #include <set>
@@ -71,5 +70,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_EVENT_H_

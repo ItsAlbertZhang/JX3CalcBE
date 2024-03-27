@@ -1,5 +1,4 @@
-#ifndef CONCRETE_NPC_H
-#define CONCRETE_NPC_H
+#pragma once
 
 #include "frame/character/derived/npc.h"
 #include <memory>
@@ -28,5 +27,3 @@ auto create(npc::Type type) -> std::unique_ptr<frame::NPC>;
 
 } // namespace concrete
 } // namespace jx3calc
-
-#endif // CONCRETE_NPC_H

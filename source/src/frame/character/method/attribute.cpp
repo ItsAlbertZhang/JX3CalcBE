@@ -1,5 +1,5 @@
 #include "frame/character/property/attribute.h"
-#include "frame/globalparam.h"
+#include "frame/common/globalparam.h"
 
 using namespace jx3calc;
 using namespace frame;

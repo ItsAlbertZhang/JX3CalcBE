@@ -1,5 +1,4 @@
-#ifndef MODULES_WEB_H_
-#define MODULES_WEB_H_
+#pragma once
 
 namespace jx3calc {
 namespace modules {
@@ -12,5 +11,3 @@ void run();
 
 } // namespace modules
 } // namespace jx3calc
-
-#endif // MODULES_WEB_H_

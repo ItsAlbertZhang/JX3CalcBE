@@ -1,5 +1,4 @@
-#ifndef FRAME_CHARACTER_PROPERTY_SKILLEVENT_H_
-#define FRAME_CHARACTER_PROPERTY_SKILLEVENT_H_
+#pragma once
 
 #include "frame/ref/global_skillevent.h"
 #include <set>
@@ -29,5 +28,3 @@ public:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_PROPERTY_SKILLEVENT_H_

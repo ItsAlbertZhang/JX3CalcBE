@@ -1,5 +1,4 @@
-#ifndef FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIB_H_
-#define FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIB_H_
+#pragma once
 
 #include "frame/character/property/buff.h"
 #include "frame/global/buff.h"
@@ -36,5 +35,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIB_H_

@@ -1,5 +1,4 @@
-#ifndef FRAME_CHARACTER_DERIVED_PLAYER_H_
-#define FRAME_CHARACTER_DERIVED_PLAYER_H_
+#pragma once
 
 #include "frame/character/character.h"
 #include <sol/sol.hpp>
@@ -44,5 +43,3 @@ public:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_DERIVED_PLAYER_H_

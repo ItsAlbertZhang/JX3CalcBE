@@ -1,5 +1,4 @@
-#ifndef FRAME_GLOBALPARAM_H_
-#define FRAME_GLOBALPARAM_H_
+#pragma once
 
 #include <mutex>
 
@@ -64,5 +63,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_GLOBAL_GLOBALPARAM_H_

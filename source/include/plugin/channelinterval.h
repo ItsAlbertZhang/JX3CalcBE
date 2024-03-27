@@ -1,5 +1,4 @@
-#ifndef GLOBAL_CONSTEXPR_CHANNELINTERVAL_H_
-#define GLOBAL_CONSTEXPR_CHANNELINTERVAL_H_
+#pragma once
 
 #ifdef D_CONSTEXPR_CHANNELINTERVAL
 
@@ -39,5 +38,3 @@ void save();
 // do...while 的目的是在不影响性能的同时, 保证语句非置空, 以消除 MSVC 警告: “;”: 找到空的受控语句；这是否是有意的?
 
 #endif // D_CONSTEXPR_CHANNELINTERVAL
-
-#endif // GLOBAL_CONSTEXPR_CHANNELINTERVAL_H_

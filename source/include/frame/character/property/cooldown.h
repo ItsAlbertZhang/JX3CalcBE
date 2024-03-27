@@ -1,5 +1,4 @@
-#ifndef FRAME_CHARACTER_PROPERTY_COOLDOWN_H_
-#define FRAME_CHARACTER_PROPERTY_COOLDOWN_H_
+#pragma once
 
 #include "frame/common/event.h"
 #include <unordered_map>
@@ -28,5 +27,3 @@ public:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_PROPERTY_COOLDOWN_H_

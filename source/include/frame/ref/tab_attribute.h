@@ -1,5 +1,4 @@
-#ifndef FRAME_REF_TAB_ATTRIBUTE_H_
-#define FRAME_REF_TAB_ATTRIBUTE_H_
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -109,5 +108,3 @@ inline const std::unordered_map<std::string, enumTabAttribute> mapTabAttribute =
 } // namespace ref
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_REF_TAB_ATTRIBUTE_H_

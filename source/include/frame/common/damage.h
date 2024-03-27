@@ -1,5 +1,4 @@
-#ifndef FRAME_CHARACTER_PROPERTY_DAMAGE_H_
-#define FRAME_CHARACTER_PROPERTY_DAMAGE_H_
+#pragma once
 
 #include "frame/common/event.h"
 #include <vector>
@@ -38,5 +37,3 @@ using ChDamage = std::vector<Damage>;
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_PROPERTY_DAMAGE_H_

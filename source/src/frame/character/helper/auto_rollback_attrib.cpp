@@ -1,6 +1,6 @@
 #include "frame/character/helper/auto_rollback_attrib.h"
 #include "frame/character/character.h"
-#include "frame/lua_runtime.h"
+#include "frame/lua/interface.h"
 #include "frame/ref/tab_attribute.h" // enumTabAttribute
 #include "plugin/log.h"
 #include <random>
@@ -27,12 +27,12 @@ AutoRollbackAttrib::~AutoRollbackAttrib() {
     }
     if (!buff.ScriptFile.empty()) {
         std::string paramStr = "scripts/skill/" + buff.ScriptFile;
-        if (!LuaCpp::analysis(
-                LuaCpp::getOnRemove(paramStr)(
+        if (!lua::interface::analysis(
+                lua::interface::getOnRemove(paramStr)(
                     item->nCharacterID, item->nID, item->nLevel, item->nLeftFrame, item->nCustomValue, item->dwSkillSrcID, item->nStackNum, 0, 0, item->dwCasterSkillID
                 ),
                 paramStr,
-                LuaCpp::Func::OnRemove
+                lua::interface::FuncType::OnRemove
             ))
             CONSTEXPR_LOG_ERROR("LuaFunc::getOnRemove(\"{}\") failed.", paramStr);
         // OnRemove(nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID)
@@ -119,10 +119,10 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case enumTabAttribute::atExecuteScript: {
         std::string paramStr = "scripts/" + attrib.valueAStr;
         if (isRollback) {
-            if (!LuaCpp::analysis(LuaCpp::getUnApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaCpp::Func::UnApply))
+            if (!lua::interface::analysis(lua::interface::getUnApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, lua::interface::FuncType::UnApply))
                 CONSTEXPR_LOG_ERROR("LuaFunc::getUnApply(\"{}\") failed.", paramStr);
         } else {
-            if (!LuaCpp::analysis(LuaCpp::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaCpp::Func::Apply))
+            if (!lua::interface::analysis(lua::interface::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, lua::interface::FuncType::Apply))
                 CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
         }
     } break;

@@ -1,5 +1,4 @@
-#ifndef FRAME_GLOBAL_ITEM_H_
-#define FRAME_GLOBAL_ITEM_H_
+#pragma once
 
 #include "frame/common/item.h"
 #include <array>
@@ -62,5 +61,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_GLOBAL_ITEM_H_

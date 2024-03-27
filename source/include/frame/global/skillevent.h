@@ -1,5 +1,4 @@
-#ifndef FRAME_GLOBAL_SKILLEVENT_H_
-#define FRAME_GLOBAL_SKILLEVENT_H_
+#pragma once
 
 #include "frame/ref/global_skillevent.h"
 #include <cstdint>
@@ -68,5 +67,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_GLOBAL_SKILLEVENT_H_

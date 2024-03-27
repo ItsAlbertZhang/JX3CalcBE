@@ -1,10 +1,9 @@
-#ifndef MODULES_TASK_H_
-#define MODULES_TASK_H_
+#pragma once
 
 #include "concrete/effect.h"
 #include "concrete/player.h"
 #include "frame/character/property/attribute.h"
-#include "frame/character/property/damage.h"
+#include "frame/common/damage.h"
 #include "modules/pool.h"
 #include <memory>
 #include <mutex>
@@ -136,5 +135,3 @@ private:
 
 } // namespace modules
 } // namespace jx3calc
-
-#endif // MODULES_TASK_H_

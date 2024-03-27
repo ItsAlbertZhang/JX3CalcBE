@@ -1,5 +1,4 @@
-#ifndef CONCRETE_EFFECTS_H_
-#define CONCRETE_EFFECTS_H_
+#pragma once
 
 #include "frame/character/character.h"
 #include <memory>
@@ -49,5 +48,3 @@ auto create(effect::Type type) -> std::shared_ptr<effect::Base>;
 
 } // namespace concrete
 } // namespace jx3calc
-
-#endif // CONCRETE_EFFECTS_H_

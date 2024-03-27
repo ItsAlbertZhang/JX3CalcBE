@@ -1,5 +1,4 @@
-#ifndef FRAME_REF_LUA_OTHER_H_
-#define FRAME_REF_LUA_OTHER_H_
+#pragma once
 
 namespace jx3calc {
 namespace frame {
@@ -127,5 +126,3 @@ inline const char *refLuaMoveState[] = {
 } // namespace ref
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_REF_LUA_OTHER_H_

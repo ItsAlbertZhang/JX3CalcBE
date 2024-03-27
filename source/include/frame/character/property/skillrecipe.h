@@ -1,5 +1,4 @@
-#ifndef FRAME_CHARACTER_PROPERTY_SKILLRECIPE_H_
-#define FRAME_CHARACTER_PROPERTY_SKILLRECIPE_H_
+#pragma once
 
 #include <set>
 #include <unordered_map>
@@ -23,5 +22,3 @@ public:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_PROPERTY_SKILLRECIPE_H_

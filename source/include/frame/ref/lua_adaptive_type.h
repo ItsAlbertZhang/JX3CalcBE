@@ -1,5 +1,4 @@
-#ifndef FRAME_REF_LUA_ADAPTIVE_TYPE_H_
-#define FRAME_REF_LUA_ADAPTIVE_TYPE_H_
+#pragma once
 
 #include <unordered_map>
 
@@ -26,5 +25,3 @@ inline const std::unordered_map<enumLuaAdaptiveKungfuID, enumLuaAdaptiveType> ma
 } // namespace ref
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_REF_LUA_ADAPTIVE_TYPE_H_

@@ -7,8 +7,7 @@
  * @warning 请勿随意更改本文件内容.
  */
 
-#ifndef LIB_GDI_H
-#define LIB_GDI_H
+#pragma once
 
 #include <cstring>
 #include <sol/sol.hpp>
@@ -178,5 +177,3 @@ void tabQuery(int tabIdx, char *data, size_t dataSize); // 实际接口
 void tabSelect(Tab tab, select_t &arg);
 
 } // namespace gdi
-
-#endif // LIB_GDI_H

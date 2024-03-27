@@ -1,5 +1,4 @@
-#ifndef FRAME_GLOBAL_BUFF_H_
-#define FRAME_GLOBAL_BUFF_H_
+#pragma once
 
 #include "frame/ref/tab_attribute.h" // ref::enumTabAttribute
 #include <mutex>
@@ -99,5 +98,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_GLOBAL_BUFF_H_

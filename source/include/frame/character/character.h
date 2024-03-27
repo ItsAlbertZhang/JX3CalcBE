@@ -1,15 +1,14 @@
-#ifndef FRAME_CHARACTER_H_
-#define FRAME_CHARACTER_H_
+#pragma once
 
 #include "frame/character/property/attribute.h"
 #include "frame/character/property/buff.h"
 #include "frame/character/property/cooldown.h"
-#include "frame/character/property/damage.h"
 #include "frame/character/property/item.h"
 #include "frame/character/property/scene.h"
 #include "frame/character/property/skill.h"
 #include "frame/character/property/skillevent.h"
 #include "frame/character/property/skillrecipe.h"
+#include "frame/common/damage.h"
 #include "frame/ref/lua_other.h"
 #include <cstdint>
 #include <optional>
@@ -197,5 +196,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_H_

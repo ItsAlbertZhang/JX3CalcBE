@@ -1,5 +1,4 @@
-#ifndef FRAME_LUA_RUNTIME_H_
-#define FRAME_LUA_RUNTIME_H_
+#pragma once
 
 #include <sol/sol.hpp>
 #include <sol/state.hpp>
@@ -7,12 +6,13 @@
 
 namespace jx3calc {
 namespace frame {
+namespace lua {
 
-namespace LuaCpp {
+namespace interface {
 
 sol::state *getLuaState();
 
-enum class Func {
+enum class FuncType {
     GetSkillLevelData,
     GetSkillRecipeData,
     Apply,
@@ -26,8 +26,8 @@ enum class Func {
 // global 下的 Manager::get() 返回均为 const 引用. 如果直接将其用于参数传入, 编译阶段会报错.
 
 int  getIndex(std::string &filename, bool reload = false);
-bool analysis(sol::protected_function_result res, std::string &filename, Func func);
-bool analysis(sol::protected_function_result res, int idx, Func func);
+bool analysis(sol::protected_function_result res, std::string &filename, FuncType func);
+bool analysis(sol::protected_function_result res, int idx, FuncType func);
 
 // 可以为获取函数重载参数类型 std::string filename / int idx, 但没必要, 暂时实现一个版本的就够了.
 sol::protected_function getGetSkillLevelData(std::string &filename);
@@ -39,9 +39,8 @@ sol::protected_function getOnTimer(int idx);
 
 void include(const std::string &filename);
 
-}; // namespace LuaCpp
+} // namespace interface
 
+} // namespace lua
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_LUA_RUNTIME_H_

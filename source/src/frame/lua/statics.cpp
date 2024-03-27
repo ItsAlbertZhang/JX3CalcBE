@@ -1,22 +1,21 @@
-#include "frame/lua_static.h"
+#include "frame/lua/statics.h"
 #include "frame/character/character.h"
 #include "frame/global/skill.h"
-#include "frame/lua_runtime.h"
+#include "frame/lua/global_func.h"
+#include "frame/lua/interface.h"
 #include "frame/ref/lua_adaptive_type.h"
 #include "frame/ref/lua_attribute_type.h"
 #include "frame/ref/lua_other.h"
-#include "plugin/log.h"
 #include <optional>
-#include <random>
-#include <sol/sol.hpp>
-#include <string>
-
-#define UNREFERENCED_PARAMETER(P) (P)
 
 using namespace jx3calc;
 using namespace frame;
 
-const char *const frame::luaFuncList[]{
+const std::unordered_set<std::string> frame::lua::statics::LuaBlacklistFiles = {
+    "scripts/player/include/Kungfu2ArenaType.lh",
+};
+
+const char *const frame::lua::statics::luaFuncList[]{
     // Skill
     "SetDelaySubSkill",
     "AddAttribute",
@@ -63,10 +62,11 @@ const char *const frame::luaFuncList[]{
     "SetBuffLeftActiveCount",
     "SetBuffNextActiveFrame",
 };
-const size_t frame::luaFuncListSize = sizeof(frame::luaFuncList) / sizeof(frame::luaFuncList[0]);
+const size_t frame::lua::statics::luaFuncListSize =
+    sizeof(frame::lua::statics::luaFuncList) / sizeof(frame::lua::statics::luaFuncList[0]);
 
-sol::state *frame::luaInit() {
-    auto lua = LuaCpp::getLuaState();
+sol::state *frame::lua::statics::luaInit() {
+    auto lua = lua::interface::getLuaState();
     lua->open_libraries(sol::lib::base);
     lua->open_libraries(sol::lib::table);
 
@@ -206,21 +206,21 @@ sol::state *frame::luaInit() {
 
     // lua 函数
 
-    (*lua)["Include"]                  = &LuaGlobalFunc::Include;
-    (*lua)["GetPlayer"]                = &LuaGlobalFunc::GetPlayer;
-    (*lua)["GetNpc"]                   = &LuaGlobalFunc::GetNpc;
-    (*lua)["IsPlayer"]                 = &LuaGlobalFunc::IsPlayer;
-    (*lua)["IsLangKeXingMap"]          = &LuaGlobalFunc::IsLangKeXingMap;
-    (*lua)["ModityCDToUI"]             = &LuaGlobalFunc::ModityCDToUI;
-    (*lua)["CheckInTongWar"]           = &LuaGlobalFunc::CheckInTongWar;
-    (*lua)["IsTreasureBattleFieldMap"] = &LuaGlobalFunc::IsTreasureBattleFieldMap;
-    (*lua)["GetValueByBits"]           = &LuaGlobalFunc::GetValueByBits;
-    (*lua)["SetValueByBits"]           = &LuaGlobalFunc::SetValueByBits;
-    (*lua)["RemoteCallToClient"]       = &LuaGlobalFunc::RemoteCallToClient;
-    (*lua)["GetDistanceSq"]            = &LuaGlobalFunc::GetDistanceSq;
-    (*lua)["Random"]                   = &LuaGlobalFunc::Random;
-    (*lua)["GetEditorString"]          = &LuaGlobalFunc::GetEditorString;
-    (*lua)["IsClient"]                 = &LuaGlobalFunc::IsClient;
+    (*lua)["Include"]                  = &lua::gfunc::Include;
+    (*lua)["GetPlayer"]                = &lua::gfunc::GetPlayer;
+    (*lua)["GetNpc"]                   = &lua::gfunc::GetNpc;
+    (*lua)["IsPlayer"]                 = &lua::gfunc::IsPlayer;
+    (*lua)["IsLangKeXingMap"]          = &lua::gfunc::IsLangKeXingMap;
+    (*lua)["ModityCDToUI"]             = &lua::gfunc::ModityCDToUI;
+    (*lua)["CheckInTongWar"]           = &lua::gfunc::CheckInTongWar;
+    (*lua)["IsTreasureBattleFieldMap"] = &lua::gfunc::IsTreasureBattleFieldMap;
+    (*lua)["GetValueByBits"]           = &lua::gfunc::GetValueByBits;
+    (*lua)["SetValueByBits"]           = &lua::gfunc::SetValueByBits;
+    (*lua)["RemoteCallToClient"]       = &lua::gfunc::RemoteCallToClient;
+    (*lua)["GetDistanceSq"]            = &lua::gfunc::GetDistanceSq;
+    (*lua)["Random"]                   = &lua::gfunc::Random;
+    (*lua)["GetEditorString"]          = &lua::gfunc::GetEditorString;
+    (*lua)["IsClient"]                 = &lua::gfunc::IsClient;
 
     // lua 常量
 
@@ -295,137 +295,4 @@ sol::state *frame::luaInit() {
     (*lua)["ABSORB_ATTRIBUTE_SHIELD_TYPE"] = ABSORB_ATTRIBUTE_SHIELD_TYPE;
 
     return lua;
-}
-
-void LuaGlobalFunc::Include(const std::string &filename) {
-    LuaCpp::include(filename);
-    return;
-}
-
-Character *LuaGlobalFunc::GetPlayer(int nCharacterID) {
-    return Character::characterGet(nCharacterID);
-}
-
-Character *LuaGlobalFunc::GetNpc(int nCharacterID) {
-    return Character::characterGet(nCharacterID);
-}
-
-bool LuaGlobalFunc::IsPlayer(int nCharacterID) {
-    return Character::characterGet(nCharacterID)->isPlayer;
-}
-
-bool LuaGlobalFunc::IsLangKeXingMap(int mapID) {
-    UNREFERENCED_PARAMETER(mapID);
-    return false;
-}
-
-void LuaGlobalFunc::ModityCDToUI(frame::Character *character, int skillID, int c, int d) {
-    UNREFERENCED_PARAMETER(character);
-    UNREFERENCED_PARAMETER(skillID);
-    UNREFERENCED_PARAMETER(c);
-    UNREFERENCED_PARAMETER(d);
-    return;
-}
-
-bool LuaGlobalFunc::CheckInTongWar(frame::Character *character) {
-    UNREFERENCED_PARAMETER(character);
-    return false;
-}
-
-bool LuaGlobalFunc::IsTreasureBattleFieldMap(int mapID) {
-    UNREFERENCED_PARAMETER(mapID);
-    return false;
-}
-
-/* ```lua
--- 函数名	: CustomFunction.GetValueByBit
--- 函数描述	: 获得数字的某一比特位值
--- 参数列表	:  nValue：值；nBit：取值范围[0,31]
--- 返回值	: 1 or 0
--- 备注		: CustomFunction.GetValueByBit(10, 31)，表示获取数字“10”的第31个Bit位的值。
-function CustomFunction.GetValueByBit(nValue, nBit)
-    if nBit > 31 or nBit < 0 then
-        print(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error")
-        --return nValue
-    end
-    return GetValueByBits(nValue, nBit, 1)
-    --return math.floor(nValue / 2 ^ nBit) % 2
-end
-``` */
-int LuaGlobalFunc::GetValueByBits(int nValue, int nBit, int c) {
-    UNREFERENCED_PARAMETER(c);
-    if (nBit > 31 || nBit < 0) {
-        CONSTEXPR_LOG_ERROR(">>>>>>>CustomFunction.GetValueByBit Arg ERROR!!!!!BitIndex error{}", "");
-    }
-    return (nValue >> nBit) & 1;
-}
-
-/* ```lua
--- 函数名	: CustomFunction.SetValueByBit
--- 函数描述	: 将某个值的某一比特位值设置为0或者1
--- 参数列表	:  nValue：值；nBit：取值范围[0,31]；nNewBit：只能为0或者1
--- 返回值	: 设置完bit之后的新值
--- 备注		: CustomFunction.SetValueByBit(10,31,1)，表示将数字“10”的第31个Bit位的值置为1
-function CustomFunction.SetValueByBit(nValue, nBit, nNewBitValue)
-    if nNewBitValue > 1 or nNewBitValue < 0 then
-        print(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,")
-        return nValue
-    end
-    if nBit > 31 or nBit < 0 then
-        print(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!BitIndex error")
-        return nValue
-    end
-    return SetValueByBits(nValue, nBit, 1, nNewBitValue)
-    --如果要设置的新值和旧值一样，那么值不变，直接返回
-    --if math.floor(nValue / 2 ^ nBit) % 2 == nNewBitValue then
-        --return nValue
-    --end
-    --如果参数不正确那么
-    --if nNewBitValue > 1 or nNewBitValue < 0 or nBit > 31 or nBit < 0 then
-        --print(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nBit=[] nNewBit Must be 0 or 1,")
-        --return nValue
-    --end
-    --0设成1加值，1变成0减值
-    --print("SetValueByBit="..nNewBitValue)
-    --if nNewBitValue == 1 then
-        --return nValue + 2 ^ nBit
-    --else
-        --return nValue - 2 ^ nBit
-    --end
-end
-``` */
-int LuaGlobalFunc::SetValueByBits(int nValue, int nBit, int c, int nNewBitValue) {
-    UNREFERENCED_PARAMETER(c);
-    if (nNewBitValue > 1 || nNewBitValue < 0) {
-        CONSTEXPR_LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!nNewBit Must be 0 or 1,{}", "");
-        return nValue;
-    }
-    if (nBit > 31 || nBit < 0) {
-        CONSTEXPR_LOG_ERROR(">>>>>>>CustomFunction.SetValueByBit Arg ERROR!!!!!BitIndex error{}", "");
-        return nValue;
-    }
-    return (nValue & ~(1 << nBit)) | (nNewBitValue << nBit);
-}
-
-void LuaGlobalFunc::RemoteCallToClient() {
-    return;
-}
-
-int LuaGlobalFunc::GetDistanceSq(int pX, int pY, int pZ, int tX, int tY, int tZ) {
-    return (pX - tX) * (pX - tX) + (pY - tY) * (pY - tY) + (pZ - tZ) * (pZ - tZ);
-}
-
-int LuaGlobalFunc::Random(int min, int max) {
-    std::random_device              rd;
-    std::mt19937                    gen(rd());
-    std::uniform_int_distribution<> dis(min, max);
-    return static_cast<int>(dis(gen));
-}
-
-std::string LuaGlobalFunc::GetEditorString(int a, int b) {
-    return std::to_string(a) + "-" + std::to_string(b);
-}
-
-bool LuaGlobalFunc::IsClient() {
-    return false;
 }

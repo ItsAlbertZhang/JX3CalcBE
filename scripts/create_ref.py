@@ -125,8 +125,7 @@ map_to_create: dict[str, MyClass] = {
 for key, value in map_to_create.items():
     value.vector.sort()
     output = f"""\
-#ifndef FRAME_REF_{value.name.upper()}_H_
-#define FRAME_REF_{value.name.upper()}_H_
+#pragma once
 
 """
     if value.map:
@@ -173,8 +172,6 @@ namespace ref {
 } // namespace jx3calc
 
 """
-    output += f"""\
-#endif // FRAME_REF_{value.name.upper()}_H_
-"""
+
     with open(f"source/include/frame/ref/{value.name}.h", "w") as f:
         f.write(output)

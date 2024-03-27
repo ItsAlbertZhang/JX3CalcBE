@@ -1,5 +1,4 @@
-#ifndef FRAME_GLOBAL_SKILL_H_
-#define FRAME_GLOBAL_SKILL_H_
+#pragma once
 
 #include "frame/ref/global_skill.h"
 #include <cstdint>
@@ -291,5 +290,3 @@ private:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_GLOBAL_SKILL_H_

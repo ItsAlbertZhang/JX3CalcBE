@@ -1,7 +1,6 @@
-#ifndef FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_
-#define FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_
+#pragma once
 
-#include "frame/character/property/damage.h"
+#include "frame/common/damage.h"
 #include <queue>
 #include <vector>
 
@@ -41,5 +40,3 @@ public:
 
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_

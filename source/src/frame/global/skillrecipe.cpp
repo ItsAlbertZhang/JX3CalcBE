@@ -1,5 +1,5 @@
 #include "frame/global/skillrecipe.h"
-#include "frame/lua_runtime.h"
+#include "frame/lua/interface.h"
 #include "gdi.h"
 #include "plugin/log.h"
 #include <tuple>
@@ -70,12 +70,12 @@ void SkillRecipeManager::addScriptSkill(const SkillRecipe *skillrecipe, const Sk
     scriptskill.dwSkillID = skill->dwSkillID;
     scriptskill.dwLevel   = skill->dwLevel;
     std::string path      = "scripts/skill/" + skillrecipe->tab.at("ScriptFile");
-    bool        res       = LuaCpp::analysis(
-        LuaCpp::getGetSkillRecipeData(path)(
+    bool        res       = lua::interface::analysis(
+        lua::interface::getGetSkillRecipeData(path)(
             scriptskill, skillrecipe->RecipeID, skillrecipe->RecipeLevel
         ),
         path,
-        LuaCpp::Func::GetSkillRecipeData
+        lua::interface::FuncType::GetSkillRecipeData
     );
     if (res) {
         // 成功执行, 将技能添加到 ScriptSkill 中

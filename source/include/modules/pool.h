@@ -1,5 +1,4 @@
-#ifndef MODULES_POOL_H_
-#define MODULES_POOL_H_
+#pragma once
 
 #include <condition_variable>
 #include <functional>
@@ -80,5 +79,3 @@ private:
 
 } // namespace modules
 } // namespace jx3calc
-
-#endif // MODULES_POOL_H_

@@ -1,5 +1,4 @@
-#ifndef FRAME_REF_LUA_ATTRIBUTE_TYPE_H_
-#define FRAME_REF_LUA_ATTRIBUTE_TYPE_H_
+#pragma once
 
 namespace jx3calc {
 namespace frame {
@@ -150,5 +149,3 @@ inline const char *refLuaAttributeType[] = {
 } // namespace ref
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_REF_LUA_ATTRIBUTE_TYPE_H_

@@ -1,5 +1,4 @@
-#ifndef FRAME_CHARACTER_PROPERTY_ATTRIBUTE_H_
-#define FRAME_CHARACTER_PROPERTY_ATTRIBUTE_H_
+#pragma once
 
 #include <cstring>
 
@@ -238,5 +237,3 @@ public:
 };
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_CHARACTER_PROPERTY_ATTRIBUTE_H_

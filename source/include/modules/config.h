@@ -1,5 +1,4 @@
-#ifndef MODULES_CONFIG_H_
-#define MODULES_CONFIG_H_
+#pragma once
 
 #include <filesystem>
 #include <nlohmann/json.hpp>
@@ -32,5 +31,3 @@ std::string status();
 }; // namespace config
 } // namespace modules
 } // namespace jx3calc
-
-#endif // MODULES_CONFIG_H_

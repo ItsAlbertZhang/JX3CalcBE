@@ -1,19 +1,14 @@
-#ifndef FRAME_LUA_STATIC_H_
-#define FRAME_LUA_STATIC_H_
+#pragma once
 
 #include "frame/character/character.h"
-#include <sol/sol.hpp>
 #include <string>
 
 namespace jx3calc {
 namespace frame {
+namespace lua {
 
-sol::state *luaInit();
+namespace gfunc {
 
-extern const char *const luaFuncList[];
-extern const size_t      luaFuncListSize;
-
-namespace LuaGlobalFunc {
 bool        CheckInTongWar(frame::Character *character);
 bool        IsLangKeXingMap(int mapID);
 bool        IsClient();
@@ -29,9 +24,9 @@ void        ModityCDToUI(frame::Character *character, int skillID, int c, int d)
 void        RemoteCallToClient();
 Character  *GetPlayer(int nCharacterID);
 Character  *GetNpc(int nCharacterID);
-}; // namespace LuaGlobalFunc
 
+} // namespace gfunc
+
+} // namespace lua
 } // namespace frame
 } // namespace jx3calc
-
-#endif // FRAME_LUA_STATIC_H_

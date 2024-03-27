@@ -1,5 +1,5 @@
 #include "frame/character/character.h"
-#include "frame/character/property/damage.h"
+#include "frame/common/damage.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
 #include "plugin/channelinterval.h"
