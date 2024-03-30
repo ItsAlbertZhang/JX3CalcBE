@@ -233,61 +233,61 @@ sol::state *frame::lua::statics::luaInit() {
     // lua 表
 
     sol::table AttributeType = lua->create_table();
-    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ATTRIBUTE_TYPE>::Type::COUNT); i++) {
-        AttributeType[Ref<ref::lua::ATTRIBUTE_TYPE>::list[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ATTRIBUTE_TYPE>::count); i++) {
+        AttributeType[Ref<ref::lua::ATTRIBUTE_TYPE>::names[i]] = i;
     }
     (*lua)["ATTRIBUTE_TYPE"] = AttributeType;
 
     sol::table AttributeEffectMode = lua->create_table();
-    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ATTRIBUTE_EFFECT_MODE>::Type::COUNT); i++) {
-        AttributeEffectMode[Ref<ref::lua::ATTRIBUTE_EFFECT_MODE>::list[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ATTRIBUTE_EFFECT_MODE>::count); i++) {
+        AttributeEffectMode[Ref<ref::lua::ATTRIBUTE_EFFECT_MODE>::names[i]] = i;
     }
     (*lua)["ATTRIBUTE_EFFECT_MODE"] = AttributeEffectMode;
 
     sol::table BuffCompareFlag = lua->create_table();
-    for (int i = 0; i < static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::COUNT); i++) {
-        BuffCompareFlag[Ref<ref::lua::BUFF_COMPARE_FLAG>::list[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::count); i++) {
+        BuffCompareFlag[Ref<ref::lua::BUFF_COMPARE_FLAG>::names[i]] = i;
     }
     (*lua)["BUFF_COMPARE_FLAG"] = BuffCompareFlag;
 
     sol::table SKILL_COMPARE_FLAG = lua->create_table();
-    for (int i = 0; i < static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::COUNT); i++) {
-        SKILL_COMPARE_FLAG[Ref<ref::lua::BUFF_COMPARE_FLAG>::list[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::count); i++) {
+        SKILL_COMPARE_FLAG[Ref<ref::lua::BUFF_COMPARE_FLAG>::names[i]] = i;
     }
     (*lua)["SKILL_COMPARE_FLAG"] = SKILL_COMPARE_FLAG;
 
     sol::table TARGET = lua->create_table();
-    for (int i = 0; i < static_cast<int>(Ref<ref::lua::TARGET>::Type::COUNT); i++) {
-        TARGET[Ref<ref::lua::TARGET>::list[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::TARGET>::count); i++) {
+        TARGET[Ref<ref::lua::TARGET>::names[i]] = i;
     }
     (*lua)["TARGET"] = TARGET;
 
     sol::table SKILL_KIND_TYPE = lua->create_table();
-    for (int i = 0; i < static_cast<int>(Ref<ref::lua::SKILL_KIND_TYPE>::Type::COUNT); i++) {
-        SKILL_KIND_TYPE[Ref<ref::lua::SKILL_KIND_TYPE>::list[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::SKILL_KIND_TYPE>::count); i++) {
+        SKILL_KIND_TYPE[Ref<ref::lua::SKILL_KIND_TYPE>::names[i]] = i;
     }
     (*lua)["SKILL_KIND_TYPE"] = SKILL_KIND_TYPE;
 
     sol::table ROLE_TYPE = lua->create_table();
-    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ROLE_TYPE>::Type::COUNT); i++) {
-        ROLE_TYPE[Ref<ref::lua::ROLE_TYPE>::list[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ROLE_TYPE>::count); i++) {
+        ROLE_TYPE[Ref<ref::lua::ROLE_TYPE>::names[i]] = i;
     }
     (*lua)["ROLE_TYPE"] = ROLE_TYPE;
 
     sol::table ABSORB_ATTRIBUTE_SHIELD_TYPE = lua->create_table();
-    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ABSORB_ATTRIBUTE_SHIELD_TYPE>::Type::COUNT); i++) {
-        ABSORB_ATTRIBUTE_SHIELD_TYPE[Ref<ref::lua::ABSORB_ATTRIBUTE_SHIELD_TYPE>::list[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ABSORB_ATTRIBUTE_SHIELD_TYPE>::count); i++) {
+        ABSORB_ATTRIBUTE_SHIELD_TYPE[Ref<ref::lua::ABSORB_ATTRIBUTE_SHIELD_TYPE>::names[i]] = i;
     }
     (*lua)["ABSORB_ATTRIBUTE_SHIELD_TYPE"] = ABSORB_ATTRIBUTE_SHIELD_TYPE;
 
     sol::table MOVE_STATE = lua->create_table();
-    for (int i = 0; i < static_cast<int>(Ref<ref::lua::MOVE_STATE>::Type::COUNT); i++) {
-        MOVE_STATE[Ref<ref::lua::MOVE_STATE>::list[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::MOVE_STATE>::count); i++) {
+        MOVE_STATE[Ref<ref::lua::MOVE_STATE>::names[i]] = i;
     }
     (*lua)["MOVE_STATE"] = MOVE_STATE;
 
     sol::table KUNGFU_ADAPTIVETYPE_LIST = lua->create_table();
-    for (auto &it : Ref<ref::lua::KUNGFU_ADAPTIVETYPE_LIST>::EnumToType) {
+    for (auto &it : Ref<ref::lua::KUNGFU_ADAPTIVETYPE_LIST>::kungfu2type) {
         sol::table sub_table                                 = lua->create_table();
         sub_table["adaptiveType"]                            = static_cast<int>(it.second);
         KUNGFU_ADAPTIVETYPE_LIST[static_cast<int>(it.first)] = sub_table;

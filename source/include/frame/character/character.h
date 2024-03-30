@@ -43,7 +43,7 @@ public:
     Character *targetSelect = nullptr; // 选中的目标
     Character *targetCurr   = nullptr; // 当前目标
 
-    Ref<ref::lua::SKILL_KIND_TYPE>::Type atAdaptiveSkillType = Ref<ref::lua::SKILL_KIND_TYPE>::Type::COUNT;
+    ref::lua::SKILL_KIND_TYPE atAdaptiveSkillType;
 
     ChAttr        chAttr;        // 角色属性. 这一属性暂时被 api.lua 调用.
     ChBuff        chBuff;        // 角色 buff
@@ -93,7 +93,7 @@ public:
     void skillrecipeAdd(int recipeID, int recipeLevel);
     void skillrecipeRemove(int recipeID, int recipeLevel);
     // skillevent
-    auto skilleventGet(Ref<ref::SkillEvent::EventType>::Type type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2) -> std::set<const SkillEvent *>;
+    auto skilleventGet(ref::SkillEvent::EventType type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2) -> std::set<const SkillEvent *>;
     void skilleventAdd(int eventID);
     void skilleventRemove(int eventID);
 

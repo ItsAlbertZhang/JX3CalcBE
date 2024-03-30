@@ -26,7 +26,7 @@ public:
     std::unordered_map<std::string, std::string> ui;  // ui_skill.tab 中的数据
     std::string                                  Name;
 
-    Ref<ref::Skill::KindType>::Type KindType;
+    ref::Skill::KindType KindType;
 
     bool     IsPassiveSkill;
     bool     HasCriticalStrike;

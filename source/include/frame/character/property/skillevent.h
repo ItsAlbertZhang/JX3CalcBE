@@ -14,7 +14,7 @@ public:
     // 下列方法均已在 Character 类中实现.
     // void add(int ID);
     // void remove(int ID);
-    // std::set<const SkillEvent *> getList(Ref<ref::SkillEvent::EventType>::Type type, int EventSkillID, uint32_t EventMask1, uint32_t EventMask2);
+    // std::set<const SkillEvent *> getList(ref::SkillEvent::EventType type, int EventSkillID, uint32_t EventMask1, uint32_t EventMask2);
 
     class ItemType {
     public:
@@ -23,7 +23,7 @@ public:
         std::set<const SkillEvent *>                          EventMask2[32]; // 用于快速查找指定 EventMask2 的 SkillEvent
     };
 
-    ItemType data[static_cast<int>(Ref<ref::SkillEvent::EventType>::Type::COUNT)];
+    ItemType data[Ref<ref::SkillEvent::EventType>::count];
 };
 
 } // namespace frame

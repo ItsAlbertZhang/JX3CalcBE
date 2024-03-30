@@ -22,16 +22,16 @@ public:
     std::unordered_map<std::string, std::string> tab; // buffs.tab 中的数据
 
     // 初始化时拿出一些数据, 降低使用开销
-    int                                      ID;
-    Ref<ref::SkillEvent::EventType>::Type    type = Ref<ref::SkillEvent::EventType>::Type::COUNT;
-    int                                      Odds;
-    int                                      SkillID;
-    int                                      SkillLevel;
-    Ref<ref::SkillEvent::CasterTarget>::Type SkillCaster = Ref<ref::SkillEvent::CasterTarget>::Type::COUNT;
-    Ref<ref::SkillEvent::CasterTarget>::Type SkillTarget = Ref<ref::SkillEvent::CasterTarget>::Type::COUNT;
-    uint32_t                                 EventMask1;
-    uint32_t                                 EventMask2;
-    int                                      EventSkillID;
+    int                           ID;
+    ref::SkillEvent::EventType    type;
+    int                           Odds;
+    int                           SkillID;
+    int                           SkillLevel;
+    ref::SkillEvent::CasterTarget SkillCaster;
+    ref::SkillEvent::CasterTarget SkillTarget;
+    uint32_t                      EventMask1;
+    uint32_t                      EventMask2;
+    int                           EventSkillID;
     // int                             EventSkillLevel; // 此属性事实上被弃用
 };
 

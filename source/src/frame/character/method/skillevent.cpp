@@ -31,12 +31,9 @@ void Character::skilleventRemove(int eventID) {
 }
 
 std::set<const SkillEvent *> Character::skilleventGet(
-    Ref<ref::SkillEvent::EventType>::Type type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2
+    ref::SkillEvent::EventType type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2
 ) {
     std::set<const SkillEvent *> emptySet;
-    if (type == Ref<ref::SkillEvent::EventType>::Type::COUNT) {
-        return emptySet;
-    }
     if (eventskillID != 0) {
         emptySet.insert(
             this->chSkillEvent.data[static_cast<int>(type)].EventSkillID[eventskillID].begin(),

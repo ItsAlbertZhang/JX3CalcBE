@@ -1,7 +1,7 @@
 #include "frame/character/helper/auto_rollback_attrib.h"
 #include "frame/character/character.h"
 #include "frame/lua/interface.h"
-#include "frame/ref/tab_attribute.h" // Ref<ref::Attrib>::Type
+#include "frame/ref/tab_attribute.h" // ref::Attrib
 #include "plugin/log.h"
 #include <random>
 
@@ -47,13 +47,13 @@ void AutoRollbackAttrib::active() {
 void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     int c = isRollback ? -1 : 1;
     switch (attrib.type) {
-    case Ref<ref::Attrib>::Type::atLunarDamageCoefficient:
+    case ref::Attrib::atLunarDamageCoefficient:
         self->chAttr.atLunarDamageCoefficient += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atSolarDamageCoefficient:
+    case ref::Attrib::atSolarDamageCoefficient:
         self->chAttr.atSolarDamageCoefficient += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atCallSolarDamage: {
+    case ref::Attrib::atCallSolarDamage: {
         // 计算会心
         Character *src                                 = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
@@ -84,7 +84,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         ));
         src->bFightState = true;
     } break;
-    case Ref<ref::Attrib>::Type::atCallLunarDamage: {
+    case ref::Attrib::atCallLunarDamage: {
         // 计算会心
         Character *src                                 = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
@@ -115,7 +115,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         ));
         src->bFightState = true;
     } break;
-    case Ref<ref::Attrib>::Type::atExecuteScript: {
+    case ref::Attrib::atExecuteScript: {
         std::string paramStr = "scripts/" + attrib.valueAStr;
         if (isRollback) {
             if (!lua::interface::analysis(lua::interface::getUnApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, lua::interface::FuncType::UnApply))
@@ -125,91 +125,91 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
                 CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
         }
     } break;
-    case Ref<ref::Attrib>::Type::atLunarCriticalStrikeBaseRate:
+    case ref::Attrib::atLunarCriticalStrikeBaseRate:
         self->chAttr.atLunarCriticalStrikeBaseRate += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atSolarCriticalStrikeBaseRate:
+    case ref::Attrib::atSolarCriticalStrikeBaseRate:
         self->chAttr.atSolarCriticalStrikeBaseRate += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atMagicCriticalDamagePowerBaseKiloNumRate:
+    case ref::Attrib::atMagicCriticalDamagePowerBaseKiloNumRate:
         self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atAllShieldIgnorePercent:
+    case ref::Attrib::atAllShieldIgnorePercent:
         self->chAttr.atAllShieldIgnorePercent += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atAddTransparencyValue:
+    case ref::Attrib::atAddTransparencyValue:
         // 未做相关实现, 推测为透明度
         break;
-    case Ref<ref::Attrib>::Type::atSetSelectableType:
+    case ref::Attrib::atSetSelectableType:
         // 未做相关实现, 推测为是否可以选中
         break;
-    case Ref<ref::Attrib>::Type::atSkillEventHandler:
+    case ref::Attrib::atSkillEventHandler:
         if (isRollback) {
             self->skilleventRemove(attrib.valueAInt);
         } else {
             self->skilleventAdd(attrib.valueAInt);
         }
         break;
-    case Ref<ref::Attrib>::Type::atStealth:
+    case ref::Attrib::atStealth:
         // 未做相关实现, 推测为隐身
         break;
-    case Ref<ref::Attrib>::Type::atMoveSpeedPercent:
+    case ref::Attrib::atMoveSpeedPercent:
         // 未做相关实现, 推测为移动速度
         break;
-    case Ref<ref::Attrib>::Type::atKnockedDownRate:
+    case ref::Attrib::atKnockedDownRate:
         // 未做相关实现, 推测为免疫击倒
         break;
-    case Ref<ref::Attrib>::Type::atBeImmunisedStealthEnable:
+    case ref::Attrib::atBeImmunisedStealthEnable:
         // 未做相关实现
         break;
-    case Ref<ref::Attrib>::Type::atImmunity:
+    case ref::Attrib::atImmunity:
         // 未做相关实现
         break;
-    case Ref<ref::Attrib>::Type::atImmuneSkillMove:
+    case ref::Attrib::atImmuneSkillMove:
         // 未做相关实现
         break;
-    case Ref<ref::Attrib>::Type::atActiveThreatCoefficient:
+    case ref::Attrib::atActiveThreatCoefficient:
         // 未做相关实现, 推测为威胁值
         break;
-    case Ref<ref::Attrib>::Type::atHalt:
+    case ref::Attrib::atHalt:
         // 未做相关实现, 推测为禁止移动
         break;
-    case Ref<ref::Attrib>::Type::atNoLimitChangeSkillIcon:
+    case ref::Attrib::atNoLimitChangeSkillIcon:
         // 未做相关实现, 推测为技能图标替换
         break;
-    case Ref<ref::Attrib>::Type::atSetTalentRecipe:
+    case ref::Attrib::atSetTalentRecipe:
         if (isRollback) {
             self->skillrecipeRemove(attrib.valueAInt, attrib.valueBInt);
         } else {
             self->skillrecipeAdd(attrib.valueAInt, attrib.valueBInt);
         }
         break;
-    case Ref<ref::Attrib>::Type::atAllMagicDamageAddPercent:
+    case ref::Attrib::atAllMagicDamageAddPercent:
         self->chAttr.atAllMagicDamageAddPercent += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atBeTherapyCoefficient:
+    case ref::Attrib::atBeTherapyCoefficient:
         self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atCallBuff:
+    case ref::Attrib::atCallBuff:
         self->buffAdd(0, 99, attrib.valueAInt, attrib.valueBInt);
         break;
-    case Ref<ref::Attrib>::Type::atKnockedOffRate:
+    case ref::Attrib::atKnockedOffRate:
         // 未做相关实现, 推测为免疫击退
         break;
-    case Ref<ref::Attrib>::Type::atSolarCriticalDamagePowerBaseKiloNumRate:
+    case ref::Attrib::atSolarCriticalDamagePowerBaseKiloNumRate:
         self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atLunarCriticalDamagePowerBaseKiloNumRate:
+    case ref::Attrib::atLunarCriticalDamagePowerBaseKiloNumRate:
         self->chAttr.atLunarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atAllDamageAddPercent:
+    case ref::Attrib::atAllDamageAddPercent:
         self->chAttr.atAllDamageAddPercent += attrib.valueAInt * c;
         break;
-    case Ref<ref::Attrib>::Type::atMagicOvercome:
+    case ref::Attrib::atMagicOvercome:
         self->chAttr.atMagicOvercome += attrib.valueAInt * c;
         break;
     default:
-        CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, Ref<ref::Attrib>::list[static_cast<int>(attrib.type)], attrib.valueAInt);
+        CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, Ref<ref::Attrib>::names[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;
     }
 }

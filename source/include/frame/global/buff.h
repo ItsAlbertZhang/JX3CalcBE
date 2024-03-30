@@ -1,6 +1,6 @@
 #pragma once
 
-#include "frame/ref/tab_attribute.h" // Ref<ref::Attrib>::Type
+#include "frame/ref/tab_attribute.h" // ref::Attrib
 #include <mutex>
 #include <string>
 #include <tuple>
@@ -41,13 +41,13 @@ public:
 
     class Attrib {
     public:
-        Attrib(Ref<ref::Attrib>::Type type, const std::string &valueA, const std::string &valueB)
+        Attrib(ref::Attrib type, const std::string &valueA, const std::string &valueB)
             : type(type), valueAStr(valueA), valueBStr(valueB) {}
-        Ref<ref::Attrib>::Type type      = Ref<ref::Attrib>::Type::COUNT;
-        std::string            valueAStr = "";
-        std::string            valueBStr = "";
-        int                    valueAInt = 0;
-        int                    valueBInt = 0;
+        ref::Attrib type;
+        std::string valueAStr;
+        std::string valueBStr;
+        int         valueAInt;
+        int         valueBInt;
     };
     std::vector<Attrib> BeginAttrib;
     std::vector<Attrib> ActiveAttrib;

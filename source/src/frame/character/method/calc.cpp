@@ -17,23 +17,23 @@ std::tuple<int, int> Character::calcCritical(const ChAttr &attrSelf, int skillID
         return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 
     switch (skill.KindType) {
-    case Ref<ref::Skill::KindType>::Type::Physics:
+    case ref::Skill::KindType::Physics:
         atCriticalStrike      = attrSelf.getPhysicsCriticalStrike();
         atCriticalDamagePower = attrSelf.getPhysicsCriticalDamagePower();
         break;
-    case Ref<ref::Skill::KindType>::Type::SolarMagic:
+    case ref::Skill::KindType::SolarMagic:
         atCriticalStrike      = attrSelf.getSolarCriticalStrike();
         atCriticalDamagePower = attrSelf.getSolarCriticalDamagePower();
         break;
-    case Ref<ref::Skill::KindType>::Type::LunarMagic:
+    case ref::Skill::KindType::LunarMagic:
         atCriticalStrike      = attrSelf.getLunarCriticalStrike();
         atCriticalDamagePower = attrSelf.getLunarCriticalDamagePower();
         break;
-    case Ref<ref::Skill::KindType>::Type::NeutralMagic:
+    case ref::Skill::KindType::NeutralMagic:
         atCriticalStrike      = attrSelf.getNeutralCriticalStrike();
         atCriticalDamagePower = attrSelf.getNeutralCriticalDamagePower();
         break;
-    case Ref<ref::Skill::KindType>::Type::Poison:
+    case ref::Skill::KindType::Poison:
         atCriticalStrike      = attrSelf.getPoisonCriticalStrike();
         atCriticalDamagePower = attrSelf.getPoisonCriticalDamagePower();
         break;

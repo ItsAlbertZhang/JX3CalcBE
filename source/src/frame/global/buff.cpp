@@ -13,7 +13,7 @@ const Buff &BuffManager::get(int buffID, int buffLevel) {
     return data[std::make_tuple(buffID, buffLevel)];
 }
 
-static inline void addAttribute(std::vector<frame::Buff::Attrib> &attrib, Ref<ref::Attrib>::Type type, const std::string &valueA, const std::string &valueB) {
+static inline void addAttribute(std::vector<frame::Buff::Attrib> &attrib, ref::Attrib type, const std::string &valueA, const std::string &valueB) {
     auto &it     = attrib.emplace_back(type, valueA, valueB);
     // 尝试将 valueA 和 value B 转换为数字形态. 若转换失败, 则其会被置为 0, 且不会引发报错.
     it.valueAInt = atoi(valueA.c_str());

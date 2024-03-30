@@ -30,19 +30,16 @@ void SkillEventManager::add(int ID) {
     gdi::tabSelect(gdi::Tab::skillevent, arg);
     skillevent.tab = std::move(arg[0]);
 
-    using typeEventType    = Ref<ref::SkillEvent::EventType>::Type;
-    using typeCasterTarget = Ref<ref::SkillEvent::CasterTarget>::Type;
-
-    auto &mapEventType    = Ref<ref::SkillEvent::EventType>::map;
-    auto &mapCasterTarget = Ref<ref::SkillEvent::CasterTarget>::map;
+    auto &m_et = Ref<ref::SkillEvent::EventType>::map;
+    auto &m_ct = Ref<ref::SkillEvent::CasterTarget>::map;
 
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    skillevent.type         = mapEventType.contains(skillevent.tab["EventType"]) ? mapEventType.at(skillevent.tab["EventType"]) : typeEventType::COUNT;
+    skillevent.type         = m_et.at(skillevent.tab["EventType"]);
     skillevent.Odds         = std::stoi(skillevent.tab["Odds"]);
     skillevent.SkillID      = std::stoi(skillevent.tab["SkillID"]);
     skillevent.SkillLevel   = std::stoi(skillevent.tab["SkillLevel"]);
-    skillevent.SkillCaster  = mapCasterTarget.contains(skillevent.tab["SkillCaster"]) ? mapCasterTarget.at(skillevent.tab["SkillCaster"]) : typeCasterTarget::COUNT;
-    skillevent.SkillTarget  = mapCasterTarget.contains(skillevent.tab["SkillTarget"]) ? mapCasterTarget.at(skillevent.tab["SkillTarget"]) : typeCasterTarget::COUNT;
+    skillevent.SkillCaster  = m_ct.at(skillevent.tab["SkillCaster"]);
+    skillevent.SkillTarget  = m_ct.at(skillevent.tab["SkillTarget"]);
     skillevent.EventMask1   = std::stoi(skillevent.tab["EventMask1"]);
     skillevent.EventMask2   = std::stoi(skillevent.tab["EventMask2"]);
     skillevent.EventSkillID = std::stoi(skillevent.tab["EventSkillID"]);
