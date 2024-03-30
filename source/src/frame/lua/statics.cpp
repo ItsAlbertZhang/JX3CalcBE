@@ -3,9 +3,9 @@
 #include "frame/global/skill.h"
 #include "frame/lua/global_func.h"
 #include "frame/lua/interface.h"
-#include "frame/ref/lua_adaptive_type.h"
 #include "frame/ref/lua_attribute_type.h"
-#include "frame/ref/lua_other.h"
+#include "frame/ref/lua_normal.h"
+#include "frame/ref/lua_special.h"
 #include <optional>
 
 using namespace jx3calc;
@@ -233,66 +233,66 @@ sol::state *frame::lua::statics::luaInit() {
     // lua 表
 
     sol::table AttributeType = lua->create_table();
-    for (int i = 0; i < static_cast<int>(ref::enumLuaAttributeType::COUNT); i++) {
-        AttributeType[ref::refLuaAttributeType[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ATTRIBUTE_TYPE>::Type::COUNT); i++) {
+        AttributeType[Ref<ref::lua::ATTRIBUTE_TYPE>::list[i]] = i;
     }
     (*lua)["ATTRIBUTE_TYPE"] = AttributeType;
 
     sol::table AttributeEffectMode = lua->create_table();
-    for (int i = 0; i < static_cast<int>(ref::enumLuaAttributeEffectMode::COUNT); i++) {
-        AttributeEffectMode[ref::refLuaAttributeEffectMode[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ATTRIBUTE_EFFECT_MODE>::Type::COUNT); i++) {
+        AttributeEffectMode[Ref<ref::lua::ATTRIBUTE_EFFECT_MODE>::list[i]] = i;
     }
     (*lua)["ATTRIBUTE_EFFECT_MODE"] = AttributeEffectMode;
 
     sol::table BuffCompareFlag = lua->create_table();
-    for (int i = 0; i < static_cast<int>(ref::enumLuaBuffCompareFlag::COUNT); i++) {
-        BuffCompareFlag[ref::refLuaBuffCompareFlag[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::COUNT); i++) {
+        BuffCompareFlag[Ref<ref::lua::BUFF_COMPARE_FLAG>::list[i]] = i;
     }
     (*lua)["BUFF_COMPARE_FLAG"] = BuffCompareFlag;
 
     sol::table SKILL_COMPARE_FLAG = lua->create_table();
-    for (int i = 0; i < static_cast<int>(ref::enumLuaSkillCompareFlag::COUNT); i++) {
-        SKILL_COMPARE_FLAG[ref::refLuaSkillCompareFlag[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::COUNT); i++) {
+        SKILL_COMPARE_FLAG[Ref<ref::lua::BUFF_COMPARE_FLAG>::list[i]] = i;
     }
     (*lua)["SKILL_COMPARE_FLAG"] = SKILL_COMPARE_FLAG;
 
     sol::table TARGET = lua->create_table();
-    for (int i = 0; i < static_cast<int>(ref::enumLuaTarget::COUNT); i++) {
-        TARGET[ref::refLuaTarget[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::TARGET>::Type::COUNT); i++) {
+        TARGET[Ref<ref::lua::TARGET>::list[i]] = i;
     }
     (*lua)["TARGET"] = TARGET;
 
     sol::table SKILL_KIND_TYPE = lua->create_table();
-    for (int i = 0; i < static_cast<int>(ref::enumLuaSkillKindType::COUNT); i++) {
-        SKILL_KIND_TYPE[ref::refLuaSkillKindType[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::SKILL_KIND_TYPE>::Type::COUNT); i++) {
+        SKILL_KIND_TYPE[Ref<ref::lua::SKILL_KIND_TYPE>::list[i]] = i;
     }
     (*lua)["SKILL_KIND_TYPE"] = SKILL_KIND_TYPE;
 
-    sol::table MOVE_STATE = lua->create_table();
-    for (int i = 0; i < static_cast<int>(ref::enumLuaMoveState::COUNT); i++) {
-        MOVE_STATE[ref::refLuaMoveState[i]] = i;
-    }
-    (*lua)["MOVE_STATE"] = MOVE_STATE;
-
     sol::table ROLE_TYPE = lua->create_table();
-    for (int i = 0; i < static_cast<int>(ref::enumLuaRoleType::COUNT); i++) {
-        ROLE_TYPE[ref::refLuaRoleType[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ROLE_TYPE>::Type::COUNT); i++) {
+        ROLE_TYPE[Ref<ref::lua::ROLE_TYPE>::list[i]] = i;
     }
     (*lua)["ROLE_TYPE"] = ROLE_TYPE;
 
-    sol::table KUNGFU_ADAPTIVETYPE_LIST = lua->create_table();
-    for (auto &i : ref::mapLuaAdaptiveType) {
-        sol::table sub_table                                = lua->create_table();
-        sub_table["adaptiveType"]                           = static_cast<int>(i.second);
-        KUNGFU_ADAPTIVETYPE_LIST[static_cast<int>(i.first)] = sub_table;
-    }
-    (*lua)["KUNGFU_ADAPTIVETYPE_LIST"] = KUNGFU_ADAPTIVETYPE_LIST;
-
     sol::table ABSORB_ATTRIBUTE_SHIELD_TYPE = lua->create_table();
-    for (int i = 0; i < static_cast<int>(ref::enumLuaAbsorbAttributeShieldType::COUNT); i++) {
-        ROLE_TYPE[ref::refLuaAbsorbAttributeShieldType[i]] = i;
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::ABSORB_ATTRIBUTE_SHIELD_TYPE>::Type::COUNT); i++) {
+        ABSORB_ATTRIBUTE_SHIELD_TYPE[Ref<ref::lua::ABSORB_ATTRIBUTE_SHIELD_TYPE>::list[i]] = i;
     }
     (*lua)["ABSORB_ATTRIBUTE_SHIELD_TYPE"] = ABSORB_ATTRIBUTE_SHIELD_TYPE;
+
+    sol::table MOVE_STATE = lua->create_table();
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::MOVE_STATE>::Type::COUNT); i++) {
+        MOVE_STATE[Ref<ref::lua::MOVE_STATE>::list[i]] = i;
+    }
+    (*lua)["MOVE_STATE"] = MOVE_STATE;
+
+    sol::table KUNGFU_ADAPTIVETYPE_LIST = lua->create_table();
+    for (auto &it : Ref<ref::lua::KUNGFU_ADAPTIVETYPE_LIST>::EnumToType) {
+        sol::table sub_table                                 = lua->create_table();
+        sub_table["adaptiveType"]                            = static_cast<int>(it.second);
+        KUNGFU_ADAPTIVETYPE_LIST[static_cast<int>(it.first)] = sub_table;
+    }
+    (*lua)["KUNGFU_ADAPTIVETYPE_LIST"] = KUNGFU_ADAPTIVETYPE_LIST;
 
     return lua;
 }

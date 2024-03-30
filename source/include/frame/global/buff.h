@@ -1,6 +1,6 @@
 #pragma once
 
-#include "frame/ref/tab_attribute.h" // ref::enumTabAttribute
+#include "frame/ref/tab_attribute.h" // Ref<ref::Attrib>::Type
 #include <mutex>
 #include <string>
 #include <tuple>
@@ -41,13 +41,13 @@ public:
 
     class Attrib {
     public:
-        Attrib(ref::enumTabAttribute type, const std::string &valueA, const std::string &valueB)
+        Attrib(Ref<ref::Attrib>::Type type, const std::string &valueA, const std::string &valueB)
             : type(type), valueAStr(valueA), valueBStr(valueB) {}
-        ref::enumTabAttribute type      = ref::enumTabAttribute::COUNT;
-        std::string           valueAStr = "";
-        std::string           valueBStr = "";
-        int                   valueAInt = 0;
-        int                   valueBInt = 0;
+        Ref<ref::Attrib>::Type type      = Ref<ref::Attrib>::Type::COUNT;
+        std::string            valueAStr = "";
+        std::string            valueBStr = "";
+        int                    valueAInt = 0;
+        int                    valueBInt = 0;
     };
     std::vector<Attrib> BeginAttrib;
     std::vector<Attrib> ActiveAttrib;

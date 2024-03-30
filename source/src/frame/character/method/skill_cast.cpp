@@ -228,7 +228,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     RuntimeCastSkill runtime{this, skillID, skillLevel};
 
     // 1. 执行 SkillEvent: PreCast
-    staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->skilleventGet(Ref<ref::SkillEvent::EventType>::Type::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
 
     // 2. 处理 SkillRecipe: CoolDownAdd. 顺便处理 DamageAddPercent.
     int DamageAddPercent = 0;
@@ -293,10 +293,10 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
         2. 其余的 SkillEvent 尚未实现.
         3. 目前 SkillEvent 能够享受 attribute 的加成, 暂时不清楚游戏内是否如此. (因为需要保证 PreCast 的即时插入, 所以 SkillEvent 采取了栈调用的方式)
     */
-    staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->skilleventGet(Ref<ref::SkillEvent::EventType>::Type::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->skilleventGet(Ref<ref::SkillEvent::EventType>::Type::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     if (isCritical) {
-        staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+        staticTriggerSkillEvent(this, this->skilleventGet(Ref<ref::SkillEvent::EventType>::Type::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     }
 
     return true;
@@ -355,7 +355,7 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
         }
         BuffItem *buff              = nullptr;
         int       nLevelCompareFlag = cond.nLevelCompareFlag;
-        if (cond.nLevel == 0 && cond.nLevelCompareFlag == static_cast<int>(ref::enumLuaBuffCompareFlag::EQUAL)) {
+        if (cond.nLevel == 0 && cond.nLevelCompareFlag == static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::EQUAL)) {
             /**
              * @note
              * 对于 "要求 buff 不存在" 的检查逻辑, 理论上讲应当是: 对于任何 level 的 buff, 要求其均不存在.
@@ -363,7 +363,7 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
              * 但不知为何, 在实际的 lua 中, 此逻辑变成了: 对于 nLevel EQUAL 0 的 buff, 要求其 nStackNum EQUAL 0. (可见 明教_烈日斩.lua)
              * 因此, 此处对其逻辑进行还原, 将 nLevel 的比较标志设置为 GREATER, 以符合实际的检查逻辑.
              */
-            nLevelCompareFlag = static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER);
+            nLevelCompareFlag = static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::GREATER);
         }
         if (checkbuffSrcOwn) {
             buff = checkbuffCharacter->buffGetByOwnerWithCompareFlag(cond.dwBuffID, cond.nLevel, self->dwID, nLevelCompareFlag);
@@ -383,13 +383,13 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
 
 static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue) {
     switch (flag) {
-    case static_cast<int>(ref::enumLuaBuffCompareFlag::EQUAL):
+    case static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::EQUAL):
         return buffValue == luaValue;
         break;
-    case static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER):
+    case static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::GREATER):
         return buffValue > luaValue;
         break;
-    case static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER_EQUAL):
+    case static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::GREATER_EQUAL):
         return buffValue >= luaValue;
         break;
     }
@@ -411,13 +411,13 @@ static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skil
 
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue) {
     switch (flag) {
-    case static_cast<int>(ref::enumLuaSkillCompareFlag::EQUAL):
+    case static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::EQUAL):
         return skillValue == luaValue; // 其中包含 EQUAL 0 的情况
         break;
-    case static_cast<int>(ref::enumLuaSkillCompareFlag::GREATER):
+    case static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::GREATER):
         return skillValue > luaValue;
         break;
-    case static_cast<int>(ref::enumLuaSkillCompareFlag::GREATER_EQUAL):
+    case static_cast<int>(Ref<ref::lua::BUFF_COMPARE_FLAG>::Type::GREATER_EQUAL):
         return skillValue >= luaValue;
         break;
     }
@@ -440,8 +440,8 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
         std::mt19937                    gen(rd());
         std::uniform_int_distribution<> dis(0, 1023);
         if (dis(gen) < it->Odds) {
-            Character *caster = it->SkillCaster == ref::enumSkilleventCastertarget::EventCaster ? self : self->targetCurr;
-            Character *target = it->SkillTarget == ref::enumSkilleventCastertarget::EventTarget ? self->targetCurr : self;
+            Character *caster = it->SkillCaster == Ref<ref::SkillEvent::CasterTarget>::Type::EventCaster ? self : self->targetCurr;
+            Character *target = it->SkillTarget == Ref<ref::SkillEvent::CasterTarget>::Type::EventTarget ? self->targetCurr : self;
             if (caster != nullptr) {
                 caster->skillCast(target, it->SkillID, it->SkillLevel);
             }

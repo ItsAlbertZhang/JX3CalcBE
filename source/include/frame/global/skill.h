@@ -1,6 +1,6 @@
 #pragma once
 
-#include "frame/ref/global_skill.h"
+#include "frame/ref/skill.h"
 #include <cstdint>
 #include <mutex>
 #include <optional>
@@ -26,22 +26,23 @@ public:
     std::unordered_map<std::string, std::string> ui;  // ui_skill.tab 中的数据
     std::string                                  Name;
 
-    ref::enumSkillKindtype KindType;
-    bool                   IsPassiveSkill;
-    bool                   HasCriticalStrike;
-    uint32_t               SkillEventMask1;
-    uint32_t               SkillEventMask2;
-    bool                   NeedOutOfFight;
-    bool                   TargetTypePlayer;
-    bool                   TargetTypeNpc;
-    bool                   TargetRelationNone;
-    bool                   TargetRelationSelf;
-    bool                   TargetRelationEnemy;
-    int                    RecipeType;
-    int                    SunSubsectionSkillID;
-    int                    SunSubsectionSkillLevel;
-    int                    MoonSubsectionSkillID;
-    int                    MoonSubsectionSkillLevel;
+    Ref<ref::Skill::KindType>::Type KindType;
+
+    bool     IsPassiveSkill;
+    bool     HasCriticalStrike;
+    uint32_t SkillEventMask1;
+    uint32_t SkillEventMask2;
+    bool     NeedOutOfFight;
+    bool     TargetTypePlayer;
+    bool     TargetTypeNpc;
+    bool     TargetRelationNone;
+    bool     TargetRelationSelf;
+    bool     TargetRelationEnemy;
+    int      RecipeType;
+    int      SunSubsectionSkillID;
+    int      SunSubsectionSkillLevel;
+    int      MoonSubsectionSkillID;
+    int      MoonSubsectionSkillLevel;
 
     // ---------- 技能等级 ----------
     int dwSkillID = -1;

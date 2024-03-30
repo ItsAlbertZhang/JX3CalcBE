@@ -9,7 +9,8 @@
 #include "frame/character/property/skillevent.h"
 #include "frame/character/property/skillrecipe.h"
 #include "frame/common/damage.h"
-#include "frame/ref/lua_other.h"
+#include "frame/ref/lua_normal.h"
+#include "frame/ref/ref.h"
 #include <cstdint>
 #include <optional>
 #include <set>
@@ -23,8 +24,6 @@ namespace frame {
 
 class AutoRollbackAttrib;
 class AutoRollbackAttribute;
-
-using CharacterType = ref::enumLuaTarget;
 
 /**
  * @brief Character 类
@@ -44,7 +43,7 @@ public:
     Character *targetSelect = nullptr; // 选中的目标
     Character *targetCurr   = nullptr; // 当前目标
 
-    ref::enumLuaSkillKindType atAdaptiveSkillType = ref::enumLuaSkillKindType::COUNT;
+    Ref<ref::lua::SKILL_KIND_TYPE>::Type atAdaptiveSkillType = Ref<ref::lua::SKILL_KIND_TYPE>::Type::COUNT;
 
     ChAttr        chAttr;        // 角色属性. 这一属性暂时被 api.lua 调用.
     ChBuff        chBuff;        // 角色 buff
@@ -94,7 +93,7 @@ public:
     void skillrecipeAdd(int recipeID, int recipeLevel);
     void skillrecipeRemove(int recipeID, int recipeLevel);
     // skillevent
-    auto skilleventGet(ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2) -> std::set<const SkillEvent *>;
+    auto skilleventGet(Ref<ref::SkillEvent::EventType>::Type type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2) -> std::set<const SkillEvent *>;
     void skilleventAdd(int eventID);
     void skilleventRemove(int eventID);
 

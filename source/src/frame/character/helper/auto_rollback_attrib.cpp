@@ -1,13 +1,12 @@
 #include "frame/character/helper/auto_rollback_attrib.h"
 #include "frame/character/character.h"
 #include "frame/lua/interface.h"
-#include "frame/ref/tab_attribute.h" // enumTabAttribute
+#include "frame/ref/tab_attribute.h" // Ref<ref::Attrib>::Type
 #include "plugin/log.h"
 #include <random>
 
 using namespace jx3calc;
 using namespace frame;
-using namespace ref;
 
 AutoRollbackAttrib::AutoRollbackAttrib(Character *self, BuffItem *item, const Buff &buff)
     : self(self), item(item), buff(buff) {
@@ -48,13 +47,13 @@ void AutoRollbackAttrib::active() {
 void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     int c = isRollback ? -1 : 1;
     switch (attrib.type) {
-    case enumTabAttribute::atLunarDamageCoefficient:
+    case Ref<ref::Attrib>::Type::atLunarDamageCoefficient:
         self->chAttr.atLunarDamageCoefficient += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atSolarDamageCoefficient:
+    case Ref<ref::Attrib>::Type::atSolarDamageCoefficient:
         self->chAttr.atSolarDamageCoefficient += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atCallSolarDamage: {
+    case Ref<ref::Attrib>::Type::atCallSolarDamage: {
         // 计算会心
         Character *src                                 = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
@@ -85,7 +84,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         ));
         src->bFightState = true;
     } break;
-    case enumTabAttribute::atCallLunarDamage: {
+    case Ref<ref::Attrib>::Type::atCallLunarDamage: {
         // 计算会心
         Character *src                                 = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
@@ -116,7 +115,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         ));
         src->bFightState = true;
     } break;
-    case enumTabAttribute::atExecuteScript: {
+    case Ref<ref::Attrib>::Type::atExecuteScript: {
         std::string paramStr = "scripts/" + attrib.valueAStr;
         if (isRollback) {
             if (!lua::interface::analysis(lua::interface::getUnApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, lua::interface::FuncType::UnApply))
@@ -126,91 +125,91 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
                 CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
         }
     } break;
-    case enumTabAttribute::atLunarCriticalStrikeBaseRate:
+    case Ref<ref::Attrib>::Type::atLunarCriticalStrikeBaseRate:
         self->chAttr.atLunarCriticalStrikeBaseRate += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atSolarCriticalStrikeBaseRate:
+    case Ref<ref::Attrib>::Type::atSolarCriticalStrikeBaseRate:
         self->chAttr.atSolarCriticalStrikeBaseRate += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atMagicCriticalDamagePowerBaseKiloNumRate:
+    case Ref<ref::Attrib>::Type::atMagicCriticalDamagePowerBaseKiloNumRate:
         self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atAllShieldIgnorePercent:
+    case Ref<ref::Attrib>::Type::atAllShieldIgnorePercent:
         self->chAttr.atAllShieldIgnorePercent += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atAddTransparencyValue:
+    case Ref<ref::Attrib>::Type::atAddTransparencyValue:
         // 未做相关实现, 推测为透明度
         break;
-    case enumTabAttribute::atSetSelectableType:
+    case Ref<ref::Attrib>::Type::atSetSelectableType:
         // 未做相关实现, 推测为是否可以选中
         break;
-    case enumTabAttribute::atSkillEventHandler:
+    case Ref<ref::Attrib>::Type::atSkillEventHandler:
         if (isRollback) {
             self->skilleventRemove(attrib.valueAInt);
         } else {
             self->skilleventAdd(attrib.valueAInt);
         }
         break;
-    case enumTabAttribute::atStealth:
+    case Ref<ref::Attrib>::Type::atStealth:
         // 未做相关实现, 推测为隐身
         break;
-    case enumTabAttribute::atMoveSpeedPercent:
+    case Ref<ref::Attrib>::Type::atMoveSpeedPercent:
         // 未做相关实现, 推测为移动速度
         break;
-    case enumTabAttribute::atKnockedDownRate:
+    case Ref<ref::Attrib>::Type::atKnockedDownRate:
         // 未做相关实现, 推测为免疫击倒
         break;
-    case enumTabAttribute::atBeImmunisedStealthEnable:
+    case Ref<ref::Attrib>::Type::atBeImmunisedStealthEnable:
         // 未做相关实现
         break;
-    case enumTabAttribute::atImmunity:
+    case Ref<ref::Attrib>::Type::atImmunity:
         // 未做相关实现
         break;
-    case enumTabAttribute::atImmuneSkillMove:
+    case Ref<ref::Attrib>::Type::atImmuneSkillMove:
         // 未做相关实现
         break;
-    case enumTabAttribute::atActiveThreatCoefficient:
+    case Ref<ref::Attrib>::Type::atActiveThreatCoefficient:
         // 未做相关实现, 推测为威胁值
         break;
-    case enumTabAttribute::atHalt:
+    case Ref<ref::Attrib>::Type::atHalt:
         // 未做相关实现, 推测为禁止移动
         break;
-    case enumTabAttribute::atNoLimitChangeSkillIcon:
+    case Ref<ref::Attrib>::Type::atNoLimitChangeSkillIcon:
         // 未做相关实现, 推测为技能图标替换
         break;
-    case enumTabAttribute::atSetTalentRecipe:
+    case Ref<ref::Attrib>::Type::atSetTalentRecipe:
         if (isRollback) {
             self->skillrecipeRemove(attrib.valueAInt, attrib.valueBInt);
         } else {
             self->skillrecipeAdd(attrib.valueAInt, attrib.valueBInt);
         }
         break;
-    case enumTabAttribute::atAllMagicDamageAddPercent:
+    case Ref<ref::Attrib>::Type::atAllMagicDamageAddPercent:
         self->chAttr.atAllMagicDamageAddPercent += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atBeTherapyCoefficient:
+    case Ref<ref::Attrib>::Type::atBeTherapyCoefficient:
         self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atCallBuff:
+    case Ref<ref::Attrib>::Type::atCallBuff:
         self->buffAdd(0, 99, attrib.valueAInt, attrib.valueBInt);
         break;
-    case enumTabAttribute::atKnockedOffRate:
+    case Ref<ref::Attrib>::Type::atKnockedOffRate:
         // 未做相关实现, 推测为免疫击退
         break;
-    case enumTabAttribute::atSolarCriticalDamagePowerBaseKiloNumRate:
+    case Ref<ref::Attrib>::Type::atSolarCriticalDamagePowerBaseKiloNumRate:
         self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atLunarCriticalDamagePowerBaseKiloNumRate:
+    case Ref<ref::Attrib>::Type::atLunarCriticalDamagePowerBaseKiloNumRate:
         self->chAttr.atLunarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atAllDamageAddPercent:
+    case Ref<ref::Attrib>::Type::atAllDamageAddPercent:
         self->chAttr.atAllDamageAddPercent += attrib.valueAInt * c;
         break;
-    case enumTabAttribute::atMagicOvercome:
+    case Ref<ref::Attrib>::Type::atMagicOvercome:
         self->chAttr.atMagicOvercome += attrib.valueAInt * c;
         break;
     default:
-        CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)], attrib.valueAInt);
+        CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, Ref<ref::Attrib>::list[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;
     }
 }

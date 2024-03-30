@@ -31,10 +31,10 @@ void Character::skilleventRemove(int eventID) {
 }
 
 std::set<const SkillEvent *> Character::skilleventGet(
-    ref::enumSkilleventEventtype type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2
+    Ref<ref::SkillEvent::EventType>::Type type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2
 ) {
     std::set<const SkillEvent *> emptySet;
-    if (type == ref::enumSkilleventEventtype::COUNT) {
+    if (type == Ref<ref::SkillEvent::EventType>::Type::COUNT) {
         return emptySet;
     }
     if (eventskillID != 0) {

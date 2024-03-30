@@ -8,7 +8,7 @@
 using namespace jx3calc;
 using namespace frame;
 
-static const std::string names[] = {
+static const std::string names[]{
     "GetSkillLevelData",
     "GetSkillRecipeData",
     "Apply",
