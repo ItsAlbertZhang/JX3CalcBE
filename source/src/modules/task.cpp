@@ -11,9 +11,7 @@
 #include "plugin/log.h"
 #include <asio/co_spawn.hpp>
 #include <chrono>
-#include <format>
 #include <memory>
-#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -62,218 +60,88 @@ static int calcDetail(const Data &data, frame::ChDamage *detail);
 template <typename TypeValue>
 static std::string genID(const std::unordered_map<std::string, TypeValue> &map, int length = 6);
 
-auto Server::validate(const std::string &jsonstr) -> Response {
+static auto createTaskData(Response &res, const std::string &jsonstr) -> Data {
+    // 1. 验证数据可用性. 此步骤未成功, catch 会返回 config.json not available.
+    if (!modules::config::dataAvailable) [[unlikely]]
+        throw std::runtime_error("");
+    res.next();
+    // 2. 解析 json. 此步骤未成功, 返回 json parse error.
     using json = nlohmann::json;
-    // 解析 json
-    json j;
-    try {
-        j = json::parse(jsonstr);
-    } catch (...) {
-        return Response{
-            .status = ResponseStatus::parse_error,
-            .data   = "json parse error",
-        };
-    }
-    // 检查字段
-    // 1.1 检查必须字段
-    static const std::vector<std::string> required{
-        "player", "delayNetwork", "delayKeyboard", "fightTime", "fightCount", "attribute", "effects"
-    };
-    for (auto &it : required) {
-        if (!j.contains(it)) {
-            return Response{
-                .status = ResponseStatus::missing_field,
-                .data   = std::format("missing required field: {}", it),
-            };
-        }
-    }
-    // 1.2 检查不允许字段
-    if (j.contains("custom") && !modules::config::taskdata::allowCustom) {
-        return Response{
-            .status = ResponseStatus::invalid_field,
-            .data   = "custom not allowed",
-        };
-    }
-    // 2. 分别检查字段值
-    // 2.1 检查 player
-    if (!j["player"].is_string() || !concrete::player::refType.contains(j["player"].get<std::string>())) {
-        return Response{
-            .status = ResponseStatus::invalid_player,
-            .data   = "player invalid",
-        };
-    }
-    // 2.2 检查 delayNetwork, delayKeyboard, fightTime, fightCount
-    if (!j["delayNetwork"].is_number_integer() || j["delayNetwork"].get<int>() < 0 ||
-        j["delayNetwork"].get<int>() > modules::config::taskdata::maxDelayNetwork) {
-        return Response{
-            .status = ResponseStatus::invalid_interger,
-            .data   = "delayNetwork invalid",
-        };
-    }
-    if (!j["delayKeyboard"].is_number_integer() || j["delayKeyboard"].get<int>() < 0 ||
-        j["delayKeyboard"].get<int>() > modules::config::taskdata::maxDelayKeyboard) {
-        return Response{
-            .status = ResponseStatus::invalid_interger,
-            .data   = "delayKeyboard invalid",
-        };
-    }
-    if (!j["fightTime"].is_number_integer() || j["fightTime"].get<int>() < 0 ||
-        j["fightTime"].get<int>() > modules::config::taskdata::maxFightTime) {
-        return Response{
-            .status = ResponseStatus::invalid_interger,
-            .data   = "fightTime invalid",
-        };
-    }
-    if (!j["fightCount"].is_number_integer() || j["fightCount"].get<int>() < 0 ||
-        j["fightCount"].get<int>() > modules::config::taskdata::maxFightCount) {
-        return Response{
-            .status = ResponseStatus::invalid_interger,
-            .data   = "fightCount invalid",
-        };
-    }
-    // 2.3 检查 attribute
-    if (!j["attribute"].is_object() ||
-        !j["attribute"].contains("method") || !j["attribute"]["method"].is_string() ||
-        !refAttributeType.contains(j["attribute"]["method"].get<std::string>()) ||
-        !j["attribute"].contains("data") || !j["attribute"]["data"].is_object()) {
-        return Response{
-            .status = ResponseStatus::invalid_attribute_method,
-            .data   = "attribute method invalid",
-        };
-    }
-    enumAttributeType type = refAttributeType.at(j["attribute"]["method"].get<std::string>());
-    switch (type) {
-    case enumAttributeType::data:
-        break;
-    case enumAttributeType::jx3box: {
-        if (!j["attribute"]["data"].contains("pzid") || !j["attribute"]["data"]["pzid"].is_string()) {
-            return Response{
-                .status = ResponseStatus::invalid_attribute_data,
-                .data   = "attribute data invalid",
-            };
-        }
-    } break;
-    default:
-        return Response{
-            .status = ResponseStatus::invalid_attribute_method,
-            .data   = "attribute method invalid",
-        };
-        break;
-    }
-    // 2.4 检查 effects
-    if (!j["effects"].is_array()) {
-        return Response{
-            .status = ResponseStatus::invalid_effects,
-            .data   = "effects invalid",
-        };
-    }
-    for (auto &it : j["effects"]) {
-        if (!it.is_string() || !concrete::effect::refType.contains(it.get<std::string>())) {
-            return Response{
-                .status = ResponseStatus::invalid_effects,
-                .data   = std::format("effects invalid: {}", it.get<std::string>()),
-            };
-        }
-    }
-    // 2.5 检查 custom
-    if (j.contains("custom")) {
-        bool invalid = false;
-        if (!j["custom"].is_object() ||
-            !j["custom"].contains("method") || !j["custom"]["method"].is_string() ||
-            !refCustom.contains(j["custom"]["method"].get<std::string>()) ||
-            !j["custom"].contains("data")) {
-            invalid = true;
-        }
-        switch (refCustom.at(j["custom"]["method"].get<std::string>())) {
-        case enumCustom::lua:
-            if (!j["custom"]["data"].is_string()) {
-                invalid = true;
-            }
-            break;
-        case enumCustom::jx3:
-            if (!j["custom"]["data"].is_array()) {
-                invalid = true;
-            } else {
-                for (auto &it : j["custom"]["data"]) {
-                    if (!it.is_string()) {
-                        invalid = true;
-                        break;
-                    }
-                }
-            }
-            break;
-        }
-        if (invalid) {
-            return Response{
-                .status = ResponseStatus::invalid_custom,
-                .data   = "custom method invalid",
-            };
-        }
-    }
-    // 检查完毕, 返回 true
-    return Response{
-        .status = ResponseStatus::success,
-    };
-}
+    json j     = json::parse(jsonstr);
+    res.next();
+    // 3. 检查 custom. 此步骤未成功, catch 会返回 Field not allowed: custom.
+    if (j.contains("custom") && !modules::config::taskdata::allowCustom) [[unlikely]]
+        throw std::runtime_error("custom");
+    res.next();
 
-static std::optional<Data> createTaskData(const nlohmann::json &j) {
-    Data res{
-        .playerType    = concrete::player::refType.at(j["player"].get<std::string>()),
-        .delayNetwork  = j["delayNetwork"].get<int>(),
-        .delayKeyboard = j["delayKeyboard"].get<int>(),
-        .fightTime     = j["fightTime"].get<int>(),
-        .fightCount    = j["fightCount"].get<int>(),
+    // 4. basic Data. 此步骤未成功, catch 会返回 Error in base: missing field or invalid option.
+    Data data{
+        .playerType    = concrete::player::refType.at(j.at("player").get<std::string>()),
+        .delayNetwork  = j.at("delayNetwork").get<int>(),
+        .delayKeyboard = j.at("delayKeyboard").get<int>(),
+        .fightTime     = j.at("fightTime").get<int>(),
+        .fightCount    = j.at("fightCount").get<int>(),
     };
+    res.next();
+    // 5. 检查 basic Data. 此步骤未成功, catch 会返回 Error in base: invalid input value.
+    if (data.delayNetwork < 0 || data.delayNetwork > modules::config::taskdata::maxDelayNetwork ||
+        data.delayKeyboard < 0 || data.delayKeyboard > modules::config::taskdata::maxDelayKeyboard ||
+        data.fightTime < 0 || data.fightTime > modules::config::taskdata::maxFightTime ||
+        data.fightCount < 0 || data.fightCount > modules::config::taskdata::maxFightCount) [[unlikely]] {
+        throw std::runtime_error("");
+    }
+    res.next();
 
-    // player. 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
-    auto player = concrete::create(res.playerType, 0, 0);
-
-    auto attrType = refAttributeType.at(j["attribute"]["method"].get<std::string>());
+    // 6. attribute. 此步骤未成功, catch 会返回 Error in attribute.
+    auto player   = concrete::create(data.playerType, 0, 0);
+    // 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
+    auto attrType = refAttributeType.at(j.at("attribute")["method"].get<std::string>());
     switch (attrType) {
     case enumAttributeType::data: {
-        std::string dataJsonStr = j["attribute"]["data"].dump();
-        if (!player->attrImportFromData(dataJsonStr)) {
-            return std::nullopt;
-        }
+        std::string dataJsonStr = j.at("attribute")["data"].dump();
+        if (!player->attrImportFromData(dataJsonStr))
+            throw std::runtime_error("import from data failed.");
     } break;
     case enumAttributeType::jx3box: {
-        std::string pzid = j["attribute"]["data"]["pzid"].get<std::string>();
-        if (!player->attrImportFromJX3BOX(pzid)) {
-            return std::nullopt;
-        }
+        std::string pzid = j.at("attribute")["data"]["pzid"].get<std::string>();
+        if (!player->attrImportFromJX3BOX(pzid))
+            throw std::runtime_error("import from jx3box failed.");
     } break;
-    default:
-        return std::nullopt;
-        break;
     }
-    res.attrBackup = player->chAttr;
+    data.attrBackup = player->chAttr;
+    res.next();
 
+    // 7. effect. 此步骤未成功, catch 会返回 Error in effect.
     std::vector<std::shared_ptr<concrete::effect::Base>> effectList;
-    for (auto &x : j["effects"].items()) {
-        auto effect = concrete::create(concrete::effect::refType.at(x.value().get<std::string>()));
-        if (effect == nullptr) [[unlikely]] {
-            return std::nullopt; // 代码未出错的情况下, 不可能出现此情况, 因为 validate 已经验证过了
+    effectList.reserve(j.at("effects").size());
+    for (auto &x : j.at("effects").items()) {
+        auto name = x.value().get<std::string>();
+        if (!concrete::effect::refType.contains(name)) [[unlikely]] {
+            throw std::runtime_error("unknown effect: " + name);
         }
-        effectList.emplace_back(std::move(effect));
+        effectList.emplace_back(concrete::create(concrete::effect::refType.at(name)));
     }
-    res.effects = std::move(effectList);
+    data.effects = std::move(effectList);
+    res.next();
 
+    // 8. custom. 此步骤未成功, catch 会返回 Error in custom.
     if (j.contains("custom")) {
-        switch (refCustom.at(j["custom"]["method"].get<std::string>())) {
+        switch (refCustom.at(j.at("custom")["method"].get<std::string>())) {
         case enumCustom::lua:
-            res.customString = j["custom"]["data"].get<std::string>();
+            data.customString = j.at("custom")["data"].get<std::string>();
             break;
         case enumCustom::jx3:
             std::vector<std::string> v;
-            for (auto &it : j["custom"]["data"]) {
+            for (auto &it : j.at("custom")["data"]) {
                 v.emplace_back(it.get<std::string>());
             }
-            res.customString = frame::CustomLua::parse(v);
+            data.customString = frame::CustomLua::parse(v);
             break;
         }
     }
+    res.next();
 
-    return res;
+    return data;
 }
 
 static void asyncStop(Server *self, Task &task) {
@@ -281,7 +149,7 @@ static void asyncStop(Server *self, Task &task) {
     self->taskMap.erase(task.id);
 }
 
-static asio::awaitable<void> asyncRun(Server *self, asio::io_context &io, Task &task) {
+static auto asyncRun(Server *self, asio::io_context &io, Task &task) -> asio::awaitable<void> {
     using namespace modules::task;
 
     // 在线程池中创建任务
@@ -321,33 +189,17 @@ static asio::awaitable<void> asyncRun(Server *self, asio::io_context &io, Task &
 }
 
 auto modules::task::Server::create(const std::string &jsonstr) -> Response {
-    // 验证数据可用性
-    if (!modules::config::dataAvailable) [[unlikely]]
-        return Response{
-            .status = ResponseStatus::config_error,
-            .data   = "Data not available. Please config.",
-        };
-    // 验证 json
-    auto res = validate(jsonstr);
-    if (res.status != ResponseStatus::success) [[unlikely]]
-        return res;
-    // 验证后, 使用时无需再次验证
-    using json    = nlohmann::json;
-    json j        = json::parse(jsonstr);
-    auto taskdata = createTaskData(j);
-    if (!taskdata.has_value()) [[unlikely]]
-        return Response{
-            .status = ResponseStatus::create_data_error,
-            .data   = "An error occurred while creating task data. Please try again later.",
-        };
-
-    auto  id = genID(taskMap);
-    auto &it = taskMap.emplace(id, std::make_unique<Task>(id, std::move(taskdata.value()))).first->second;
-    asio::co_spawn(ioContext, asyncRun(this, ioContext, *it), asio::detached);
-    return Response{
-        .status = ResponseStatus::success,
-        .data   = id,
-    };
+    Response res;
+    try {
+        auto  id   = genID(taskMap);
+        auto  data = createTaskData(res, jsonstr);
+        auto &it   = taskMap.emplace(id, std::make_unique<Task>(id, std::move(data))).first->second;
+        asio::co_spawn(ioContext, asyncRun(this, ioContext, *it), asio::detached);
+        res.message = std::move(id);
+    } catch (const std::exception &e) {
+        res.message = e.what();
+    }
+    return res;
 }
 
 void modules::task::Server::stop(std::string id) {
@@ -521,7 +373,7 @@ std::string Task::queryDamageList() {
             objDamage["name"]           = name;
             objFight.emplace_back(objDamage);
         }
-        j["data"].emplace_back(objFight);
+        j.at("data").emplace_back(objFight);
     }
     return j.dump();
 }
@@ -585,7 +437,7 @@ std::string Task::queryDamageAnalysis() {
             objDamage["damageMin"]  = it.damageMin;
             objDamage["damageMax"]  = it.damageMax;
             objDamage["proportion"] = static_cast<double>(it.damageSum) / sumDamage;
-            j["data"].emplace_back(objDamage);
+            j.at("data").emplace_back(objDamage);
         }
     }
     return j.dump();

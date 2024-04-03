@@ -5,6 +5,7 @@
 #include "frame/character/property/attribute.h"
 #include "frame/common/damage.h"
 #include "modules/pool.h"
+#include <format>
 #include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
@@ -70,7 +71,6 @@ public:
 enum class enumAttributeType {
     data,
     jx3box,
-    COUNT,
 };
 inline const std::unordered_map<std::string, enumAttributeType> refAttributeType{
     {"从数据导入", enumAttributeType::data  },
@@ -88,29 +88,31 @@ inline std::unordered_map<std::string, enumCustom> refCustom{
     {"使用游戏内宏",    enumCustom::jx3},
 };
 
-enum class ResponseStatus {
-    success,
-    config_error,
-    parse_error,
-    missing_field,
-    invalid_field,
-    invalid_player,
-    invalid_interger,
-    invalid_attribute_method,
-    invalid_attribute_data,
-    invalid_effects,
-    invalid_custom,
-    create_data_error,
-};
 class Response {
+    inline static const char *status[]{
+        "",
+        "config.json not available.",
+        "json parse error.",
+        "Field not allowed: ",
+        "Error in base: missing field or invalid option: ",
+        "Error in base: invalid input value.",
+        "Error in attribute: ",
+        "Error in effect: ",
+        "Error in custom: ",
+    };
+
 public:
-    ResponseStatus status;
-    std::string    data;
-    std::string    format() {
-        nlohmann::json j;
-        j["status"] = static_cast<int>(status);
-        j["data"]   = data;
-        return j.dump();
+    int         idx = 1;
+    std::string message;
+
+    void next() {
+        assert(idx > 0);
+        idx++;
+        if (idx == sizeof(status) / sizeof(status[0])) [[unlikely]]
+            idx = 0;
+    }
+    std::string format() {
+        return std::format("{{\"status\":{},\"data\":\"{}{}\"}}", idx, status[idx], message);
     }
 };
 
