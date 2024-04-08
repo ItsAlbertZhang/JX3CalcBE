@@ -44,7 +44,7 @@ public:
 class Effect腰坠·特效 : public effect::Base {
 public:
     virtual void active(frame::Character *obj) const override {
-        switch (obj->dwKungfuID) {
+        switch (obj->kungfuID) {
         case 10242:
             // 焚影圣诀
             obj->itemAdd(frame::ItemType::Trinket, 38789); // 吹香雪
@@ -58,7 +58,7 @@ public:
 class Effect武器·橙武 : public effect::Base {
 public:
     virtual void active(frame::Character *obj) const override {
-        switch (obj->dwKungfuID) {
+        switch (obj->kungfuID) {
         case 10242:
             // 焚影圣诀
             obj->skillrecipeAdd(1542, 1); // 驱夜伤害提高 5%

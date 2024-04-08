@@ -152,9 +152,10 @@ void Pool::emplace(const std::string &id, int count, std::vector<std::future<typ
 
 // int calcDetail(const Data &data, frame::ChDamage *detail)
 using t1Res  = int;
-using t1Arg1 = const task::Data &;
+using t1Arg1 = const task::Task::Data &;
 using t1Arg2 = std::vector<frame::Damage> *;
 using t1Func = t1Res (&)(t1Arg1, t1Arg2);
+
 template void Pool::emplace<t1Func, t1Arg1, t1Arg2>(
     const std::string &,
     int,
@@ -166,8 +167,9 @@ template void Pool::emplace<t1Func, t1Arg1, t1Arg2>(
 
 // int calcBrief(const Data &arg)
 using t2Res  = int;
-using t2Arg1 = const task::Data &;
+using t2Arg1 = const task::Task::Data &;
 using t2Func = t2Res (&)(t2Arg1);
+
 template void Pool::emplace<t2Func, t2Arg1>(
     const std::string &,
     int,

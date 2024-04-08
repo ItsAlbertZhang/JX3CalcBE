@@ -5,91 +5,72 @@ using namespace jx3calc;
 using namespace concrete;
 
 namespace {
+
+const std::vector<std::tuple<int, int>> skills{
+    {3962,  33}, // 赤日轮
+    {3963,  32}, // 烈日斩
+    {3966,  1 }, // 生死劫
+    {3967,  32}, // 净世破魔击
+    {3959,  24}, // 幽月轮
+    {3960,  18}, // 银月斩
+    {3969,  1 }, // 光明相
+    {3974,  1 }, // 暗尘弥散
+    {3979,  29}, // 驱夜断愁
+    {22890, 1 }, // 诛邪镇魔
+    {37337, 1 }, // 崇光斩恶
+};
+
+const std::vector<int> talents{
+    5972,  // 腾焰飞芒
+    18279, // 净身明礼
+    22888, // 诛邪镇魔
+    6717,  // 无明业火
+    34383, // 明光恒照
+    34395, // 日月同辉
+    34372, // 靡业报劫
+    17567, // 用晦而明
+    25166, // 净体不畏
+    34378, // 降灵尊
+    34347, // 悬象著明 (主动)
+    34370, // 日月齐光
+};
+
+const std::vector<int> recipes{
+    1005, // 赤日轮, 会心提高4%
+    999,  // 赤日轮, 伤害提高3%
+    1000, // 赤日轮, 伤害提高4%
+    1001, // 赤日轮, 伤害提高5%
+    1011, // 烈日斩, 会心提高4%
+    1008, // 烈日斩, 伤害提高4%
+    1009, // 烈日斩, 伤害提高5%
+    1013, // 烈日斩, 对原地静止的目标伤害提升10%
+    1621, // 生死劫, 伤害提高3%
+    1622, // 生死劫, 伤害提高4%
+    1623, // 生死劫, 伤害提高5%
+    1019, // 净世破魔击, 会心提高5%
+    1015, // 净世破魔击, 伤害提高4%
+    1016, // 净世破魔击, 伤害提高5%
+    5206, // 焚影圣诀心法下净世破魔击·月命中后回复20点月魂
+    989,  // 幽月轮, 会心提高4%
+    990,  // 幽月轮, 会心提高5%
+    984,  // 幽月轮, 伤害提高3%
+    985,  // 幽月轮, 伤害提高4%
+    992,  // 银月斩, 会心提高3%
+    993,  // 银月斩, 会心提高4%
+    994,  // 银月斩, 会心提高5%
+    1029, // 光明相, 调息时间减少10秒
+    1030, // 光明相, 调息时间减少10秒
+    1031, // 光明相, 调息时间减少10秒
+    1055, // 驱夜断愁, 会心提高4%
+    1056, // 驱夜断愁, 会心提高5%
+    1052, // 驱夜断愁, 伤害提高4%
+    1053, // 驱夜断愁, 伤害提高5%
+};
+
 class MjFysj : public frame::Player {
 public:
     MjFysj(int delayNetwork, int delayKeyboard)
-        : Player(delayNetwork, delayKeyboard) {
-
-        skillLearn(10242, 13); // 焚影圣诀
-        dwKungfuID       = 10242;
-        publicCooldownID = 503; // GCD
-        skillActive(10242);     // 激活心法加成
-
-        skillLearn(3962, 33); // 赤日轮
-        skillLearn(3963, 32); // 烈日斩
-        skillLearn(3966, 1);  // 生死劫
-        skillLearn(3967, 32); // 净世破魔击
-        skillLearn(3959, 24); // 幽月轮
-        skillLearn(3960, 18); // 银月斩
-        skillLearn(3969, 1);  // 光明相
-        skillLearn(3974, 1);  // 暗尘弥散
-        skillLearn(3979, 29); // 驱夜断愁
-
-        skillLearn(5972, 1);  // 腾焰飞芒
-        skillLearn(18279, 1); // 净身明礼
-        skillLearn(22888, 1); // 诛邪镇魔
-        skillLearn(22890, 1); // 诛邪镇魔, 主动
-        skillLearn(6717, 1);  // 无明业火
-        skillLearn(34383, 1); // 明光恒照
-        skillLearn(34395, 1); // 日月同辉
-        skillLearn(34372, 1); // 靡业报劫
-        skillLearn(17567, 1); // 用晦而明
-        skillLearn(25166, 1); // 净体不畏
-        skillLearn(34378, 1); // 降灵尊
-        skillLearn(34347, 1); // 悬象著明, 主动
-        skillLearn(34370, 1); // 日月齐光
-
-        skillActive(5972);
-        skillActive(18279);
-        skillActive(22888);
-        // skillActive(22890); // 主动技能不需要激活
-        skillActive(6717);
-        skillActive(34383);
-        skillActive(34395);
-        skillActive(34372);
-        skillActive(17567);
-        skillActive(25166);
-        skillActive(34378);
-        // skillActive(34347); // 主动技能不需要激活
-        skillActive(34370);
-
-        skillrecipeAdd(1005, 1); // 赤日轮, 会心提高4%
-        skillrecipeAdd(999, 1);  // 赤日轮, 伤害提高3%
-        skillrecipeAdd(1000, 1); // 赤日轮, 伤害提高4%
-        skillrecipeAdd(1001, 1); // 赤日轮, 伤害提高5%
-
-        skillrecipeAdd(1011, 1); // 烈日斩, 会心提高4%
-        skillrecipeAdd(1008, 1); // 烈日斩, 伤害提高4%
-        skillrecipeAdd(1009, 1); // 烈日斩, 伤害提高5%
-        skillrecipeAdd(1013, 1); // 烈日斩, 对原地静止的目标伤害提升10%
-
-        skillrecipeAdd(1621, 1); // 生死劫, 伤害提高3%
-        skillrecipeAdd(1622, 1); // 生死劫, 伤害提高4%
-        skillrecipeAdd(1623, 1); // 生死劫, 伤害提高5%
-
-        skillrecipeAdd(1019, 1); // 净世破魔击, 会心提高5%
-        skillrecipeAdd(1015, 1); // 净世破魔击, 伤害提高4%
-        skillrecipeAdd(1016, 1); // 净世破魔击, 伤害提高5%
-        skillrecipeAdd(5206, 1); // 焚影圣诀心法下净世破魔击·月命中后回复20点月魂
-
-        skillrecipeAdd(989, 1); // 幽月轮, 会心提高4%
-        skillrecipeAdd(990, 1); // 幽月轮, 会心提高5%
-        skillrecipeAdd(984, 1); // 幽月轮, 伤害提高3%
-        skillrecipeAdd(985, 1); // 幽月轮, 伤害提高4%
-
-        skillrecipeAdd(992, 1); // 银月斩, 会心提高3%
-        skillrecipeAdd(993, 1); // 银月斩, 会心提高4%
-        skillrecipeAdd(994, 1); // 银月斩, 会心提高5%
-
-        skillrecipeAdd(1029, 1); // 光明相, 调息时间减少10秒
-        skillrecipeAdd(1030, 1); // 光明相, 调息时间减少10秒
-        skillrecipeAdd(1031, 1); // 光明相, 调息时间减少10秒
-
-        skillrecipeAdd(1055, 1); // 驱夜断愁, 会心提高4%
-        skillrecipeAdd(1056, 1); // 驱夜断愁, 会心提高5%
-        skillrecipeAdd(1052, 1); // 驱夜断愁, 伤害提高4%
-        skillrecipeAdd(1053, 1); // 驱夜断愁, 伤害提高5%
-    }
+        : Player(10242, 13, &skills, &talents, &recipes, 503, delayNetwork, delayKeyboard) {}
 
 private:
     bool macroSwitchedOnce = false;
@@ -214,7 +195,7 @@ private:
         }
     }
 
-    virtual void prepare() override {
+    virtual void fightPrepare() override {
         cast(3974);
         if (nSunPowerValue == 0 && nMoonPowerValue == 0) {
             if (nCurrentMoonEnergy >= 10000)
@@ -223,12 +204,12 @@ private:
                 nSunPowerValue = 1;
         }
     }
-    virtual int normalAttack() override {
+    virtual int fightNormalAttack() override {
         skillCast(targetSelect, 4326, 1); // 大漠刀法
         int frame = 16 * 1024 / (1024 + this->chAttr.getHaste());
         return frame * 64; // 64 = 1024/16
     }
-    virtual void macroDefault() override {
+    virtual void fightDefault() override {
         switch (macroIdx) {
         case 0:
             macroDefault0();

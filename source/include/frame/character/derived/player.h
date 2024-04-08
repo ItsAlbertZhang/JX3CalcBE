@@ -7,13 +7,25 @@ namespace jx3calc {
 namespace frame {
 
 class Player : public Character {
+    using vtii = std::vector<std::tuple<int, int>>;
+    using vi   = std::vector<int>;
+
 public:
-    Player(int delayNetwork, int delayKeyboard);
-    virtual void prepare() {}
-    virtual int  normalAttack() {
+    Player(
+        int         kungfuID,
+        int         kungfuLevel,
+        const vtii *skills,
+        const vi   *talents,
+        const vi   *recipes,
+        int         publicCooldownID,
+        int         delayNetwork  = 0,
+        int         delayKeyboard = 0
+    );
+    virtual void fightPrepare() {}
+    virtual int  fightNormalAttack() {
         return 1024; // 返回普通攻击间隔
     }
-    virtual void macroDefault() {}
+    virtual void fightDefault() {}
 
     int publicCooldownID = 0;
     int delayBase        = 0;
@@ -22,8 +34,12 @@ public:
     int macroIdx         = 0;
 
     std::shared_ptr<CustomLua> customLua;
+    const vtii                *initSkills;
+    const vi                  *initTalents;
+    const vi                  *initRecipes;
 
-    void macroRun();
+    void init();
+    void fightStart();
 };
 
 } // namespace frame

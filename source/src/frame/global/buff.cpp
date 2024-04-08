@@ -37,6 +37,10 @@ void BuffManager::add(int buffID, int buffLevel) {
     arg[0]["ID"]    = std::to_string(buffID);
     arg[0]["Level"] = std::to_string(buffLevel);
     gdi::tabSelect(gdi::Tab::buff, arg);
+    if (arg.size() == 0) {
+        CONSTEXPR_LOG_ERROR("BuffManager::add: Buff ID {} 不存在.", buffID);
+        return;
+    }
     buff.tab         = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     buff.IsStackable = buff.tab["IsStackable"] == "1";

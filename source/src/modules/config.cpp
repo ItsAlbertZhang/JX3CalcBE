@@ -10,7 +10,7 @@ using namespace modules;
 using json   = nlohmann::json;
 namespace fs = std::filesystem;
 
-const std::string version = "v1.0.2";
+const std::string version = "v1.1.0";
 
 static void initFromJson(const json &j) {
     std::string spJX3;
@@ -86,7 +86,8 @@ std::string config::status() {
         userinput["maxDelayKeyboard"] = taskdata::maxDelayKeyboard;
         userinput["maxFightTime"]     = taskdata::maxFightTime;
         userinput["maxFightCount"]    = taskdata::maxFightCount;
-        userinput["allowCustom"]      = taskdata::allowCustom;
+
+        data["custom"] = taskdata::allowCustom;
     }
     return j.dump();
 }

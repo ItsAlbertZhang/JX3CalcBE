@@ -10,7 +10,7 @@ int Character::otherGetMapID() {
 }
 
 int Character::otherGetKungfuMountID() {
-    return this->dwKungfuID;
+    return this->kungfuID;
 }
 
 bool Character::otherIsFormationLeader() {

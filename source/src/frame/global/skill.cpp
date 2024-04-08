@@ -39,6 +39,10 @@ void SkillManager::add(int skillID, int skillLevel) {
         arg.emplace_back();
         arg[0]["SkillID"] = std::to_string(skillID);
         gdi::tabSelect(gdi::Tab::skills, arg);
+        if (arg.size() == 0) {
+            CONSTEXPR_LOG_ERROR("SkillManager::add: 技能 ID {} 不存在.", skillID);
+            return;
+        }
         skill.tab = std::move(arg[0]);
     } else {
         // 如果该技能 ID 已存在, 则复用同 ID 技能的 tab

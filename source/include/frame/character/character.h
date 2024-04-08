@@ -59,7 +59,8 @@ public:
     std::set<AutoRollbackAttribute *> autoRollbackAttributeList; // 自动回滚的魔法属性列表
 
     // ---------- 以下属性和方法未被游戏 lua 调用 ----------
-    int dwKungfuID = 0;
+    int kungfuID    = 0;
+    int kungfuLevel = 0;
 
     // character
     static auto characterGet(int nCharacterID) -> Character *;

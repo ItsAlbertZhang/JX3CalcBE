@@ -16,7 +16,7 @@ public:
     CustomLua(const std::string &script);
 
     sol::state                           lua; // lua 状态机
-    sol::protected_function              init;
+    sol::protected_function              fightPrepareAdd;
     std::vector<sol::protected_function> macroRuntime;
 };
 

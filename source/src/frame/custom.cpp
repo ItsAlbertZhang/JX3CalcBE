@@ -66,7 +66,7 @@ static std::string convertCondition(const char *cond) {
     public:
         const size_t      len;
         const std::string name;
-        std::string (*convert)(const char *start, size_t len);
+        std::string       (*convert)(const char *start, size_t len);
     };
     static const std::unordered_map<std::string, CondType> condMap = {
         {"buff",      {4, "player:macroBuff", convertRValBuff}            },
@@ -288,7 +288,7 @@ static void constructorBefore(CustomLua *self) {
     player["skillrecipeRemove"]              = &Player::skillrecipeRemove;
     player["skilleventAdd"]                  = &Player::skilleventAdd;
     player["skilleventRemove"]               = &Player::skilleventRemove;
-    player["dwKungfuID"]                     = &Player::dwKungfuID;
+    player["dwKungfuID"]                     = &Player::kungfuID;
     player["publicCooldownID"]               = &Player::publicCooldownID;
     player["delayBase"]                      = &Player::delayBase;
     player["delayRand"]                      = &Player::delayRand;
@@ -305,8 +305,8 @@ static void constructorBefore(CustomLua *self) {
 }
 
 static void constructorAfter(CustomLua *self) {
-    self->init   = self->lua["Init"];
-    int macroNum = self->lua["MacroNum"].get<int>();
+    self->fightPrepareAdd = self->lua["Init"];
+    int macroNum          = self->lua["MacroNum"].get<int>();
     for (int i = 0; i < macroNum; i++) {
         self->macroRuntime.push_back(self->lua["Macro" + std::to_string(i)]);
     }

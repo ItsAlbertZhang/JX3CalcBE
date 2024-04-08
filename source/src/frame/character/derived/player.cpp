@@ -1,5 +1,6 @@
 #include "frame/character/derived/player.h"
 #include "frame/event.h"
+#include "frame/global/skill.h"
 #include "plugin/log.h"
 #include <random>
 
@@ -8,26 +9,66 @@
 using namespace jx3calc;
 using namespace frame;
 
-Player::Player(int delayNetwork, int delayKeyboard)
-    : Character(), delayBase(delayNetwork), delayRand(delayKeyboard) {
-    isPlayer = true;
+Player::Player(
+    int         kungfuID,
+    int         kungfuLevel,
+    const vtii *skills,
+    const vi   *talents,
+    const vi   *recipes,
+    int         publicCooldownID,
+    int         delayNetwork,
+    int         delayKeyboard
+)
+    : Character(),
+      initSkills(skills),
+      initTalents(talents),
+      initRecipes(recipes),
+      publicCooldownID(publicCooldownID),
+      delayBase(delayNetwork),
+      delayRand(delayKeyboard) {
+
+    this->isPlayer    = true;
+    this->kungfuID    = kungfuID;
+    this->kungfuLevel = kungfuLevel;
+
+    skillLearn(kungfuID, kungfuLevel);
+    skillActive(kungfuID);
+}
+
+void Player::init() {
+    for (auto &[skillID, skillLevel] : *initSkills) {
+        skillLearn(skillID, skillLevel);
+        auto &skill = SkillManager::get(skillID, skillLevel);
+        if (skill.IsPassiveSkill) {
+            skillActive(skillID);
+        }
+    }
+    for (auto &skillID : *initTalents) {
+        skillLearn(skillID, 1);
+        auto &skill = SkillManager::get(skillID, 1);
+        if (skill.IsPassiveSkill) {
+            skillActive(skillID);
+        }
+    }
+    for (auto &recipeID : *initRecipes) {
+        skillrecipeAdd(recipeID, 1);
+    }
 }
 
 static void callbackMacroDefault(void *self, void *nullparam);
 static void callbackMacroCustomLua(void *self, void *nullparam);
 static void callbackNormalAttack(void *self, void *nullparam);
 
-void Player::macroRun() {
+void Player::fightStart() {
+    init();         // 初始化
+    fightPrepare(); // 战斗准备
     if (nullptr == customLua) {
-        prepare();                           // 起手
         callbackMacroDefault(this, nullptr); // 进入战斗
-        callbackNormalAttack(this, nullptr); // 开启普通攻击
     } else {
-        customLua->init();                     // 初始化
-        prepare();                             // 起手
+        customLua->fightPrepareAdd();          // 初始化
         callbackMacroCustomLua(this, nullptr); // 进入战斗
-        callbackNormalAttack(this, nullptr);   // 开启普通攻击
     }
+    callbackNormalAttack(this, nullptr); // 开启普通攻击
 }
 
 // 计算网络延迟和按键延迟
@@ -59,7 +100,7 @@ inline static frame::event_tick_t getDelay(Player *player) {
 static void callbackMacroDefault(void *self, void *nullparam) {
     UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
-    player->macroDefault();
+    player->fightDefault();
     Event::add(getDelay(player), callbackMacroDefault, self, nullptr);
 }
 
@@ -77,5 +118,5 @@ static void callbackMacroCustomLua(void *self, void *nullparam) {
 static void callbackNormalAttack(void *self, void *nullparam) {
     UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
-    Event::add(player->normalAttack() + getDelayAdd(player), callbackNormalAttack, self, nullptr);
+    Event::add(player->fightNormalAttack() + getDelayAdd(player), callbackNormalAttack, self, nullptr);
 }

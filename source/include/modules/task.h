@@ -9,6 +9,7 @@
 #include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -31,29 +32,35 @@ namespace modules {
 
 namespace task {
 
-class Data {
-public:
-    ~Data();
-
-    concrete::player::Type playerType;
-
-    int delayNetwork;
-    int delayKeyboard;
-    int fightTime;
-    int fightCount;
-
-    frame::ChAttr                                        attrBackup;
-    std::vector<std::shared_ptr<concrete::effect::Base>> effects;
-
-    std::string customString;
-};
-
 class Task {
 public:
-    Task(const std::string &id, const Data &data)
-        : id(id), data(data){};
-    const std::string             id;
-    const Data                    data;
+    Task(const std::string &id)
+        : id(id){};
+    const std::string id;
+
+    class Data {
+    public:
+        concrete::player::Type playerType;
+
+        int delayNetwork;
+        int delayKeyboard;
+        int fightTime;
+        int fightCount;
+
+        frame::ChAttr                                        attrBackup;
+        std::vector<std::shared_ptr<concrete::effect::Base>> effects;
+
+        class Custom {
+        public:
+            ~Custom();
+            std::optional<std::string>                       fight;
+            std::optional<std::vector<std::tuple<int, int>>> skills;
+            std::optional<std::vector<int>>                  talents;
+            std::optional<std::vector<int>>                  recipes;
+        } custom;
+
+    } data;
+
     std::atomic<bool>             stop{false};
     std::vector<std::future<int>> futures;
     std::mutex                    mutex; // 用于保护 results 和 details, 被 io 线程和 web 线程同时访问

@@ -49,40 +49,39 @@ Server::~Server() {
     pool.join();
 }
 
-Data::~Data() {
-    if (!customString.empty()) {
-        frame::CustomLua::cancel(customString);
+Task::Data::Custom::~Custom() {
+    if (fight.has_value()) {
+        frame::CustomLua::cancel(fight.value());
     }
 }
 
-static int calcBrief(const Data &arg);
-static int calcDetail(const Data &data, frame::ChDamage *detail);
+static int calcBrief(const Task::Data &arg);
+static int calcDetail(const Task::Data &data, frame::ChDamage *detail);
 template <typename TypeValue>
 static std::string genID(const std::unordered_map<std::string, TypeValue> &map, int length = 6);
 
-static auto createTaskData(Response &res, const std::string &jsonstr) -> Data {
+static void createTaskData(Task::Data &data, Response &res, const std::string &jsonstr) {
     // 1. 验证数据可用性. 此步骤未成功, catch 会返回 config.json not available.
     if (!modules::config::dataAvailable) [[unlikely]]
         throw std::runtime_error("");
     res.next();
     // 2. 解析 json. 此步骤未成功, 返回 json parse error.
-    using json = nlohmann::json;
-    json j     = json::parse(jsonstr);
+    using json   = nlohmann::json;
+    const json j = json::parse(jsonstr);
     res.next();
-    // 3. 检查 custom. 此步骤未成功, catch 会返回 Field not allowed: custom.
+    // 3. 检查不允许的 field. 此步骤未成功, catch 会返回 Field not allowed: {fieldname}.
     if (j.contains("custom") && !modules::config::taskdata::allowCustom) [[unlikely]]
         throw std::runtime_error("custom");
     res.next();
 
     // 4. basic Data. 此步骤未成功, catch 会返回 Error in base: missing field or invalid option.
-    Data data{
-        .playerType    = concrete::player::refType.at(j.at("player").get<std::string>()),
-        .delayNetwork  = j.at("delayNetwork").get<int>(),
-        .delayKeyboard = j.at("delayKeyboard").get<int>(),
-        .fightTime     = j.at("fightTime").get<int>(),
-        .fightCount    = j.at("fightCount").get<int>(),
-    };
+    data.playerType    = concrete::player::refType.at(j.at("player").get<std::string>()),
+    data.delayNetwork  = j.at("delayNetwork").get<int>(),
+    data.delayKeyboard = j.at("delayKeyboard").get<int>(),
+    data.fightTime     = j.at("fightTime").get<int>(),
+    data.fightCount    = j.at("fightCount").get<int>(),
     res.next();
+
     // 5. 检查 basic Data. 此步骤未成功, catch 会返回 Error in base: invalid input value.
     if (data.delayNetwork < 0 || data.delayNetwork > modules::config::taskdata::maxDelayNetwork ||
         data.delayKeyboard < 0 || data.delayKeyboard > modules::config::taskdata::maxDelayKeyboard ||
@@ -126,22 +125,36 @@ static auto createTaskData(Response &res, const std::string &jsonstr) -> Data {
 
     // 8. custom. 此步骤未成功, catch 会返回 Error in custom.
     if (j.contains("custom")) {
-        switch (refCustom.at(j.at("custom")["method"].get<std::string>())) {
-        case enumCustom::lua:
-            data.customString = j.at("custom")["data"].get<std::string>();
-            break;
-        case enumCustom::jx3:
-            std::vector<std::string> v;
-            for (auto &it : j.at("custom")["data"]) {
-                v.emplace_back(it.get<std::string>());
+        const json &custom = j.at("custom");
+        if (custom.contains("talent")) {
+            const json &talent = custom.at("talent"); // talent 为 int[]
+            data.custom.talents.emplace(talent.get<std::vector<int>>());
+        }
+        if (custom.contains("recipe")) {
+            const json &recipe = custom.at("recipe"); // recipe 为 int[]
+            data.custom.recipes.emplace(recipe.get<std::vector<int>>());
+        }
+        if (custom.contains("fight")) {
+            const json &fight = custom.at("fight");
+            switch (refCustom.at(fight.at("method").get<std::string>())) {
+            case enumCustom::lua:
+                // fight["data"] 为 string, 内容为 lua 代码
+                data.custom.fight.emplace(fight.at("data").get<std::string>());
+                break;
+            case enumCustom::jx3:
+                // fight["data"] 为 string[], 每一项都是一个游戏内宏
+                std::vector<std::string> v;
+                for (auto &it : fight.at("data")) {
+                    v.emplace_back(it.get<std::string>());
+                }
+                data.custom.fight.emplace(frame::CustomLua::parse(v));
+                break;
             }
-            data.customString = frame::CustomLua::parse(v);
-            break;
+        } else if (data.custom.talents.has_value() || data.custom.recipes.has_value()) {
+            throw std::runtime_error("missing fight");
         }
     }
     res.next();
-
-    return data;
 }
 
 static void asyncStop(Server *self, Task &task) {
@@ -155,10 +168,11 @@ static auto asyncRun(Server *self, asio::io_context &io, Task &task) -> asio::aw
     // 在线程池中创建任务
     const int cntCalcDetail = task.data.fightCount > CNT_DETAIL_TASKS ? CNT_DETAIL_TASKS : task.data.fightCount;
     task.details.resize(cntCalcDetail); // 注意, 此处不是 reserve, 因为获得的内存地址需要传递给线程池
+    const Task::Data &data = task.data;
     for (int i = 0; i < cntCalcDetail; i++) {
-        self->pool.emplace(task.id, 1, task.futures, calcDetail, task.data, &task.details[i]);
+        self->pool.emplace(task.id, 1, task.futures, calcDetail, data, &task.details[i]);
     }
-    self->pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, task.data);
+    self->pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, data);
 
     task.results.reserve(task.data.fightCount);
     int cntPre = 0;
@@ -189,14 +203,15 @@ static auto asyncRun(Server *self, asio::io_context &io, Task &task) -> asio::aw
 }
 
 auto modules::task::Server::create(const std::string &jsonstr) -> Response {
-    Response res;
+    Response    res;
+    std::string id = genID(taskMap);
+    auto       &it = taskMap.emplace(id, std::make_unique<Task>(id)).first->second;
     try {
-        auto  id   = genID(taskMap);
-        auto  data = createTaskData(res, jsonstr);
-        auto &it   = taskMap.emplace(id, std::make_unique<Task>(id, std::move(data))).first->second;
+        createTaskData(it->data, res, jsonstr);
         asio::co_spawn(ioContext, asyncRun(this, ioContext, *it), asio::detached);
         res.message = std::move(id);
     } catch (const std::exception &e) {
+        taskMap.erase(id);
         res.message = e.what();
     }
     return res;
@@ -208,19 +223,27 @@ void modules::task::Server::stop(std::string id) {
     taskMap.at(id)->stop.store(true); // 真正的停止操作在 asyncRun 中
 }
 
-static auto calc(const Data &arg) {
+static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
     std::unique_ptr<frame::Player> player = concrete::create(arg.playerType, arg.delayNetwork, arg.delayKeyboard);
-    std::unique_ptr<frame::NPC>    npc    = concrete::create(concrete::npc::Type::NPC124);
-    player->targetSelect                  = npc.get();
-    if (!arg.customString.empty()) {
-        player->customLua = frame::CustomLua::get(arg.customString);
+    if (arg.custom.talents.has_value()) {
+        player->initSkills = &arg.custom.skills.value();
     }
+    if (arg.custom.talents.has_value()) {
+        player->initTalents = &arg.custom.talents.value();
+    }
+    if (arg.custom.fight.has_value()) {
+        player->customLua = frame::CustomLua::get(arg.custom.fight.value());
+    }
+
+    std::unique_ptr<frame::NPC> npc = concrete::create(concrete::npc::Type::NPC124);
+    player->targetSelect            = npc.get();
+
     player->attrImportFromBackup(arg.attrBackup);
     for (auto &it : arg.effects) {
         it->active(player.get());
     }
     frame::Event::clear();
-    player->macroRun();
+    player->fightStart();
     while (frame::Event::now() < static_cast<frame::event_tick_t>(1024 * arg.fightTime)) {
         bool ret = frame::Event::run();
         if (!ret)
@@ -230,7 +253,7 @@ static auto calc(const Data &arg) {
     return player;
 }
 
-static int calcBrief(const Data &data) {
+static int calcBrief(const Task::Data &data) {
     auto player = calc(data);
 
     ull sumDamage = 0;
@@ -241,7 +264,7 @@ static int calcBrief(const Data &data) {
     return static_cast<int>(sumDamage / data.fightTime);
 }
 
-static int calcDetail(const Data &data, frame::ChDamage *detail) {
+static int calcDetail(const Task::Data &data, frame::ChDamage *detail) {
     auto player = calc(data);
 
     ull sumDamage = 0;
