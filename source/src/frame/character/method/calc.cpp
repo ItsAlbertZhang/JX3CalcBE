@@ -131,7 +131,8 @@ Damage Character::calcDamage(
         break;
     }
 
-    unsigned long long damage = damageBase + damageRand / 2;
+    using ull  = unsigned long long;
+    ull damage = damageBase + damageRand / 2;
     if (isSurplus) {
         CONSTEXPR_CHANNELINTERVAL_RECORD(
             id,
@@ -151,7 +152,7 @@ Damage Character::calcDamage(
             static_cast<double>(1) * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 * (atGlobalDamageFactor + (1 << 20)) / (1 << 20),
             isBuff
         );
-        damage = damage + atAttackPower * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 + weaponDamage;
+        damage = damage + static_cast<ull>(atAttackPower) * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 + weaponDamage;
     }
     damage = damage * (atGlobalDamageFactor + (1 << 20)) / (1 << 20);
     if (!target->isPlayer) {
@@ -168,8 +169,8 @@ Damage Character::calcDamage(
     damage = damage * (1024 - targetShield) / 1024;
     damage = damage * (1024 + targetDamageCoefficient) / 1024;
 
-    unsigned long long damageCritical = damage * (1792 + atCriticalDamagePower) / 1024;
-    unsigned long long damageExcept   = (damage * (10000 - atCriticalStrike) + damageCritical * atCriticalStrike) / 10000;
+    ull damageCritical = damage * (1792 + atCriticalDamagePower) / 1024;
+    ull damageExcept   = (damage * (10000 - atCriticalStrike) + damageCritical * atCriticalStrike) / 10000;
 
     return Damage{
         .tick           = Event::now(),

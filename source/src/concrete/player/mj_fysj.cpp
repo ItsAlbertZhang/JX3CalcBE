@@ -17,7 +17,6 @@ const std::vector<std::tuple<int, int>> skills{
     {3974,  1 }, // 暗尘弥散
     {3979,  29}, // 驱夜断愁
     {22890, 1 }, // 诛邪镇魔
-    {37337, 1 }, // 崇光斩恶
 };
 
 const std::vector<int> talents{
