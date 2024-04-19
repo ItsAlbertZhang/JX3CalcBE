@@ -67,6 +67,7 @@ void BuffManager::add(int buffID, int buffLevel) {
 
             if (Ref<ref::Attrib>::map.find(name) == Ref<ref::Attrib>::map.end()) {
                 CONSTEXPR_LOG_ERROR("BuffManager::add: {} Unknown Attribute: {}", attribIdx, name);
+                // source/include/frame/ref/tab_attribute.h
                 continue;
             }
             switch (attribIdx) {

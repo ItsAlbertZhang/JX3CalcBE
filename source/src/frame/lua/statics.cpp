@@ -61,6 +61,7 @@ const char *const frame::lua::statics::luaFuncList[]{
     "CreatePublicShadow",
     "SetBuffLeftActiveCount",
     "SetBuffNextActiveFrame",
+    "LearnSkillLevel",
 };
 const size_t frame::lua::statics::luaFuncListSize =
     sizeof(frame::lua::statics::luaFuncList) / sizeof(frame::lua::statics::luaFuncList[0]);
@@ -104,6 +105,7 @@ sol::state *frame::lua::statics::luaInit() {
     skill["nCostStamina"]              = &Skill::nCostStamina;
     skill["nCostItemType"]             = &Skill::nCostItemType;
     skill["nCostItemIndex"]            = &Skill::nCostItemIndex;
+    skill["nCostManaBasePercent"]      = &Skill::nCostManaBasePercent;
     skill["nCostSprintPower"]          = &Skill::nCostSprintPower;
     skill["bIsAccumulate"]             = &Skill::bIsAccumulate;
     skill["SetSubsectionSkill"]        = &Skill::SetSubsectionSkill;
@@ -155,6 +157,7 @@ sol::state *frame::lua::statics::luaInit() {
     character["ModifyCoolDown"]         = &Character::cooldownModify;
     character["ResetCD"]                = &Character::cooldownReset;
     character["GetSkillLevel"]          = &Character::skillGetLevel;
+    character["LearnSkillLevel"]        = &Character::skillLearn;
     character["CastSkill"]              = sol::overload(
         static_cast<void (Character::*)(int, int)>(&Character::skillCast),
         static_cast<void (Character::*)(int, int, int)>(&Character::skillCast),

@@ -34,7 +34,7 @@ public:
     int macroIdx         = 0;
 
     std::shared_ptr<CustomLua> customLua;
-    const vtii                *initSkills;
+    const vtii                *initSkills; // 目前未被 custom 启用
     const vi                  *initTalents;
     const vi                  *initRecipes;
 

@@ -195,12 +195,13 @@ public:
     int nBaseThreat = 0;
 
     // 技能消耗
-    int nCostLife        = 0; // 技能消耗生命值
-    int nCostMana        = 0; // 技能消耗的内力
-    int nCostStamina     = 0; // 技能消耗的体力
-    int nCostItemType    = 0; // 技能消耗的物品类型
-    int nCostItemIndex   = 0; // 技能消耗的物品索引ID
-    int nCostSprintPower = 0; // 技能消耗气力值
+    int nCostLife            = 0; // 技能消耗生命值
+    int nCostMana            = 0; // 技能消耗的内力
+    int nCostStamina         = 0; // 技能消耗的体力
+    int nCostItemType        = 0; // 技能消耗的物品类型
+    int nCostItemIndex       = 0; // 技能消耗的物品索引ID
+    int nCostManaBasePercent = 0; // 技能消耗的内力百分比
+    int nCostSprintPower     = 0; // 技能消耗气力值
 
     // 聚气相关
     bool bIsAccumulate = false; // 技能是否需要聚气

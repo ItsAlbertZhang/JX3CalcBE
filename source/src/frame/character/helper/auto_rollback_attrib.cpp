@@ -208,6 +208,9 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case ref::Attrib::atMagicOvercome:
         self->chAttr.atMagicOvercome += attrib.valueAInt * c;
         break;
+    case ref::Attrib::atCastSkillTargetDst:
+        self->skillCast(attrib.valueAInt, attrib.valueBInt);
+        break;
     default:
         CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, Ref<ref::Attrib>::names[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;

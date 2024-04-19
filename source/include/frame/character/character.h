@@ -88,7 +88,6 @@ public:
     int  skillCountAvailable(int skillID);
     void skillActive(int skillID);
     void skillDeactive(int skillID);
-    void skillLearn(int skillID, int skillLevel);
     // skillrecipe
     auto skillrecipeGet(int skillID, int skillrecipeType) -> std::set<const SkillRecipe *>;
     void skillrecipeAdd(int recipeID, int recipeLevel);
@@ -151,6 +150,7 @@ public:
     void cooldownReset(int cooldownID);
     // skill
     int  skillGetLevel(int skillID);
+    void skillLearn(int skillID, int skillLevel);
     void skillCast(int skillID, int skillLevel);
     void skillCast(int skillID, int skillLevel, int targetID);
     void skillCast(int skillID, int skillLevel, int type, int targetID);

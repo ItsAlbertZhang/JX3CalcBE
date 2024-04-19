@@ -16,6 +16,7 @@ enum class ref::Attrib {
     atCallBuff,
     atCallLunarDamage,
     atCallSolarDamage,
+    atCastSkillTargetDst,
     atExecuteScript,
     atHalt,
     atImmuneSkillMove,

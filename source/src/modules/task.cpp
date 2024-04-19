@@ -226,10 +226,10 @@ void modules::task::Server::stop(std::string id) {
 static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
     std::unique_ptr<frame::Player> player = concrete::create(arg.playerType, arg.delayNetwork, arg.delayKeyboard);
     if (arg.custom.talents.has_value()) {
-        player->initSkills = &arg.custom.skills.value();
-    }
-    if (arg.custom.talents.has_value()) {
         player->initTalents = &arg.custom.talents.value();
+    }
+    if (arg.custom.recipes.has_value()) {
+        player->initRecipes = &arg.custom.recipes.value();
     }
     if (arg.custom.fight.has_value()) {
         player->customLua = frame::CustomLua::get(arg.custom.fight.value());

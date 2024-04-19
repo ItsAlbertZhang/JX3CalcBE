@@ -54,7 +54,7 @@ public:
         public:
             ~Custom();
             std::optional<std::string>                       fight;
-            std::optional<std::vector<std::tuple<int, int>>> skills;
+            std::optional<std::vector<std::tuple<int, int>>> skills; // 目前未启用
             std::optional<std::vector<int>>                  talents;
             std::optional<std::vector<int>>                  recipes;
         } custom;
