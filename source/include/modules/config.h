@@ -7,8 +7,14 @@ namespace jx3calc {
 namespace modules {
 namespace config {
 
-inline std::filesystem::path pExeDir;               // 可执行文件所在目录的路径
-inline bool                  dataAvailable = false; // 数据是否已经初始化
+enum class dataStatus {
+    unavailable = 0,
+    jx3,
+    jx3_exp,
+};
+
+inline std::filesystem::path pExeDir;                                 // 可执行文件所在目录的路径
+inline dataStatus            dataAvailable = dataStatus::unavailable; // 数据是否已经初始化
 
 namespace taskdata {
 

@@ -24,6 +24,8 @@ public:
     ~AutoRollbackAttrib();
 
     void active();
+    void load();
+    void unload();
 
 private:
     Character  *self;

@@ -88,9 +88,11 @@ inline static frame::event_tick_t getDelay(Player *player) {
         player->delayCustom = 0;
     } else if (player->publicCooldownID > 0) {
         // 其次使用 GCD
-        frame::event_tick_t over = player->chCooldown.cooldownList.at(player->publicCooldownID).tickOver;
         frame::event_tick_t now  = frame::Event::now();
-        delay                    = over > now ? over - now : 0; // 当前无技能可放, 将延迟设为 0.
+        frame::event_tick_t over = now;
+        if (player->chCooldown.cooldownList.contains(player->publicCooldownID))
+            over = player->chCooldown.cooldownList.at(player->publicCooldownID).tickOver;
+        delay = over > now ? over - now : 0; // 当前无技能可放, 将延迟设为 0.
     }
     // 加上网络延迟和按键延迟
     delay += getDelayAdd(player);

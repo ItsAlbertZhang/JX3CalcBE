@@ -12,7 +12,12 @@ namespace fs = std::filesystem;
 
 const std::string version = "v1.1.0";
 
+static inline bool stringContains(const std::string &str, const std::string &substr) {
+    return str.find(substr) != std::string::npos;
+}
+
 static void initFromJson(const json &j) {
+    using namespace config;
     std::string spJX3;
     std::string spUnpack;
     if (j.contains("JX3Dir") && j["JX3Dir"].is_string()) {
@@ -21,7 +26,13 @@ static void initFromJson(const json &j) {
     if (j.contains("UnpackDir") && j["UnpackDir"].is_string()) {
         spUnpack = j["UnpackDir"].get<std::string>();
     }
-    config::dataAvailable = (0 == gdi::dataInit(spJX3.c_str(), spUnpack.c_str()));
+    if (0 == gdi::dataInit(spJX3.c_str(), spUnpack.c_str())) {
+        if (stringContains(spJX3, "exp") || stringContains(spUnpack, "exp") ||
+            stringContains(spJX3, "EXP") || stringContains(spUnpack, "EXP"))
+            dataAvailable = dataStatus::jx3_exp;
+        else
+            dataAvailable = dataStatus::jx3;
+    }
 
     if (j.contains("maxDelayNetwork") && j["maxDelayNetwork"].is_number_integer()) {
         config::taskdata::maxDelayNetwork = j["maxDelayNetwork"].get<int>();
@@ -62,7 +73,7 @@ bool config::init(const std::string &jsonstr) {
         }
         j.update(json::parse(jsonstr));
         initFromJson(j);
-        if (!dataAvailable) {
+        if (dataAvailable == dataStatus::unavailable) {
             return false;
         }
         std::ofstream fileConfig{pathConfig};
@@ -75,9 +86,9 @@ bool config::init(const std::string &jsonstr) {
 
 std::string config::status() {
     json j;
-    j["status"] = dataAvailable ? 0 : -1;
-    if (dataAvailable) {
+    j["status"] = dataAvailable != dataStatus::unavailable ? 0 : -1;
 
+    if (dataAvailable != dataStatus::unavailable) {
         auto &data      = j["data"];
         data["version"] = version;
 
@@ -88,6 +99,7 @@ std::string config::status() {
         userinput["maxFightCount"]    = taskdata::maxFightCount;
 
         data["custom"] = taskdata::allowCustom;
+        data["isExp"]  = dataAvailable == dataStatus::jx3_exp;
     }
     return j.dump();
 }

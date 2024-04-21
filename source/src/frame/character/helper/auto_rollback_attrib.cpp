@@ -10,10 +10,7 @@ using namespace frame;
 
 AutoRollbackAttrib::AutoRollbackAttrib(Character *self, BuffItem *item, const Buff &buff)
     : self(self), item(item), buff(buff) {
-    // item->flushLeftFrame();
-    for (const auto &it : buff.BeginAttrib) {
-        handle(it, false);
-    }
+    load();
 }
 
 AutoRollbackAttrib::~AutoRollbackAttrib() {
@@ -43,15 +40,26 @@ void AutoRollbackAttrib::active() {
         handle(it, false);
     }
 }
+void AutoRollbackAttrib::load() {
+    for (const auto &it : buff.BeginAttrib) {
+        handle(it, false);
+    }
+}
+void AutoRollbackAttrib::unload() {
+    for (const auto &it : buff.BeginAttrib) {
+        handle(it, true);
+    }
+}
 
 void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
-    int c = isRollback ? -1 : 1;
+    int c     = isRollback ? -1 : 1;
+    int stack = item->nStackNum;
     switch (attrib.type) {
     case ref::Attrib::atLunarDamageCoefficient:
-        self->chAttr.atLunarDamageCoefficient += attrib.valueAInt * c;
+        self->chAttr.atLunarDamageCoefficient += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atSolarDamageCoefficient:
-        self->chAttr.atSolarDamageCoefficient += attrib.valueAInt * c;
+        self->chAttr.atSolarDamageCoefficient += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atCallSolarDamage: {
         // 计算会心
@@ -126,16 +134,16 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         }
     } break;
     case ref::Attrib::atLunarCriticalStrikeBaseRate:
-        self->chAttr.atLunarCriticalStrikeBaseRate += attrib.valueAInt * c;
+        self->chAttr.atLunarCriticalStrikeBaseRate += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atSolarCriticalStrikeBaseRate:
-        self->chAttr.atSolarCriticalStrikeBaseRate += attrib.valueAInt * c;
+        self->chAttr.atSolarCriticalStrikeBaseRate += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atMagicCriticalDamagePowerBaseKiloNumRate:
-        self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
+        self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atAllShieldIgnorePercent:
-        self->chAttr.atAllShieldIgnorePercent += attrib.valueAInt * c;
+        self->chAttr.atAllShieldIgnorePercent += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atAddTransparencyValue:
         // 未做相关实现, 推测为透明度
@@ -185,10 +193,10 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         }
         break;
     case ref::Attrib::atAllMagicDamageAddPercent:
-        self->chAttr.atAllMagicDamageAddPercent += attrib.valueAInt * c;
+        self->chAttr.atAllMagicDamageAddPercent += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atBeTherapyCoefficient:
-        self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c;
+        self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atCallBuff:
         self->buffAdd(0, 99, attrib.valueAInt, attrib.valueBInt);
@@ -197,16 +205,16 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         // 未做相关实现, 推测为免疫击退
         break;
     case ref::Attrib::atSolarCriticalDamagePowerBaseKiloNumRate:
-        self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
+        self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atLunarCriticalDamagePowerBaseKiloNumRate:
-        self->chAttr.atLunarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
+        self->chAttr.atLunarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atAllDamageAddPercent:
-        self->chAttr.atAllDamageAddPercent += attrib.valueAInt * c;
+        self->chAttr.atAllDamageAddPercent += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atMagicOvercome:
-        self->chAttr.atMagicOvercome += attrib.valueAInt * c;
+        self->chAttr.atMagicOvercome += attrib.valueAInt * c * stack;
         break;
     case ref::Attrib::atCastSkillTargetDst:
         self->skillCast(attrib.valueAInt, attrib.valueBInt);

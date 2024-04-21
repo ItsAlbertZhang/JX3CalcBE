@@ -38,7 +38,10 @@ local skillQueueShouwei = {
 local idx = 1
 local midx = 0
 
-function Init() end;
+function Init()
+    idx = 1;
+    midx = 0;
+end;
 
 MacroNum = 4;
 
@@ -56,8 +59,8 @@ end
 function Macro1(player)
     local id = skillDict[skillQueue6chong[idx]];
     if player:cast(id) then
-        idx = idx + 1;
-        if idx == 3 then -- 隐身不占 GCD
+        idx = idx + 1;   -- idx 此时为下一个技能的索引
+        if idx == 3 then -- 下一个技能是隐身
             player.delayCustom = 400;
         end
         if idx > #skillQueue6chong then
@@ -73,8 +76,8 @@ function Macro2(player)
         player:itemUse(1, 38789);
     end
     if player:cast(id) then
-        idx = idx + 1;
-        if idx == 3 then -- 隐身不占 GCD
+        idx = idx + 1;   -- idx 此时为下一个技能的索引
+        if idx == 3 then -- 下一个技能是隐身
             player.delayCustom = 400;
         end
         if idx > #skillQueue9chong then
@@ -92,8 +95,8 @@ end
 function Macro3(player)
     local id = skillDict[skillQueueShouwei[idx]];
     if player:cast(id) then
-        idx = idx + 1;
-        if idx == 3 then -- 隐身不占 GCD
+        idx = idx + 1;   -- idx 此时为下一个技能的索引
+        if idx == 3 then -- 下一个技能是隐身
             player.delayCustom = 400;
         end
     end

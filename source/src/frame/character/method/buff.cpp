@@ -65,9 +65,6 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         if (nullptr != src) {      // lua 中有 AddBuff 时直接填 CharacterID 为 0 的逆天逻辑
             it.attr = src->chAttr; // 调用复制构造函数, 锁面板
         }
-        // it.attr      = characterGet(buffSourceID)->chAttr;      // 调用复制构造函数, 锁面板
-        it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
-        this->autoRollbackAttribList.emplace(static_cast<AutoRollbackAttrib *>(it.ptrAttrib));
         it.nLeftActiveCount = buff.Count * count;
         // 计算 interval
         it.interval         = buff.Interval * 1024 / (1024 + it.attr.getHaste());
@@ -76,7 +73,14 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         // 注册回调函数
         it.tickActive       = Event::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it);
         // 其他工作
-        it.nStackNum        = stacknum; // 将层数设置为 1
+        if (buff.IsStackable) {
+            it.nStackNum = stacknum > buff.MaxStackNum ? buff.MaxStackNum : stacknum; // 层数
+        } else {
+            it.nStackNum = 1; // 应该不会有 0 层的 AddBuff ?
+        }
+        // 创建 AutoRollbackAttrib, 处理 BeginAttrib
+        it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
+        this->autoRollbackAttribList.emplace(static_cast<AutoRollbackAttrib *>(it.ptrAttrib));
     } else {
         // 当前存在该 buff
         // it.attr             = characterGet(buffSourceID)->chAttr; // 锁面板
@@ -90,8 +94,13 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         it.interval         = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
         it.interval         = it.interval < buff.MinInterval ? buff.MinInterval : it.interval;
         // 其他工作
-        if (buff.IsStackable)
-            it.nStackNum += stacknum; // 层数 +stacknum
+        if (buff.IsStackable) {
+            AutoRollbackAttrib *ptr = static_cast<AutoRollbackAttrib *>(it.ptrAttrib);
+            ptr->unload(); // UnloadAttrib
+            it.nStackNum += stacknum;
+            it.nStackNum = it.nStackNum > buff.MaxStackNum ? buff.MaxStackNum : it.nStackNum;
+            ptr->load(); // LoadAttrib
+        }
         if (buff.Exclude) {
             // Exclude 为 1 (true), 则重置下次生效时间 (通常用于常规 buff)
             Event::cancel(it.tickActive, callbackActiveBuff, this, &it);                        // 取出回调函数

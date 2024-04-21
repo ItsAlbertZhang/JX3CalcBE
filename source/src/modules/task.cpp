@@ -62,7 +62,7 @@ static std::string genID(const std::unordered_map<std::string, TypeValue> &map, 
 
 static void createTaskData(Task::Data &data, Response &res, const std::string &jsonstr) {
     // 1. 验证数据可用性. 此步骤未成功, catch 会返回 config.json not available.
-    if (!modules::config::dataAvailable) [[unlikely]]
+    if (modules::config::dataAvailable == modules::config::dataStatus::unavailable) [[unlikely]]
         throw std::runtime_error("");
     res.next();
     // 2. 解析 json. 此步骤未成功, 返回 json parse error.
