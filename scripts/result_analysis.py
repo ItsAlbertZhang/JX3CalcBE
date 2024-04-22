@@ -1,14 +1,37 @@
 import json
 
-time = -1
-l = [19055, 26916]
+skill_list = [
+    "赤日轮",
+    "幽月轮",
+    "烈日斩",
+    "银月斩",
+    "净世破魔击·日",
+    "净世破魔击·月",
+    "生死劫·日",
+    "生死劫·月",
+    "悬象著明·日",
+    "悬象著明·月",
+    "驱夜断愁",
+    "诛邪镇魔",
+    "崇光斩恶",
+]
 
-with open("result.json", "r") as f:
-    damage_list = json.load(f)["data"][0]
-    # 遍历 list
-    for i in range(len(damage_list)):
-        # 打印第 i 个元素
-        damage = damage_list[i]
-        if damage["id"] in l and damage["time"] - time > 14 / 16:
-            time = damage["time"]
-            print(f"{damage['time']:.2f} {damage['name']}")
+
+def isvalid(item):
+    return (
+        (item["name"] in skill_list) and (item["id"] != 19055) and (item["id"] != 4202)
+    )
+
+
+curr = -1
+
+with open("data.json", "r", encoding="utf-8") as f:
+    data = json.load(f)
+    data = data["data"][0]
+    for item in data:
+        c = item["time"] - curr
+        if item["id"] == 4482:
+            c -= 1 / 16
+        if c > 14 / 16 and isvalid(item):
+            print(f'{item["time"]:.2f}\t{c:.2f}\t{item["name"]}')
+            curr += c
