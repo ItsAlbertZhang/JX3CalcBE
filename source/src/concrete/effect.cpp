@@ -1,5 +1,6 @@
 #include "concrete/effect.h"
 #include "frame/common/item.h"
+#include <stdexcept>
 
 using namespace jx3calc;
 using namespace concrete;
@@ -109,5 +110,7 @@ auto jx3calc::concrete::create(effect::Type type) -> std::shared_ptr<effect::Bas
         return std::make_shared<Effect武器·水特效>();
     case effect::Type::家园酒·加速:
         return std::make_shared<Effect家园酒·加速>();
+    default:
+        throw std::range_error("Invalid effectType");
     }
 }

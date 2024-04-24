@@ -22,9 +22,9 @@ static thread_local std::unordered_map<std::string, int>              filenameMa
 static thread_local std::vector<std::vector<sol::protected_function>> filefuncList;
 static thread_local std::unordered_set<std::string>                   includedFiles;
 
-static const std::string &getFilename(int idx) {
-    return filenameList[idx];
-}
+// static const std::string &getFilename(int idx) {
+//     return filenameList[idx];
+// }
 
 static void add(const std::string &filename) {
     // 由于 data 是线程本地的, 因此不用考虑线程安全问题
