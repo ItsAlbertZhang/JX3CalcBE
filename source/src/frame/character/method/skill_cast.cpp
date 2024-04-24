@@ -1,6 +1,7 @@
 #include "frame/character/character.h"
 #include "frame/character/helper/auto_rollback_attribute.h"
 #include "frame/character/helper/runtime_castskill.h"
+#include "frame/common/event.h"
 #include "frame/event.h"
 #include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
@@ -431,7 +432,7 @@ static inline void staticTriggerCoolDown(Character *self, int cooldownID, int co
     durationFrame                 = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
     durationFrame                 = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
     durationFrame                 = durationFrame + cooldownAdd;
-    self->cooldownModify(cooldownID, durationFrame);
+    self->cooldownModify(cooldownID, 0, 1);
 }
 
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent) {
@@ -450,30 +451,23 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
 }
 
 static inline event_tick_t staticCooldownLeftTick(Character *self, const Skill::SkillCoolDown &cooldown) {
+    event_tick_t ret = 0;
+    event_tick_t tmp = 0;
     if (cooldown.isValidPublicCoolDown) {
-        if (self->chCooldown.cooldownList.contains(cooldown.nPublicCoolDown) &&
-            self->chCooldown.cooldownList[cooldown.nPublicCoolDown].countAvailable == 0) {
-            // Public CD 存在于列表中且未冷却完毕, 返回剩余时间
-            return self->chCooldown.cooldownList[cooldown.nPublicCoolDown].tickOver - Event::now();
-        }
+        tmp = self->cooldownLeft(cooldown.nPublicCoolDown);
+        ret = tmp > ret ? tmp : ret;
     }
     for (int i = 0; i < 3; i++) {
         if (cooldown.isValidNormalCoolDown[i]) {
-            if (self->chCooldown.cooldownList.contains(cooldown.nNormalCoolDownID[i]) &&
-                self->chCooldown.cooldownList[cooldown.nNormalCoolDownID[i]].countAvailable == 0) {
-                // Normal CD 存在于列表中且未冷却完毕, 返回剩余时间
-                return self->chCooldown.cooldownList[cooldown.nNormalCoolDownID[i]].tickOver - Event::now();
-            }
+            tmp = self->cooldownLeft(cooldown.nNormalCoolDownID[i]);
+            ret = tmp > ret ? tmp : ret;
         }
         if (cooldown.isValidCheckCoolDown[i]) {
-            if (self->chCooldown.cooldownList.contains(cooldown.nCheckCoolDownID[i]) &&
-                self->chCooldown.cooldownList[cooldown.nCheckCoolDownID[i]].countAvailable == 0) {
-                // Check CD 存在于列表中且未冷却完毕, 返回剩余时间
-                return self->chCooldown.cooldownList[cooldown.nCheckCoolDownID[i]].tickOver - Event::now();
-            }
+            tmp = self->cooldownLeft(cooldown.nCheckCoolDownID[i]);
+            ret = tmp > ret ? tmp : ret;
         }
     }
-    return 0;
+    return ret;
 }
 
 static inline Skill::SkillCoolDown staticGetCooldown(Character *self, int skillID) {

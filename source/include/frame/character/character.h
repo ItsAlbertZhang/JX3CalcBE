@@ -76,6 +76,9 @@ public:
     auto buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, int sourceID, int flag) -> BuffItem *;
     void buffBind(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int skillID, int skillLevel);
     void buffFlushLeftFrame(BuffItem *item);
+    // cooldown
+    void cooldownModify(int cooldownID, int frame, int count);
+    auto cooldownLeft(int cooldownID) -> event_tick_t;
     // item
     void itemAdd(ItemType type, int ID);
     void itemAdd(int type, int ID);

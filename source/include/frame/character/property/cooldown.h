@@ -14,8 +14,8 @@ public:
     class Item {
     public:
         int          countAvailable = 0; // 可用次数
-        event_tick_t tickOver       = 0; // 距离当前层冷却完毕的 tick
-        event_tick_t tickAdditional = 0; // 非当前层的总冷却 tick
+        event_tick_t tickOverCurr   = 0; // 当前层冷却完毕的瞬间(时间点)
+        event_tick_t tickOverAdd    = 0; // 非当前层的总冷却时间(时间段)
     };
 
     /**

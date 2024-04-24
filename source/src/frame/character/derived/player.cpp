@@ -91,7 +91,7 @@ inline static frame::event_tick_t getDelay(Player *player) {
         frame::event_tick_t now  = frame::Event::now();
         frame::event_tick_t over = now;
         if (player->chCooldown.cooldownList.contains(player->publicCooldownID))
-            over = player->chCooldown.cooldownList.at(player->publicCooldownID).tickOver;
+            over = player->chCooldown.cooldownList.at(player->publicCooldownID).tickOverCurr;
         delay = over > now ? over - now : 0; // 当前无技能可放, 将延迟设为 0.
     }
     // 加上网络延迟和按键延迟

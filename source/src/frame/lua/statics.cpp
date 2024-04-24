@@ -66,6 +66,10 @@ const char *const frame::lua::statics::luaFuncList[]{
 const size_t frame::lua::statics::luaFuncListSize =
     sizeof(frame::lua::statics::luaFuncList) / sizeof(frame::lua::statics::luaFuncList[0]);
 
+static void FileNotExistEmptyFunction() {
+    // do nothing
+}
+
 sol::state *frame::lua::statics::luaInit() {
     auto lua = lua::interface::getLuaState();
     lua->open_libraries(sol::lib::base);
@@ -154,7 +158,7 @@ sol::state *frame::lua::statics::luaInit() {
     character["SetBuffLeftActiveCount"] = &Character::buffSetLeftActiveCount;
     character["SetBuffNextActiveFrame"] = &Character::buffSetNextActiveFrame;
     character["ClearCDTime"]            = &Character::cooldownClearTime;
-    character["ModifyCoolDown"]         = &Character::cooldownModify;
+    character["ModifyCoolDown"]         = static_cast<void (Character::*)(int, int)>(&Character::cooldownModify);
     character["ResetCD"]                = &Character::cooldownReset;
     character["GetSkillLevel"]          = &Character::skillGetLevel;
     character["LearnSkillLevel"]        = &Character::skillLearn;
@@ -208,6 +212,8 @@ sol::state *frame::lua::statics::luaInit() {
     scene["nType"] = &ChScene::nType;
 
     // lua 函数
+
+    (*lua)["FileNotExistEmptyFunction"] = &FileNotExistEmptyFunction;
 
     (*lua)["Include"]                  = &lua::gfunc::Include;
     (*lua)["GetPlayer"]                = &lua::gfunc::GetPlayer;

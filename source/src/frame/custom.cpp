@@ -236,7 +236,7 @@ static void constructorBefore(CustomLua *self) {
     player["buffSetLeftActiveCount"] = &Player::buffSetLeftActiveCount;
     player["buffSetNextActiveFrame"] = &Player::buffSetNextActiveFrame;
     player["cooldownClearTime"]      = &Player::cooldownClearTime;
-    player["cooldownModify"]         = &Player::cooldownModify;
+    player["cooldownModify"]         = static_cast<void (Character::*)(int, int)>(&Character::cooldownModify);
     player["cooldownReset"]          = &Player::cooldownReset;
     player["skillGetLevel"]          = &Player::skillGetLevel;
     player["skillCast"]              = sol::overload(
