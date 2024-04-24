@@ -432,7 +432,7 @@ static inline void staticTriggerCoolDown(Character *self, int cooldownID, int co
     durationFrame                 = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
     durationFrame                 = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
     durationFrame                 = durationFrame + cooldownAdd;
-    self->cooldownModify(cooldownID, 0, 1);
+    self->cooldownModify(cooldownID, durationFrame);
 }
 
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent) {
