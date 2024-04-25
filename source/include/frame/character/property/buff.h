@@ -1,5 +1,4 @@
-#ifndef FRAME_CHARACTER_PROPERTY_BUFF_H_
-#define FRAME_CHARACTER_PROPERTY_BUFF_H_
+#pragma once
 
 #include "frame/character/property/attribute.h"
 #include "frame/common/event.h"
@@ -8,7 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class BuffItem {
 public:
@@ -71,6 +71,5 @@ public:
     // std::multimap<event_tick_t, Item *> buffTickList;
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_CHARACTER_PROPERTY_BUFF_H_
+} // namespace frame
+} // namespace jx3calc

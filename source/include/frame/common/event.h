@@ -1,12 +1,11 @@
-#ifndef FRAME_COMMON_EVENT_H_
-#define FRAME_COMMON_EVENT_H_
+#pragma once
 
 #include <cstdint>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 using event_tick_t = int64_t;
 
-} // namespace ns_frame
-
-#endif // FRAME_COMMON_EVENT_H_
+} // namespace frame
+} // namespace jx3calc

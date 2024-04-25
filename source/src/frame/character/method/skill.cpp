@@ -4,7 +4,8 @@
 #include "frame/character/helper/runtime_castskill.h"
 #include "plugin/log.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 bool Character::cast(int skillID) {
     if (skillID <= 0) {

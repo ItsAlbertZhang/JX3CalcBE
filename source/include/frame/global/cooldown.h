@@ -1,11 +1,11 @@
-#ifndef FRAME_GLOBAL_COOLDOWN_H_
-#define FRAME_GLOBAL_COOLDOWN_H_
+#pragma once
 
 #include <mutex>
 #include <string>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief Cooldown 类
@@ -57,6 +57,5 @@ private:
     static void add(int ID);
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_GLOBAL_COOLDOWN_H_
+} // namespace frame
+} // namespace jx3calc

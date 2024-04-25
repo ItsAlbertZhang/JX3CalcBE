@@ -1,46 +1,48 @@
-#ifndef FRAME_CHARACTER_DERIVED_PLAYER_H_
-#define FRAME_CHARACTER_DERIVED_PLAYER_H_
+#pragma once
 
 #include "frame/character/character.h"
-#include <sol/sol.hpp>
+#include "frame/custom.h"
 
-namespace ns_frame {
-
-class CustomLua {
-public:
-    static inline thread_local std::unordered_map<std::string, std::shared_ptr<CustomLua>> mapCustomLua;
-
-    static std::shared_ptr<CustomLua> get(const std::string &script);
-    static void                       cancel(const std::string &script);
-    static std::string                parse(std::vector<std::string> macroList);
-
-    CustomLua(const std::string &script);
-
-    sol::state                           lua; // lua 状态机
-    sol::protected_function              init;
-    std::vector<sol::protected_function> macroRuntime;
-};
+namespace jx3calc {
+namespace frame {
 
 class Player : public Character {
+    using vtii = std::vector<std::tuple<int, int>>;
+    using vi   = std::vector<int>;
+
 public:
-    Player(int delayNetwork, int delayKeyboard);
-    virtual void prepare() {}
-    virtual int  normalAttack() {
+    Player(
+        int         kungfuID,
+        int         kungfuLevel,
+        const vtii *skills,
+        const vi   *talents,
+        const vi   *recipes,
+        int         publicCooldownID
+    );
+    virtual void fightPrepare() {}
+    virtual int  fightNormalAttack() {
         return 1024; // 返回普通攻击间隔
     }
-    virtual void macroDefault() {}
+    virtual void fightDefault() {}
 
     int publicCooldownID = 0;
     int delayBase        = 0;
     int delayRand        = 0;
     int delayCustom      = 0;
-    int macroIdx         = 0;
+    int macroIdx         = 0; // 当前宏索引
+    int embedFightType   = 0; // 内置战斗的类型
 
     std::shared_ptr<CustomLua> customLua;
 
-    void macroRun();
+    const vtii *initSkills; // 目前未被 custom 启用
+    const vi   *initTalents;
+    const vi   *initRecipes;
+
+    std::optional<bool> stopInitiative = std::nullopt; // 主动停止 (而非时间到而停止) 标志
+
+    void init();
+    void fightStart();
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_CHARACTER_DERIVED_PLAYER_H_
+} // namespace frame
+} // namespace jx3calc

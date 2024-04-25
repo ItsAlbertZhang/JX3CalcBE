@@ -1,7 +1,8 @@
 #include "frame/global/cooldown.h"
 #include "gdi.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 const Cooldown &CooldownManager::get(int ID) {
     // 若 Cooldown ID 不存在, 则添加

@@ -1,7 +1,8 @@
 #include "frame/global/skillrecipe.h"
 #include "frame/character/character.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 void Character::skillrecipeAdd(int recipeID, int recipeLevel) {
     const SkillRecipe &skillrecipe = SkillRecipeManager::getRecipe(recipeID, recipeLevel);

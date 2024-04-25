@@ -1,11 +1,11 @@
-#ifndef FRAME_CHARACTER_PROPERTY_SKILLEVENT_H_
-#define FRAME_CHARACTER_PROPERTY_SKILLEVENT_H_
+#pragma once
 
-#include "frame/ref/global_skillevent.h"
+#include "frame/ref/skillevent.h"
 #include <set>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class SkillEvent;
 
@@ -14,7 +14,7 @@ public:
     // 下列方法均已在 Character 类中实现.
     // void add(int ID);
     // void remove(int ID);
-    // std::set<const SkillEvent *> getList(ref::enumSkilleventEventtype type, int EventSkillID, uint32_t EventMask1, uint32_t EventMask2);
+    // std::set<const SkillEvent *> getList(ref::SkillEvent::EventType type, int EventSkillID, uint32_t EventMask1, uint32_t EventMask2);
 
     class ItemType {
     public:
@@ -23,9 +23,8 @@ public:
         std::set<const SkillEvent *>                          EventMask2[32]; // 用于快速查找指定 EventMask2 的 SkillEvent
     };
 
-    ItemType data[static_cast<int>(ref::enumSkilleventEventtype::COUNT)];
+    ItemType data[Ref<ref::SkillEvent::EventType>::count];
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_CHARACTER_PROPERTY_SKILLEVENT_H_
+} // namespace frame
+} // namespace jx3calc

@@ -1,7 +1,6 @@
-#ifndef FRAME_GLOBAL_SKILL_H_
-#define FRAME_GLOBAL_SKILL_H_
+#pragma once
 
-#include "frame/ref/global_skill.h"
+#include "frame/ref/skill.h"
 #include <cstdint>
 #include <mutex>
 #include <optional>
@@ -9,7 +8,8 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief 技能类
@@ -26,22 +26,23 @@ public:
     std::unordered_map<std::string, std::string> ui;  // ui_skill.tab 中的数据
     std::string                                  Name;
 
-    ref::enumSkillKindtype KindType;
-    bool                   IsPassiveSkill;
-    bool                   HasCriticalStrike;
-    uint32_t               SkillEventMask1;
-    uint32_t               SkillEventMask2;
-    bool                   NeedOutOfFight;
-    bool                   TargetTypePlayer;
-    bool                   TargetTypeNpc;
-    bool                   TargetRelationNone;
-    bool                   TargetRelationSelf;
-    bool                   TargetRelationEnemy;
-    int                    RecipeType;
-    int                    SunSubsectionSkillID;
-    int                    SunSubsectionSkillLevel;
-    int                    MoonSubsectionSkillID;
-    int                    MoonSubsectionSkillLevel;
+    ref::Skill::KindType KindType;
+
+    bool     IsPassiveSkill;
+    bool     HasCriticalStrike;
+    uint32_t SkillEventMask1;
+    uint32_t SkillEventMask2;
+    bool     NeedOutOfFight;
+    bool     TargetTypePlayer;
+    bool     TargetTypeNpc;
+    bool     TargetRelationNone;
+    bool     TargetRelationSelf;
+    bool     TargetRelationEnemy;
+    int      RecipeType;
+    int      SunSubsectionSkillID;
+    int      SunSubsectionSkillLevel;
+    int      MoonSubsectionSkillID;
+    int      MoonSubsectionSkillLevel;
 
     // ---------- 技能等级 ----------
     int dwSkillID = -1;
@@ -194,12 +195,13 @@ public:
     int nBaseThreat = 0;
 
     // 技能消耗
-    int nCostLife        = 0; // 技能消耗生命值
-    int nCostMana        = 0; // 技能消耗的内力
-    int nCostStamina     = 0; // 技能消耗的体力
-    int nCostItemType    = 0; // 技能消耗的物品类型
-    int nCostItemIndex   = 0; // 技能消耗的物品索引ID
-    int nCostSprintPower = 0; // 技能消耗气力值
+    int nCostLife            = 0; // 技能消耗生命值
+    int nCostMana            = 0; // 技能消耗的内力
+    int nCostStamina         = 0; // 技能消耗的体力
+    int nCostItemType        = 0; // 技能消耗的物品类型
+    int nCostItemIndex       = 0; // 技能消耗的物品索引ID
+    int nCostManaBasePercent = 0; // 技能消耗的内力百分比
+    int nCostSprintPower     = 0; // 技能消耗气力值
 
     // 聚气相关
     bool bIsAccumulate = false; // 技能是否需要聚气
@@ -288,6 +290,5 @@ private:
     static void add(int skillID, int skillLevel);
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_GLOBAL_SKILL_H_
+} // namespace frame
+} // namespace jx3calc

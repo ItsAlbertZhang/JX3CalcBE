@@ -1,13 +1,13 @@
-#ifndef FRAME_GLOBAL_SKILLEVENT_H_
-#define FRAME_GLOBAL_SKILLEVENT_H_
+#pragma once
 
-#include "frame/ref/global_skillevent.h"
+#include "frame/ref/skillevent.h"
 #include <cstdint>
 #include <mutex>
 #include <string>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief SkillEvent 类
@@ -22,16 +22,16 @@ public:
     std::unordered_map<std::string, std::string> tab; // buffs.tab 中的数据
 
     // 初始化时拿出一些数据, 降低使用开销
-    int                             ID;
-    ref::enumSkilleventEventtype    type = ref::enumSkilleventEventtype::COUNT;
-    int                             Odds;
-    int                             SkillID;
-    int                             SkillLevel;
-    ref::enumSkilleventCastertarget SkillCaster = ref::enumSkilleventCastertarget::COUNT;
-    ref::enumSkilleventCastertarget SkillTarget = ref::enumSkilleventCastertarget::COUNT;
-    uint32_t                        EventMask1;
-    uint32_t                        EventMask2;
-    int                             EventSkillID;
+    int                           ID;
+    ref::SkillEvent::EventType    type;
+    int                           Odds;
+    int                           SkillID;
+    int                           SkillLevel;
+    ref::SkillEvent::CasterTarget SkillCaster;
+    ref::SkillEvent::CasterTarget SkillTarget;
+    uint32_t                      EventMask1;
+    uint32_t                      EventMask2;
+    int                           EventSkillID;
     // int                             EventSkillLevel; // 此属性事实上被弃用
 };
 
@@ -65,6 +65,5 @@ private:
     static void add(int ID);
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_GLOBAL_SKILLEVENT_H_
+} // namespace frame
+} // namespace jx3calc

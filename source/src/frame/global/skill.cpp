@@ -1,11 +1,12 @@
 #include "frame/global/skill.h"
-#include "frame/lua_runtime.h"
+#include "frame/lua/interface.h"
 #include "gdi.h"
 #include "plugin/log.h"
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 const Skill &SkillManager::get(int skillID, int skillLevel) {
     // 若技能 ID 不存在, 则添加
@@ -38,6 +39,10 @@ void SkillManager::add(int skillID, int skillLevel) {
         arg.emplace_back();
         arg[0]["SkillID"] = std::to_string(skillID);
         gdi::tabSelect(gdi::Tab::skills, arg);
+        if (arg.size() == 0) {
+            CONSTEXPR_LOG_ERROR("SkillManager::add: 技能 ID {} 不存在.", skillID);
+            return;
+        }
         skill.tab = std::move(arg[0]);
     } else {
         // 如果该技能 ID 已存在, 则复用同 ID 技能的 tab
@@ -45,10 +50,7 @@ void SkillManager::add(int skillID, int skillLevel) {
         skill.tab = it->second.tab;
     }
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
-    skill.KindType =
-        ref::mapSkillKindtype.find(skill.tab["KindType"]) != ref::mapSkillKindtype.end()
-            ? ref::mapSkillKindtype.at(skill.tab["KindType"])
-            : ref::enumSkillKindtype::COUNT;
+    skill.KindType             = Ref<ref::Skill::KindType>::map.at(skill.tab["KindType"]);
     skill.IsPassiveSkill       = skill.tab["IsPassiveSkill"] == "1";
     skill.HasCriticalStrike    = skill.tab["HasCriticalStrike"] == "1";
     skill.SkillEventMask1      = atoi(skill.tab["SkillEventMask1"].c_str());
@@ -70,8 +72,8 @@ void SkillManager::add(int skillID, int skillLevel) {
     skill.nWeaponDamagePercent = !skill.tab["WeaponRequest"].empty() && skill.tab["WeaponRequest"] != "0" ? 1024 : 0;
     // 执行 GetSkillLevelData
     std::string name           = "scripts/skill/" + skill.tab["ScriptFile"];
-    bool        res            = LuaFunc::analysis(
-        LuaFunc::getGetSkillLevelData(name)(skill), name, LuaFunc::Enum::GetSkillLevelData
+    bool        res            = lua::interface::analysis(
+        lua::interface::getGetSkillLevelData(name)(skill), name, lua::interface::FuncType::GetSkillLevelData
     );
 
     if (res) {

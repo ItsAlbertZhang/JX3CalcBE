@@ -1,7 +1,8 @@
 #include "frame/character/property/attribute.h"
-#include "frame/globalparam.h"
+#include "frame/common/globalparam.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 // 主属性
 int ChAttr::getVitality() const {

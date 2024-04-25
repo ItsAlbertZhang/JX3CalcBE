@@ -1,12 +1,13 @@
-#ifndef FRAME_GLOBAL_ITEM_H_
-#define FRAME_GLOBAL_ITEM_H_
+#pragma once
 
 #include "frame/common/item.h"
 #include <array>
 #include <mutex>
 #include <string>
 #include <unordered_map>
-namespace ns_frame {
+
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief Item 类
@@ -58,6 +59,5 @@ private:
     static void add(ItemType type, int ID);
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_GLOBAL_ITEM_H_
+} // namespace frame
+} // namespace jx3calc

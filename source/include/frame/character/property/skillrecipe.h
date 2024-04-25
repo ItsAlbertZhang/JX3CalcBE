@@ -1,10 +1,10 @@
-#ifndef FRAME_CHARACTER_PROPERTY_SKILLRECIPE_H_
-#define FRAME_CHARACTER_PROPERTY_SKILLRECIPE_H_
+#pragma once
 
 #include <set>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class SkillRecipe;
 
@@ -20,6 +20,5 @@ public:
     std::unordered_map<int, std::set<const SkillRecipe *>> SkillIDMap;         // 用于快速查找指定 SkillID 的 SkillRecipe
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_CHARACTER_PROPERTY_SKILLRECIPE_H_
+} // namespace frame
+} // namespace jx3calc

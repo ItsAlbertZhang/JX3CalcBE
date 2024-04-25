@@ -7,8 +7,7 @@
  * @warning 请勿随意更改本文件内容.
  */
 
-#ifndef LIB_GDI_H
-#define LIB_GDI_H
+#pragma once
 
 #include <cstring>
 #include <sol/sol.hpp>
@@ -173,13 +172,8 @@ void tabQuery(int tabIdx, char *data, size_t dataSize); // 实际接口
  * @param arg 是一个 `select_t` 类型的变量, 用于传入和传出数据. 详情请查看其定义.
  * @warning 对于相同的表而言, tabSelect 不是线程安全的.
  * 在每个线程中维护同一份数据从设计角度上来说是不必要的. 请自行确保进入同一份表时的线程安全.
+ * @warning 这个函数不会被 gdi 库定义, 实现见 gdi.cpp .
  */
-inline void tabSelect(Tab tab, select_t &arg) {
-    static thread_local char data[1024 * 1024 * 16]; // 保证在不同表之间不会出现数据竞争
-    tabQuery(static_cast<int>(tab), serialize(arg, data, sizeof(data)), sizeof(data));
-    arg = deserialize(data, sizeof(data));
-}
+void tabSelect(Tab tab, select_t &arg);
 
 } // namespace gdi
-
-#endif // LIB_GDI_H

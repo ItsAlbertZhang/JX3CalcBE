@@ -1,13 +1,15 @@
-#ifndef MODULES_TASK_H_
-#define MODULES_TASK_H_
+#pragma once
 
-#include "concrete/effect/base.h"
+#include "concrete/effect.h"
+#include "concrete/player.h"
 #include "frame/character/property/attribute.h"
-#include "frame/character/property/damage.h"
+#include "frame/common/damage.h"
 #include "modules/pool.h"
+#include <format>
 #include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -25,38 +27,46 @@
 #pragma clang diagnostic pop // Clang
 #pragma warning(pop)         // MSVC
 
-namespace ns_modules {
+namespace jx3calc {
+namespace modules {
 
 namespace task {
 
-class Data {
-public:
-    ~Data();
-    // json 数据区
-    int delayNetwork;
-    int delayKeyboard;
-    int fightTime;
-    int fightCount;
-
-    ns_frame::ChAttr                                      attrBackup;
-    std::vector<std::shared_ptr<ns_concrete::EffectBase>> effects;
-
-    std::string customString;
-};
-
 class Task {
 public:
-    Task(const std::string &id, const Data &data)
-        : id(id), data(data){};
-    const std::string               id;
-    const Data                      data;
-    std::atomic<bool>               stop{false};
-    std::vector<std::future<int>>   futures;
-    std::mutex                      mutex; // 用于保护 results 和 details, 被 io 线程和 web 线程同时访问
-    std::vector<int>                results;
-    std::vector<ns_frame::ChDamage> details;
-    int                             cntCompleted = 0; // 已完成的任务数, 同时也是当前任务的 idx
-    int                             speedCurr    = 0; // 当前速度
+    Task(const std::string &id)
+        : id(id){};
+    const std::string id;
+
+    class Data {
+    public:
+        ~Data();
+        concrete::player::Type playerType;
+
+        int delayNetwork;
+        int delayKeyboard;
+        int fightTime;
+        int fightCount;
+
+        frame::ChAttr                                        attrBackup;
+        std::vector<std::shared_ptr<concrete::effect::Base>> effects;
+
+        int embedFightType = 0;
+
+        std::optional<std::string>                       fight;
+        std::optional<std::vector<std::tuple<int, int>>> skills; // 目前未启用
+        std::optional<std::vector<int>>                  talents;
+        std::optional<std::vector<int>>                  recipes;
+
+    } data;
+
+    std::atomic<bool>             stop{false};
+    std::vector<std::future<int>> futures;
+    std::mutex                    mutex; // 用于保护 results 和 details, 被 io 线程和 web 线程同时访问
+    std::vector<int>              results;
+    std::vector<frame::ChDamage>  details;
+    int                           cntCompleted = 0; // 已完成的任务数, 同时也是当前任务的 idx
+    int                           speedCurr    = 0; // 当前速度
 
     std::string queryDPS();
     std::string queryDamageList();
@@ -67,7 +77,6 @@ public:
 enum class enumAttributeType {
     data,
     jx3box,
-    COUNT,
 };
 inline const std::unordered_map<std::string, enumAttributeType> refAttributeType{
     {"从数据导入", enumAttributeType::data  },
@@ -79,63 +88,59 @@ enum class enumCustom {
     lua,
     jx3,
 };
-
 inline std::unordered_map<std::string, enumCustom> refCustom{
   // {"使用内置循环", enumCustom::none},
     {"使用lua编程语言", enumCustom::lua},
     {"使用游戏内宏",    enumCustom::jx3},
 };
 
-enum class ResponseStatus {
-    success,
-    config_error,
-    parse_error,
-    missing_field,
-    invalid_field,
-    invalid_player,
-    invalid_interger,
-    invalid_attribute_method,
-    invalid_attribute_data,
-    invalid_effects,
-    invalid_custom,
-    create_data_error,
-};
 class Response {
+    inline static const char *status[]{
+        "",
+        "config.json not available.",
+        "json parse error.",
+        "Error in base: missing field or invalid option: ",
+        "Error in base: invalid input value.",
+        "Error in attribute: ",
+        "Error in effect: ",
+        "Error in fight: ",
+        "Error in talents: ",
+        "Error in recipes: ",
+    };
+
 public:
-    ResponseStatus status;
-    std::string    data;
-    std::string    format() {
-        nlohmann::json j;
-        j["status"] = static_cast<int>(status);
-        j["data"]   = data;
-        return j.dump();
+    int         idx = 1;
+    std::string message;
+
+    void next() {
+        assert(idx > 0);
+        idx++;
+        if (idx == sizeof(status) / sizeof(status[0])) [[unlikely]]
+            idx = 0;
+    }
+    std::string format() {
+        return std::format("{{\"status\":{},\"data\":\"{}{}\"}}", idx, status[idx], message);
     }
 };
-Response validate(const std::string &jsonstr);
-Response create(const std::string &jsonstr);
-void     pause(std::string id);
-void     stop(std::string id);
 
-namespace server {
+class Server {
+public:
+    Server();  // 构造函数会非阻塞异步启动子线程任务模块.
+    ~Server(); // 析构函数会停止子线程任务模块并同步等待其退出.
+    auto validate(const std::string &jsonstr) -> Response;
+    auto create(const std::string &jsonstr) -> Response;
+    void pause(std::string id);
+    void stop(std::string id);
 
-inline std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
+    std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
+    Pool                                                   pool;
 
-void asyncrun(); // 非阻塞异步启动子线程任务模块.
-void stop();     // 停止子线程任务模块并同步等待其退出.
-
-inline Pool pool;
-/**
- *  注意, pool 的构造晚于 taskMap. 这很重要:
- *
- */
-
-inline std::thread      ioThread;
-inline asio::io_context ioContext;
-
-} // namespace server
+private:
+    std::thread      ioThread;
+    asio::io_context ioContext;
+};
 
 } // namespace task
 
-} // namespace ns_modules
-
-#endif // MODULES_TASK_H_
+} // namespace modules
+} // namespace jx3calc

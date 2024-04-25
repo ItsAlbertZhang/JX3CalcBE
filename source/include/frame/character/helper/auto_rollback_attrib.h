@@ -1,10 +1,10 @@
-#ifndef FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIB_H_
-#define FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIB_H_
+#pragma once
 
 #include "frame/character/property/buff.h"
 #include "frame/global/buff.h"
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class Character;
 
@@ -24,6 +24,8 @@ public:
     ~AutoRollbackAttrib();
 
     void active();
+    void load();
+    void unload();
 
 private:
     Character  *self;
@@ -33,6 +35,5 @@ private:
     void handle(const Buff::Attrib &attrib, bool isRollback);
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIB_H_
+} // namespace frame
+} // namespace jx3calc

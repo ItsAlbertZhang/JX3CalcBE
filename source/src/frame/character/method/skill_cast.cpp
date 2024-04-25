@@ -1,18 +1,21 @@
 #include "frame/character/character.h"
 #include "frame/character/helper/auto_rollback_attribute.h"
 #include "frame/character/helper/runtime_castskill.h"
+#include "frame/common/event.h"
 #include "frame/event.h"
 #include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
 #include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"
+#include "frame/ref/lua_attribute_type.h"
 #include "plugin/log.h"
 #include <memory> // std::unique_ptr
 #include <random>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 void Character::skillCast(int skillID, int skillLevel, int type, int targetID) {
     UNREFERENCED_PARAMETER(type);
@@ -138,7 +141,7 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
 static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue);
 static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
-static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int nCoolDownAdd);
+// static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int nCoolDownAdd);
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
 
 static inline event_tick_t         staticCooldownLeftTick(Character *self, const Skill::SkillCoolDown &cooldown);
@@ -227,7 +230,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     RuntimeCastSkill runtime{this, skillID, skillLevel};
 
     // 1. 执行 SkillEvent: PreCast
-    staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
 
     // 2. 处理 SkillRecipe: CoolDownAdd. 顺便处理 DamageAddPercent.
     int DamageAddPercent = 0;
@@ -238,11 +241,13 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
 
     // 3. 触发 CD
     if (cooldown.isValidPublicCoolDown) {
-        staticTriggerCoolDown(this, cooldown.nPublicCoolDown, 0);
+        // staticTriggerCoolDown(this, cooldown.nPublicCoolDown, 0);
+        cooldownModify(cooldown.nPublicCoolDown, 0, 1);
     }
     for (int i = 0; i < 3; i++) {
         if (cooldown.isValidNormalCoolDown[i]) {
-            staticTriggerCoolDown(this, cooldown.nNormalCoolDownID[i], cooldown.nNormalCoolDownAdd[i]);
+            // staticTriggerCoolDown(this, cooldown.nNormalCoolDownID[i], cooldown.nNormalCoolDownAdd[i]);
+            cooldownModify(cooldown.nNormalCoolDownID[i], cooldown.nNormalCoolDownAdd[i], 1);
         }
     }
 
@@ -255,10 +260,20 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     // 5.1 处理日月豆子技能
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
-            runtime.skillQueue.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel, this, target);
+            runtime.skillQueue.emplace(
+                static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_NOT_ROLLBACK),
+                static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL),
+                skill.SunSubsectionSkillID,
+                skill.SunSubsectionSkillLevel
+            );
             this->nSunPowerValue = 0;
         } else if (this->nMoonPowerValue) {
-            runtime.skillQueue.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel, this, target);
+            runtime.skillQueue.emplace(
+                static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_NOT_ROLLBACK),
+                static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL),
+                skill.MoonSubsectionSkillID,
+                skill.MoonSubsectionSkillLevel
+            );
             this->nMoonPowerValue = 0;
         }
     }
@@ -292,10 +307,10 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
         2. 其余的 SkillEvent 尚未实现.
         3. 目前 SkillEvent 能够享受 attribute 的加成, 暂时不清楚游戏内是否如此. (因为需要保证 PreCast 的即时插入, 所以 SkillEvent 采取了栈调用的方式)
     */
-    staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+    staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     if (isCritical) {
-        staticTriggerSkillEvent(this, this->skilleventGet(ref::enumSkilleventEventtype::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
+        staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     }
 
     return true;
@@ -354,7 +369,7 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
         }
         BuffItem *buff              = nullptr;
         int       nLevelCompareFlag = cond.nLevelCompareFlag;
-        if (cond.nLevel == 0 && cond.nLevelCompareFlag == static_cast<int>(ref::enumLuaBuffCompareFlag::EQUAL)) {
+        if (cond.nLevel == 0 && cond.nLevelCompareFlag == static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::EQUAL)) {
             /**
              * @note
              * 对于 "要求 buff 不存在" 的检查逻辑, 理论上讲应当是: 对于任何 level 的 buff, 要求其均不存在.
@@ -362,7 +377,7 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
              * 但不知为何, 在实际的 lua 中, 此逻辑变成了: 对于 nLevel EQUAL 0 的 buff, 要求其 nStackNum EQUAL 0. (可见 明教_烈日斩.lua)
              * 因此, 此处对其逻辑进行还原, 将 nLevel 的比较标志设置为 GREATER, 以符合实际的检查逻辑.
              */
-            nLevelCompareFlag = static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER);
+            nLevelCompareFlag = static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER);
         }
         if (checkbuffSrcOwn) {
             buff = checkbuffCharacter->buffGetByOwnerWithCompareFlag(cond.dwBuffID, cond.nLevel, self->dwID, nLevelCompareFlag);
@@ -382,13 +397,13 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
 
 static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue) {
     switch (flag) {
-    case static_cast<int>(ref::enumLuaBuffCompareFlag::EQUAL):
+    case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::EQUAL):
         return buffValue == luaValue;
         break;
-    case static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER):
+    case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER):
         return buffValue > luaValue;
         break;
-    case static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER_EQUAL):
+    case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER_EQUAL):
         return buffValue >= luaValue;
         break;
     }
@@ -410,28 +425,28 @@ static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skil
 
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue) {
     switch (flag) {
-    case static_cast<int>(ref::enumLuaSkillCompareFlag::EQUAL):
+    case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::EQUAL):
         return skillValue == luaValue; // 其中包含 EQUAL 0 的情况
         break;
-    case static_cast<int>(ref::enumLuaSkillCompareFlag::GREATER):
+    case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER):
         return skillValue > luaValue;
         break;
-    case static_cast<int>(ref::enumLuaSkillCompareFlag::GREATER_EQUAL):
+    case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER_EQUAL):
         return skillValue >= luaValue;
         break;
     }
     return false;
 }
 
-static inline void staticTriggerCoolDown(Character *self, int cooldownID, int cooldownAdd) {
-    const Cooldown &cooldown      = CooldownManager::get(cooldownID);
-    // 计算 CD 时间
-    int             durationFrame = cooldown.DurationFrame * 1024 / (1024 + self->chAttr.getHaste());
-    durationFrame                 = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
-    durationFrame                 = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
-    durationFrame                 = durationFrame + cooldownAdd;
-    self->cooldownModify(cooldownID, durationFrame);
-}
+// static inline void staticTriggerCoolDown(Character *self, int cooldownID, int cooldownAdd) {
+//     const Cooldown &cooldown      = CooldownManager::get(cooldownID);
+//     // 计算 CD 时间
+//     int             durationFrame = cooldown.DurationFrame * 1024 / (1024 + self->chAttr.getHaste());
+//     durationFrame                 = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
+//     durationFrame                 = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
+//     durationFrame                 = durationFrame + cooldownAdd;
+//     self->cooldownModify(cooldownID, durationFrame);
+// }
 
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent) {
     for (const auto &it : skillevent) {
@@ -439,8 +454,8 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
         std::mt19937                    gen(rd());
         std::uniform_int_distribution<> dis(0, 1023);
         if (dis(gen) < it->Odds) {
-            Character *caster = it->SkillCaster == ref::enumSkilleventCastertarget::EventCaster ? self : self->targetCurr;
-            Character *target = it->SkillTarget == ref::enumSkilleventCastertarget::EventTarget ? self->targetCurr : self;
+            Character *caster = it->SkillCaster == ref::SkillEvent::CasterTarget::EventTarget ? self->targetCurr : self;
+            Character *target = it->SkillTarget == ref::SkillEvent::CasterTarget::EventCaster ? self : self->targetCurr;
             if (caster != nullptr) {
                 caster->skillCast(target, it->SkillID, it->SkillLevel);
             }
@@ -449,30 +464,23 @@ static inline void staticTriggerSkillEvent(Character *self, const std::set<const
 }
 
 static inline event_tick_t staticCooldownLeftTick(Character *self, const Skill::SkillCoolDown &cooldown) {
+    event_tick_t ret = 0;
+    event_tick_t tmp = 0;
     if (cooldown.isValidPublicCoolDown) {
-        if (self->chCooldown.cooldownList.contains(cooldown.nPublicCoolDown) &&
-            self->chCooldown.cooldownList[cooldown.nPublicCoolDown].countAvailable == 0) {
-            // Public CD 存在于列表中且未冷却完毕, 返回剩余时间
-            return self->chCooldown.cooldownList[cooldown.nPublicCoolDown].tickOver - Event::now();
-        }
+        tmp = self->cooldownLeft(cooldown.nPublicCoolDown);
+        ret = tmp > ret ? tmp : ret;
     }
     for (int i = 0; i < 3; i++) {
         if (cooldown.isValidNormalCoolDown[i]) {
-            if (self->chCooldown.cooldownList.contains(cooldown.nNormalCoolDownID[i]) &&
-                self->chCooldown.cooldownList[cooldown.nNormalCoolDownID[i]].countAvailable == 0) {
-                // Normal CD 存在于列表中且未冷却完毕, 返回剩余时间
-                return self->chCooldown.cooldownList[cooldown.nNormalCoolDownID[i]].tickOver - Event::now();
-            }
+            tmp = self->cooldownLeft(cooldown.nNormalCoolDownID[i]);
+            ret = tmp > ret ? tmp : ret;
         }
         if (cooldown.isValidCheckCoolDown[i]) {
-            if (self->chCooldown.cooldownList.contains(cooldown.nCheckCoolDownID[i]) &&
-                self->chCooldown.cooldownList[cooldown.nCheckCoolDownID[i]].countAvailable == 0) {
-                // Check CD 存在于列表中且未冷却完毕, 返回剩余时间
-                return self->chCooldown.cooldownList[cooldown.nCheckCoolDownID[i]].tickOver - Event::now();
-            }
+            tmp = self->cooldownLeft(cooldown.nCheckCoolDownID[i]);
+            ret = tmp > ret ? tmp : ret;
         }
     }
-    return 0;
+    return ret;
 }
 
 static inline Skill::SkillCoolDown staticGetCooldown(Character *self, int skillID) {

@@ -1,11 +1,11 @@
-#ifndef FRAME_EVENT_H_
-#define FRAME_EVENT_H_
+#pragma once
 
 #include "frame/common/event.h"
 #include <set>
 #include <tuple>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 using event_func_t = void (*)(void *, void *);
 
@@ -68,6 +68,5 @@ private:
     static inline thread_local std::set<EventItem> eventList;
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_EVENT_H_
+} // namespace frame
+} // namespace jx3calc

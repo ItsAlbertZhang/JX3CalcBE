@@ -1,10 +1,10 @@
-#ifndef FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
-#define FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
+#pragma once
 
-#include "frame/character/property/damage.h"
+#include "frame/common/damage.h"
 #include "frame/global/skill.h"
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class Character;
 class RuntimeCastSkill;
@@ -40,6 +40,5 @@ private:
     void handle(bool isRollback);
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_CHARACTER_HELPER_AUTO_ROLLBACK_ATTRIBUTE_H_
+} // namespace frame
+} // namespace jx3calc

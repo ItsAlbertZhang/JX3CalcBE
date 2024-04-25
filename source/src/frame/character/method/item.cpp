@@ -1,9 +1,9 @@
 #include "frame/global/item.h"
 #include "frame/character/character.h"
-#include "frame/global/cooldown.h"
 #include <stdexcept>
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 void Character::itemAdd(ItemType type, int ID) {
     if (type == ItemType::COUNT) {
@@ -27,18 +27,11 @@ void Character::itemUse(ItemType type, int ID) {
 
     if (item.CoolDownID != 0) {
         // 检查 CD
-        if (chCooldown.cooldownList.contains(item.CoolDownID)) {
-            const ChCooldown::Item &cd = chCooldown.cooldownList.at(item.CoolDownID);
-            if (cd.countAvailable == 0) {
-                return;
-            }
+        if (cooldownLeft(item.CoolDownID) > 0) {
+            return;
         }
         // 触发 CD
-        const Cooldown &cooldown      = CooldownManager::get(item.CoolDownID);
-        int             durationFrame = cooldown.DurationFrame * 1024 / (1024 + chAttr.getHaste());
-        durationFrame                 = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
-        durationFrame                 = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
-        cooldownModify(item.CoolDownID, durationFrame);
+        cooldownModify(item.CoolDownID, 0, 1);
     }
 
     // 触发技能

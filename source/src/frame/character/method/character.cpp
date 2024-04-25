@@ -3,7 +3,8 @@
 #include "frame/character/helper/auto_rollback_attribute.h"
 #include <cstdlib>
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 Character::Character() {
     this->dwID = static_cast<int>(characterList.size());

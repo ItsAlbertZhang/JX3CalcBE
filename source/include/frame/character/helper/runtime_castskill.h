@@ -1,11 +1,12 @@
-#ifndef FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_
-#define FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_
+#pragma once
 
-#include "frame/character/property/damage.h"
+#include "frame/common/damage.h"
+#include "frame/global/skill.h"
 #include <queue>
 #include <vector>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 class Character;
 
@@ -15,29 +16,12 @@ public:
         : self(self), skillID(skillID), skillLevel(skillLevel) {}
     ~RuntimeCastSkill();
 
-    // 待执行的技能队列.
-    class SkillQueueElement {
-    public:
-        SkillQueueElement(int skillID, int skillLevel, Character *caster, Character *target)
-            : skillID(skillID), skillLevel(skillLevel), caster(caster), target(target), hasTarget(true) {}
-        SkillQueueElement(int skillID, int skillLevel, Character *caster)
-            : skillID(skillID), skillLevel(skillLevel), caster(caster) {}
-
-        int        skillID;    // 技能 ID
-        int        skillLevel; // 技能等级
-        Character *caster;
-        Character *target;
-
-        bool hasTarget = false;
-    };
-
-    Character                    *self;
-    const int                     skillID;
-    const int                     skillLevel;
-    std::queue<SkillQueueElement> skillQueue;
-    std::vector<Damage>           damageList;
+    Character                        *self;
+    const int                         skillID;
+    const int                         skillLevel;
+    std::queue<Skill::SkillAttribute> skillQueue;
+    std::vector<Damage>               damageList;
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_CHARACTER_HELPER_RUNTIME_CASTSKILL_H_
+} // namespace frame
+} // namespace jx3calc

@@ -3,26 +3,28 @@
 #include "plugin/channelinterval.h"
 #include "frame/global/buff.h"
 #include "frame/global/skill.h"
-#include "utils/config.h"
+#include "modules/config.h"
 #include <format>
 #include <fstream>
 
-void ns_plugin::channelinterval::record(int id, int level, int base, int rand, double channelinterval, bool isBuff) {
+using namespace jx3calc;
+
+void plugin::channelinterval::record(int id, int level, int base, int rand, double channelinterval, bool isBuff) {
     if (enable) {
         records[id][level] = {base, rand, channelinterval, isBuff};
     }
 }
 
-void ns_plugin::channelinterval::save() {
-    std::ofstream file(ns_utils::config::pExeDir / "output_channelinterval.tab");
+void plugin::channelinterval::save() {
+    std::ofstream file(modules::config::pExeDir / "output_channelinterval.tab");
     file << std::format("Base\tRand\tCoefficient\tSkillID\tSkillLevel\tName\n");
     for (const auto &[id, skillLevelMap] : records) {
         for (const auto &[level, item] : skillLevelMap) {
             std::string name;
             if (item.isBuff) {
-                name = ns_frame::BuffManager::get(id, level).Name;
+                name = frame::BuffManager::get(id, level).Name;
             } else {
-                name = ns_frame::SkillManager::get(id, level).Name;
+                name = frame::SkillManager::get(id, level).Name;
             }
             file << std::format("{}\t{}\t{:.4f}\t{}\t{}\t{}\n", item.base, item.rand, item.channelinterval, id, level, name);
         }

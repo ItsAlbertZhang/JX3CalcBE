@@ -1,19 +1,16 @@
 #include "frame/character/helper/auto_rollback_attrib.h"
 #include "frame/character/character.h"
-#include "frame/lua_runtime.h"
-#include "frame/ref/tab_attribute.h" // enumTabAttribute
+#include "frame/lua/interface.h"
+#include "frame/ref/tab_attribute.h" // ref::Attrib
 #include "plugin/log.h"
 #include <random>
 
-using namespace ns_frame;
-using namespace ns_frame::ref;
+using namespace jx3calc;
+using namespace frame;
 
 AutoRollbackAttrib::AutoRollbackAttrib(Character *self, BuffItem *item, const Buff &buff)
     : self(self), item(item), buff(buff) {
-    // item->flushLeftFrame();
-    for (const auto &it : buff.BeginAttrib) {
-        handle(it, false);
-    }
+    load();
 }
 
 AutoRollbackAttrib::~AutoRollbackAttrib() {
@@ -26,12 +23,12 @@ AutoRollbackAttrib::~AutoRollbackAttrib() {
     }
     if (!buff.ScriptFile.empty()) {
         std::string paramStr = "scripts/skill/" + buff.ScriptFile;
-        if (!LuaFunc::analysis(
-                LuaFunc::getOnRemove(paramStr)(
+        if (!lua::interface::analysis(
+                lua::interface::getOnRemove(paramStr)(
                     item->nCharacterID, item->nID, item->nLevel, item->nLeftFrame, item->nCustomValue, item->dwSkillSrcID, item->nStackNum, 0, 0, item->dwCasterSkillID
                 ),
                 paramStr,
-                LuaFunc::Enum::OnRemove
+                lua::interface::FuncType::OnRemove
             ))
             CONSTEXPR_LOG_ERROR("LuaFunc::getOnRemove(\"{}\") failed.", paramStr);
         // OnRemove(nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID)
@@ -43,17 +40,28 @@ void AutoRollbackAttrib::active() {
         handle(it, false);
     }
 }
+void AutoRollbackAttrib::load() {
+    for (const auto &it : buff.BeginAttrib) {
+        handle(it, false);
+    }
+}
+void AutoRollbackAttrib::unload() {
+    for (const auto &it : buff.BeginAttrib) {
+        handle(it, true);
+    }
+}
 
 void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
-    int c = isRollback ? -1 : 1;
+    int c     = isRollback ? -1 : 1;
+    int stack = item->nStackNum;
     switch (attrib.type) {
-    case enumTabAttribute::atLunarDamageCoefficient:
-        self->chAttr.atLunarDamageCoefficient += attrib.valueAInt * c;
+    case ref::Attrib::atLunarDamageCoefficient:
+        self->chAttr.atLunarDamageCoefficient += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atSolarDamageCoefficient:
-        self->chAttr.atSolarDamageCoefficient += attrib.valueAInt * c;
+    case ref::Attrib::atSolarDamageCoefficient:
+        self->chAttr.atSolarDamageCoefficient += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atCallSolarDamage: {
+    case ref::Attrib::atCallSolarDamage: {
         // 计算会心
         Character *src                                 = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
@@ -84,7 +92,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         ));
         src->bFightState = true;
     } break;
-    case enumTabAttribute::atCallLunarDamage: {
+    case ref::Attrib::atCallLunarDamage: {
         // 计算会心
         Character *src                                 = Character::characterGet(item->dwSkillSrcID);
         // 注意计算会心时使用的是 item->attr, 而不是 src->chAttr, 实现快照效果
@@ -115,101 +123,104 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         ));
         src->bFightState = true;
     } break;
-    case enumTabAttribute::atExecuteScript: {
+    case ref::Attrib::atExecuteScript: {
         std::string paramStr = "scripts/" + attrib.valueAStr;
         if (isRollback) {
-            if (!LuaFunc::analysis(LuaFunc::getUnApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::UnApply))
+            if (!lua::interface::analysis(lua::interface::getUnApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, lua::interface::FuncType::UnApply))
                 CONSTEXPR_LOG_ERROR("LuaFunc::getUnApply(\"{}\") failed.", paramStr);
         } else {
-            if (!LuaFunc::analysis(LuaFunc::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, LuaFunc::Enum::Apply))
+            if (!lua::interface::analysis(lua::interface::getApply(paramStr)(item->nCharacterID, item->dwSkillSrcID), paramStr, lua::interface::FuncType::Apply))
                 CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
         }
     } break;
-    case enumTabAttribute::atLunarCriticalStrikeBaseRate:
-        self->chAttr.atLunarCriticalStrikeBaseRate += attrib.valueAInt * c;
+    case ref::Attrib::atLunarCriticalStrikeBaseRate:
+        self->chAttr.atLunarCriticalStrikeBaseRate += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atSolarCriticalStrikeBaseRate:
-        self->chAttr.atSolarCriticalStrikeBaseRate += attrib.valueAInt * c;
+    case ref::Attrib::atSolarCriticalStrikeBaseRate:
+        self->chAttr.atSolarCriticalStrikeBaseRate += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atMagicCriticalDamagePowerBaseKiloNumRate:
-        self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
+    case ref::Attrib::atMagicCriticalDamagePowerBaseKiloNumRate:
+        self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atAllShieldIgnorePercent:
-        self->chAttr.atAllShieldIgnorePercent += attrib.valueAInt * c;
+    case ref::Attrib::atAllShieldIgnorePercent:
+        self->chAttr.atAllShieldIgnorePercent += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atAddTransparencyValue:
+    case ref::Attrib::atAddTransparencyValue:
         // 未做相关实现, 推测为透明度
         break;
-    case enumTabAttribute::atSetSelectableType:
+    case ref::Attrib::atSetSelectableType:
         // 未做相关实现, 推测为是否可以选中
         break;
-    case enumTabAttribute::atSkillEventHandler:
+    case ref::Attrib::atSkillEventHandler:
         if (isRollback) {
             self->skilleventRemove(attrib.valueAInt);
         } else {
             self->skilleventAdd(attrib.valueAInt);
         }
         break;
-    case enumTabAttribute::atStealth:
+    case ref::Attrib::atStealth:
         // 未做相关实现, 推测为隐身
         break;
-    case enumTabAttribute::atMoveSpeedPercent:
+    case ref::Attrib::atMoveSpeedPercent:
         // 未做相关实现, 推测为移动速度
         break;
-    case enumTabAttribute::atKnockedDownRate:
+    case ref::Attrib::atKnockedDownRate:
         // 未做相关实现, 推测为免疫击倒
         break;
-    case enumTabAttribute::atBeImmunisedStealthEnable:
+    case ref::Attrib::atBeImmunisedStealthEnable:
         // 未做相关实现
         break;
-    case enumTabAttribute::atImmunity:
+    case ref::Attrib::atImmunity:
         // 未做相关实现
         break;
-    case enumTabAttribute::atImmuneSkillMove:
+    case ref::Attrib::atImmuneSkillMove:
         // 未做相关实现
         break;
-    case enumTabAttribute::atActiveThreatCoefficient:
+    case ref::Attrib::atActiveThreatCoefficient:
         // 未做相关实现, 推测为威胁值
         break;
-    case enumTabAttribute::atHalt:
+    case ref::Attrib::atHalt:
         // 未做相关实现, 推测为禁止移动
         break;
-    case enumTabAttribute::atNoLimitChangeSkillIcon:
+    case ref::Attrib::atNoLimitChangeSkillIcon:
         // 未做相关实现, 推测为技能图标替换
         break;
-    case enumTabAttribute::atSetTalentRecipe:
+    case ref::Attrib::atSetTalentRecipe:
         if (isRollback) {
             self->skillrecipeRemove(attrib.valueAInt, attrib.valueBInt);
         } else {
             self->skillrecipeAdd(attrib.valueAInt, attrib.valueBInt);
         }
         break;
-    case enumTabAttribute::atAllMagicDamageAddPercent:
-        self->chAttr.atAllMagicDamageAddPercent += attrib.valueAInt * c;
+    case ref::Attrib::atAllMagicDamageAddPercent:
+        self->chAttr.atAllMagicDamageAddPercent += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atBeTherapyCoefficient:
-        self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c;
+    case ref::Attrib::atBeTherapyCoefficient:
+        self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atCallBuff:
+    case ref::Attrib::atCallBuff:
         self->buffAdd(0, 99, attrib.valueAInt, attrib.valueBInt);
         break;
-    case enumTabAttribute::atKnockedOffRate:
+    case ref::Attrib::atKnockedOffRate:
         // 未做相关实现, 推测为免疫击退
         break;
-    case enumTabAttribute::atSolarCriticalDamagePowerBaseKiloNumRate:
-        self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
+    case ref::Attrib::atSolarCriticalDamagePowerBaseKiloNumRate:
+        self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atLunarCriticalDamagePowerBaseKiloNumRate:
-        self->chAttr.atLunarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c;
+    case ref::Attrib::atLunarCriticalDamagePowerBaseKiloNumRate:
+        self->chAttr.atLunarCriticalDamagePowerBaseKiloNumRate += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atAllDamageAddPercent:
-        self->chAttr.atAllDamageAddPercent += attrib.valueAInt * c;
+    case ref::Attrib::atAllDamageAddPercent:
+        self->chAttr.atAllDamageAddPercent += attrib.valueAInt * c * stack;
         break;
-    case enumTabAttribute::atMagicOvercome:
-        self->chAttr.atMagicOvercome += attrib.valueAInt * c;
+    case ref::Attrib::atMagicOvercome:
+        self->chAttr.atMagicOvercome += attrib.valueAInt * c * stack;
+        break;
+    case ref::Attrib::atCastSkillTargetDst:
+        self->skillCast(attrib.valueAInt, attrib.valueBInt);
         break;
     default:
-        CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, refTabAttribute[static_cast<int>(attrib.type)], attrib.valueAInt);
+        CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, Ref<ref::Attrib>::names[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;
     }
 }

@@ -23,12 +23,16 @@ if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC")
         "/W4" # 设置警告等级为 4
     )
 elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fuse-ld=lld")
     if(APPLE)
         set(CMAKE_MACOSX_RPATH ON)
         set(CMAKE_SKIP_BUILD_RPATH FALSE)
         set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
         set(CMAKE_INSTALL_RPATH "@executable_path/")
-    else()
+    elseif(UNIX AND NOT APPLE)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++") # 使用 libc++ 标准库
         set(CMAKE_SKIP_BUILD_RPATH FALSE)
         set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
         set(CMAKE_INSTALL_RPATH "$ORIGIN")
@@ -95,11 +99,12 @@ include_directories("${CMAKE_SOURCE_DIR}/extern/nlohmann-json/include")
 include_directories("${CMAKE_SOURCE_DIR}/extern/sol2/include")
 
 # 构建 jx3calc
-file(GLOB_RECURSE MAIN_SOURCES "${CMAKE_SOURCE_DIR}/source/src/*.cpp")
+file(GLOB_RECURSE MAIN_SOURCES "${CMAKE_SOURCE_DIR}/source/src/*.cpp" "${CMAKE_SOURCE_DIR}/source/lib/*.cpp")
 add_executable(jx3calc ${MAIN_SOURCES}) # 编译为可执行文件
 target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/source/include")
 target_link_libraries(jx3calc PRIVATE ${LUA}) # 链接 lua 库
 if(DEFINED CROW_ENABLE_SSL)
+    add_definitions(-DCROW_ENABLE_SSL)
     target_link_libraries(jx3calc PRIVATE ssl crypto) # 链接 ssl 库
 endif()
 

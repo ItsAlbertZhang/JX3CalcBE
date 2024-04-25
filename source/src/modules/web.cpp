@@ -1,83 +1,84 @@
 #include "modules/web.h"
+#include "modules/config.h"
 #include "modules/task.h"
-#include "utils/config.h"
-#include <crow/mustache.h>
+#include <future>
 #include <string>
 
-#define UNREFERENCED_PARAMETER(P) (P)
+#pragma warning(push, 0)      // MSVC
+#pragma clang diagnostic push // Clang
+#pragma clang diagnostic ignored "-Weverything"
 
-using namespace ns_modules;
+#ifdef _WIN32
+#include <sdkddkver.h>
+#endif
+#include <crow.h>
+#include <crow/middlewares/cors.h>
 
-web::Web::~Web() {
-    app.stop();
-    future.get();
-}
+#pragma clang diagnostic pop // Clang
+#pragma warning(pop)         // MSVC
 
-web::WebApp::WebApp() {
-    task::server::asyncrun();
+void jx3calc::modules::web::run() {
+    std::atomic<bool>            stop{false};
+    crow::App<crow::CORSHandler> app;
+    crow::App<crow::CORSHandler> manager;
+    task::Server                 server;
 
     CROW_ROUTE(app, "/status")
         .methods("GET"_method)([]() {
-            return crow::response{200, "application/json", ns_utils::config::status()};
+            return crow::response{200, "application/json", config::status()};
         });
 
     CROW_ROUTE(app, "/create")
-        .methods("POST"_method)([](const crow::request &req) {
-            auto res = task::create(req.body);
+        .methods("POST"_method)([&server](const crow::request &req) {
+            auto res = server.create(req.body);
             return crow::response{200, "application/json", res.format()};
         });
 
     CROW_ROUTE(app, "/query/<string>/dps")
-        .methods("GET"_method)([](std::string id) {
-            if (!task::server::taskMap.contains(id))
+        .methods("GET"_method)([&server](std::string id) {
+            if (!server.taskMap.contains(id))
                 return crow::response{200, "application/json", R"({"status":-1,"data":"error task id"})"};
-            return crow::response{200, "application/json", task::server::taskMap.at(id)->queryDPS()};
+            return crow::response{200, "application/json", server.taskMap.at(id)->queryDPS()};
         });
 
     CROW_ROUTE(app, "/query/<string>/damage-list")
-        .methods("GET"_method)([](std::string id) {
-            if (!task::server::taskMap.contains(id))
+        .methods("GET"_method)([&server](std::string id) {
+            if (!server.taskMap.contains(id))
                 return crow::response{200, "application/json", R"({"status":-1,"data":"error task id"})"};
-            return crow::response{200, "application/json", task::server::taskMap.at(id)->queryDamageList()};
+            return crow::response{200, "application/json", server.taskMap.at(id)->queryDamageList()};
         });
 
     CROW_ROUTE(app, "/query/<string>/damage-analysis")
-        .methods("GET"_method)([](std::string id) {
-            if (!task::server::taskMap.contains(id))
+        .methods("GET"_method)([&server](std::string id) {
+            if (!server.taskMap.contains(id))
                 return crow::response{200, "application/json", R"({"status":-1,"data":"error task id"})"};
-            return crow::response{200, "application/json", task::server::taskMap.at(id)->queryDamageAnalysis()};
+            return crow::response{200, "application/json", server.taskMap.at(id)->queryDamageAnalysis()};
         });
 
 #ifdef CROW_ENABLE_SSL
     app.ssl_file("fullchain.pem", "privkey.pem");
 #endif
-    future = app.bindaddr("0.0.0.0").port(12897).multithreaded().run_async();
-}
+    auto futureApp = app.bindaddr("0.0.0.0").port(12897).multithreaded().run_async();
 
-web::WebApp::~WebApp() {
-    task::server::stop();
-}
-
-web::WebManager::WebManager() {
-    CROW_ROUTE(app, "/config")
+    CROW_ROUTE(manager, "/config")
         .methods("POST"_method)([](const crow::request &req) {
-            bool ret = ns_utils::config::init(req.body);
+            bool ret = modules::config::init(req.body);
             return crow::response{ret ? 200 : 400};
         });
 
-    CROW_ROUTE(app, "/stop")
-        .methods("GET"_method)([]() {
+    CROW_ROUTE(manager, "/stop")
+        .methods("GET"_method)([&stop]() {
             stop.store(true);
             return crow::response{200};
         });
-    future = app.bindaddr("0.0.0.0").port(12898).run_async();
-}
+    auto futureManager = manager.bindaddr("127.0.0.1").port(12898).run_async();
 
-void web::run() {
-    WebApp     app;
-    WebManager manager;
     while (!stop.load()) {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-    // 离开作用域, app 和 manager 自动析构.
+
+    app.stop();
+    futureApp.get();
+    manager.stop();
+    futureManager.get();
 }

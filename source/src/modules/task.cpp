@@ -1,31 +1,31 @@
 #include "modules/task.h"
-#include "concrete/character/character.h"
-#include "concrete/effect/effect.h"
+#include "concrete/effect.h"
+#include "concrete/npc.h"
+#include "concrete/player.h"
 #include "frame/character/derived/player.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
 #include "frame/global/skill.h"
+#include "modules/config.h"
 #include "plugin/channelinterval.h"
 #include "plugin/log.h"
-#include "utils/config.h"
 #include <asio/co_spawn.hpp>
 #include <chrono>
-#include <format>
 #include <memory>
-#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-using namespace ns_modules::task;
+using namespace jx3calc;
+using namespace modules::task;
 using ull = unsigned long long;
 
 constexpr int CNT_DETAIL_TASKS = 5;
 
-void ns_modules::task::server::asyncrun() {
+Server::Server() {
     asio::co_spawn(
         ioContext,
-        [&]() -> asio::awaitable<void> {
+        [this]() -> asio::awaitable<void> {
             asio::steady_timer timer(ioContext);
             while (true) {
                 timer.expires_after(std::chrono::seconds(1));
@@ -34,258 +34,146 @@ void ns_modules::task::server::asyncrun() {
         },
         asio::detached
     ); // 用于保持 io.run() 的运行
-    ioThread = std::thread([&]() {
+    ioThread = std::thread([this]() {
         ioContext.run();
     });
 }
 
-void ns_modules::task::server::stop() {
+Server::~Server() {
     for (auto &task : taskMap)
-        task::stop(task.first);
+        stop(task.first);
+    // 任务结束是异步的 (每秒检查一次), 因此需要等待 1 秒以上. 等待 1.5 秒.
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     ioContext.stop();
     ioThread.join();
     pool.join();
 }
 
-ns_modules::task::Data::~Data() {
-    if (!customString.empty()) {
-        ns_frame::CustomLua::cancel(customString);
+Task::Data::~Data() {
+    if (fight.has_value()) {
+        frame::CustomLua::cancel(fight.value());
     }
 }
 
-static int         calcBrief(const Data &arg);
-static int         calcDetail(const Data &data, ns_frame::ChDamage *detail);
-static std::string genID(int length = 6);
+static int calcBrief(const Task::Data &arg);
+static int calcDetail(const Task::Data &data, frame::ChDamage *detail);
+template <typename TypeValue>
+static std::string genID(const std::unordered_map<std::string, TypeValue> &map, int length = 6);
 
-Response ns_modules::task::validate(const std::string &jsonstr) {
-    using json = nlohmann::json;
-    // 解析 json
-    json j;
-    try {
-        j = json::parse(jsonstr);
-    } catch (...) {
-        return Response{
-            .status = ResponseStatus::parse_error,
-            .data   = "json parse error",
-        };
-    }
-    // 检查字段
-    // 1.1 检查必须字段
-    static const std::vector<std::string> required{
-        "player", "delayNetwork", "delayKeyboard", "fightTime", "fightCount", "attribute", "effects"
-    };
-    for (auto &it : required) {
-        if (!j.contains(it)) {
-            return Response{
-                .status = ResponseStatus::missing_field,
-                .data   = std::format("missing required field: {}", it),
-            };
-        }
-    }
-    // 1.2 检查不允许字段
-    if (j.contains("custom") && !ns_utils::config::taskdata::allowCustom) {
-        return Response{
-            .status = ResponseStatus::invalid_field,
-            .data   = "custom not allowed",
-        };
-    }
-    // 2. 分别检查字段值
-    // 2.1 检查 player
-    if (!j["player"].is_string() || !ns_concrete::refPlayerType.contains(j["player"].get<std::string>())) {
-        return Response{
-            .status = ResponseStatus::invalid_player,
-            .data   = "player invalid",
-        };
-    }
-    // 2.2 检查 delayNetwork, delayKeyboard, fightTime, fightCount
-    if (!j["delayNetwork"].is_number_integer() || j["delayNetwork"].get<int>() < 0 ||
-        j["delayNetwork"].get<int>() > ns_utils::config::taskdata::maxDelayNetwork) {
-        return Response{
-            .status = ResponseStatus::invalid_interger,
-            .data   = "delayNetwork invalid",
-        };
-    }
-    if (!j["delayKeyboard"].is_number_integer() || j["delayKeyboard"].get<int>() < 0 ||
-        j["delayKeyboard"].get<int>() > ns_utils::config::taskdata::maxDelayKeyboard) {
-        return Response{
-            .status = ResponseStatus::invalid_interger,
-            .data   = "delayKeyboard invalid",
-        };
-    }
-    if (!j["fightTime"].is_number_integer() || j["fightTime"].get<int>() < 0 ||
-        j["fightTime"].get<int>() > ns_utils::config::taskdata::maxFightTime) {
-        return Response{
-            .status = ResponseStatus::invalid_interger,
-            .data   = "fightTime invalid",
-        };
-    }
-    if (!j["fightCount"].is_number_integer() || j["fightCount"].get<int>() < 0 ||
-        j["fightCount"].get<int>() > ns_utils::config::taskdata::maxFightCount) {
-        return Response{
-            .status = ResponseStatus::invalid_interger,
-            .data   = "fightCount invalid",
-        };
-    }
-    // 2.3 检查 attribute
-    if (!j["attribute"].is_object() ||
-        !j["attribute"].contains("method") || !j["attribute"]["method"].is_string() ||
-        !refAttributeType.contains(j["attribute"]["method"].get<std::string>()) ||
-        !j["attribute"].contains("data") || !j["attribute"]["data"].is_object()) {
-        return Response{
-            .status = ResponseStatus::invalid_attribute_method,
-            .data   = "attribute method invalid",
-        };
-    }
-    enumAttributeType type = refAttributeType.at(j["attribute"]["method"].get<std::string>());
-    switch (type) {
-    case enumAttributeType::data:
-        break;
-    case enumAttributeType::jx3box: {
-        if (!j["attribute"]["data"].contains("pzid") || !j["attribute"]["data"]["pzid"].is_string()) {
-            return Response{
-                .status = ResponseStatus::invalid_attribute_data,
-                .data   = "attribute data invalid",
-            };
-        }
-    } break;
-    default:
-        return Response{
-            .status = ResponseStatus::invalid_attribute_method,
-            .data   = "attribute method invalid",
-        };
-        break;
-    }
-    // 2.4 检查 effects
-    if (!j["effects"].is_array()) {
-        return Response{
-            .status = ResponseStatus::invalid_effects,
-            .data   = "effects invalid",
-        };
-    }
-    for (auto &it : j["effects"]) {
-        if (!it.is_string() || !ns_concrete::refEffectType.contains(it.get<std::string>())) {
-            return Response{
-                .status = ResponseStatus::invalid_effects,
-                .data   = std::format("effects invalid: {}", it.get<std::string>()),
-            };
-        }
-    }
-    // 2.5 检查 custom
-    if (j.contains("custom")) {
-        bool invalid = false;
-        if (!j["custom"].is_object() ||
-            !j["custom"].contains("method") || !j["custom"]["method"].is_string() ||
-            !refCustom.contains(j["custom"]["method"].get<std::string>()) ||
-            !j["custom"].contains("data")) {
-            invalid = true;
-        }
-        switch (refCustom.at(j["custom"]["method"].get<std::string>())) {
-        case enumCustom::lua:
-            if (!j["custom"]["data"].is_string()) {
-                invalid = true;
-            }
-            break;
-        case enumCustom::jx3:
-            if (!j["custom"]["data"].is_array()) {
-                invalid = true;
-            } else {
-                for (auto &it : j["custom"]["data"]) {
-                    if (!it.is_string()) {
-                        invalid = true;
-                        break;
-                    }
-                }
-            }
-            break;
-        }
-        if (invalid) {
-            return Response{
-                .status = ResponseStatus::invalid_custom,
-                .data   = "custom method invalid",
-            };
-        }
-    }
-    // 检查完毕, 返回 true
-    return Response{
-        .status = ResponseStatus::success,
-    };
-}
+static void createTaskData(Task::Data &data, Response &res, const std::string &jsonstr) {
+    // 1. 验证数据可用性. 此步骤未成功, catch 会返回 config.json not available.
+    if (modules::config::dataAvailable == modules::config::dataStatus::unavailable) [[unlikely]]
+        throw std::runtime_error("");
+    res.next();
+    // 2. 解析 json. 此步骤未成功, 返回 json parse error.
+    using json   = nlohmann::json;
+    const json j = json::parse(jsonstr);
+    res.next();
 
-static std::optional<Data> createTaskData(const nlohmann::json &j) {
-    Data res{
-        .delayNetwork  = j["delayNetwork"].get<int>(),
-        .delayKeyboard = j["delayKeyboard"].get<int>(),
-        .fightTime     = j["fightTime"].get<int>(),
-        .fightCount    = j["fightCount"].get<int>(),
-    };
+    // 3. basic Data. 此步骤未成功, catch 会返回 Error in base: missing field or invalid option.
+    data.playerType    = concrete::player::refType.at(j.at("player").get<std::string>()),
+    data.delayNetwork  = j.at("delayNetwork").get<int>(),
+    data.delayKeyboard = j.at("delayKeyboard").get<int>(),
+    data.fightTime     = j.at("fightTime").get<int>(),
+    data.fightCount    = j.at("fightCount").get<int>(),
+    res.next();
 
-    auto playerType = ns_concrete::refPlayerType.at(j["player"].get<std::string>());
-    // player. 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
-    auto player     = ns_concrete::createPlayer(playerType, 0, 0);
+    // 4. 检查 basic Data. 此步骤未成功, catch 会返回 Error in base: invalid input value.
+    if (data.delayNetwork < 0 || data.delayNetwork > modules::config::taskdata::maxDelayNetwork ||
+        data.delayKeyboard < 0 || data.delayKeyboard > modules::config::taskdata::maxDelayKeyboard ||
+        data.fightTime < 0 || data.fightTime > modules::config::taskdata::maxFightTime ||
+        data.fightCount < 0 || data.fightCount > modules::config::taskdata::maxFightCount) [[unlikely]] {
+        throw std::runtime_error("");
+    }
+    res.next();
 
-    auto attrType = refAttributeType.at(j["attribute"]["method"].get<std::string>());
+    // 5. attribute. 此步骤未成功, catch 会返回 Error in attribute.
+    auto player   = concrete::create(data.playerType);
+    auto attrType = refAttributeType.at(j.at("attribute")["method"].get<std::string>());
     switch (attrType) {
     case enumAttributeType::data: {
-        std::string dataJsonStr = j["attribute"]["data"].dump();
-        if (!player->attrImportFromData(dataJsonStr)) {
-            return std::nullopt;
-        }
+        std::string dataJsonStr = j.at("attribute")["data"].dump();
+        if (!player->attrImportFromData(dataJsonStr))
+            throw std::runtime_error("import from data failed.");
     } break;
     case enumAttributeType::jx3box: {
-        std::string pzid = j["attribute"]["data"]["pzid"].get<std::string>();
-        if (!player->attrImportFromJX3BOX(pzid)) {
-            return std::nullopt;
-        }
+        std::string pzid = j.at("attribute")["data"]["pzid"].get<std::string>();
+        if (!player->attrImportFromJX3BOX(pzid))
+            throw std::runtime_error("import from jx3box failed.");
     } break;
-    default:
-        return std::nullopt;
-        break;
     }
-    res.attrBackup = player->chAttr;
+    data.attrBackup = player->chAttr;
+    res.next();
 
-    std::vector<std::shared_ptr<ns_concrete::EffectBase>> effectList;
-    for (auto &x : j["effects"].items()) {
-        auto effect = ns_concrete::createEffect(ns_concrete::refEffectType.at(x.value().get<std::string>()));
-        if (effect == nullptr) [[unlikely]] {
-            return std::nullopt; // 代码未出错的情况下, 不可能出现此情况, 因为 validate 已经验证过了
+    // 6. effect. 此步骤未成功, catch 会返回 Error in effect.
+    std::vector<std::shared_ptr<concrete::effect::Base>> effectList;
+    effectList.reserve(j.at("effects").size());
+    for (auto &x : j.at("effects").items()) {
+        auto name = x.value().get<std::string>();
+        if (!concrete::effect::refType.contains(name)) [[unlikely]] {
+            throw std::runtime_error("unknown effect: " + name);
         }
-        effectList.emplace_back(std::move(effect));
+        effectList.emplace_back(concrete::create(concrete::effect::refType.at(name)));
     }
-    res.effects = std::move(effectList);
+    data.effects = std::move(effectList);
+    res.next();
 
-    if (j.contains("custom")) {
-        switch (refCustom.at(j["custom"]["method"].get<std::string>())) {
-        case enumCustom::lua:
-            res.customString = j["custom"]["data"].get<std::string>();
-            break;
-        case enumCustom::jx3:
-            std::vector<std::string> v;
-            for (auto &it : j["custom"]["data"]) {
-                v.emplace_back(it.get<std::string>());
+    // 7. fight (可选). 此步骤未成功, catch 会返回 Error in fight.
+    if (j.contains("fight")) {
+        const json &fight = j.at("fight");
+        if (fight.contains("method") && refCustom.contains(fight.at("method").get<std::string>())) {
+            switch (refCustom.at(fight.at("method").get<std::string>())) {
+            case enumCustom::lua:
+                if (!modules::config::taskdata::allowCustom) [[unlikely]]
+                    throw std::runtime_error("custom fight is not allowed.");
+                // fight["data"] 为 string, 内容为 lua 代码
+                data.fight.emplace(fight.at("data").get<std::string>());
+                break;
+            case enumCustom::jx3:
+                // fight["data"] 为 string[], 每一项都是一个游戏内宏
+                std::vector<std::string> v;
+                for (auto &it : fight.at("data")) {
+                    v.emplace_back(it.get<std::string>());
+                }
+                data.fight.emplace(frame::CustomLua::parse(v));
+                break;
             }
-            res.customString = ns_frame::CustomLua::parse(v);
-            break;
+
+        } else if (fight.contains("data") && fight.at("data").is_number_integer()) {
+            data.embedFightType = j.at("fight").at("data").get<int>();
         }
     }
+    res.next();
 
-    return res;
+    // 8. talents (可选). 此步骤未成功, catch 会返回 Error in talents.
+    if (j.contains("talents")) {
+        data.talents.emplace(j.at("talents").get<std::vector<int>>());
+    }
+    res.next();
+
+    // 9. recipes (可选). 此步骤未成功, catch 会返回 Error in recipes.
+    if (j.contains("recipes")) {
+        data.recipes.emplace(j.at("recipes").get<std::vector<int>>());
+    }
+    res.next();
 }
 
-static void asyncStop(Task &task) {
-    using namespace ns_modules::task;
-    server::taskMap.erase(task.id);
+static void asyncStop(Server *self, Task &task) {
+    using namespace modules::task;
+    self->taskMap.erase(task.id);
 }
 
-static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
-    using namespace ns_modules::task;
+static auto asyncRun(Server *self, asio::io_context &io, Task &task) -> asio::awaitable<void> {
+    using namespace modules::task;
 
     // 在线程池中创建任务
     const int cntCalcDetail = task.data.fightCount > CNT_DETAIL_TASKS ? CNT_DETAIL_TASKS : task.data.fightCount;
     task.details.resize(cntCalcDetail); // 注意, 此处不是 reserve, 因为获得的内存地址需要传递给线程池
+    const Task::Data &data = task.data;
     for (int i = 0; i < cntCalcDetail; i++) {
-        server::pool.emplace(task.id, 1, task.futures, calcDetail, task.data, &task.details[i]);
+        self->pool.emplace(task.id, 1, task.futures, calcDetail, data, &task.details[i]);
     }
-    server::pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, task.data);
+    self->pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, data);
 
     task.results.reserve(task.data.fightCount);
     int cntPre = 0;
@@ -312,60 +200,61 @@ static asio::awaitable<void> asyncRun(asio::io_context &io, Task &task) {
         timer.expires_after(std::chrono::seconds{60}); // 等待 60 秒, 随后释放内存
         co_await timer.async_wait(asio::use_awaitable);
     }
-    asyncStop(task);
+    asyncStop(self, task);
 }
 
-Response ns_modules::task::create(const std::string &jsonstr) {
-    // 验证数据可用性
-    if (!ns_utils::config::dataAvailable) [[unlikely]]
-        return Response{
-            .status = ResponseStatus::config_error,
-            .data   = "Data not available. Please config.",
-        };
-    // 验证 json
-    auto res = validate(jsonstr);
-    if (res.status != ResponseStatus::success) [[unlikely]]
-        return res;
-    // 验证后, 使用时无需再次验证
-    using json    = nlohmann::json;
-    json j        = json::parse(jsonstr);
-    auto taskdata = createTaskData(j);
-    if (!taskdata.has_value()) [[unlikely]]
-        return Response{
-            .status = ResponseStatus::create_data_error,
-            .data   = "An error occurred while creating task data. Please try again later.",
-        };
-
-    auto  id = genID();
-    auto &it = server::taskMap.emplace(id, std::make_unique<Task>(id, std::move(taskdata.value()))).first->second;
-    asio::co_spawn(server::ioContext, asyncRun(server::ioContext, *it), asio::detached);
-    return Response{
-        .status = ResponseStatus::success,
-        .data   = id,
-    };
-}
-
-void ns_modules::task::stop(std::string id) {
-    if (!server::taskMap.contains(id)) [[unlikely]]
-        return;
-    server::taskMap.at(id)->stop.store(true); // 真正的停止操作在 asyncRun 中
-}
-
-static auto calc(const Data &arg) {
-    std::unique_ptr<ns_frame::Player> player = ns_concrete::createPlayer(ns_concrete::PlayerType::MjFysj, arg.delayNetwork, arg.delayKeyboard);
-    std::unique_ptr<ns_frame::NPC>    npc    = ns_concrete::createNPC(ns_concrete::NPCType::NPC124);
-    player->targetSelect                     = npc.get();
-    if (!arg.customString.empty()) {
-        player->customLua = ns_frame::CustomLua::get(arg.customString);
+auto modules::task::Server::create(const std::string &jsonstr) -> Response {
+    Response    res;
+    std::string id = genID(taskMap);
+    auto       &it = taskMap.emplace(id, std::make_unique<Task>(id)).first->second;
+    try {
+        createTaskData(it->data, res, jsonstr);
+        asio::co_spawn(ioContext, asyncRun(this, ioContext, *it), asio::detached);
+        res.message = std::move(id);
+    } catch (const std::exception &e) {
+        taskMap.erase(id);
+        res.message = e.what();
     }
+    return res;
+}
+
+void modules::task::Server::stop(std::string id) {
+    if (!taskMap.contains(id)) [[unlikely]]
+        return;
+    taskMap.at(id)->stop.store(true); // 真正的停止操作在 asyncRun 中
+}
+
+static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
+    std::unique_ptr<frame::Player> player = concrete::create(arg.playerType);
+    player->delayBase                     = arg.delayNetwork;
+    player->delayRand                     = arg.delayKeyboard;
+    player->embedFightType                = arg.embedFightType;
+    if (arg.talents.has_value()) {
+        player->initTalents = &arg.talents.value();
+    }
+    if (arg.recipes.has_value()) {
+        player->initRecipes = &arg.recipes.value();
+    }
+    if (arg.fight.has_value()) {
+        player->customLua = frame::CustomLua::get(arg.fight.value());
+    }
+
+    std::unique_ptr<frame::NPC> npc = concrete::create(concrete::npc::Type::NPC124);
+    player->targetSelect            = npc.get();
+
     player->attrImportFromBackup(arg.attrBackup);
     for (auto &it : arg.effects) {
         it->active(player.get());
     }
-    ns_frame::Event::clear();
-    player->macroRun();
-    while (ns_frame::Event::now() < static_cast<ns_frame::event_tick_t>(1024 * arg.fightTime)) {
-        bool ret = ns_frame::Event::run();
+    frame::Event::clear();
+    player->fightStart();
+    while (true) {
+        if (player->stopInitiative.has_value()) {
+            if (player->stopInitiative.value()) [[unlikely]]
+                break;
+        } else if (frame::Event::now() >= static_cast<frame::event_tick_t>(arg.fightTime) * 1024) [[unlikely]]
+            break;
+        bool ret = frame::Event::run();
         if (!ret)
             break;
     }
@@ -373,7 +262,7 @@ static auto calc(const Data &arg) {
     return player;
 }
 
-static int calcBrief(const Data &data) {
+static int calcBrief(const Task::Data &data) {
     auto player = calc(data);
 
     ull sumDamage = 0;
@@ -381,10 +270,10 @@ static int calcBrief(const Data &data) {
         sumDamage += it.damageExcept;
     }
 
-    return static_cast<int>(sumDamage / data.fightTime);
+    return static_cast<int>(sumDamage * 1024 / frame::Event::now());
 }
 
-static int calcDetail(const Data &data, ns_frame::ChDamage *detail) {
+static int calcDetail(const Task::Data &data, frame::ChDamage *detail) {
     auto player = calc(data);
 
     ull sumDamage = 0;
@@ -394,17 +283,18 @@ static int calcDetail(const Data &data, ns_frame::ChDamage *detail) {
 
     *detail = std::move(player->chDamage);
 #ifdef D_CONSTEXPR_LOG
-    ns_plugin::log::info.save();
-    ns_plugin::log::error.save();
+    plugin::log::info.save();
+    plugin::log::error.save();
 #endif
 #ifdef D_CONSTEXPR_CHANNELINTERVAL
-    ns_plugin::channelinterval::save();
+    plugin::channelinterval::save();
 #endif
 
-    return static_cast<int>(sumDamage / data.fightTime);
+    return static_cast<int>(sumDamage * 1024 / frame::Event::now());
 }
 
-static std::string genID(int length) {
+template <typename TValue>
+static std::string genID(const std::unordered_map<std::string, TValue> &map, int length) {
     const std::string CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
     std::random_device              random_device;
@@ -412,7 +302,7 @@ static std::string genID(int length) {
     std::uniform_int_distribution<> distribution(0, static_cast<int>(CHARACTERS.size() - 1));
 
     std::string random_string;
-    while (random_string.empty() || ns_modules::task::server::taskMap.contains(random_string)) {
+    while (random_string.empty() || map.contains(random_string)) {
         for (size_t i = 0; i < length; i++) {
             random_string += CHARACTERS[distribution(generator)];
         }
@@ -498,9 +388,9 @@ std::string Task::queryDamageList() {
         for (auto &everyDamage : everyFight) {
             std::string name;
             if (everyDamage.isBuff) {
-                name = ns_frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
+                name = frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
             } else {
-                name = ns_frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
+                name = frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
             }
             json objDamage;
             objDamage["time"]           = everyDamage.tick / 1024.0;
@@ -515,7 +405,7 @@ std::string Task::queryDamageList() {
             objDamage["name"]           = name;
             objFight.emplace_back(objDamage);
         }
-        j["data"].emplace_back(objFight);
+        j.at("data").emplace_back(objFight);
     }
     return j.dump();
 }
@@ -549,9 +439,9 @@ std::string Task::queryDamageAnalysis() {
             if (!damageAnalysisMap.contains(everyDamage.id) || !damageAnalysisMap.at(everyDamage.id).contains(everyDamage.level)) {
                 std::string name;
                 if (everyDamage.isBuff) {
-                    name = ns_frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
+                    name = frame::BuffManager::get(everyDamage.id, everyDamage.level).Name;
                 } else {
-                    name = ns_frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
+                    name = frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
                 }
                 damageAnalysisMap[everyDamage.id][everyDamage.level] = DamageAnalysisItem{
                     .id        = everyDamage.id,
@@ -579,7 +469,7 @@ std::string Task::queryDamageAnalysis() {
             objDamage["damageMin"]  = it.damageMin;
             objDamage["damageMax"]  = it.damageMax;
             objDamage["proportion"] = static_cast<double>(it.damageSum) / sumDamage;
-            j["data"].emplace_back(objDamage);
+            j.at("data").emplace_back(objDamage);
         }
     }
     return j.dump();

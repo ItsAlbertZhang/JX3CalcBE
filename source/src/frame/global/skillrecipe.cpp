@@ -1,10 +1,11 @@
 #include "frame/global/skillrecipe.h"
-#include "frame/lua_runtime.h"
+#include "frame/lua/interface.h"
 #include "gdi.h"
 #include "plugin/log.h"
 #include <tuple>
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 const SkillRecipe &SkillRecipeManager::getRecipe(int RecipeID, int RecipeLevel) {
     // 若不存在, 则添加
@@ -69,12 +70,12 @@ void SkillRecipeManager::addScriptSkill(const SkillRecipe *skillrecipe, const Sk
     scriptskill.dwSkillID = skill->dwSkillID;
     scriptskill.dwLevel   = skill->dwLevel;
     std::string path      = "scripts/skill/" + skillrecipe->tab.at("ScriptFile");
-    bool        res       = LuaFunc::analysis(
-        LuaFunc::getGetSkillRecipeData(path)(
+    bool        res       = lua::interface::analysis(
+        lua::interface::getGetSkillRecipeData(path)(
             scriptskill, skillrecipe->RecipeID, skillrecipe->RecipeLevel
         ),
         path,
-        LuaFunc::Enum::GetSkillRecipeData
+        lua::interface::FuncType::GetSkillRecipeData
     );
     if (res) {
         // 成功执行, 将技能添加到 ScriptSkill 中

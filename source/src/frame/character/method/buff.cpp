@@ -7,7 +7,8 @@
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 static void staticDelBuff(Character *self, BuffItem *it);
 
@@ -64,9 +65,6 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         if (nullptr != src) {      // lua 中有 AddBuff 时直接填 CharacterID 为 0 的逆天逻辑
             it.attr = src->chAttr; // 调用复制构造函数, 锁面板
         }
-        // it.attr      = characterGet(buffSourceID)->chAttr;      // 调用复制构造函数, 锁面板
-        it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
-        this->autoRollbackAttribList.emplace(static_cast<AutoRollbackAttrib *>(it.ptrAttrib));
         it.nLeftActiveCount = buff.Count * count;
         // 计算 interval
         it.interval         = buff.Interval * 1024 / (1024 + it.attr.getHaste());
@@ -75,7 +73,14 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         // 注册回调函数
         it.tickActive       = Event::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it);
         // 其他工作
-        it.nStackNum        = stacknum; // 将层数设置为 1
+        if (buff.IsStackable) {
+            it.nStackNum = stacknum > buff.MaxStackNum ? buff.MaxStackNum : stacknum; // 层数
+        } else {
+            it.nStackNum = 1; // 应该不会有 0 层的 AddBuff ?
+        }
+        // 创建 AutoRollbackAttrib, 处理 BeginAttrib
+        it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
+        this->autoRollbackAttribList.emplace(static_cast<AutoRollbackAttrib *>(it.ptrAttrib));
     } else {
         // 当前存在该 buff
         // it.attr             = characterGet(buffSourceID)->chAttr; // 锁面板
@@ -89,8 +94,13 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         it.interval         = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
         it.interval         = it.interval < buff.MinInterval ? buff.MinInterval : it.interval;
         // 其他工作
-        if (buff.IsStackable)
-            it.nStackNum += stacknum; // 层数 +stacknum
+        if (buff.IsStackable) {
+            AutoRollbackAttrib *ptr = static_cast<AutoRollbackAttrib *>(it.ptrAttrib);
+            ptr->unload(); // UnloadAttrib
+            it.nStackNum += stacknum;
+            it.nStackNum = it.nStackNum > buff.MaxStackNum ? buff.MaxStackNum : it.nStackNum;
+            ptr->load(); // LoadAttrib
+        }
         if (buff.Exclude) {
             // Exclude 为 1 (true), 则重置下次生效时间 (通常用于常规 buff)
             Event::cancel(it.tickActive, callbackActiveBuff, this, &it);                        // 取出回调函数
@@ -156,16 +166,16 @@ BuffItem *Character::buffGetWithCompareFlag(int buffID, int buffLevel, int flag)
         }
         // 没有 continue 说明 buffID 存在
         switch (flag) {
-        case static_cast<int>(ref::enumLuaBuffCompareFlag::EQUAL):
+        case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::EQUAL):
             if (list.second.at(buffID).find(buffLevel) != list.second.at(buffID).end() &&
                 list.second.at(buffID).at(buffLevel).isValid) {
                 return &(list.second.at(buffID).at(buffLevel));
             }
             break;
-        case static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER):
+        case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER):
             buffLevel += 1;
             // 注意, 这里不进行 break, 而是基于 +1 后的 buffLevel 继续执行 GREATER_EQUAL 的逻辑
-        case static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER_EQUAL):
+        case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER_EQUAL):
             auto it = list.second.at(buffID).lower_bound(buffLevel);
             while (it != list.second.at(buffID).end()) {
                 if (it->second.isValid) {
@@ -189,17 +199,17 @@ BuffItem *Character::buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, in
     }
     // 没有 return 说明 sourceID 和 buffID 都存在
     switch (flag) {
-    case static_cast<int>(ref::enumLuaBuffCompareFlag::EQUAL):
+    case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::EQUAL):
         if (this->chBuff.buffMap.at(sourceID).at(buffID).find(buffLevel) !=
                 this->chBuff.buffMap.at(sourceID).at(buffID).end() &&
             this->chBuff.buffMap.at(sourceID).at(buffID).at(buffLevel).isValid) {
             return &(chBuff.buffMap.at(sourceID).at(buffID).at(buffLevel));
         }
         break;
-    case static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER):
+    case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER):
         buffLevel += 1;
         // 注意, 这里不进行 break, 而是基于 +1 后的 buffLevel 继续执行 GREATER_EQUAL 的逻辑
-    case static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER_EQUAL):
+    case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER_EQUAL):
         auto it = this->chBuff.buffMap.at(sourceID).at(buffID).lower_bound(buffLevel);
         while (it != this->chBuff.buffMap.at(sourceID).at(buffID).end()) {
             if (it->second.isValid) {
@@ -215,9 +225,9 @@ BuffItem *Character::buffGetByOwnerWithCompareFlag(int buffID, int buffLevel, in
 BuffItem *Character::buffGet(int buffID, int buffLevel) {
     BuffItem *ret = nullptr;
     if (0 == buffLevel) {
-        ret = buffGetWithCompareFlag(buffID, buffLevel + 1, static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER_EQUAL));
+        ret = buffGetWithCompareFlag(buffID, buffLevel + 1, static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER_EQUAL));
     } else {
-        ret = buffGetWithCompareFlag(buffID, buffLevel, static_cast<int>(ref::enumLuaBuffCompareFlag::EQUAL));
+        ret = buffGetWithCompareFlag(buffID, buffLevel, static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::EQUAL));
     }
     if (ret != nullptr) {
         this->buffFlushLeftFrame(ret);
@@ -228,9 +238,9 @@ BuffItem *Character::buffGet(int buffID, int buffLevel) {
 BuffItem *Character::buffGetByOwner(int buffID, int buffLevel, int sourceID) {
     BuffItem *ret = nullptr;
     if (0 == buffLevel) {
-        ret = buffGetByOwnerWithCompareFlag(buffID, buffLevel + 1, sourceID, static_cast<int>(ref::enumLuaBuffCompareFlag::GREATER_EQUAL));
+        ret = buffGetByOwnerWithCompareFlag(buffID, buffLevel + 1, sourceID, static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::GREATER_EQUAL));
     } else {
-        ret = buffGetByOwnerWithCompareFlag(buffID, buffLevel, sourceID, static_cast<int>(ref::enumLuaBuffCompareFlag::EQUAL));
+        ret = buffGetByOwnerWithCompareFlag(buffID, buffLevel, sourceID, static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::EQUAL));
     }
     if (ret != nullptr) {
         this->buffFlushLeftFrame(ret);

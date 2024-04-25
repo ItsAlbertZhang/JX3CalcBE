@@ -1,11 +1,12 @@
 #include "frame/character/character.h"
-#include "frame/character/property/damage.h"
+#include "frame/common/damage.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
 #include "plugin/channelinterval.h"
 #include "plugin/log.h"
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 std::tuple<int, int> Character::calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel) {
     // TODO: 目标御劲降低会心率和会心效果.
@@ -16,23 +17,23 @@ std::tuple<int, int> Character::calcCritical(const ChAttr &attrSelf, int skillID
         return std::make_tuple(atCriticalStrike, atCriticalDamagePower);
 
     switch (skill.KindType) {
-    case ref::enumSkillKindtype::Physics:
+    case ref::Skill::KindType::Physics:
         atCriticalStrike      = attrSelf.getPhysicsCriticalStrike();
         atCriticalDamagePower = attrSelf.getPhysicsCriticalDamagePower();
         break;
-    case ref::enumSkillKindtype::SolarMagic:
+    case ref::Skill::KindType::SolarMagic:
         atCriticalStrike      = attrSelf.getSolarCriticalStrike();
         atCriticalDamagePower = attrSelf.getSolarCriticalDamagePower();
         break;
-    case ref::enumSkillKindtype::LunarMagic:
+    case ref::Skill::KindType::LunarMagic:
         atCriticalStrike      = attrSelf.getLunarCriticalStrike();
         atCriticalDamagePower = attrSelf.getLunarCriticalDamagePower();
         break;
-    case ref::enumSkillKindtype::NeutralMagic:
+    case ref::Skill::KindType::NeutralMagic:
         atCriticalStrike      = attrSelf.getNeutralCriticalStrike();
         atCriticalDamagePower = attrSelf.getNeutralCriticalDamagePower();
         break;
-    case ref::enumSkillKindtype::Poison:
+    case ref::Skill::KindType::Poison:
         atCriticalStrike      = attrSelf.getPoisonCriticalStrike();
         atCriticalDamagePower = attrSelf.getPoisonCriticalDamagePower();
         break;
@@ -130,7 +131,8 @@ Damage Character::calcDamage(
         break;
     }
 
-    unsigned long long damage = damageBase + damageRand / 2;
+    using ull  = unsigned long long;
+    ull damage = damageBase + damageRand / 2;
     if (isSurplus) {
         CONSTEXPR_CHANNELINTERVAL_RECORD(
             id,
@@ -150,7 +152,7 @@ Damage Character::calcDamage(
             static_cast<double>(1) * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 * (atGlobalDamageFactor + (1 << 20)) / (1 << 20),
             isBuff
         );
-        damage = damage + atAttackPower * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 + weaponDamage;
+        damage = damage + static_cast<ull>(atAttackPower) * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 + weaponDamage;
     }
     damage = damage * (atGlobalDamageFactor + (1 << 20)) / (1 << 20);
     if (!target->isPlayer) {
@@ -167,8 +169,8 @@ Damage Character::calcDamage(
     damage = damage * (1024 - targetShield) / 1024;
     damage = damage * (1024 + targetDamageCoefficient) / 1024;
 
-    unsigned long long damageCritical = damage * (1792 + atCriticalDamagePower) / 1024;
-    unsigned long long damageExcept   = (damage * (10000 - atCriticalStrike) + damageCritical * atCriticalStrike) / 10000;
+    ull damageCritical = damage * (1792 + atCriticalDamagePower) / 1024;
+    ull damageExcept   = (damage * (10000 - atCriticalStrike) + damageCritical * atCriticalStrike) / 10000;
 
     return Damage{
         .tick           = Event::now(),

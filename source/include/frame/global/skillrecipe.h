@@ -1,12 +1,12 @@
-#ifndef FRAME_GLOBAL_SKILLRECIPE_H_
-#define FRAME_GLOBAL_SKILLRECIPE_H_
+#pragma once
 
 #include "frame/global/skill.h"
 #include <mutex>
 #include <string>
 #include <unordered_map>
 
-namespace ns_frame {
+namespace jx3calc {
+namespace frame {
 
 /**
  * @brief SkillRecipe 类
@@ -76,6 +76,5 @@ private:
     static void addScriptSkill(const SkillRecipe *skillrecipe, const Skill *skill);
 };
 
-} // namespace ns_frame
-
-#endif // FRAME_GLOBAL_SKILLRECIPE_H_
+} // namespace frame
+} // namespace jx3calc

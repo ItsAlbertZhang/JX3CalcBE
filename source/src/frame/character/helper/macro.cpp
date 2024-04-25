@@ -1,7 +1,8 @@
 #include "frame/character/property/buff.h"
 #include <frame/character/character.h>
 
-using namespace ns_frame;
+using namespace jx3calc;
+using namespace frame;
 
 bool Character::macroSkillCast(std::string skillName) {
     if (!chSkill.skillRef.contains(skillName))
