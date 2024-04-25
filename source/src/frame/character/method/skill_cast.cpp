@@ -7,6 +7,7 @@
 #include "frame/global/skill.h"
 #include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"
+#include "frame/ref/lua_attribute_type.h"
 #include "plugin/log.h"
 #include <memory> // std::unique_ptr
 #include <random>
@@ -257,10 +258,20 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     // 5.1 处理日月豆子技能
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
-            runtime.skillQueue.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel, this, target);
+            runtime.skillQueue.emplace(
+                static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_NOT_ROLLBACK),
+                static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL),
+                skill.SunSubsectionSkillID,
+                skill.SunSubsectionSkillLevel
+            );
             this->nSunPowerValue = 0;
         } else if (this->nMoonPowerValue) {
-            runtime.skillQueue.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel, this, target);
+            runtime.skillQueue.emplace(
+                static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_NOT_ROLLBACK),
+                static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL),
+                skill.MoonSubsectionSkillID,
+                skill.MoonSubsectionSkillLevel
+            );
             this->nMoonPowerValue = 0;
         }
     }

@@ -84,25 +84,17 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 break;
             switch (it.type) {
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):
-                runtime->skillQueue.emplace(it.param1Int, it.param2, self, target);
+                runtime->skillQueue.emplace(it);
                 break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL):
-                runtime->skillQueue.emplace(it.param1Int, it.param2, self);
+                runtime->skillQueue.emplace(it);
                 break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT): {
-                std::string paramStr      = "scripts/" + it.param1Str;
-                int         dwCharacterID = Character::characterGetID(self);
-                int         dwSkillSrcID  = Character::characterGetID(self);
-                if (!lua::interface::analysis(lua::interface::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, lua::interface::FuncType::Apply))
-                    CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
-            } break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): {
-                std::string paramStr      = "scripts/" + it.param1Str;
-                int         dwCharacterID = Character::characterGetID(self);
-                int         dwSkillSrcID  = Character::characterGetID(self);
-                if (!lua::interface::analysis(lua::interface::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, lua::interface::FuncType::Apply))
-                    CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
-            } break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):
+                runtime->skillQueue.emplace(it);
+                break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM):
+                runtime->skillQueue.emplace(it);
+                break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CURRENT_SUN_ENERGY):
                 self->nCurrentSunEnergy += it.param1Int;
                 break;
