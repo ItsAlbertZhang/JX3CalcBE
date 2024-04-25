@@ -40,6 +40,7 @@ public:
 
     class Data {
     public:
+        ~Data();
         concrete::player::Type playerType;
 
         int delayNetwork;
@@ -50,14 +51,12 @@ public:
         frame::ChAttr                                        attrBackup;
         std::vector<std::shared_ptr<concrete::effect::Base>> effects;
 
-        class Custom {
-        public:
-            ~Custom();
-            std::optional<std::string>                       fight;
-            std::optional<std::vector<std::tuple<int, int>>> skills; // 目前未启用
-            std::optional<std::vector<int>>                  talents;
-            std::optional<std::vector<int>>                  recipes;
-        } custom;
+        int embedFightType = 0;
+
+        std::optional<std::string>                       fight;
+        std::optional<std::vector<std::tuple<int, int>>> skills; // 目前未启用
+        std::optional<std::vector<int>>                  talents;
+        std::optional<std::vector<int>>                  recipes;
 
     } data;
 
@@ -100,12 +99,13 @@ class Response {
         "",
         "config.json not available.",
         "json parse error.",
-        "Field not allowed: ",
         "Error in base: missing field or invalid option: ",
         "Error in base: invalid input value.",
         "Error in attribute: ",
         "Error in effect: ",
-        "Error in custom: ",
+        "Error in fight: ",
+        "Error in talents: ",
+        "Error in recipes: ",
     };
 
 public:

@@ -17,9 +17,7 @@ public:
         const vtii *skills,
         const vi   *talents,
         const vi   *recipes,
-        int         publicCooldownID,
-        int         delayNetwork  = 0,
-        int         delayKeyboard = 0
+        int         publicCooldownID
     );
     virtual void fightPrepare() {}
     virtual int  fightNormalAttack() {
@@ -32,6 +30,7 @@ public:
     int delayRand        = 0;
     int delayCustom      = 0;
     int macroIdx         = 0;
+    int embedFightType   = 0;
 
     std::shared_ptr<CustomLua> customLua;
     const vtii                *initSkills; // 目前未被 custom 启用

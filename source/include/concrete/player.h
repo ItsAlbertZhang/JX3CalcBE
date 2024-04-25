@@ -21,9 +21,9 @@ inline const std::unordered_map<std::string, Type> refType = {
 } // namespace player
 
 template <player::Type type>
-extern auto create(int delayNetwork, int delayKeyboard) -> std::unique_ptr<frame::Player>;
+extern auto create() -> std::unique_ptr<frame::Player>;
 
-auto create(player::Type type, int delayNetwork, int delayKeyboard) -> std::unique_ptr<frame::Player>;
+auto create(player::Type type) -> std::unique_ptr<frame::Player>;
 
 } // namespace concrete
 } // namespace jx3calc

@@ -15,17 +15,13 @@ Player::Player(
     const vtii *skills,
     const vi   *talents,
     const vi   *recipes,
-    int         publicCooldownID,
-    int         delayNetwork,
-    int         delayKeyboard
+    int         publicCooldownID
 )
     : Character(),
       initSkills(skills),
       initTalents(talents),
       initRecipes(recipes),
-      publicCooldownID(publicCooldownID),
-      delayBase(delayNetwork),
-      delayRand(delayKeyboard) {
+      publicCooldownID(publicCooldownID) {
 
     this->isPlayer    = true;
     this->kungfuID    = kungfuID;

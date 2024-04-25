@@ -49,7 +49,7 @@ Server::~Server() {
     pool.join();
 }
 
-Task::Data::Custom::~Custom() {
+Task::Data::~Data() {
     if (fight.has_value()) {
         frame::CustomLua::cancel(fight.value());
     }
@@ -69,12 +69,8 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     using json   = nlohmann::json;
     const json j = json::parse(jsonstr);
     res.next();
-    // 3. 检查不允许的 field. 此步骤未成功, catch 会返回 Field not allowed: {fieldname}.
-    if (j.contains("custom") && !modules::config::taskdata::allowCustom) [[unlikely]]
-        throw std::runtime_error("custom");
-    res.next();
 
-    // 4. basic Data. 此步骤未成功, catch 会返回 Error in base: missing field or invalid option.
+    // 3. basic Data. 此步骤未成功, catch 会返回 Error in base: missing field or invalid option.
     data.playerType    = concrete::player::refType.at(j.at("player").get<std::string>()),
     data.delayNetwork  = j.at("delayNetwork").get<int>(),
     data.delayKeyboard = j.at("delayKeyboard").get<int>(),
@@ -82,7 +78,7 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     data.fightCount    = j.at("fightCount").get<int>(),
     res.next();
 
-    // 5. 检查 basic Data. 此步骤未成功, catch 会返回 Error in base: invalid input value.
+    // 4. 检查 basic Data. 此步骤未成功, catch 会返回 Error in base: invalid input value.
     if (data.delayNetwork < 0 || data.delayNetwork > modules::config::taskdata::maxDelayNetwork ||
         data.delayKeyboard < 0 || data.delayKeyboard > modules::config::taskdata::maxDelayKeyboard ||
         data.fightTime < 0 || data.fightTime > modules::config::taskdata::maxFightTime ||
@@ -91,9 +87,8 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     }
     res.next();
 
-    // 6. attribute. 此步骤未成功, catch 会返回 Error in attribute.
-    auto player   = concrete::create(data.playerType, 0, 0);
-    // 此处的 player 仅用作属性导入, 因此无需设置 delayNetwork 和 delayKeyboard
+    // 5. attribute. 此步骤未成功, catch 会返回 Error in attribute.
+    auto player   = concrete::create(data.playerType);
     auto attrType = refAttributeType.at(j.at("attribute")["method"].get<std::string>());
     switch (attrType) {
     case enumAttributeType::data: {
@@ -110,7 +105,7 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     data.attrBackup = player->chAttr;
     res.next();
 
-    // 7. effect. 此步骤未成功, catch 会返回 Error in effect.
+    // 6. effect. 此步骤未成功, catch 会返回 Error in effect.
     std::vector<std::shared_ptr<concrete::effect::Base>> effectList;
     effectList.reserve(j.at("effects").size());
     for (auto &x : j.at("effects").items()) {
@@ -123,36 +118,39 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     data.effects = std::move(effectList);
     res.next();
 
-    // 8. custom. 此步骤未成功, catch 会返回 Error in custom.
-    if (j.contains("custom")) {
-        const json &custom = j.at("custom");
-        if (custom.contains("talent")) {
-            const json &talent = custom.at("talent"); // talent 为 int[]
-            data.custom.talents.emplace(talent.get<std::vector<int>>());
-        }
-        if (custom.contains("recipe")) {
-            const json &recipe = custom.at("recipe"); // recipe 为 int[]
-            data.custom.recipes.emplace(recipe.get<std::vector<int>>());
-        }
-        if (custom.contains("fight")) {
-            const json &fight = custom.at("fight");
-            switch (refCustom.at(fight.at("method").get<std::string>())) {
-            case enumCustom::lua:
-                // fight["data"] 为 string, 内容为 lua 代码
-                data.custom.fight.emplace(fight.at("data").get<std::string>());
-                break;
-            case enumCustom::jx3:
-                // fight["data"] 为 string[], 每一项都是一个游戏内宏
-                std::vector<std::string> v;
-                for (auto &it : fight.at("data")) {
-                    v.emplace_back(it.get<std::string>());
-                }
-                data.custom.fight.emplace(frame::CustomLua::parse(v));
-                break;
+    // 7. fight (可选). 此步骤未成功, catch 会返回 Error in fight.
+    if (j.contains("fight")) {
+        const json &fight = j.at("fight");
+        if (!fight.contains("method") ||
+            !refCustom.contains(fight.at("method").get<std::string>()) &&
+                fight.contains("data") && fight.at("data").is_number_integer())
+            data.embedFightType = j.at("fight").at("data").get<int>();
+        switch (refCustom.at(fight.at("method").get<std::string>())) {
+        case enumCustom::lua:
+            // fight["data"] 为 string, 内容为 lua 代码
+            data.fight.emplace(fight.at("data").get<std::string>());
+            break;
+        case enumCustom::jx3:
+            // fight["data"] 为 string[], 每一项都是一个游戏内宏
+            std::vector<std::string> v;
+            for (auto &it : fight.at("data")) {
+                v.emplace_back(it.get<std::string>());
             }
-        } else if (data.custom.talents.has_value() || data.custom.recipes.has_value()) {
-            throw std::runtime_error("missing fight");
+            data.fight.emplace(frame::CustomLua::parse(v));
+            break;
         }
+    }
+    res.next();
+
+    // 8. talents (可选). 此步骤未成功, catch 会返回 Error in talents.
+    if (j.contains("talents")) {
+        data.talents.emplace(j.at("talents").get<std::vector<int>>());
+    }
+    res.next();
+
+    // 9. recipes (可选). 此步骤未成功, catch 会返回 Error in recipes.
+    if (j.contains("recipes")) {
+        data.recipes.emplace(j.at("recipes").get<std::vector<int>>());
     }
     res.next();
 }
@@ -224,15 +222,18 @@ void modules::task::Server::stop(std::string id) {
 }
 
 static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
-    std::unique_ptr<frame::Player> player = concrete::create(arg.playerType, arg.delayNetwork, arg.delayKeyboard);
-    if (arg.custom.talents.has_value()) {
-        player->initTalents = &arg.custom.talents.value();
+    std::unique_ptr<frame::Player> player = concrete::create(arg.playerType);
+    player->delayBase                     = arg.delayNetwork;
+    player->delayRand                     = arg.delayKeyboard;
+    player->embedFightType                = arg.embedFightType;
+    if (arg.talents.has_value()) {
+        player->initTalents = &arg.talents.value();
     }
-    if (arg.custom.recipes.has_value()) {
-        player->initRecipes = &arg.custom.recipes.value();
+    if (arg.recipes.has_value()) {
+        player->initRecipes = &arg.recipes.value();
     }
-    if (arg.custom.fight.has_value()) {
-        player->customLua = frame::CustomLua::get(arg.custom.fight.value());
+    if (arg.fight.has_value()) {
+        player->customLua = frame::CustomLua::get(arg.fight.value());
     }
 
     std::unique_ptr<frame::NPC> npc = concrete::create(concrete::npc::Type::NPC124);

@@ -68,8 +68,8 @@ const std::vector<int> recipes{
 
 class MjFysj : public frame::Player {
 public:
-    MjFysj(int delayNetwork, int delayKeyboard)
-        : Player(10242, 13, &skills, &talents, &recipes, 503, delayNetwork, delayKeyboard) {}
+    MjFysj()
+        : Player(10242, 13, &skills, &talents, &recipes, 503) {}
 
 private:
     bool macroSwitchedOnce = false;
@@ -228,6 +228,6 @@ private:
 } // namespace
 
 template <>
-auto concrete::create<player::Type::MjFysj>(int delayNetwork, int delayKeyboard) -> std::unique_ptr<frame::Player> {
-    return std::make_unique<MjFysj>(delayNetwork, delayKeyboard);
+auto concrete::create<player::Type::MjFysj>() -> std::unique_ptr<frame::Player> {
+    return std::make_unique<MjFysj>();
 }
