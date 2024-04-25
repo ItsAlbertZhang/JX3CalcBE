@@ -29,13 +29,16 @@ public:
     int delayBase        = 0;
     int delayRand        = 0;
     int delayCustom      = 0;
-    int macroIdx         = 0;
-    int embedFightType   = 0;
+    int macroIdx         = 0; // 当前宏索引
+    int embedFightType   = 0; // 内置战斗的类型
 
     std::shared_ptr<CustomLua> customLua;
-    const vtii                *initSkills; // 目前未被 custom 启用
-    const vi                  *initTalents;
-    const vi                  *initRecipes;
+
+    const vtii *initSkills; // 目前未被 custom 启用
+    const vi   *initTalents;
+    const vi   *initRecipes;
+
+    std::optional<bool> stopInitiative = std::nullopt; // 主动停止 (而非时间到而停止) 标志
 
     void init();
     void fightStart();

@@ -106,10 +106,9 @@ static const std::unordered_map<skill, int> skillMap{
 
 // clang-format off
 
-static const std::vector<skill> cgOutset {
+static const std::vector<skill> cg {
     日斩, 月斩,
-};
-static const std::vector<skill> cgCircle {
+
     月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
     日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
@@ -118,28 +117,71 @@ static const std::vector<skill> cgCircle {
     日斩, 崇光, 崇光, 崇光, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
     日斩, 驱夜, 日破, 月斩, 月劫, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 崇光, 崇光, 崇光, 诛邪,
     月斩, 日斩, 驱夜,
+
+    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
+    日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
+    月斩, 日斩, 驱夜,
+    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 崇光, 崇光, 崇光, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
+    日斩, 驱夜, 日破, 月斩, 月劫, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 崇光, 崇光, 崇光, 诛邪,
+    月斩, 日斩, 驱夜,
+
+    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
+    日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
+    月斩, 日斩, 驱夜,
+    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 崇光, 崇光, 崇光, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
+    日斩, 驱夜, 日破, 月斩, 月劫, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 崇光, 崇光, 崇光, 诛邪,
+    月斩, 日斩, 驱夜,
+
+    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 崇光, 崇光, 崇光,
 };
 
-static const std::vector<skill> qgOutset {
+static const std::vector<skill> qg {
     月斩, 月破, 日破, 日斩,
-};
-static const std::vector<skill> qgCircle {
-    隐身, 日悬, 月劫, 诛邪,
-    驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+
+    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
     驱夜, 月破, 诛邪, 月斩, 日斩, 日破, 月斩, 光明相, 月劫, 日破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
     驱夜, 日斩, 日破, 月斩, 月破, 日斩,
-    隐身, 日悬, 月劫, 诛邪,
-    驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
     驱夜, 月破, 诛邪, 月斩, 日轮, 日破, 月斩, 月劫, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
     驱夜, 日斩, 日破, 月斩, 月破, 日斩,
+
+    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日斩, 日破, 月斩, 光明相, 月劫, 日破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 日斩,
+    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日轮, 日破, 月斩, 月劫, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 日斩,
+
+    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日斩, 日破, 月斩, 光明相, 月劫, 日破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 日斩,
+    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日轮, 日破, 月斩, 月劫, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 日斩,
+
+    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日斩, 日破,
+};
+
+static const std::vector<skill> outset {
+    月斩, 月破, 日破, 日斩,
 };
 
 // clang-format on
@@ -279,40 +321,30 @@ private:
 
     void embed0() {
         using namespace mj_fysj;
-        if (skillGetLevel(37337)) {
-            if (flagOutset) {
-                if (cast(skillMap.at(cgOutset[idx]))) {
-                    idx++;
-                    if (idx == cgOutset.size()) {
-                        flagOutset = false;
-                        idx        = 0;
-                    }
-                }
-            } else [[likely]] {
-                if (cast(skillMap.at(cgCircle[idx]))) {
-                    idx++;
-                    if (idx == cgCircle.size()) {
-                        idx = 0;
-                    }
-                }
+        if (skillGetLevel(37337)) { // 崇光
+            if (idx == 0) [[unlikely]]
+                stopInitiative.emplace(false);
+            if (idx % 99 == 61) [[unlikely]]
+                itemUse(frame::ItemType::Trinket, 38789); // 特效腰坠
+            if (cast(skillMap.at(cg[idx]))) {
+                idx++;
             }
-        } else if (skillGetLevel(34370)) {
-            if (flagOutset) {
-                if (cast(skillMap.at(qgOutset[idx]))) {
-                    idx++;
-                    if (idx == qgOutset.size()) {
-                        flagOutset = false;
-                        idx        = 0;
-                    }
-                }
-            } else [[likely]] {
-                if (cast(skillMap.at(qgCircle[idx]))) {
-                    idx++;
-                    if (idx == qgCircle.size()) {
-                        idx = 0;
-                    }
-                }
+            if (idx == cg.size()) [[unlikely]]
+                stopInitiative.emplace(true);
+            else if (cg[idx] == skill::隐身)
+                delayCustom = 400;
+
+        } else if (skillGetLevel(34370)) { // 齐光
+            if (idx == 0) [[unlikely]]
+                stopInitiative.emplace(false);
+            if (idx % 100 == 6) [[unlikely]]
+                itemUse(frame::ItemType::Trinket, 38789); // 特效腰坠
+            if (cast(skillMap.at(qg[idx]))) {
+                idx++;
             }
+            if (idx == qg.size()) [[unlikely]]
+                stopInitiative.emplace(true);
+
         } else [[unlikely]] {
             embedFightType = 1;
         }
@@ -321,11 +353,10 @@ private:
     void embed1() {
         if (flagOutset) {
             using namespace mj_fysj;
-            cast(skillMap.at(qgOutset[idx]));
+            cast(skillMap.at(outset[idx]));
             idx++;
-            if (idx == qgOutset.size()) {
+            if (idx == outset.size()) {
                 flagOutset = false;
-                // idx        = 0; // 不需要
             }
         } else [[likely]] {
             auto lj = buffGet(28196, 1);

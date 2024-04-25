@@ -121,23 +121,26 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     // 7. fight (可选). 此步骤未成功, catch 会返回 Error in fight.
     if (j.contains("fight")) {
         const json &fight = j.at("fight");
-        if (!fight.contains("method") ||
-            !refCustom.contains(fight.at("method").get<std::string>()) &&
-                fight.contains("data") && fight.at("data").is_number_integer())
-            data.embedFightType = j.at("fight").at("data").get<int>();
-        switch (refCustom.at(fight.at("method").get<std::string>())) {
-        case enumCustom::lua:
-            // fight["data"] 为 string, 内容为 lua 代码
-            data.fight.emplace(fight.at("data").get<std::string>());
-            break;
-        case enumCustom::jx3:
-            // fight["data"] 为 string[], 每一项都是一个游戏内宏
-            std::vector<std::string> v;
-            for (auto &it : fight.at("data")) {
-                v.emplace_back(it.get<std::string>());
+        if (fight.contains("method") && refCustom.contains(fight.at("method").get<std::string>())) {
+            switch (refCustom.at(fight.at("method").get<std::string>())) {
+            case enumCustom::lua:
+                if (!modules::config::taskdata::allowCustom) [[unlikely]]
+                    throw std::runtime_error("custom fight is not allowed.");
+                // fight["data"] 为 string, 内容为 lua 代码
+                data.fight.emplace(fight.at("data").get<std::string>());
+                break;
+            case enumCustom::jx3:
+                // fight["data"] 为 string[], 每一项都是一个游戏内宏
+                std::vector<std::string> v;
+                for (auto &it : fight.at("data")) {
+                    v.emplace_back(it.get<std::string>());
+                }
+                data.fight.emplace(frame::CustomLua::parse(v));
+                break;
             }
-            data.fight.emplace(frame::CustomLua::parse(v));
-            break;
+
+        } else if (fight.contains("data") && fight.at("data").is_number_integer()) {
+            data.embedFightType = j.at("fight").at("data").get<int>();
         }
     }
     res.next();
@@ -245,7 +248,12 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
     }
     frame::Event::clear();
     player->fightStart();
-    while (frame::Event::now() < static_cast<frame::event_tick_t>(1024 * arg.fightTime)) {
+    while (true) {
+        if (player->stopInitiative.has_value()) {
+            if (player->stopInitiative.value()) [[unlikely]]
+                break;
+        } else if (frame::Event::now() >= static_cast<frame::event_tick_t>(arg.fightTime) * 1024) [[unlikely]]
+            break;
         bool ret = frame::Event::run();
         if (!ret)
             break;
@@ -262,7 +270,7 @@ static int calcBrief(const Task::Data &data) {
         sumDamage += it.damageExcept;
     }
 
-    return static_cast<int>(sumDamage / data.fightTime);
+    return static_cast<int>(sumDamage * 1024 / frame::Event::now());
 }
 
 static int calcDetail(const Task::Data &data, frame::ChDamage *detail) {
@@ -282,7 +290,7 @@ static int calcDetail(const Task::Data &data, frame::ChDamage *detail) {
     plugin::channelinterval::save();
 #endif
 
-    return static_cast<int>(sumDamage / data.fightTime);
+    return static_cast<int>(sumDamage * 1024 / frame::Event::now());
 }
 
 template <typename TValue>

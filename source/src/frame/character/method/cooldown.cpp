@@ -74,7 +74,7 @@ auto Character::cooldownLeft(int cooldownID) -> event_tick_t {
 }
 
 void Character::cooldownModify(int cooldownID, int frame, int count) {
-    if (0 == frame) {
+    if (frame == 0 && count == 0) {
         return;
     }
     // 获取资源

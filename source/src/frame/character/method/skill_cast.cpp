@@ -141,7 +141,7 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
 static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue);
 static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
 static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
-static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int nCoolDownAdd);
+// static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int nCoolDownAdd);
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
 
 static inline event_tick_t         staticCooldownLeftTick(Character *self, const Skill::SkillCoolDown &cooldown);
@@ -241,11 +241,13 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
 
     // 3. 触发 CD
     if (cooldown.isValidPublicCoolDown) {
-        staticTriggerCoolDown(this, cooldown.nPublicCoolDown, 0);
+        // staticTriggerCoolDown(this, cooldown.nPublicCoolDown, 0);
+        cooldownModify(cooldown.nPublicCoolDown, 0, 1);
     }
     for (int i = 0; i < 3; i++) {
         if (cooldown.isValidNormalCoolDown[i]) {
-            staticTriggerCoolDown(this, cooldown.nNormalCoolDownID[i], cooldown.nNormalCoolDownAdd[i]);
+            // staticTriggerCoolDown(this, cooldown.nNormalCoolDownID[i], cooldown.nNormalCoolDownAdd[i]);
+            cooldownModify(cooldown.nNormalCoolDownID[i], cooldown.nNormalCoolDownAdd[i], 1);
         }
     }
 
@@ -436,15 +438,15 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
     return false;
 }
 
-static inline void staticTriggerCoolDown(Character *self, int cooldownID, int cooldownAdd) {
-    const Cooldown &cooldown      = CooldownManager::get(cooldownID);
-    // 计算 CD 时间
-    int             durationFrame = cooldown.DurationFrame * 1024 / (1024 + self->chAttr.getHaste());
-    durationFrame                 = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
-    durationFrame                 = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
-    durationFrame                 = durationFrame + cooldownAdd;
-    self->cooldownModify(cooldownID, durationFrame);
-}
+// static inline void staticTriggerCoolDown(Character *self, int cooldownID, int cooldownAdd) {
+//     const Cooldown &cooldown      = CooldownManager::get(cooldownID);
+//     // 计算 CD 时间
+//     int             durationFrame = cooldown.DurationFrame * 1024 / (1024 + self->chAttr.getHaste());
+//     durationFrame                 = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
+//     durationFrame                 = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
+//     durationFrame                 = durationFrame + cooldownAdd;
+//     self->cooldownModify(cooldownID, durationFrame);
+// }
 
 static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent) {
     for (const auto &it : skillevent) {
