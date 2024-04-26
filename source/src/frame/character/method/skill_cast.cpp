@@ -3,7 +3,6 @@
 #include "frame/character/helper/runtime_castskill.h"
 #include "frame/common/event.h"
 #include "frame/event.h"
-#include "frame/global/cooldown.h"
 #include "frame/global/skill.h"
 #include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"

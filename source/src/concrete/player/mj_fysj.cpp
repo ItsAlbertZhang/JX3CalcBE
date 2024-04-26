@@ -324,23 +324,49 @@ private:
         if (skillGetLevel(37337)) { // 崇光
             if (idx == 0) [[unlikely]]
                 stopInitiative.emplace(false);
-            if (idx % 99 == 61) [[unlikely]]
-                itemUse(frame::ItemType::Trinket, 38789); // 特效腰坠
+            if (idx % 99 == 61) // 特效腰坠
+                itemUse(frame::ItemType::Trinket, 38789);
+
+            // 劫后 400ms 隐身, 多 1 降
+            if (idx + 1 < cg.size() && cg[idx + 1] == skill::隐身)
+                delayCustom = 400;
+
             if (cast(skillMap.at(cg[idx]))) {
                 idx++;
+            } else {
+                auto tick = skillCooldownLeftTick(skillMap.at(cg[idx]));
+                if (tick > 0)
+                    delayCustom = tick + delayBase + delayRand / 2;
+                else
+                    stopInitiative.reset();
             }
             if (idx == cg.size()) [[unlikely]]
                 stopInitiative.emplace(true);
-            else if (cg[idx] == skill::隐身)
-                delayCustom = 400;
 
         } else if (skillGetLevel(34370)) { // 齐光
             if (idx == 0) [[unlikely]]
                 stopInitiative.emplace(false);
-            if (idx % 100 == 6) [[unlikely]]
-                itemUse(frame::ItemType::Trinket, 38789); // 特效腰坠
+            if (idx % 100 == 6) // 特效腰坠
+                itemUse(frame::ItemType::Trinket, 38789);
+
+            // 日斩冷却时间过长, 等一下再打破, 防止掉诛邪 buff
+            if (idx + 2 < qg.size() && qg[idx + 2] == mj_fysj::隐身) {
+                auto tick = skillCooldownLeftTick(skillMap.at(qg[idx + 1])); // 获取日斩的剩余冷却时间
+                auto t    = 1024 + delayBase + delayRand;
+                if (tick > t) { // 假如剩余冷却时间大于 1 秒以上
+                    delayCustom = tick - t;
+                    return; // 直接返回, 不进行后续操作
+                }
+            }
+
             if (cast(skillMap.at(qg[idx]))) {
                 idx++;
+            } else {
+                auto tick = skillCooldownLeftTick(skillMap.at(qg[idx]));
+                if (tick > 0)
+                    delayCustom = tick + delayBase + delayRand / 2;
+                else
+                    stopInitiative.reset();
             }
             if (idx == qg.size()) [[unlikely]]
                 stopInitiative.emplace(true);
