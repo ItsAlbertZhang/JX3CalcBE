@@ -10,21 +10,21 @@ namespace {
 class Effect大附魔·腰 : public effect::Base {
 public:
     virtual void active(frame::Character *obj) const override {
-        obj->skilleventAdd(1705);
+        obj->skilleventAdd(2553);
     }
 };
 
 class Effect大附魔·腕 : public effect::Base {
 public:
     virtual void active(frame::Character *obj) const override {
-        obj->skilleventAdd(1843);
+        obj->skilleventAdd(2554);
     }
 };
 
 class Effect大附魔·鞋 : public effect::Base {
 public:
     virtual void active(frame::Character *obj) const override {
-        obj->skilleventAdd(2393);
+        obj->skilleventAdd(2555);
     }
 };
 
