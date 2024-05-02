@@ -155,18 +155,18 @@ Damage Character::calcDamage(
         damage = damage + static_cast<ull>(atAttackPower) * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 + weaponDamage;
     }
     damage = damage * (atGlobalDamageFactor + (1 << 20)) / (1 << 20);
-    if (!target->isPlayer) {
-        damage = damage * (1024 + atStrain) / 1024;
-        damage = damage * (1024 + atDstNpcDamageCoefficient) / 1024;
-        damage = damage * levelCof / 100;
-    }
-    damage = damage * (1024 + atOvercome) / 1024;
     damage = damage * (1024 + atDamageAddPercent + damageAddPercent) / 1024;
     if (true) {
         // TODO: 实现目标移动状态
         damage = damage * (1024 + atAddDamageByDstMoveState) / 1024;
     }
+    damage = damage * (1024 + atOvercome) / 1024;
     damage = damage * (1024 - targetShield) / 1024;
+    if (!target->isPlayer) {
+        damage = damage * levelCof / 100;
+        damage = damage * (1024 + atStrain) / 1024;
+        damage = damage * (1024 + atDstNpcDamageCoefficient) / 1024;
+    }
     damage = damage * (1024 + targetDamageCoefficient) / 1024;
 
     ull damageCritical = damage * (1792 + atCriticalDamagePower) / 1024;
