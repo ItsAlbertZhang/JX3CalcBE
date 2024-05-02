@@ -9,8 +9,8 @@ namespace frame {
 enum class DamageType {
     Physics,
     Solar,
-    Lunar,
     Neutral,
+    Lunar,
     Poison,
     COUNT,
 };
