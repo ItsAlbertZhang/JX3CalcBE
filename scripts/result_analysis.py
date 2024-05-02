@@ -24,6 +24,7 @@ def isvalid(item):
 
 
 curr = -1
+idx = 1
 
 with open("data.json", "r", encoding="utf-8") as f:
     data = json.load(f)
@@ -33,5 +34,7 @@ with open("data.json", "r", encoding="utf-8") as f:
         if item["id"] == 4482:
             c -= 1 / 16
         if c > 14 / 16 and isvalid(item):
-            print(f'{item["time"]:.2f}\t{c:.2f}\t{item["name"]}')
+            print(f'{idx}\t{item["time"]:.2f}\t{c:.2f}\t{item["name"]}')
             curr += c
+            idx += 1
+    print(f"Total: {idx - 1}")
