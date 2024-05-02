@@ -105,19 +105,19 @@ Damage Character::calcDamage(
         targetShield            = target->chAttr.getSolarShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atSolarDamageCoefficient;
         break;
-    case DamageType::Lunar:
-        atAttackPower           = attrSelf.getLunarAttackPower();
-        atDamageAddPercent      = attrSelf.getLunarDamageAddPercent();
-        atOvercome              = this->chAttr.getLunarOvercome();
-        targetShield            = target->chAttr.getLunarShield(this->chAttr.atAllShieldIgnorePercent);
-        targetDamageCoefficient = target->chAttr.atLunarDamageCoefficient;
-        break;
     case DamageType::Neutral:
         atAttackPower           = attrSelf.getNeutralAttackPower();
         atDamageAddPercent      = attrSelf.getNeutralDamageAddPercent();
         atOvercome              = this->chAttr.getNeutralOvercome();
         targetShield            = target->chAttr.getNeutralShield(this->chAttr.atAllShieldIgnorePercent);
         targetDamageCoefficient = target->chAttr.atNeutralDamageCoefficient;
+        break;
+    case DamageType::Lunar:
+        atAttackPower           = attrSelf.getLunarAttackPower();
+        atDamageAddPercent      = attrSelf.getLunarDamageAddPercent();
+        atOvercome              = this->chAttr.getLunarOvercome();
+        targetShield            = target->chAttr.getLunarShield(this->chAttr.atAllShieldIgnorePercent);
+        targetDamageCoefficient = target->chAttr.atLunarDamageCoefficient;
         break;
     case DamageType::Poison:
         atAttackPower           = attrSelf.getPoisonAttackPower();
@@ -154,20 +154,20 @@ Damage Character::calcDamage(
         );
         damage = damage + static_cast<ull>(atAttackPower) * nChannelInterval * coeffInterval / 16 / coeffCount / c / 16 + weaponDamage;
     }
-    damage = damage * (atGlobalDamageFactor + (1 << 20)) / (1 << 20);
-    if (!target->isPlayer) {
-        damage = damage * (1024 + atStrain) / 1024;
-        damage = damage * (1024 + atDstNpcDamageCoefficient) / 1024;
-        damage = damage * levelCof / 100;
-    }
-    damage = damage * (1024 + atOvercome) / 1024;
-    damage = damage * (1024 + atDamageAddPercent + damageAddPercent) / 1024;
+    damage = damage * (atGlobalDamageFactor + (1 << 20)) / (1 << 20);        // 全局伤害系数
+    damage = damage * (1024 + atDamageAddPercent + damageAddPercent) / 1024; // 伤害加成
     if (true) {
         // TODO: 实现目标移动状态
-        damage = damage * (1024 + atAddDamageByDstMoveState) / 1024;
+        damage = damage * (1024 + atAddDamageByDstMoveState) / 1024; // 目标移动状态
     }
-    damage = damage * (1024 - targetShield) / 1024;
-    damage = damage * (1024 + targetDamageCoefficient) / 1024;
+    damage = damage * (1024 + atOvercome) / 1024;   // 破防
+    damage = damage * (1024 - targetShield) / 1024; // 目标防御
+    if (!target->isPlayer) {
+        damage = damage * levelCof / 100;                            // 等级压制
+        damage = damage * (1024 + atStrain) / 1024;                  // 无双
+        damage = damage * (1024 + atDstNpcDamageCoefficient) / 1024; // 非侠
+    }
+    damage = damage * (1024 + targetDamageCoefficient) / 1024; // 目标易伤
 
     ull damageCritical = damage * (1792 + atCriticalDamagePower) / 1024;
     ull damageExcept   = (damage * (10000 - atCriticalStrike) + damageCritical * atCriticalStrike) / 10000;
@@ -184,4 +184,58 @@ Damage Character::calcDamage(
         .isCritical     = isCritical,
         .isBuff         = isBuff,
     };
+}
+
+void Character::otherSuperCustomDamage(int sourceID, int skillID, int skillLevel, int type, int damage) {
+    // 这个函数的调用者是受到伤害的角色, 伤害来源是 sourceID
+    Character *src = Character::characterGet(sourceID);
+    if (src == nullptr) {
+        CONSTEXPR_LOG_ERROR("Character::otherSuperCustomDamage: sourceID {} not found", sourceID);
+        return;
+    }
+    int        levelCof    = 100 - (this->chAttr.atLevel - src->chAttr.atLevel) * 5;
+    int        coefficient = 0;
+    DamageType damageType  = DamageType::COUNT;
+    switch (type - 1) {
+    case static_cast<int>(DamageType::Physics):
+        coefficient = this->chAttr.atPhysicsDamageCoefficient;
+        damageType  = DamageType::Physics;
+        break;
+    case static_cast<int>(DamageType::Solar):
+        coefficient = this->chAttr.atSolarDamageCoefficient;
+        damageType  = DamageType::Solar;
+        break;
+    case static_cast<int>(DamageType::Neutral):
+        coefficient = this->chAttr.atNeutralDamageCoefficient;
+        damageType  = DamageType::Neutral;
+        break;
+    case static_cast<int>(DamageType::Lunar):
+        coefficient = this->chAttr.atLunarDamageCoefficient;
+        damageType  = DamageType::Lunar;
+        break;
+    case static_cast<int>(DamageType::Poison):
+        coefficient = this->chAttr.atPoisonDamageCoefficient;
+        damageType  = DamageType::Poison;
+        break;
+    default:
+        CONSTEXPR_LOG_ERROR("Character::otherSuperCustomDamage: unknown damage type {}", type);
+        break;
+    }
+    if (!this->isPlayer)
+        damage = damage * levelCof / 100;          // 等级压制
+    damage = damage * (1024 + coefficient) / 1024; // 易伤
+
+    // 加入伤害记录
+    src->chDamage.emplace_back(Damage{
+        .tick           = Event::now(),
+        .damageType     = damageType,
+        .id             = skillID,
+        .level          = skillLevel,
+        .damageBase     = damage,
+        .damageCritical = damage,
+        .damageExcept   = damage,
+        .criticalRate   = 0,
+        .isCritical     = false,
+        .isBuff         = false,
+    });
 }

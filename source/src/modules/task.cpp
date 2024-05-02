@@ -108,12 +108,12 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     // 6. effect. 此步骤未成功, catch 会返回 Error in effect.
     std::vector<std::shared_ptr<concrete::effect::Base>> effectList;
     effectList.reserve(j.at("effects").size());
-    for (auto &x : j.at("effects").items()) {
-        auto name = x.value().get<std::string>();
-        if (!concrete::effect::refType.contains(name)) [[unlikely]] {
-            throw std::runtime_error("unknown effect: " + name);
+    for (auto &[key, value] : j.at("effects").items()) {
+        auto ptr = concrete::effect::create(key, value);
+        if (ptr == nullptr) [[unlikely]] {
+            throw std::runtime_error("effect error: " + key);
         }
-        effectList.emplace_back(concrete::create(concrete::effect::refType.at(name)));
+        effectList.emplace_back(std::move(ptr));
     }
     data.effects = std::move(effectList);
     res.next();

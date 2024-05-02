@@ -131,7 +131,7 @@ public:
     bool   macroTNoBuff(std::string buffName);
     double macroTBufftime(std::string buffName);
 
-    // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua_static.cpp ----------
+    // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua/static.cpp ----------
 
     // character
     auto characterGetSelect() -> Character *;
@@ -175,6 +175,7 @@ public:
     void otherDestroyPublicShadow(int a, bool b);
     void otherDoAction(int a, int b);
     void otherPlayPublicShadowAnimation(int a, int b, bool c, bool d);
+    void otherSuperCustomDamage(int sourceID, int skillID, int skillLevel, int type, int damage);
 
     //  ---------- 被游戏 lua 调用的属性, 通常为匈牙利命名法 ----------
     int    dwID;                          // 角色 ID

@@ -145,17 +145,17 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_SOLAR_DAMAGE_RAND):
                 this->atDamageRand[static_cast<int>(DamageType::Solar)] += it.param1Int * c;
                 break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE):
-                this->atDamage[static_cast<int>(DamageType::Lunar)] += it.param1Int * c;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE_RAND):
-                this->atDamageRand[static_cast<int>(DamageType::Lunar)] += it.param1Int * c;
-                break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_NEUTRAL_DAMAGE):
                 this->atDamage[static_cast<int>(DamageType::Neutral)] += it.param1Int * c;
                 break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_NEUTRAL_DAMAGE_RAND):
                 this->atDamageRand[static_cast<int>(DamageType::Neutral)] += it.param1Int * c;
+                break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE):
+                this->atDamage[static_cast<int>(DamageType::Lunar)] += it.param1Int * c;
+                break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE_RAND):
+                this->atDamageRand[static_cast<int>(DamageType::Lunar)] += it.param1Int * c;
                 break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE):
                 this->atDamage[static_cast<int>(DamageType::Poison)] += it.param1Int * c;
@@ -306,18 +306,39 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 this->callDamage[static_cast<int>(DamageType::Solar)] += 1;
                 this->self->bFightState = true;
                 break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_LUNAR_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Lunar)] += 1;
-                this->self->bFightState = true;
-                break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_NEUTRAL_DAMAGE):
                 this->callDamage[static_cast<int>(DamageType::Neutral)] += 1;
+                this->self->bFightState = true;
+                break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_LUNAR_DAMAGE):
+                this->callDamage[static_cast<int>(DamageType::Lunar)] += 1;
                 this->self->bFightState = true;
                 break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_POISON_DAMAGE):
                 this->callDamage[static_cast<int>(DamageType::Poison)] += 1;
                 this->self->bFightState = true;
                 break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_ADAPTIVE_DAMAGE): {
+                switch (self->atAdaptiveSkillType) {
+                case ref::lua::SKILL_KIND_TYPE::PHYSICS:
+                    this->callDamage[static_cast<int>(DamageType::Physics)] += 1;
+                    break;
+                case ref::lua::SKILL_KIND_TYPE::SOLAR_MAGIC:
+                    this->callDamage[static_cast<int>(DamageType::Solar)] += 1;
+                    break;
+                case ref::lua::SKILL_KIND_TYPE::NEUTRAL_MAGIC:
+                    this->callDamage[static_cast<int>(DamageType::Neutral)] += 1;
+                    break;
+                case ref::lua::SKILL_KIND_TYPE::LUNAR_MAGIC:
+                    this->callDamage[static_cast<int>(DamageType::Lunar)] += 1;
+                    break;
+                case ref::lua::SKILL_KIND_TYPE::POISON_MAGIC:
+                    this->callDamage[static_cast<int>(DamageType::Poison)] += 1;
+                    break;
+                default:
+                    break;
+                }
+            } break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_PHYSICS_DAMAGE):
                 this->callSurplusDamage[static_cast<int>(DamageType::Physics)] += 1;
                 this->self->bFightState = true;
@@ -326,12 +347,12 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                 this->callSurplusDamage[static_cast<int>(DamageType::Solar)] += 1;
                 this->self->bFightState = true;
                 break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_LUNAR_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Lunar)] += 1;
-                this->self->bFightState = true;
-                break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_NEUTRAL_DAMAGE):
                 this->callSurplusDamage[static_cast<int>(DamageType::Neutral)] += 1;
+                this->self->bFightState = true;
+                break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_LUNAR_DAMAGE):
+                this->callSurplusDamage[static_cast<int>(DamageType::Lunar)] += 1;
                 this->self->bFightState = true;
                 break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_POISON_DAMAGE):

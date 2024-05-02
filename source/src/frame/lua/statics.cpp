@@ -62,6 +62,7 @@ const char *const frame::lua::statics::luaFuncList[]{
     "SetBuffLeftActiveCount",
     "SetBuffNextActiveFrame",
     "LearnSkillLevel",
+    "SuperCustomDamage",
 };
 const size_t frame::lua::statics::luaFuncListSize =
     sizeof(frame::lua::statics::luaFuncList) / sizeof(frame::lua::statics::luaFuncList[0]);
@@ -183,6 +184,7 @@ sol::state *frame::lua::statics::luaInit() {
     character["DestroyPublicShadow"]       = &Character::otherDestroyPublicShadow;
     character["DoAction"]                  = &Character::otherDoAction;
     character["PlayPublicShadowAnimation"] = &Character::otherPlayPublicShadowAnimation;
+    character["SuperCustomDamage"]         = &Character::otherSuperCustomDamage;
     character["dwID"]                      = &Character::dwID;
     character["nLevel"]                    = &Character::nLevel;
     character["nX"]                        = &Character::nX;
