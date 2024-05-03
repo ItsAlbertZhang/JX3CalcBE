@@ -324,8 +324,10 @@ private:
         if (skillGetLevel(37337)) { // 崇光
             if (idx == 0) [[unlikely]]
                 stopInitiative.emplace(false);
-            if (idx % 99 == 61) // 特效腰坠
-                itemUse(frame::ItemType::Trinket, 38789);
+            if (idx % 99 == 61) {                         // 特效腰坠
+                itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+                itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
+            }
 
             // 劫后 400ms 隐身, 多 1 降
             if (idx + 1 < cg.size() && cg[idx + 1] == skill::隐身)
@@ -346,8 +348,10 @@ private:
         } else if (skillGetLevel(34370)) { // 齐光
             if (idx == 0) [[unlikely]]
                 stopInitiative.emplace(false);
-            if (idx % 100 == 6) // 特效腰坠
-                itemUse(frame::ItemType::Trinket, 38789);
+            if (idx % 100 == 6) {                         // 特效腰坠
+                itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+                itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
+            }
 
             // 日斩冷却时间过长, 等一下再打破, 防止掉诛邪 buff
             if (idx + 2 < qg.size() && qg[idx + 2] == mj_fysj::隐身) {
