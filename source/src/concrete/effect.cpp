@@ -10,36 +10,36 @@ using namespace nlohmann;
 namespace {
 
 enum class Type {
+    套装·技能,
+    套装·特效,
     大附魔·腰,
     大附魔·腕,
     大附魔·鞋,
-    套装·技能,
-    套装·特效,
     腰坠·特效,
     武器·特效,
-    家园酒·加速,
+    家园·酿造,
 };
 
 inline const std::unordered_map<std::string, Type> typeMap = {
-    {"大附魔·腰",    Type::大附魔·腰   }, // string
-    {"大附魔·腕",    Type::大附魔·腕   }, // string
-    {"大附魔·鞋",    Type::大附魔·鞋   }, // string
-    {"套装·技能",    Type::套装·技能   }, // bool
-    {"套装·特效",    Type::套装·特效   }, // bool
-    {"腰坠·特效",    Type::腰坠·特效   }, // string
-    {"武器·特效",    Type::武器·特效   }, // string
-    {"家园酒·加速", Type::家园酒·加速}, // bool
+    {"套装·技能", Type::套装·技能}, // bool
+    {"套装·特效", Type::套装·特效}, // bool
+    {"大附魔·腰", Type::大附魔·腰}, // string
+    {"大附魔·腕", Type::大附魔·腕}, // string
+    {"大附魔·鞋", Type::大附魔·鞋}, // string
+    {"腰坠·特效", Type::腰坠·特效}, // string
+    {"武器·特效", Type::武器·特效}, // string
+    {"家园·酿造", Type::家园·酿造}, // string
 };
 
 /*
-大附魔·腰: string: ["万灵当歌" | "雾海寻龙"]
-大附魔·腕: string: ["万灵当歌" | "雾海寻龙"]
-大附魔·鞋: string: ["万灵当歌" | "雾海寻龙"]
 套装·技能: bool
 套装·特效: bool
+大附魔·腰: bool
+大附魔·腕: string: ["万灵当歌" | "雾海寻龙"]
+大附魔·鞋: string: ["万灵当歌" | "雾海寻龙"]
 腰坠·特效: string: ["吹香雪" | "梧桐影"]
 武器·特效: string: ["血月" | "封霜曲刃·忆" | "冰焰玉" | "无尽沙海"]
-家园酒·加速: bool
+家园·酿造: string: ["女儿红"]
 */
 
 template <Type type, typename T>
@@ -56,27 +56,59 @@ private:
 template <Type type>
 auto get(const json &value) -> std::shared_ptr<effect::Base>;
 
+// 套装·技能
+template <>
+void Effect<Type::套装·技能, int>::active(frame::Character *obj) const {
+    switch (obj->kungfuID) {
+    case 10242: // 焚影圣诀
+        obj->skillrecipeAdd(948, 2);
+        break;
+    default:
+        break;
+    }
+}
+template <>
+auto get<Type::套装·技能>(const json &value) -> std::shared_ptr<effect::Base> {
+    if (!value.is_boolean() || !value.get<bool>())
+        return nullptr;
+    return std::make_shared<Effect<Type::套装·技能, int>>(0);
+}
+
+// 套装·特效
+template <>
+void Effect<Type::套装·特效, int>::active(frame::Character *obj) const {
+    switch (obj->kungfuID) {
+    case 10242: // 焚影圣诀
+        obj->skilleventAdd(1922);
+        break;
+    default:
+        break;
+    }
+}
+template <>
+auto get<Type::套装·特效>(const json &value) -> std::shared_ptr<effect::Base> {
+    if (!value.is_boolean() || !value.get<bool>())
+        return nullptr;
+    return std::make_shared<Effect<Type::套装·特效, int>>(0);
+}
+
+// 大附魔·腰
 template <>
 void Effect<Type::大附魔·腰, int>::active(frame::Character *obj) const {
-    obj->skilleventAdd(value);
+    obj->skilleventAdd(2623);
 }
-
 template <>
 auto get<Type::大附魔·腰>(const json &value) -> std::shared_ptr<effect::Base> {
-    static const std::unordered_map<std::string, int> map{
-        {"万灵当歌", 2553},
-        {"雾海寻龙", 2623},
-    };
-    if (!value.is_string() || !map.contains(value.get<std::string>()))
+    if (!value.is_boolean() || !value.get<bool>())
         return nullptr;
-    return std::make_shared<Effect<Type::大附魔·腰, int>>(map.at(value.get<std::string>()));
+    return std::make_shared<Effect<Type::大附魔·腰, int>>(0);
 }
 
+// 大附魔·腕
 template <>
 void Effect<Type::大附魔·腕, int>::active(frame::Character *obj) const {
     obj->skilleventAdd(value);
 }
-
 template <>
 auto get<Type::大附魔·腕>(const json &value) -> std::shared_ptr<effect::Base> {
     static const std::unordered_map<std::string, int> map{
@@ -88,11 +120,11 @@ auto get<Type::大附魔·腕>(const json &value) -> std::shared_ptr<effect::Bas
     return std::make_shared<Effect<Type::大附魔·腕, int>>(map.at(value.get<std::string>()));
 }
 
+// 大附魔·鞋
 template <>
 void Effect<Type::大附魔·鞋, int>::active(frame::Character *obj) const {
     obj->skilleventAdd(value);
 }
-
 template <>
 auto get<Type::大附魔·鞋>(const json &value) -> std::shared_ptr<effect::Base> {
     static const std::unordered_map<std::string, int> map{
@@ -104,47 +136,11 @@ auto get<Type::大附魔·鞋>(const json &value) -> std::shared_ptr<effect::Bas
     return std::make_shared<Effect<Type::大附魔·鞋, int>>(map.at(value.get<std::string>()));
 }
 
-template <>
-void Effect<Type::套装·技能, int>::active(frame::Character *obj) const {
-    switch (obj->kungfuID) {
-    case 10242: // 焚影圣诀
-        obj->skillrecipeAdd(948, 2);
-        break;
-    default:
-        break;
-    }
-}
-
-template <>
-auto get<Type::套装·技能>(const json &value) -> std::shared_ptr<effect::Base> {
-    if (!value.is_boolean() || !value.get<bool>())
-        return nullptr;
-    return std::make_shared<Effect<Type::套装·技能, int>>(0);
-}
-
-template <>
-void Effect<Type::套装·特效, int>::active(frame::Character *obj) const {
-    switch (obj->kungfuID) {
-    case 10242: // 焚影圣诀
-        obj->skilleventAdd(1922);
-        break;
-    default:
-        break;
-    }
-}
-
-template <>
-auto get<Type::套装·特效>(const json &value) -> std::shared_ptr<effect::Base> {
-    if (!value.is_boolean() || !value.get<bool>())
-        return nullptr;
-    return std::make_shared<Effect<Type::套装·特效, int>>(0);
-}
-
+// 腰坠·特效
 template <>
 void Effect<Type::腰坠·特效, int>::active(frame::Character *obj) const {
     obj->itemAdd(frame::ItemType::Trinket, value);
 }
-
 template <>
 auto get<Type::腰坠·特效>(const json &value) -> std::shared_ptr<effect::Base> {
     static const std::unordered_map<std::string, int> map{
@@ -156,13 +152,13 @@ auto get<Type::腰坠·特效>(const json &value) -> std::shared_ptr<effect::Bas
     return std::make_shared<Effect<Type::腰坠·特效, int>>(map.at(value.get<std::string>()));
 }
 
+// 武器·特效
 enum class 武器特效 {
     血月,
     封霜曲刃·忆,
     冰焰玉,
     无尽沙海,
 };
-
 template <>
 void Effect<Type::武器·特效, 武器特效>::active(frame::Character *obj) const {
     switch (value) {
@@ -184,7 +180,6 @@ void Effect<Type::武器·特效, 武器特效>::active(frame::Character *obj) c
         break;
     }
 }
-
 template <>
 auto get<Type::武器·特效>(const json &value) -> std::shared_ptr<effect::Base> {
     static const std::unordered_map<std::string, 武器特效> map{
@@ -198,16 +193,28 @@ auto get<Type::武器·特效>(const json &value) -> std::shared_ptr<effect::Bas
     return std::make_shared<Effect<Type::武器·特效, 武器特效>>(map.at(value.get<std::string>()));
 }
 
-template <>
-void Effect<Type::家园酒·加速, int>::active(frame::Character *obj) const {
-    obj->chAttr.atHasteBase += 1144; // 17361, 2
-}
+// 使用类物品的额外属性
+enum class ItemAddType {
+    haste,
+};
 
+// 家园·酿造
 template <>
-auto get<Type::家园酒·加速>(const json &value) -> std::shared_ptr<effect::Base> {
-    if (!value.is_boolean() || !value.get<bool>())
+void Effect<Type::家园·酿造, ItemAddType>::active(frame::Character *obj) const {
+    switch (value) {
+    case ItemAddType::haste:
+        obj->chAttr.atHasteBase += 1144; // 17361, 2
+        break;
+    }
+}
+template <>
+auto get<Type::家园·酿造>(const json &value) -> std::shared_ptr<effect::Base> {
+    static const std::unordered_map<std::string, ItemAddType> map{
+        {"女儿红", ItemAddType::haste},
+    };
+    if (!value.is_string() || !map.contains(value.get<std::string>()))
         return nullptr;
-    return std::make_shared<Effect<Type::家园酒·加速, int>>(0);
+    return std::make_shared<Effect<Type::家园·酿造, ItemAddType>>(map.at(value.get<std::string>()));
 }
 
 } // namespace
@@ -230,8 +237,8 @@ auto jx3calc::concrete::effect::create(const std::string &type, const nlohmann::
         return get<Type::腰坠·特效>(value);
     case Type::武器·特效:
         return get<Type::武器·特效>(value);
-    case Type::家园酒·加速:
-        return get<Type::家园酒·加速>(value);
+    case Type::家园·酿造:
+        return get<Type::家园·酿造>(value);
     default:
         return nullptr;
     }
