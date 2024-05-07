@@ -1,9 +1,8 @@
-#include "concrete/player.h"
+#include "concrete.h"
+#include "frame/character/derived/player.h"
 #include "frame/common/event.h"
-#include <memory>
 
 using namespace jx3calc;
-using namespace concrete;
 
 namespace {
 
@@ -339,6 +338,6 @@ private:
 } // namespace
 
 template <>
-auto concrete::create<player::Type::MjFysj>() -> std::unique_ptr<frame::Player> {
+auto concrete::createPlayer<concrete::Player::MjFysj>() -> std::unique_ptr<frame::Player> {
     return std::make_unique<MjFysj>();
 }

@@ -1,8 +1,7 @@
 #pragma once
 
-#include "concrete/effect.h"
-#include "concrete/player.h"
 #include "frame/character/derived/player.h"
+#include "frame/character/effect.h"
 #include "frame/character/property/attribute.h"
 #include "frame/common/damage.h"
 #include "modules/pool.h"
@@ -42,15 +41,15 @@ public:
     class Data {
     public:
         ~Data();
-        concrete::player::Type playerType;
+        concrete::Player playerType;
 
         int delayNetwork;
         int delayKeyboard;
         int fightTime;
         int fightCount;
 
-        frame::ChAttr                                        attrBackup;
-        std::vector<std::shared_ptr<concrete::effect::Base>> effects;
+        frame::ChAttr                               attrBackup;
+        std::vector<std::shared_ptr<frame::Effect>> effects;
 
         /**
          * @brief 内置状态

@@ -1,8 +1,8 @@
-#include "concrete/npc.h"
+#include "frame/character/derived/npc.h"
+#include "concrete.h"
 #include <stdexcept>
 
 using namespace jx3calc;
-using namespace concrete;
 
 namespace {
 class NPC124 : public frame::NPC {
@@ -18,9 +18,9 @@ public:
 };
 } // namespace
 
-auto jx3calc::concrete::create(npc::Type type) -> std::unique_ptr<frame::NPC> {
+auto concrete::createNPC(NPC type) -> std::unique_ptr<frame::NPC> {
     switch (type) {
-    case npc::Type::NPC124:
+    case NPC::NPC124:
         return std::make_unique<NPC124>();
     default:
         throw std::range_error("Invalid npcType");

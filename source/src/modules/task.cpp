@@ -1,8 +1,8 @@
 #include "modules/task.h"
-#include "concrete/effect.h"
-#include "concrete/npc.h"
-#include "concrete/player.h"
+#include "concrete.h"
+#include "frame/character/derived/npc.h"
 #include "frame/character/derived/player.h"
+#include "frame/character/effect.h"
 #include "frame/common/constant.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
@@ -72,7 +72,7 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     res.next();
 
     // 3. basic Data. 此步骤未成功, catch 会返回 Error in base: missing field or invalid option.
-    data.playerType    = concrete::player::refType.at(j.at("player").get<std::string>()),
+    data.playerType    = concrete::playerMap.at(j.at("player").get<std::string>()),
     data.delayNetwork  = j.at("delayNetwork").get<int>(),
     data.delayKeyboard = j.at("delayKeyboard").get<int>(),
     data.fightTime     = j.at("fightTime").get<int>(),
@@ -89,7 +89,7 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     res.next();
 
     // 5. attribute. 此步骤未成功, catch 会返回 Error in attribute.
-    auto player   = concrete::create(data.playerType);
+    auto player   = concrete::createPlayer(data.playerType);
     auto attrType = refAttributeType.at(j.at("attribute")["method"].get<std::string>());
     switch (attrType) {
     case enumAttributeType::data: {
@@ -107,10 +107,10 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     res.next();
 
     // 6. effect. 此步骤未成功, catch 会返回 Error in effect.
-    std::vector<std::shared_ptr<concrete::effect::Base>> effectList;
+    std::vector<std::shared_ptr<frame::Effect>> effectList;
     effectList.reserve(j.at("effects").size());
     for (auto &[key, value] : j.at("effects").items()) {
-        auto ptr = concrete::effect::create(key, value);
+        auto ptr = concrete::createEffect(key, value.dump());
         if (ptr == nullptr) [[unlikely]] {
             throw std::runtime_error("effect error: " + key);
         }
@@ -237,7 +237,7 @@ void modules::task::Server::stop(std::string id) {
 }
 
 static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
-    std::unique_ptr<frame::Player> player = concrete::create(arg.playerType);
+    std::unique_ptr<frame::Player> player = concrete::createPlayer(arg.playerType);
     player->delayBase                     = arg.delayNetwork;
     player->delayRand                     = arg.delayKeyboard;
     player->embedStat                     = arg.embedStat;
@@ -245,7 +245,7 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
         player->customLua = frame::CustomLua::get(arg.fight.value());
     }
 
-    std::unique_ptr<frame::NPC> npc = concrete::create(concrete::npc::Type::NPC124);
+    std::unique_ptr<frame::NPC> npc = concrete::createNPC(concrete::NPC::NPC124);
     player->targetSelect            = npc.get();
 
     player->attrImportFromBackup(arg.attrBackup);

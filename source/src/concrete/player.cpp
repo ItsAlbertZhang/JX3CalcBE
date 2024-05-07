@@ -1,12 +1,12 @@
-#include "concrete/player.h"
+#include "frame/character/derived/player.h"
+#include "concrete.h"
 
 using namespace jx3calc;
-using namespace concrete;
 
-auto concrete::create(player::Type type) -> std::unique_ptr<frame::Player> {
+auto concrete::createPlayer(Player type) -> std::unique_ptr<frame::Player> {
     switch (type) {
-    case player::Type::MjFysj:
-        return create<player::Type::MjFysj>();
+    case Player::MjFysj:
+        return createPlayer<Player::MjFysj>();
     default:
         throw std::range_error("Invalid playerType");
     }

@@ -1,10 +1,10 @@
-#include "concrete/effect.h"
+#include "frame/character/effect.h"
 #include "frame/common/item.h"
+#include <nlohmann/json.hpp>
 #include <string>
 #include <unordered_map>
 
 using namespace jx3calc;
-using namespace concrete;
 using namespace nlohmann;
 
 namespace {
@@ -43,7 +43,7 @@ inline const std::unordered_map<std::string, Type> typeMap = {
 */
 
 template <Type type, typename T>
-class Effect : public effect::Base {
+class Effect : public frame::Effect {
 public:
     Effect(T value)
         : value(std::move(value)) {}
@@ -54,7 +54,7 @@ private:
 };
 
 template <Type type>
-auto get(const json &value) -> std::shared_ptr<effect::Base>;
+auto get(const json &value) -> std::shared_ptr<frame::Effect>;
 
 // 套装·技能
 template <>
@@ -68,7 +68,7 @@ void Effect<Type::套装·技能, int>::active(frame::Character *obj) const {
     }
 }
 template <>
-auto get<Type::套装·技能>(const json &value) -> std::shared_ptr<effect::Base> {
+auto get<Type::套装·技能>(const json &value) -> std::shared_ptr<frame::Effect> {
     if (!value.is_boolean() || !value.get<bool>())
         return nullptr;
     return std::make_shared<Effect<Type::套装·技能, int>>(0);
@@ -86,7 +86,7 @@ void Effect<Type::套装·特效, int>::active(frame::Character *obj) const {
     }
 }
 template <>
-auto get<Type::套装·特效>(const json &value) -> std::shared_ptr<effect::Base> {
+auto get<Type::套装·特效>(const json &value) -> std::shared_ptr<frame::Effect> {
     if (!value.is_boolean() || !value.get<bool>())
         return nullptr;
     return std::make_shared<Effect<Type::套装·特效, int>>(0);
@@ -98,7 +98,7 @@ void Effect<Type::大附魔·腰, int>::active(frame::Character *obj) const {
     obj->skilleventAdd(2623);
 }
 template <>
-auto get<Type::大附魔·腰>(const json &value) -> std::shared_ptr<effect::Base> {
+auto get<Type::大附魔·腰>(const json &value) -> std::shared_ptr<frame::Effect> {
     if (!value.is_boolean() || !value.get<bool>())
         return nullptr;
     return std::make_shared<Effect<Type::大附魔·腰, int>>(0);
@@ -110,7 +110,7 @@ void Effect<Type::大附魔·腕, int>::active(frame::Character *obj) const {
     obj->skilleventAdd(value);
 }
 template <>
-auto get<Type::大附魔·腕>(const json &value) -> std::shared_ptr<effect::Base> {
+auto get<Type::大附魔·腕>(const json &value) -> std::shared_ptr<frame::Effect> {
     static const std::unordered_map<std::string, int> map{
         {"万灵当歌", 2554},
         {"雾海寻龙", 2624},
@@ -126,7 +126,7 @@ void Effect<Type::大附魔·鞋, int>::active(frame::Character *obj) const {
     obj->skilleventAdd(value);
 }
 template <>
-auto get<Type::大附魔·鞋>(const json &value) -> std::shared_ptr<effect::Base> {
+auto get<Type::大附魔·鞋>(const json &value) -> std::shared_ptr<frame::Effect> {
     static const std::unordered_map<std::string, int> map{
         {"万灵当歌", 2555},
         {"雾海寻龙", 2625},
@@ -142,7 +142,7 @@ void Effect<Type::腰坠·特效, int>::active(frame::Character *obj) const {
     obj->itemAdd(frame::ItemType::Trinket, value);
 }
 template <>
-auto get<Type::腰坠·特效>(const json &value) -> std::shared_ptr<effect::Base> {
+auto get<Type::腰坠·特效>(const json &value) -> std::shared_ptr<frame::Effect> {
     static const std::unordered_map<std::string, int> map{
         {"吹香雪", 38789},
         {"梧桐影", 39853},
@@ -181,12 +181,12 @@ void Effect<Type::武器·特效, 武器特效>::active(frame::Character *obj) c
     }
 }
 template <>
-auto get<Type::武器·特效>(const json &value) -> std::shared_ptr<effect::Base> {
+auto get<Type::武器·特效>(const json &value) -> std::shared_ptr<frame::Effect> {
     static const std::unordered_map<std::string, 武器特效> map{
-        {"血月",            武器特效::血月           },
+        {"血月", 武器特效::血月},
         {"封霜曲刃·忆", 武器特效::封霜曲刃·忆},
-        {"冰焰玉",         武器特效::冰焰玉        },
-        {"无尽沙海",      武器特效::无尽沙海     },
+        {"冰焰玉", 武器特效::冰焰玉},
+        {"无尽沙海", 武器特效::无尽沙海},
     };
     if (!value.is_string() || !map.contains(value.get<std::string>()))
         return nullptr;
@@ -208,7 +208,7 @@ void Effect<Type::家园·酿造, ItemAddType>::active(frame::Character *obj) co
     }
 }
 template <>
-auto get<Type::家园·酿造>(const json &value) -> std::shared_ptr<effect::Base> {
+auto get<Type::家园·酿造>(const json &value) -> std::shared_ptr<frame::Effect> {
     static const std::unordered_map<std::string, ItemAddType> map{
         {"女儿红", ItemAddType::haste},
     };
@@ -219,9 +219,10 @@ auto get<Type::家园·酿造>(const json &value) -> std::shared_ptr<effect::Bas
 
 } // namespace
 
-auto jx3calc::concrete::effect::create(const std::string &type, const nlohmann::json &value) -> std::shared_ptr<effect::Base> {
+auto concrete::createEffect(const std::string &type, const std::string &jsonstr) -> std::shared_ptr<frame::Effect> {
     if (!typeMap.contains(type))
         return nullptr;
+    const auto value = json::parse(jsonstr);
     switch (typeMap.at(type)) {
     case Type::大附魔·腰:
         return get<Type::大附魔·腰>(value);
