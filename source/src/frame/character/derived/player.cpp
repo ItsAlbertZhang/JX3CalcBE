@@ -9,18 +9,74 @@
 using namespace jx3calc;
 using namespace frame;
 
+Player::Skill Player::Skill::override(const Skill &oldSkill, const Skill &newSkill) {
+    using t_arr   = std::array<int, CountRecipesPerSkill>;
+    int   level   = newSkill.level > 0 ? newSkill.level : oldSkill.level;
+    t_arr recipes = oldSkill.recipes;
+    int   count   = 0;
+    // 先写入新技能的秘籍
+    for (int i = 0; i < CountRecipesPerSkill; i++) {
+        if (newSkill.recipes[i] > 0) {
+            recipes[i] = newSkill.recipes[i];
+            count++;
+        }
+    }
+    // 再写入旧技能的秘籍
+    for (int i = 0; i < CountRecipesPerSkill && count < CountRecipesPerSkill; i++) {
+        if (oldSkill.recipes[i] > 0) {
+            // 检查是否已有该秘籍
+            bool has = false;
+            for (int j = 0; j < CountRecipesPerSkill; j++) {
+                if (recipes[j] == oldSkill.recipes[i]) {
+                    has = true;
+                    break;
+                }
+            }
+            if (!has) {
+                recipes[count] = oldSkill.recipes[i];
+                count++;
+            }
+        }
+    }
+    return {newSkill.id, level, recipes};
+}
+
+Player::typeSkillMap Player::overrideSkill(
+    const typeSkillMap &oldSkills,
+    const typeSkillMap &newSkills
+) {
+    typeSkillMap skills = oldSkills;
+    for (const auto &it : newSkills) {
+        if (skills.contains(it.first)) {
+            auto new_ = Skill::override(skills.at(it.first), it.second);
+            skills.erase(it.first);
+            skills.emplace(it.first, new_);
+        } else {
+            skills.emplace(it.first, it.second);
+        }
+    }
+    return skills;
+}
+
+Player::typeTalentArray Player::overrideTalent(
+    const typeTalentArray &oldTalents,
+    const typeTalentArray &newTalents
+) {
+    typeTalentArray talents = oldTalents;
+    for (int i = 0; i < CountTalents; i++) {
+        if (newTalents[i] > 0) {
+            talents[i] = newTalents[i];
+        }
+    }
+    return talents;
+}
+
 Player::Player(
-    int         kungfuID,
-    int         kungfuLevel,
-    const vtii *skills,
-    const vi   *talents,
-    const vi   *recipes,
-    int         publicCooldownID
+    int kungfuID,
+    int kungfuLevel,
+    int publicCooldownID
 )
     : Character(),
-      initSkills(skills),
-      initTalents(talents),
-      initRecipes(recipes),
       publicCooldownID(publicCooldownID) {
 
     this->isPlayer    = true;
@@ -31,32 +87,38 @@ Player::Player(
     skillActive(kungfuID);
 }
 
-void Player::init() {
-    for (auto &[skillID, skillLevel] : *initSkills) {
-        skillLearn(skillID, skillLevel);
-        auto &skill = SkillManager::get(skillID, skillLevel);
+void Player::init(
+    const typeSkillMap    &skills,
+    const typeTalentArray &talents
+) {
+    for (const auto &it : skills) {
+        skillLearn(it.second.id, it.second.level);
+        auto &skill = SkillManager::get(it.second.id, it.second.level);
         if (skill.IsPassiveSkill) {
-            skillActive(skillID);
+            skillActive(it.second.id);
         }
     }
-    for (auto &skillID : *initTalents) {
-        skillLearn(skillID, 1);
-        auto &skill = SkillManager::get(skillID, 1);
-        if (skill.IsPassiveSkill) {
-            skillActive(skillID);
+    for (const auto &it : skills) {
+        for (int i = 0; i < CountRecipesPerSkill; i++) {
+            if (it.second.recipes[i] > 0) {
+                skillrecipeAdd(it.second.recipes[i], 1);
+            }
         }
     }
-    for (auto &recipeID : *initRecipes) {
-        skillrecipeAdd(recipeID, 1);
+    for (const auto &id : talents) {
+        skillLearn(id, 1);
+        auto &skill = SkillManager::get(id, 1);
+        if (skill.IsPassiveSkill) {
+            skillActive(id);
+        }
     }
 }
 
 static void callbackMacroDefault(void *self, void *nullparam);
 static void callbackMacroCustomLua(void *self, void *nullparam);
-static void callbackNormalAttack(void *self, void *nullparam);
+static void callbackWeaponAttack(void *self, void *nullparam);
 
 void Player::fightStart() {
-    init();         // 初始化
     fightPrepare(); // 战斗准备
     if (nullptr == customLua) {
         callbackMacroDefault(this, nullptr); // 进入战斗
@@ -64,7 +126,7 @@ void Player::fightStart() {
         customLua->fightPrepareAdd();          // 初始化
         callbackMacroCustomLua(this, nullptr); // 进入战斗
     }
-    callbackNormalAttack(this, nullptr); // 开启普通攻击
+    callbackWeaponAttack(this, nullptr); // 开启普通攻击
 }
 
 // 计算网络延迟和按键延迟
@@ -98,7 +160,7 @@ inline static frame::event_tick_t getDelay(Player *player) {
 static void callbackMacroDefault(void *self, void *nullparam) {
     UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
-    player->fightDefault();
+    player->fightEmbed();
     Event::add(getDelay(player), callbackMacroDefault, self, nullptr);
 }
 
@@ -113,8 +175,8 @@ static void callbackMacroCustomLua(void *self, void *nullparam) {
     Event::add(getDelay(player), callbackMacroCustomLua, self, nullptr);
 }
 
-static void callbackNormalAttack(void *self, void *nullparam) {
+static void callbackWeaponAttack(void *self, void *nullparam) {
     UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
-    Event::add(player->fightNormalAttack() + getDelayAdd(player), callbackNormalAttack, self, nullptr);
+    Event::add(player->fightWeaponAttack() + getDelayAdd(player), callbackWeaponAttack, self, nullptr);
 }

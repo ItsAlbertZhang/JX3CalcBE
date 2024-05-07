@@ -3,6 +3,7 @@
 #include "concrete/npc.h"
 #include "concrete/player.h"
 #include "frame/character/derived/player.h"
+#include "frame/common/constant.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
 #include "frame/global/skill.h"
@@ -140,21 +141,32 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
             }
 
         } else if (fight.contains("data") && fight.at("data").is_number_integer()) {
-            data.embedFightType = j.at("fight").at("data").get<int>();
+            data.embedStat = j.at("fight").at("data").get<int>();
         }
     }
     res.next();
 
     // 8. talents (可选). 此步骤未成功, catch 会返回 Error in talents.
     if (j.contains("talents")) {
-        data.talents.emplace(j.at("talents").get<std::vector<int>>());
+        data.talents = j.at("talents").get<frame::Player::typeTalentArray>();
     }
+    data.talents = player->getTalents(data.talents);
     res.next();
 
-    // 9. recipes (可选). 此步骤未成功, catch 会返回 Error in recipes.
-    if (j.contains("recipes")) {
-        data.recipes.emplace(j.at("recipes").get<std::vector<int>>());
+    // 9. skills (可选). 此步骤未成功, catch 会返回 Error in skills.
+    if (j.contains("skills")) {
+        for (auto &[key, value] : j.at("skills").items()) {
+            data.skills.emplace(
+                std::stoi(key),
+                frame::Player::Skill{
+                    .id      = value.at("id").get<int>(),
+                    .level   = value.at("level").get<int>(),
+                    .recipes = value.at("recipes").get<std::array<int, CountRecipesPerSkill>>(),
+                }
+            );
+        }
     }
+    data.skills = player->getSkills(data.skills);
     res.next();
 }
 
@@ -228,13 +240,7 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
     std::unique_ptr<frame::Player> player = concrete::create(arg.playerType);
     player->delayBase                     = arg.delayNetwork;
     player->delayRand                     = arg.delayKeyboard;
-    player->embedFightType                = arg.embedFightType;
-    if (arg.talents.has_value()) {
-        player->initTalents = &arg.talents.value();
-    }
-    if (arg.recipes.has_value()) {
-        player->initRecipes = &arg.recipes.value();
-    }
+    player->embedStat                     = arg.embedStat;
     if (arg.fight.has_value()) {
         player->customLua = frame::CustomLua::get(arg.fight.value());
     }
@@ -246,7 +252,9 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
     for (auto &it : arg.effects) {
         it->active(player.get());
     }
+
     frame::Event::clear();
+    player->init(arg.skills, arg.talents);
     player->fightStart();
     while (true) {
         if (player->stopInitiative.has_value()) {

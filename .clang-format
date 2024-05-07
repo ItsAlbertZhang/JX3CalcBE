@@ -5,7 +5,7 @@ Language: Cpp
 BasedOnStyle: LLVM
 AccessModifierOffset: -4 # 访问说明符的偏移
 AlignAfterOpenBracket: BlockIndent # 如果要对小括号换行, 则在小括号后换行, 且在新行关闭尾括号
-AlignArrayOfStructures: Left # 对齐结构体数组
+# AlignArrayOfStructures: Left # 对齐结构体数组
 AlignConsecutiveAssignments: AcrossComments # 跨注释行对齐连续赋值
 AlignConsecutiveBitFields: AcrossComments # 跨注释行对齐连续位域
 AlignConsecutiveDeclarations: AcrossComments # 跨注释行对齐连续声明
