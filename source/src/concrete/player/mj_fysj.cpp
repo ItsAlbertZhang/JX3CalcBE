@@ -1,6 +1,7 @@
 #include "concrete.h"
 #include "frame/character/derived/player.h"
 #include "frame/common/event.h"
+#include "frame/event.h"
 
 using namespace jx3calc;
 
@@ -284,18 +285,24 @@ private:
     }
     virtual void fightEmbed() override {
         if (embedStat == 0) {
-            embed0();
+            embed上限_崇光69();
         } else if (embedStat == 1) {
             embed1();
         }
     }
 
     enum class EmbedType {
-        Custom = -1,
-        CG69   = 0, // 默认循环为 崇光69
-        QG30,       // 齐光30耗
-        CG699,      // 崇光699
-        QG35,       // 齐光35耗
+        自定义      = -1,
+        // 上限循环
+        上限_崇光69 = 0, // 默认
+        上限_齐光30,
+        上限_崇光699,
+        上限_齐光35,
+        // 简单循环
+        简单_齐光一键 = 1024,
+        简单_崇光两键,
+        简单_齐光两键,
+        简单_崇光洞若,
     };
 
     virtual auto getSkills(const typeSkillMap &custom) -> typeSkillMap override {
@@ -322,16 +329,202 @@ private:
         static const typeTalentArray talentQG{0, 0, 诛邪镇魔_奇穴, 0, 0, 日月同辉_奇穴, 靡业报劫_奇穴, 0, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 日月齐光_奇穴};
         typeTalentArray              temp = overrideTalent(talent, custom);
         switch (static_cast<int>(this->embedStat)) {
-        case static_cast<int>(EmbedType::CG69):
+        case static_cast<int>(EmbedType::上限_崇光69):
             return overrideTalent(temp, talentCG);
-        case static_cast<int>(EmbedType::QG30):
+        case static_cast<int>(EmbedType::上限_齐光30):
             return overrideTalent(temp, talentQG);
-        case static_cast<int>(EmbedType::CG699):
+        case static_cast<int>(EmbedType::上限_崇光699):
             return overrideTalent(temp, talentCG);
-        case static_cast<int>(EmbedType::QG35):
+        case static_cast<int>(EmbedType::上限_齐光35):
             return overrideTalent(temp, talentQG);
         default:
             return temp;
+        }
+    }
+
+    int  ava日斩 = 1;
+    int  ava月斩 = 1;
+    int  ava诛邪 = 1;
+    void embed上限_崇光69() {
+        // 获取战斗时间
+        const auto now          = frame::Event::now();
+        // if (now < 1024)
+        //     stopInitiative.emplace(false);
+        // 起手双斩
+        const auto buff目标日斩 = targetSelect ? targetSelect->buffGet(4418, 1) : nullptr;
+        const auto buff目标月斩 = targetSelect ? targetSelect->buffGet(4202, 0) : nullptr;
+        const auto time目标日斩 = buff目标日斩 && buff目标日斩->isValid ? buff目标日斩->nLeftFrame * 1024 / 16 : 0;
+        const auto time目标月斩 = buff目标月斩 && buff目标月斩->isValid ? buff目标月斩->nLeftFrame * 1024 / 16 : 0;
+        if (time目标日斩 == 0 && now < 2 * 1024)
+            cast(烈日斩);
+        if (time目标月斩 == 0 && now < 2 * 1024)
+            cast(银月斩);
+        // 崇光
+        const auto buff降灵尊   = buffGet(25731, 1);
+        const auto buff崇光     = buffGet(28194, 1);
+        const auto buff斩恶     = buffGet(28195, 1);
+        const auto buff连击     = buffGet(28196, 1);
+        const auto stacknum崇光 = buff崇光 && buff崇光->isValid ? buff崇光->nStackNum : 0;
+        const auto stacknum连击 = buff连击 && buff连击->isValid ? buff连击->nStackNum : 0;
+        const auto cd生死劫     = skillCooldownLeftTick(生死劫);
+        const auto cd隐身       = skillCooldownLeftTick(隐身);
+        const auto cd悬象       = skillCooldownLeftTick(悬象著明);
+        const bool bool崇悬前 =
+            cd悬象 < 5 * 1024 && stacknum崇光 >= 3; // 悬象CD小于5s, 并且拥有至少3层崇光
+        const bool bool崇劫后 =
+            cd生死劫 > (14 - 1) * 1024 - delayBase - delayRand && // 刚打完生死劫, 并且
+            stacknum崇光 >= 3 &&                                  // 拥有至少3层崇光, 并且
+            (cd隐身 > 0 || (buff斩恶 && buff斩恶->isValid));      // 要么隐身在冷却(大多数情况下), 要么隐身好了但是手里有3.5崇光
+        const bool bool崇降后 =
+            time目标日斩 > 16 * 1024 && stacknum崇光 >= 5 && // 目标日斩buff时长大于3秒, 并且拥有5层崇光, 并且
+            !(buff降灵尊 && buff降灵尊->isValid);            // 没有降灵尊
+        const bool bool崇收尾 =
+            now - fightTick > -20 * 1024 &&                  // 距离预定的收尾时间不到20s, 或已经超过了预定的收尾时间
+            cd隐身 > 25 * 1024 &&                            // 隐身CD大于25s
+            time目标日斩 > 16 * 1024 && stacknum崇光 >= 3 && // 目标日斩buff时长大于3秒, 并且拥有3层崇光, 并且
+            !(buff降灵尊 && buff降灵尊->isValid);            // 没有降灵尊
+        const bool bool崇溢出 =
+            time目标日斩 > 3 * (960 + delayBase + delayRand) && // 目标日斩buff时长大于3秒, 并且
+            stacknum崇光 >= 5 && buff斩恶 && buff斩恶->isValid; // 拥有5.5层崇光
+        const bool bool崇连击 =
+            stacknum连击 > 0 && stacknum连击 < 3; // 有连击但是不满3层(满3层时下一次崇光就会被重置)
+        if (bool崇悬前 || bool崇劫后 || bool崇降后 || bool崇收尾 || bool崇连击) {
+            cast(崇光斩恶);
+            // if (bool崇收尾 && stacknum连击 == 3)
+            //     stopInitiative.emplace(true);
+            return;
+        }
+        // 隐身. 隐含条件: 没有成功释放崇光 (如果成功释放崇光, 会在此前返回)
+        const auto buff悬象 = buffGet(25716, 0);
+        if (buff悬象 && buff悬象->isValid &&                      // 有悬象buff, 并且
+            nCurrentSunEnergy < 4000 && nCurrentMoonEnergy < 4000 // 日灵月魂均小于40
+        ) {
+            cast(暗尘弥散);
+            return;
+        }
+
+        // 处理特效腰坠
+        if (buff降灵尊 && buff降灵尊->isValid &&                        // 降灵尊内, 并且
+            nCurrentSunEnergy >= 10000 && nCurrentMoonEnergy == 8000 && // 100/80, 并且
+            stacknum崇光 >= 4                                           // 拥有至少4层崇光
+        ) {
+            itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
+            itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+        }
+
+        // 满灵部分
+        // 悬象. 隐身CD小于5s就可以放 (大于2秒时, 悬劫后3刀).
+        if (cd隐身 < 5 * 1024 && nCurrentSunEnergy >= 10000 && nCurrentMoonEnergy >= 10000)
+            cast(悬象著明);
+        // 悬象劫. 与悬象绑定.
+        if (nCurrentSunEnergy >= 10000 && buff悬象 && buff悬象->isValid)
+            if (cast(生死劫))
+                delayCustom = 400;
+        // 普通劫. 有半边诛邪就放. 或者在橙武特效内(刚结束特效时)直接放.
+        const auto buff橙武CD = buffGet(2584, 0);
+        const auto time橙武CD = buff橙武CD && buff橙武CD->isValid ? buff橙武CD->nLeftFrame * 1024 / 16 : 0;
+        const auto buff灵日   = buffGet(9910, 0);
+        const auto buff魂月   = buffGet(9911, 0);
+        const auto time半边诛邪 =
+            buff灵日 && buff灵日->isValid
+                ? buff灵日->nLeftFrame * 1024 / 16
+            : buff魂月 && buff魂月->isValid
+                ? buff魂月->nLeftFrame * 1024 / 16
+                : 0;
+        if (time半边诛邪 > 0 || time橙武CD > 24 * 1024)
+            cast(生死劫);
+        // 赶时间劫. 如果隐身cd对14取余大于11, 则直接放. (隐前劫cd转好时, 隐身已经转好0~3秒)
+        // if (cd隐身 % (14 * 1024) > (11 * 1024))
+        //     cast(生死劫);
+        // 特殊处理: 崇光填充.
+        if (stacknum崇光 >= 3 &&                                           // 拥有至少3层崇光, 并且
+            (nCurrentSunEnergy >= 10000 || nCurrentMoonEnergy >= 10000) && // 手中有满灵, 并且
+            cd生死劫 < 3 * 1024 &&                                         // 劫CD小于3s, 并且
+            time橙武CD < 25 * 1024 &&                                      // 不在橙武特效中, 并且
+            (time半边诛邪 > 3 * 1024 || time橙武CD > 23 * 1024)            // 半边诛邪持续时间大于3秒或刚结束橙武特效
+        )
+            cast(崇光斩恶);
+        // 诛邪. 不在cw特效里放, 不在劫cd好时放. 注意: 需要 ava诛邪 (控制诛邪释放的标记) 为 1.
+        if (time橙武CD < 25 * 1024 && cd生死劫 > 0 && ava诛邪 > 0)
+            cast(诛邪镇魔);
+        // 破魔击. 直接放.
+        cast(净世破魔击);
+
+        // 处理卡驱夜CD的延迟诛邪
+        if (buff降灵尊 && buff降灵尊->isValid && nCurrentSunEnergy == 0 && nCurrentMoonEnergy == 4000)
+            ava诛邪 = 0; // 暂时停止诛邪释放
+        // 处理离开cw特效的情况
+        if (time橙武CD > 24 * 1024 && time橙武CD < 25 * 1024) {
+            // 此时橙武特效刚结束, 手中应该还有一个满灵
+            const auto cnt三崇 = cd隐身 / (14 * 1024) + (cd生死劫 == 0 ? 1 : 0); // 一个生死劫插三崇
+            const auto cnt额外 = (cd隐身 - 3 * cnt三崇 * 1024) % (6 * 1024);
+            // 破诛异驱破破诛 - 双满
+            // 破诛同破 - 单边满
+            // 破驱诛破斩驱破诛破 - 双满+单边满
+            if (cnt额外 > 2 * 1024 && cnt额外 < 5 * 1024) {
+                const auto buff同辉 = buffGet(12850, 2);
+                const auto buff灵魂 = buffGet(25765, 0);
+                const auto cnt灵魂 =
+                    (buff同辉 && buff同辉->isValid ? buff同辉->nStackNum * 5 : 0) +
+                    (buff灵魂 && buff灵魂->isValid ? buff灵魂->nStackNum : 0);
+                const auto cnt小节 = (cd隐身 - 3 * cnt三崇 * 1024) / (6 * 1024);
+                if (cnt额外 > 3 * 1024 && cnt灵魂 > cnt小节 * 2) {
+                    // 单边满
+                    if (nCurrentSunEnergy < 10000) {
+                        ava日斩 = 1;
+                        ava月斩 = 0;
+                    } else if (nCurrentMoonEnergy < 10000) {
+                        ava日斩 = 0;
+                        ava月斩 = 1;
+                    }
+                } else {
+                    // 双满+单边满
+                    if (nCurrentSunEnergy == 10000) {
+                        ava日斩 = 1;
+                        ava月斩 = 0;
+                    } else if (nCurrentMoonEnergy == 10000) {
+                        ava日斩 = 0;
+                        ava月斩 = 1;
+                    }
+                }
+            } else {
+                // 双满
+                if (nCurrentSunEnergy < 10000) {
+                    ava日斩 = 0;
+                    ava月斩 = 1;
+                } else if (nCurrentMoonEnergy < 10000) {
+                    ava日斩 = 1;
+                    ava月斩 = 0;
+                }
+            }
+        }
+        // 无灵魂时, 重置日月斩和驱夜
+        if (nCurrentSunEnergy <= 2000 && nCurrentMoonEnergy <= 2000) {
+            ava日斩 = 1;
+            ava月斩 = 1;
+        }
+
+        // 双斩.
+        // 1. 双方都可用时, 随便放.
+        // 2. 自身可用且悬冷却完毕.
+        // 3. 灵>60且有对半边诛邪时
+        if (!(buff悬象 && buff悬象->isValid)) {
+            if (ava日斩 > 0 && ava月斩 > 0) {
+                ava日斩 -= cast(烈日斩) ? 1 : 0;
+                ava月斩 -= cast(银月斩) ? 1 : 0;
+            } else if (ava日斩 > 0 && cd悬象 == 0) {
+                ava日斩 -= cast(烈日斩) ? 1 : 0;
+            } else if (ava月斩 > 0 && cd悬象 == 0) {
+                ava月斩 -= cast(银月斩) ? 1 : 0;
+            } else if (nCurrentSunEnergy >= 6000 && buff魂月 && buff魂月->isValid) {
+                ava日斩 -= cast(烈日斩) ? 1 : 0;
+            } else if (nCurrentMoonEnergy >= 6000 && buff灵日 && buff灵日->isValid) {
+                ava月斩 -= cast(银月斩) ? 1 : 0;
+            }
+        }
+        // 驱夜. 驱夜释放完毕后, 将诛邪标记恢复.
+        if (cast(驱夜断愁)) {
+            ava诛邪 = 1;
         }
     }
 };

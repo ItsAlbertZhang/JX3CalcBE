@@ -63,6 +63,7 @@ public:
      * 当该标志 has_value() 时, 将不再以时间作为判断停止的依据, 而是将该值作为停止的依据.
      */
     std::optional<bool> stopInitiative = std::nullopt;
+    event_tick_t        fightTick      = 0;
 
     void init(const typeSkillMap &skills, const typeTalentArray &talents);
     void fightStart();

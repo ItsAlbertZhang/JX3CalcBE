@@ -241,6 +241,7 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
     player->delayBase                     = arg.delayNetwork;
     player->delayRand                     = arg.delayKeyboard;
     player->embedStat                     = arg.embedStat;
+    player->fightTick                     = arg.fightTime * 1024;
     if (arg.fight.has_value()) {
         player->customLua = frame::CustomLua::get(arg.fight.value());
     }
