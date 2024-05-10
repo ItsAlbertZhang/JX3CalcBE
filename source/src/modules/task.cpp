@@ -259,7 +259,7 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
     player->fightStart();
     while (true) {
         if (player->stopInitiative.has_value()) {
-            if (player->stopInitiative.value()) [[unlikely]]
+            if (player->stopInitiative.value() == 0) [[unlikely]]
                 break;
         } else if (frame::Event::now() >= static_cast<frame::event_tick_t>(arg.fightTime) * 1024) [[unlikely]]
             break;
