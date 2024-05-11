@@ -21,6 +21,7 @@ ColumnLimit: 0 # 列宽
 IndentWidth: 4 # 缩进宽度
 InsertNewlineAtEOF: true # 在文件末尾插入新行
 LineEnding: LF # 行尾换行符
+RemoveSemicolon: true # 移除分号
 TabWidth: 4 # Tab 宽度
 UseTab: Never # 不使用 Tab
 ---

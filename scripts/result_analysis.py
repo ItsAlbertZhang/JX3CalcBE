@@ -35,7 +35,7 @@ with open("data.json", "r", encoding="utf-8") as f:
             c -= 1 / 16
         if c > 14 / 16 and isvalid(item):
             print(
-                f'{idx}\t{item["time"]:.2f}\t{c:.2f}\t{item["damageExcept"]}\t{item["name"]}'
+                f'{idx}\t{item["time"]:.2f}\t{c:.2f}\t{c>1.1}\t{item["damageExcept"]}\t{item["name"]}'
             )
             curr += c
             idx += 1
