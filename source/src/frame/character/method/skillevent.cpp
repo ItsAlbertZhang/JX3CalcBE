@@ -30,6 +30,11 @@ void Character::skilleventRemove(int eventID) {
     }
 }
 
+bool Character::skilleventExist(int eventID) {
+    const SkillEvent &skillevent = SkillEventManager::get(eventID);
+    return this->chSkillEvent.data[static_cast<int>(skillevent.type)].EventSkillID[skillevent.EventSkillID].contains(&skillevent);
+}
+
 std::set<const SkillEvent *> Character::skilleventGet(
     ref::SkillEvent::EventType type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2
 ) {

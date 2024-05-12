@@ -99,6 +99,7 @@ public:
     auto skilleventGet(ref::SkillEvent::EventType type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2) -> std::set<const SkillEvent *>;
     void skilleventAdd(int eventID);
     void skilleventRemove(int eventID);
+    bool skilleventExist(int eventID);
 
     // calc
     Damage calcDamage(

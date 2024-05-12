@@ -1,0 +1,93 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "jx3calc",
+    "collectionId": "7bb1dad8-c59b-406e-8605-4e3e73de5c4a",
+    "dateExported": "2024-05-12T09:40:01.770Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "1a8068bd-7d2a-40e5-951c-ca55b2511e60",
+            "colId": "7bb1dad8-c59b-406e-8605-4e3e73de5c4a",
+            "containerId": "",
+            "name": "紫武",
+            "url": "127.0.0.1:12897/create",
+            "method": "POST",
+            "sortNum": 5000,
+            "created": "2024-05-12T00:32:37.160Z",
+            "modified": "2024-05-12T06:18:04.545Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"name\": \"基准页\",\n    \"player\": \"焚影圣诀\",\n    \"delayNetwork\": 45,\n    \"delayKeyboard\": 20,\n    \"fightTime\": 300,\n    \"fightCount\": 100,\n    \"attribute\": {\n        \"method\": \"从数据导入\",\n        \"data\": {\n            \"Dodge\": 0,\n            \"Haste\": 0,\n            \"Parry\": 0,\n            \"Spunk\": 6365,\n            \"Spirit\": 41,\n            \"Strain\": 41977,\n            \"Agility\": 41,\n            \"Strength\": 41,\n            \"Vitality\": 32888,\n            \"MaxHealth\": 468639,\n            \"Toughness\": 0,\n            \"ParryValue\": 0,\n            \"LunarShield\": 4825,\n            \"PVXAllRound\": 0,\n            \"SolarShield\": 4825,\n            \"DodgePercent\": 0,\n            \"HastePercent\": 0,\n            \"ParryPercent\": 0.03,\n            \"PoisonShield\": 4825,\n            \"SurplusValue\": 3838,\n            \"TherapyPower\": 0,\n            \"LunarOvercome\": 31658,\n            \"NeutralShield\": 4825,\n            \"PhysicsShield\": 3185,\n            \"SolarOvercome\": 31658,\n            \"StrainPercent\": 0.5537187084689533,\n            \"PoisonOvercome\": 19954,\n            \"LunarShieldBase\": 4825,\n            \"NeutralOvercome\": 19954,\n            \"PhysicsOvercome\": 12,\n            \"SolarShieldBase\": 4825,\n            \"DecriticalDamage\": 0,\n            \"LunarAttackPower\": 54345,\n            \"PoisonShieldBase\": 4825,\n            \"SolarAttackPower\": 54345,\n            \"TherapyPowerBase\": 0,\n            \"LunarOvercomeBase\": 31658,\n            \"MeleeWeaponDamage\": 2419,\n            \"NeutralShieldBase\": 4825,\n            \"PhysicsShieldBase\": 3185,\n            \"PoisonAttackPower\": 27328,\n            \"SolarOvercomeBase\": 31658,\n            \"LunarShieldPercent\": 0.10304159570321884,\n            \"NeutralAttackPower\": 27328,\n            \"PhysicsAttackPower\": 6,\n            \"PoisonOvercomeBase\": 19954,\n            \"SolarShieldPercent\": 0.10304159570321884,\n            \"LunarCriticalStrike\": 31997,\n            \"NeutralOvercomeBase\": 19954,\n            \"PVXAllRoundtoStrain\": 0,\n            \"PhysicsOvercomeBase\": 12,\n            \"PoisonShieldPercent\": 0.10304159570321884,\n            \"SolarCriticalStrike\": 31997,\n            \"SurplusValuePercent\": 0.05062706727741008,\n            \"LunarAttackPowerBase\": 42250,\n            \"LunarOvercomePercent\": 0.40265827212312,\n            \"NeutralShieldPercent\": 0.10304159570321884,\n            \"PhysicsShieldPercent\": 0.07048682383273487,\n            \"PoisonCriticalStrike\": 23932,\n            \"SolarAttackPowerBase\": 42250,\n            \"SolarOvercomePercent\": 0.40265827212312,\n            \"MeleeWeaponDamageRand\": 1613,\n            \"NeutralCriticalStrike\": 23932,\n            \"PhysicsCriticalStrike\": 23932,\n            \"PoisonAttackPowerBase\": 27328,\n            \"PoisonOvercomePercent\": 0.2537950332284015,\n            \"MeleeWeaponAttackSpeed\": 16,\n            \"NeutralAttackPowerBase\": 27328,\n            \"NeutralOvercomePercent\": 0.2537950332284015,\n            \"PhysicsAttackPowerBase\": 6,\n            \"PhysicsOvercomePercent\": 0.00015262806448535724,\n            \"ActiveThreatCoefficient\": -307,\n            \"DecriticalDamagePercent\": 0.1,\n            \"LunarCriticalStrikeRate\": 0.4069700149448313,\n            \"SolarCriticalStrikeRate\": 0.4069700149448313,\n            \"LunarCriticalDamagePower\": 8461,\n            \"PoisonCriticalStrikeRate\": 0.3043912366052975,\n            \"SolarCriticalDamagePower\": 8461,\n            \"NeutralCriticalStrikeRate\": 0.3043912366052975,\n            \"PVXAllRoundtoSurplusValue\": 0,\n            \"PhysicsCriticalStrikeRate\": 0.3043912366052975,\n            \"PoisonCriticalDamagePower\": 8043,\n            \"NeutralCriticalDamagePower\": 8043,\n            \"PhysicsCriticalDamagePower\": 5703,\n            \"ToughnessDecirDamagePercent\": 0,\n            \"ToughnessDefCriticalPercent\": 0,\n            \"PVXAllRoundtoDecriticalDamage\": 0,\n            \"LunarCriticalDamagePowerPercent\": 2.057518967788833,\n            \"SolarCriticalDamagePowerPercent\": 2.057518967788833,\n            \"PoisonCriticalDamagePowerPercent\": 2.042326563990732,\n            \"NeutralCriticalDamagePowerPercent\": 2.042326563990732,\n            \"PhysicsCriticalDamagePowerPercent\": 1.957278179092272,\n            \"MeleeWeaponDamageMax\": 4032\n        }\n    },\n    \"effects\": {\n        \"套装·技能\": true,\n        \"家园·酿造\": \"女儿红\",\n        \"大附魔·腰\": true,\n        \"大附魔·腕\": \"雾海寻龙\",\n        \"大附魔·鞋\": \"雾海寻龙\",\n        \"腰坠·特效\": \"梧桐影\",\n        \"武器·特效\": \"无尽沙海\"\n    },\n    \"fight\": {\n        \"method\": \"使用内置循环\",\n        \"data\": 0\n    },\n    \"talents\": [\n        5972,\n        18279,\n        22888,\n        6717,\n        34383,\n        34395,\n        34372,\n        17567,\n        25166,\n        34378,\n        34347,\n        37337\n    ]\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "8f583f0d-0ece-49b6-b7c0-9679654252b3",
+            "colId": "7bb1dad8-c59b-406e-8605-4e3e73de5c4a",
+            "containerId": "",
+            "name": "橙武",
+            "url": "127.0.0.1:12897/create",
+            "method": "POST",
+            "sortNum": 7500,
+            "created": "2024-05-12T00:33:06.217Z",
+            "modified": "2024-05-12T09:39:37.547Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n    \"name\": \"基准页\",\n    \"player\": \"焚影圣诀\",\n    \"delayNetwork\": 45,\n    \"delayKeyboard\": 20,\n    \"fightTime\": 308,\n    \"fightCount\": 100,\n    \"attribute\": {\n        \"method\": \"从数据导入\",\n        \"data\": {\n            \"Dodge\": 0,\n            \"Haste\": 0,\n            \"Parry\": 0,\n            \"Spunk\": 6365,\n            \"Spirit\": 41,\n            \"Strain\": 41977,\n            \"Agility\": 41,\n            \"Strength\": 41,\n            \"Vitality\": 32888,\n            \"MaxHealth\": 468639,\n            \"Toughness\": 0,\n            \"ParryValue\": 0,\n            \"LunarShield\": 4825,\n            \"PVXAllRound\": 0,\n            \"SolarShield\": 4825,\n            \"DodgePercent\": 0,\n            \"HastePercent\": 0,\n            \"ParryPercent\": 0.03,\n            \"PoisonShield\": 4825,\n            \"SurplusValue\": 3838,\n            \"TherapyPower\": 0,\n            \"LunarOvercome\": 31658,\n            \"NeutralShield\": 4825,\n            \"PhysicsShield\": 3185,\n            \"SolarOvercome\": 31658,\n            \"StrainPercent\": 0.5537187084689533,\n            \"PoisonOvercome\": 19954,\n            \"LunarShieldBase\": 4825,\n            \"NeutralOvercome\": 19954,\n            \"PhysicsOvercome\": 12,\n            \"SolarShieldBase\": 4825,\n            \"DecriticalDamage\": 0,\n            \"LunarAttackPower\": 54345,\n            \"PoisonShieldBase\": 4825,\n            \"SolarAttackPower\": 54345,\n            \"TherapyPowerBase\": 0,\n            \"LunarOvercomeBase\": 31658,\n            \"MeleeWeaponDamage\": 2419,\n            \"NeutralShieldBase\": 4825,\n            \"PhysicsShieldBase\": 3185,\n            \"PoisonAttackPower\": 27328,\n            \"SolarOvercomeBase\": 31658,\n            \"LunarShieldPercent\": 0.10304159570321884,\n            \"NeutralAttackPower\": 27328,\n            \"PhysicsAttackPower\": 6,\n            \"PoisonOvercomeBase\": 19954,\n            \"SolarShieldPercent\": 0.10304159570321884,\n            \"LunarCriticalStrike\": 31997,\n            \"NeutralOvercomeBase\": 19954,\n            \"PVXAllRoundtoStrain\": 0,\n            \"PhysicsOvercomeBase\": 12,\n            \"PoisonShieldPercent\": 0.10304159570321884,\n            \"SolarCriticalStrike\": 31997,\n            \"SurplusValuePercent\": 0.05062706727741008,\n            \"LunarAttackPowerBase\": 42250,\n            \"LunarOvercomePercent\": 0.40265827212312,\n            \"NeutralShieldPercent\": 0.10304159570321884,\n            \"PhysicsShieldPercent\": 0.07048682383273487,\n            \"PoisonCriticalStrike\": 23932,\n            \"SolarAttackPowerBase\": 42250,\n            \"SolarOvercomePercent\": 0.40265827212312,\n            \"MeleeWeaponDamageRand\": 1613,\n            \"NeutralCriticalStrike\": 23932,\n            \"PhysicsCriticalStrike\": 23932,\n            \"PoisonAttackPowerBase\": 27328,\n            \"PoisonOvercomePercent\": 0.2537950332284015,\n            \"MeleeWeaponAttackSpeed\": 16,\n            \"NeutralAttackPowerBase\": 27328,\n            \"NeutralOvercomePercent\": 0.2537950332284015,\n            \"PhysicsAttackPowerBase\": 6,\n            \"PhysicsOvercomePercent\": 0.00015262806448535724,\n            \"ActiveThreatCoefficient\": -307,\n            \"DecriticalDamagePercent\": 0.1,\n            \"LunarCriticalStrikeRate\": 0.4069700149448313,\n            \"SolarCriticalStrikeRate\": 0.4069700149448313,\n            \"LunarCriticalDamagePower\": 8461,\n            \"PoisonCriticalStrikeRate\": 0.3043912366052975,\n            \"SolarCriticalDamagePower\": 8461,\n            \"NeutralCriticalStrikeRate\": 0.3043912366052975,\n            \"PVXAllRoundtoSurplusValue\": 0,\n            \"PhysicsCriticalStrikeRate\": 0.3043912366052975,\n            \"PoisonCriticalDamagePower\": 8043,\n            \"NeutralCriticalDamagePower\": 8043,\n            \"PhysicsCriticalDamagePower\": 5703,\n            \"ToughnessDecirDamagePercent\": 0,\n            \"ToughnessDefCriticalPercent\": 0,\n            \"PVXAllRoundtoDecriticalDamage\": 0,\n            \"LunarCriticalDamagePowerPercent\": 2.057518967788833,\n            \"SolarCriticalDamagePowerPercent\": 2.057518967788833,\n            \"PoisonCriticalDamagePowerPercent\": 2.042326563990732,\n            \"NeutralCriticalDamagePowerPercent\": 2.042326563990732,\n            \"PhysicsCriticalDamagePowerPercent\": 1.957278179092272,\n            \"MeleeWeaponDamageMax\": 4032\n        }\n    },\n    \"effects\": {\n        \"套装·技能\": true,\n        \"家园·酿造\": \"女儿红\",\n        \"大附魔·腰\": true,\n        \"大附魔·腕\": \"雾海寻龙\",\n        \"大附魔·鞋\": \"雾海寻龙\",\n        \"腰坠·特效\": \"梧桐影\",\n        \"武器·特效\": \"血月\"\n    },\n    \"fight\": {\n        \"method\": \"使用内置循环\",\n        \"data\": 0\n    },\n    \"talents\": [\n        5972,\n        18279,\n        22888,\n        6717,\n        34383,\n        34395,\n        34372,\n        17567,\n        25166,\n        34378,\n        34347,\n        37337\n    ]\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "a24df493-a96f-4dae-bc6c-215c68ab4bf7",
+            "colId": "7bb1dad8-c59b-406e-8605-4e3e73de5c4a",
+            "containerId": "",
+            "name": "查询dps",
+            "url": "127.0.0.1:12897/query/RLwMRY/dps",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2024-05-12T00:32:30.098Z",
+            "modified": "2024-05-12T09:39:53.339Z",
+            "headers": []
+        },
+        {
+            "_id": "8cb8dd72-642e-4ebf-ae81-1b59e53e7058",
+            "colId": "7bb1dad8-c59b-406e-8605-4e3e73de5c4a",
+            "containerId": "",
+            "name": "查询伤害列表",
+            "url": "127.0.0.1:12897/query/UlQpps/damage-list",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2024-05-12T00:32:42.277Z",
+            "modified": "2024-05-12T09:35:21.742Z",
+            "headers": []
+        },
+        {
+            "_id": "41d35ddd-cfae-4cbd-8246-79ade00a4151",
+            "colId": "7bb1dad8-c59b-406e-8605-4e3e73de5c4a",
+            "containerId": "",
+            "name": "查询伤害占比",
+            "url": "127.0.0.1:12897/query/RiCBgT/damage-analysis",
+            "method": "GET",
+            "sortNum": 40000,
+            "created": "2024-05-12T00:32:56.094Z",
+            "modified": "2024-05-12T00:32:56.094Z",
+            "headers": []
+        },
+        {
+            "_id": "be606b6f-3532-492a-b4fa-75e63444a16c",
+            "colId": "7bb1dad8-c59b-406e-8605-4e3e73de5c4a",
+            "containerId": "",
+            "name": "停止",
+            "url": "127.0.0.1:12898/stop",
+            "method": "GET",
+            "sortNum": 50000,
+            "created": "2024-05-12T00:33:38.621Z",
+            "modified": "2024-05-12T00:33:38.621Z",
+            "headers": []
+        }
+    ],
+    "ref": "Q4gDu0bIlbGwLCXZB68Cz_fc-KQ3ucKRGA6YZSIvN4tLkldaUY679EzDIVeVYE9-4E9DP4qnEBipWNoPzRbDmA"
+}
