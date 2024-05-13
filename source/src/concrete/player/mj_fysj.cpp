@@ -270,6 +270,8 @@ private:
         }
     }
 
+    int framePublicCooldown = 0;
+
     virtual void fightPrepare() override {
         cast(3974);
         if (nSunPowerValue == 0 && nMoonPowerValue == 0) {
@@ -278,6 +280,7 @@ private:
             else if (nCurrentSunEnergy >= 10000)
                 nSunPowerValue = 1;
         }
+        framePublicCooldown = 16 * 1024 / (1024 + chAttr.getHaste());
     }
     virtual auto fightWeaponAttack() -> frame::event_tick_t override {
         skillCast(targetSelect, 4326, 1); // 大漠刀法
@@ -391,8 +394,8 @@ private:
                     return;
                 }
             }
-        // 满灵时, 施展诛邪
-        if (nSunPowerValue || nMoonPowerValue)
+        // 生死劫在CD且满灵时, 施展诛邪
+        if (cd生死劫 > 0 && (nSunPowerValue || nMoonPowerValue))
             if (cast(诛邪镇魔))
                 return;
         // 施展破魔击
@@ -530,11 +533,35 @@ private:
         if (nCurrentMoonEnergy <= 2000 || (!(targetSelect->buffExist(4202, 0)) && nCurrentMoonEnergy <= 4000))
             if (cast(银月斩))
                 return;
-        // 驱夜
-        if (nCurrentSunEnergy >= 4000 && nCurrentMoonEnergy >= 4000)
-            if (cast(驱夜断愁)) {
-                return;
+        // 二段加速下,自适应 Beta
+        if (framePublicCooldown <= 14) {
+            if (nCurrentSunEnergy >= 4000 && nCurrentMoonEnergy >= 4000) {
+                // 单边满灵
+                // 破劫诛-3崇-6GCD-6GCD-3崇-6GCD-5GCD = 32GCD, 再给 400ms 的劫停手延迟
+                const auto t = 32 * (framePublicCooldown * 1024 / 16 + delayBase + delayRand * 3 / 4) + 400; // 这里多取 1/4 的随机延迟
+                if (skillCooldownLeftTick(暗尘弥散) > t) {
+                    if (cast(银月斩))
+                        return;
+                }
+                // 月轮
+                if (nCurrentMoonEnergy == 8000)
+                    if (cast(幽月轮))
+                        return;
             }
+            if (skillCountAvailable(烈日斩) == 2 && nCurrentSunEnergy >= 6000)
+                if (cast(烈日斩))
+                    return;
+            if (skillCountAvailable(银月斩) == 2 && nCurrentMoonEnergy >= 6000)
+                if (cast(银月斩))
+                    return;
+            // 驱夜
+            if (cast(驱夜断愁))
+                return;
+        } else {
+            if (nCurrentSunEnergy >= 4000 && nCurrentMoonEnergy >= 4000)
+                if (cast(驱夜断愁))
+                    return;
+        }
     }
     void fightBeta() {}
     void fightGamma() {}
@@ -609,10 +636,8 @@ private:
         const auto count灵魂 =
             (buff同辉 && buff同辉->isValid ? buff同辉->nStackNum * 5 : 0) +
             (buff灵魂 && buff灵魂->isValid ? buff灵魂->nStackNum : 0);
-        const auto buff橙武CD  = buffGet(2584, 0);
-        const auto time橙武CD  = buff橙武CD && buff橙武CD->isValid ? buff橙武CD->nLeftFrame * 1024 / 16 : 0;
-        // const auto has橙武特效 = skilleventExist(2421);
-        const auto has橙武特效 = false; // 暂时不启用双满打法
+        const auto buff橙武CD = buffGet(2584, 0);
+        const auto time橙武CD = buff橙武CD && buff橙武CD->isValid ? buff橙武CD->nLeftFrame * 1024 / 16 : 0;
 
         // 起手双斩
         if (now < 3 * 1024) {
@@ -650,6 +675,9 @@ private:
             else if (time目标日斩 < 3 * 1024) { // 悬外补斩
                 if (cast(烈日斩))
                     return;
+            } else if (time目标月斩 < 3 * 1024) { // 悬外补斩
+                if (cast(银月斩))
+                    return;
             } else if (cast(崇光斩恶)) // 悬外崇
                 return;
         }
@@ -679,13 +707,13 @@ private:
             if (count灵魂 >= 5)
                 return fightAlphaVariantBothSunMoonPower();
             else
-                return has橙武特效 ? fightAlphaVariantBothSunMoonPower() : fightAlpha();
+                return framePublicCooldown <= 14 ? fightAlphaVariantBothSunMoonPower() : fightAlpha();
         } else if (buff悬象 && buff悬象->isValid)
             return fightBravo();
         else {
-            if (stacknum崇光 >= 3 &&         // 有3层崇光, 并且
-                time目标日斩 > 16 * 1024 &&  // 目标日斩buff时长大于16秒, 并且
-                now - fightTick > -20 * 1024 // 距离预定的收尾时间不到20s, 或已经超过了预定的收尾时间
+            if (stacknum崇光 >= 3 && stacknum崇光 < 5 && // 崇光层数在3到5之间
+                time目标日斩 > 3 * 1024 &&               // 目标日斩buff时长大于3秒, 并且
+                now - fightTick > -20 * 1024             // 距离预定的收尾时间不到20s, 或已经超过了预定的收尾时间
             )
                 if (cast(崇光斩恶)) {
                     stopInitiative.emplace(2);
@@ -700,7 +728,7 @@ private:
             if (stacknum崇光 >= 3 && cd生死劫 > 13 * 1024 - delayBase - delayRand) // 有3层崇光, 并且刚打完生死劫
                 if (cast(崇光斩恶))
                     return;
-            return has橙武特效 ? fightAlphaVariantBothSunMoonPower() : fightAlpha();
+            return framePublicCooldown <= 14 ? fightAlphaVariantBothSunMoonPower() : fightAlpha();
         }
     }
 
