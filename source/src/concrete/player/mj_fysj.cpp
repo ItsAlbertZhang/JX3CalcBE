@@ -311,7 +311,7 @@ void MjFysj::embed0() {
         } else {
             auto tick = skillCooldownLeftTick(cg[idx]);
             if (tick > 0)
-                delayCustom = tick + delayBase + delayRand / 2;
+                delayCustom = static_cast<int>(tick + delayBase + delayRand / 2);
             else
                 stopInitiative.reset();
         }
@@ -331,7 +331,7 @@ void MjFysj::embed0() {
             auto tick = skillCooldownLeftTick(qg[idx + 1]); // 获取日斩的剩余冷却时间
             auto t    = 1024 + delayBase + delayRand;
             if (tick > t) { // 假如剩余冷却时间大于 1 秒以上
-                delayCustom = tick - t;
+                delayCustom = static_cast<int>(tick - t);
                 return; // 直接返回, 不进行后续操作
             }
         }
@@ -341,7 +341,7 @@ void MjFysj::embed0() {
         } else {
             auto tick = skillCooldownLeftTick(qg[idx]);
             if (tick > 0)
-                delayCustom = tick + delayBase + delayRand / 2;
+                delayCustom = static_cast<int>(tick + delayBase + delayRand / 2);
             else
                 stopInitiative.reset();
         }
@@ -361,12 +361,12 @@ void MjFysj::embed1() {
             flagOutset = false;
         }
     } else [[likely]] {
-        auto lj = buffGet(28196, 1);
-        auto cg = buffGet(28194, 1);
-        auto ze = buffGet(28195, 1);
-        if (lj && lj->isValid && lj->nStackNum < 3)
+        auto buffLJ = buffGet(28196, 1); // 连击
+        auto buffCG = buffGet(28194, 1); // 崇光
+        auto buffZE = buffGet(28195, 1); // 斩恶
+        if (buffLJ && buffLJ->isValid && buffLJ->nStackNum < 3)
             cast(37335); // 崇光斩恶, 连击
-        if (cg && cg->isValid && cg->nStackNum == 5 && ze && ze->isValid)
+        if (buffCG && buffCG->isValid && buffCG->nStackNum == 5 && buffZE && buffZE->isValid)
             cast(37335); // 崇光斩恶, 5.5 层
         cast(3974);      // 暗尘弥散
         if (buffExist(25731, 1))
@@ -375,7 +375,7 @@ void MjFysj::embed1() {
         cast(3969);      // 光明相
         cast(3966);      // 生死劫
         cast(3967);      // 净世破魔击
-        if (cg && cg->isValid && cg->nStackNum >= 3)
+        if (buffCG && buffCG->isValid && buffCG->nStackNum >= 3)
             cast(37335); // 崇光斩恶, 3 层
         cast(3979);      // 驱夜断愁
         cast(3963);      // 烈日斩
@@ -427,7 +427,7 @@ void MjFysj::fightBurst() {
                     delayCustom = 400;
                 return;
             } else if (cd生死劫 < 400) {
-                delayCustom = cd生死劫 + delayBase + delayRand / 2;
+                delayCustom = static_cast<int>(cd生死劫 + delayBase + delayRand / 2);
                 return;
             }
         }
@@ -493,7 +493,7 @@ void MjFysj::fightConv() {
         if (cast(生死劫))
             return;
         else if (cd生死劫 < 400) {
-            delayCustom = cd生死劫 + delayBase + delayRand / 2;
+            delayCustom = static_cast<int>(cd生死劫 + delayBase + delayRand / 2);
             return;
         }
     }
@@ -557,7 +557,7 @@ void MjFysj::fightConvVar() {
         if (cast(生死劫))
             return;
         else if (cd生死劫 < 400) {
-            delayCustom = cd生死劫 + delayBase + delayRand / 2;
+            delayCustom = static_cast<int>(cd生死劫 + delayBase + delayRand / 2);
             return;
         }
     }
@@ -606,7 +606,6 @@ void MjFysj::fightCW() {
     // 后续计算所需资源
     const auto cd生死劫     = skillCooldownLeftTick(生死劫);
     const auto cd暗尘弥散   = skillCooldownLeftTick(暗尘弥散);
-    const auto buff诛邪     = buffGet(9909, 0);
     const auto buff悬象     = buffGet(25716, 0);
     const auto buff橙武CD   = buffGet(2584, 0);
     const auto time橙武CD   = buff橙武CD && buff橙武CD->isValid ? buff橙武CD->nLeftFrame * 1024 / 16 : 0;
@@ -628,7 +627,7 @@ void MjFysj::fightCW() {
             if (cast(生死劫))
                 return;
             else if (cd生死劫 < 400) {
-                delayCustom = cd生死劫 + delayBase + delayRand / 2;
+                delayCustom = static_cast<int>(cd生死劫 + delayBase + delayRand / 2);
                 return;
             }
         }

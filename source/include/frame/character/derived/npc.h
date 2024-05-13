@@ -2,6 +2,7 @@
 
 #include "concrete.h"
 #include "frame/character/character.h"
+#include <memory>
 
 namespace jx3calc {
 
