@@ -15,13 +15,13 @@ AllowAllConstructorInitializersOnNextLine: true # 允许构造函数的所有参
 AllowAllParametersOfDeclarationOnNextLine: true # 允许函数声明的所有参数都在下一行
 AllowShortFunctionsOnASingleLine: Empty # 仅允许空函数在单行
 AlwaysBreakBeforeMultilineStrings: true # 总是在多行字符串之前换行
-BinPackArguments: false # 函数调用的参数无法放置在一行时, 将它们每个都单独放在一行
-BinPackParameters: false # 函数声明的参数无法放置在一行时, 将它们每个都单独放在一行
+BreakConstructorInitializers: AfterColon # 构造函数初始化列表在冒号后换行
 ColumnLimit: 0 # 列宽
 IndentWidth: 4 # 缩进宽度
 InsertNewlineAtEOF: true # 在文件末尾插入新行
 LineEnding: LF # 行尾换行符
 RemoveSemicolon: true # 移除分号
+SpaceBeforeCpp11BracedList: true # C++11 列表初始化前空格
 TabWidth: 4 # Tab 宽度
 UseTab: Never # 不使用 Tab
 ---

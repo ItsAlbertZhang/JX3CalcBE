@@ -51,12 +51,9 @@ public:
         frame::ChAttr                               attrBackup;
         std::vector<std::shared_ptr<frame::Effect>> effects;
 
-        /**
-         * @brief 内置状态
-         * -1 代表自定义战斗(不使用内置), 非负数代表使用内置, 且数值等于内置枚举索引, 其中 0 为默认内置循环.
-         * 具体数值代表状态由各心法具体实现.
-         */
-        int embedStat = 0;
+        // 战斗类型. -1 代表自定义战斗(不使用内置), 非负数代表使用内置, 且数值等于内置枚举索引, 其中 0 为默认内置循环.
+        // 具体数值代表的状态由各心法负责具体实现.
+        int fightType = 0;
 
         frame::Player::typeSkillMap    skills;
         frame::Player::typeTalentArray talents;

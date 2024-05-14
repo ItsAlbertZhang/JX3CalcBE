@@ -8,8 +8,8 @@
 using namespace jx3calc;
 using namespace frame;
 
-AutoRollbackAttrib::AutoRollbackAttrib(Character *self, BuffItem *item, const Buff &buff)
-    : self(self), item(item), buff(buff) {
+AutoRollbackAttrib::AutoRollbackAttrib(Character *self, BuffItem *item, const Buff &buff) :
+    self(self), item(item), buff(buff) {
     load();
 }
 
@@ -218,6 +218,15 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
         break;
     case ref::Attrib::atCastSkillTargetDst:
         self->skillCast(attrib.valueAInt, attrib.valueBInt);
+        break;
+    case ref::Attrib::atLunarAttackPowerPercent:
+        self->chAttr.atLunarAttackPowerPercent += attrib.valueAInt * c * stack;
+        break;
+    case ref::Attrib::atSolarAttackPowerPercent:
+        self->chAttr.atSolarAttackPowerPercent += attrib.valueAInt * c * stack;
+        break;
+    case ref::Attrib::atDamageToLifeForSelf:
+        // 未做相关实现,
         break;
     default:
         CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, Ref<ref::Attrib>::names[static_cast<int>(attrib.type)], attrib.valueAInt);

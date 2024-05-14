@@ -1,5 +1,6 @@
 #include "frame/character/character.h"
 #include "frame/common/damage.h"
+#include "frame/common/globalparam.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
 #include "plugin/channelinterval.h"
@@ -139,7 +140,7 @@ Damage Character::calcDamage(
             level,
             damageBase,
             damageRand,
-            static_cast<double>(1) * (atGlobalDamageFactor + (1 << 20)) / (1 << 20),
+            static_cast<double>(1) * (atGlobalDamageFactor + (1 << 20)) / (1 << 20) * GlobalParam::get().fSurplusParam,
             isBuff
         );
         damage = damage + atSurplus * 1;
@@ -172,7 +173,7 @@ Damage Character::calcDamage(
     ull damageCritical = damage * (1792 + atCriticalDamagePower) / 1024;
     ull damageExcept   = (damage * (10000 - atCriticalStrike) + damageCritical * atCriticalStrike) / 10000;
 
-    return Damage{
+    return Damage {
         .tick           = Event::now(),
         .damageType     = typeDamage,
         .id             = id,
@@ -226,7 +227,7 @@ void Character::otherSuperCustomDamage(int sourceID, int skillID, int skillLevel
     damage = damage * (1024 + coefficient) / 1024; // 易伤
 
     // 加入伤害记录
-    src->chDamage.emplace_back(Damage{
+    src->chDamage.emplace_back(Damage {
         .tick           = Event::now(),
         .damageType     = damageType,
         .id             = skillID,

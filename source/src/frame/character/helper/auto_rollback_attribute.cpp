@@ -11,8 +11,8 @@
 using namespace jx3calc;
 using namespace frame;
 
-AutoRollbackAttribute::AutoRollbackAttribute(Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill)
-    : self(self), target(target), runtime(runtime), skill(skill) {
+AutoRollbackAttribute::AutoRollbackAttribute(Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill) :
+    self(self), target(target), runtime(runtime), skill(skill) {
     handle(false);
 }
 AutoRollbackAttribute::~AutoRollbackAttribute() {

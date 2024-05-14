@@ -51,8 +51,6 @@ Player::typeSkillMap Player::overrideSkill(
             auto new_ = Skill::override(skills.at(it.first), it.second);
             skills.erase(it.first);
             skills.emplace(it.first, new_);
-        } else {
-            skills.emplace(it.first, it.second);
         }
     }
     return skills;

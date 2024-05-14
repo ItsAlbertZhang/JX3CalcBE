@@ -141,7 +141,8 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
             }
 
         } else if (fight.contains("data") && fight.at("data").is_number_integer()) {
-            data.embedStat = j.at("fight").at("data").get<int>();
+            player->fightType = j.at("fight").at("data").get<int>();
+            data.fightType    = player->fightType;
         }
     }
     res.next();
@@ -240,7 +241,7 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
     std::unique_ptr<frame::Player> player = concrete::createPlayer(arg.playerType);
     player->delayBase                     = arg.delayNetwork;
     player->delayRand                     = arg.delayKeyboard;
-    player->embedStat                     = arg.embedStat;
+    player->fightType                     = arg.fightType;
     player->fightTick                     = arg.fightTime * 1024;
     if (arg.fight.has_value()) {
         player->customLua = frame::CustomLua::get(arg.fight.value());
@@ -258,8 +259,8 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
     player->init(arg.skills, arg.talents);
     player->fightStart();
     while (true) {
-        if (player->stopInitiative.has_value()) {
-            if (player->stopInitiative.value() == 0) [[unlikely]]
+        if (player->fightStopWait.has_value()) {
+            if (player->fightStopWait.value() == 0) [[unlikely]]
                 break;
         } else if (frame::Event::now() >= static_cast<frame::event_tick_t>(arg.fightTime) * 1024) [[unlikely]]
             break;

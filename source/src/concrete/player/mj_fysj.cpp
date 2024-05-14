@@ -21,18 +21,6 @@ private:
 
     int framePublicCooldown = 0;
 
-    int  idx = 0;
-    void embed0();
-
-    bool flagOutset = true;
-    void embed1();
-
-    bool bFlagFight = true;
-    void fightBurst();
-    void fightConv();    // conventional fight
-    void fightConvVar(); // variant conventional fight
-    void fightCW();
-
     enum class EmbedType {
         自定义      = -1,
         // 上限循环
@@ -49,7 +37,20 @@ private:
         简单_崇光洞若,
     };
 
+    int  nFight = 0;
+    bool bFight = true;
+    void fightStrict(const std::vector<int> &queue);
+    void fightSimple();
+
+    void fightBurst();
+    void fightConv();    // conventional fight
+    void fightConvVar(); // variant conventional fight
+    void fightCW();
+
     void fight_上限_崇光69();
+    // void fight_简单_齐光一键(); // see fightSimple
+    // void fight_简单_崇光两键(); // see fightSimple
+    void fight_简单_齐光两键();
     void fight_简单_崇光洞若();
 };
 } // namespace
@@ -74,10 +75,29 @@ enum talent {
     靡业报劫_奇穴 = 34372,
     用晦而明_奇穴 = 17567,
     净体不畏_奇穴 = 25166,
+    天地诛戮_奇穴 = 5979,
     降灵尊_奇穴   = 34378,
     悬象著明_奇穴 = 34347,
     崇光斩恶_奇穴 = 37337,
     日月齐光_奇穴 = 34370,
+};
+
+const std::set<int> talentAvailable {
+    腾焰飞芒_奇穴,
+    净身明礼_奇穴,
+    诛邪镇魔_奇穴,
+    洞若观火_奇穴,
+    无明业火_奇穴,
+    明光恒照_奇穴,
+    日月同辉_奇穴,
+    靡业报劫_奇穴,
+    用晦而明_奇穴,
+    净体不畏_奇穴,
+    天地诛戮_奇穴,
+    降灵尊_奇穴,
+    悬象著明_奇穴,
+    崇光斩恶_奇穴,
+    日月齐光_奇穴,
 };
 
 enum skill {
@@ -145,93 +165,18 @@ enum skillAlias {
     崇光 = 崇光斩恶,
 };
 
-// clang-format off
-
-static const std::vector<int> cg {
-    日斩, 月斩,
-
-    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
-    日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
-    日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
-    月斩, 日斩, 驱夜,
-    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
-    日斩, 崇光, 崇光, 崇光, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
-    日斩, 驱夜, 日破, 月斩, 月劫, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 崇光, 崇光, 崇光, 诛邪,
-    月斩, 日斩, 驱夜,
-
-    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
-    日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
-    日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
-    月斩, 日斩, 驱夜,
-    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
-    日斩, 崇光, 崇光, 崇光, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
-    日斩, 驱夜, 日破, 月斩, 月劫, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 崇光, 崇光, 崇光, 诛邪,
-    月斩, 日斩, 驱夜,
-
-    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
-    日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
-    日斩, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
-    月斩, 日斩, 驱夜,
-    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
-    日斩, 崇光, 崇光, 崇光, 驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪,
-    日斩, 驱夜, 日破, 月斩, 月劫, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 崇光, 崇光, 崇光, 诛邪,
-    月斩, 日斩, 驱夜,
-
-    月悬, 日劫, 隐身, 月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
-    日斩, 崇光, 崇光, 崇光,
+enum operation {
+    特效腰坠 = -1024,
+    延迟隐身,
+    点诛,
+    特殊处理1,
 };
 
-static const std::vector<int> qg {
-    月斩, 月破, 日破, 日斩,
-
-    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
-    驱夜, 月破, 诛邪, 月斩, 日斩, 日破, 月斩, 光明相, 月劫, 日破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 日斩,
-    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
-    驱夜, 月破, 诛邪, 月斩, 日轮, 日破, 月斩, 月劫, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 日斩,
-
-    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
-    驱夜, 月破, 诛邪, 月斩, 日斩, 日破, 月斩, 光明相, 月劫, 日破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 日斩,
-    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
-    驱夜, 月破, 诛邪, 月斩, 日轮, 日破, 月斩, 月劫, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 日斩,
-
-    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
-    驱夜, 月破, 诛邪, 月斩, 日斩, 日破, 月斩, 光明相, 月劫, 日破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 日斩,
-    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
-    驱夜, 月破, 诛邪, 月斩, 日轮, 日破, 月斩, 月劫, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
-    驱夜, 日斩, 日破, 月斩, 月破, 日斩,
-
-    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
-    驱夜, 月破, 诛邪, 月斩, 日斩, 日破,
-};
-
-static const std::vector<int> outset {
-    月斩, 月破, 日破, 日斩,
-};
-
-// clang-format on
-
-MjFysj::MjFysj()
-    : Player(10242, 13, 503) {}
+MjFysj::MjFysj() :
+    Player(10242, 13, 503) {}
 
 auto MjFysj::getSkills(const typeSkillMap &custom) -> typeSkillMap {
-    static const typeSkillMap skill{
+    static const typeSkillMap skill {
         {赤日轮, {赤日轮, 33, {赤日轮_会心4, 赤日轮_伤害3, 赤日轮_伤害4, 赤日轮_伤害5}}},
         {烈日斩, {烈日斩, 32, {烈日斩_会心4, 烈日斩_伤害4, 烈日斩_伤害5, 烈日斩_静止10}}},
         {生死劫, {生死劫, 1, {生死劫_伤害3, 生死劫_伤害4, 生死劫_伤害5}}},
@@ -243,24 +188,31 @@ auto MjFysj::getSkills(const typeSkillMap &custom) -> typeSkillMap {
         {驱夜断愁, {驱夜断愁, 29, {驱夜断愁_会心4, 驱夜断愁_会心5, 驱夜断愁_伤害4, 驱夜断愁_伤害5}}},
         {诛邪镇魔, {诛邪镇魔, 1, {}}},
     };
-    static const typeSkillMap skillForced{
+    static const typeSkillMap skillForced {
         {净世破魔击, {净世破魔击, 0, {净世破魔击_20月魂}}},
     };
     return overrideSkill(overrideSkill(skill, custom), skillForced);
 }
 
 auto MjFysj::getTalents(const typeTalentArray &custom) -> typeTalentArray {
-    static const typeTalentArray talent{腾焰飞芒_奇穴, 净身明礼_奇穴, 诛邪镇魔_奇穴, 无明业火_奇穴, 明光恒照_奇穴, 日月同辉_奇穴, 靡业报劫_奇穴, 用晦而明_奇穴, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 崇光斩恶_奇穴};
-    static const typeTalentArray talentCG{0, 0, 诛邪镇魔_奇穴, 0, 0, 日月同辉_奇穴, 靡业报劫_奇穴, 0, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 崇光斩恶_奇穴};
-    static const typeTalentArray talentQG{0, 0, 诛邪镇魔_奇穴, 0, 0, 日月同辉_奇穴, 靡业报劫_奇穴, 0, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 日月齐光_奇穴};
-    typeTalentArray              temp = overrideTalent(talent, custom);
-    switch (static_cast<int>(this->embedStat)) {
+    static const typeTalentArray talent {腾焰飞芒_奇穴, 净身明礼_奇穴, 诛邪镇魔_奇穴, 无明业火_奇穴, 明光恒照_奇穴, 日月同辉_奇穴, 靡业报劫_奇穴, 用晦而明_奇穴, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 崇光斩恶_奇穴};
+    static const typeTalentArray talentCG {0, 0, 诛邪镇魔_奇穴, 0, 0, 日月同辉_奇穴, 靡业报劫_奇穴, 0, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 崇光斩恶_奇穴};
+    static const typeTalentArray talentQG {0, 0, 诛邪镇魔_奇穴, 0, 0, 日月同辉_奇穴, 靡业报劫_奇穴, 0, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 日月齐光_奇穴};
+
+    typeTalentArray temp = overrideTalent(talent, custom);
+    for (int i = 0; i < CountTalents; i++)
+        if (!talentAvailable.contains(temp[i]))
+            temp[i] = talent[i];
+
+    switch (static_cast<int>(fightType)) {
     case static_cast<int>(EmbedType::上限_崇光69):
+        return overrideTalent(temp, talentCG);
+    case static_cast<int>(EmbedType::严格_崇光69):
+        return overrideTalent(temp, talentCG);
+    case static_cast<int>(EmbedType::严格_崇光699):
         return overrideTalent(temp, talentCG);
     case static_cast<int>(EmbedType::严格_齐光30):
         return overrideTalent(temp, talentQG);
-    case static_cast<int>(EmbedType::严格_崇光699):
-        return overrideTalent(temp, talentCG);
     case static_cast<int>(EmbedType::严格_齐光35):
         return overrideTalent(temp, talentQG);
     default:
@@ -285,97 +237,115 @@ auto MjFysj::fightWeaponAttack() -> frame::event_tick_t {
     return frame * 64; // 64 = 1024/16
 }
 
+extern const std::vector<int> queue崇光69;
+extern const std::vector<int> queue崇光699;
+extern const std::vector<int> queue齐光30;
+extern const std::vector<int> queue齐光35;
+
 void MjFysj::fightEmbed() {
-    if (embedStat == 0) {
-        fight_上限_崇光69();
-    } else if (embedStat == 1) {
-        embed1();
+    switch (static_cast<int>(fightType)) {
+    case static_cast<int>(EmbedType::上限_崇光69):
+        return fight_上限_崇光69();
+    case static_cast<int>(EmbedType::严格_崇光69):
+        return fightStrict(queue崇光69);
+    case static_cast<int>(EmbedType::严格_崇光699):
+        return fightStrict(queue崇光699);
+    case static_cast<int>(EmbedType::严格_齐光30):
+        return fightStrict(queue齐光30);
+    case static_cast<int>(EmbedType::严格_齐光35):
+        return fightStrict(queue齐光35);
+    case static_cast<int>(EmbedType::简单_齐光一键):
+        // do nothing and fall through
+    case static_cast<int>(EmbedType::简单_崇光两键):
+        return fightSimple();
+    case static_cast<int>(EmbedType::简单_齐光两键):
+        return fight_简单_齐光两键();
+    case static_cast<int>(EmbedType::简单_崇光洞若):
+        return fight_简单_崇光洞若();
+    default:
+        return fightSimple();
     }
 }
 
-void MjFysj::embed0() {
-    if (skillGetLevel(37337)) { // 崇光
-        if (idx == 0) [[unlikely]]
-            stopInitiative.emplace(1);
-        if (idx % 99 == 61) {                         // 特效腰坠
-            itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+void MjFysj::fightStrict(const std::vector<int> &queue) {
+    if (nFight == 0) [[unlikely]]
+        fightStopWait.emplace(1);
+    if (nFight >= queue.size()) [[unlikely]]
+        fightStopWait.emplace(0);
+    if (queue[nFight] < 0) {
+        switch (queue[nFight]) {
+        case 特效腰坠: {
             itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
-        }
-
-        // 劫后 400ms 隐身, 多 1 降
-        if (idx + 1 < cg.size() && cg[idx + 1] == 隐身)
-            delayCustom = 400;
-
-        if (cast(cg[idx])) {
-            idx++;
-        } else {
-            auto tick = skillCooldownLeftTick(cg[idx]);
-            if (tick > 0)
-                delayCustom = static_cast<int>(tick + delayBase + delayRand / 2);
-            else
-                stopInitiative.reset();
-        }
-        if (idx == cg.size()) [[unlikely]]
-            stopInitiative.emplace(0);
-
-    } else if (skillGetLevel(34370)) { // 齐光
-        if (idx == 0) [[unlikely]]
-            stopInitiative.emplace(1);
-        if (idx % 100 == 6) {                         // 特效腰坠
             itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
-            itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
-        }
-
-        // 日斩冷却时间过长, 等一下再打破, 防止掉诛邪 buff
-        if (idx + 2 < qg.size() && qg[idx + 2] == 隐身) {
-            auto tick = skillCooldownLeftTick(qg[idx + 1]); // 获取日斩的剩余冷却时间
-            auto t    = 1024 + delayBase + delayRand;
-            if (tick > t) { // 假如剩余冷却时间大于 1 秒以上
-                delayCustom = static_cast<int>(tick - t);
-                return; // 直接返回, 不进行后续操作
+            nFight++;
+        } break;
+        case 延迟隐身: {
+            const auto cd = skillCooldownLeftTick(暗尘弥散);
+            if (cd < 400) {
+                delayCustom = 400;
+                nFight++;
+            } else {
+                delayCustom = static_cast<int>(cd - 400 + delayBase + delayRand / 2);
+                return;
             }
+        } break;
+        case 点诛: {
+            buffDelMultiGroupByID(9909);
+            nFight++;
+        } break;
+        case 特殊处理1: {
+            const auto cd = skillCooldownLeftTick(烈日斩); // 获取日斩的剩余冷却时间
+            const auto t  = framePublicCooldown * 1024 / 16 + delayBase + delayRand;
+            if (cd > t) { // 假如剩余冷却时间大于 1 秒以上
+                delayCustom = static_cast<int>(cd - t);
+                return; // 直接返回, 不进行后续操作
+            } else {
+                nFight++;
+            }
+        } break;
         }
-
-        if (cast(qg[idx])) {
-            idx++;
-        } else {
-            auto tick = skillCooldownLeftTick(qg[idx]);
-            if (tick > 0)
-                delayCustom = static_cast<int>(tick + delayBase + delayRand / 2);
-            else
-                stopInitiative.reset();
-        }
-        if (idx == qg.size()) [[unlikely]]
-            stopInitiative.emplace(0);
-
-    } else [[unlikely]] {
-        embedStat = 1;
     }
+    const auto &skill = queue[nFight];
+    if (cast(skill)) {
+        nFight++;
+    } else {
+        const auto tick = skillCooldownLeftTick(skill);
+        if (tick > 0)
+            return;
+        else
+            fightStopWait.reset();
+    }
+    if (nFight == queue.size()) [[unlikely]]
+        fightStopWait.emplace(0);
 }
 
-void MjFysj::embed1() {
-    if (flagOutset) {
-        cast(outset[idx]);
-        idx++;
-        if (idx == outset.size()) {
-            flagOutset = false;
+extern const std::vector<int> outsetSimple;
+
+void MjFysj::fightSimple() {
+    if (bFight) {
+        cast(outsetSimple[nFight]);
+        nFight++;
+        if (nFight == outsetSimple.size()) {
+            bFight = false;
         }
     } else [[likely]] {
-        auto buffLJ = buffGet(28196, 1); // 连击
-        auto buffCG = buffGet(28194, 1); // 崇光
-        auto buffZE = buffGet(28195, 1); // 斩恶
-        if (buffLJ && buffLJ->isValid && buffLJ->nStackNum < 3)
+        // 顺便做一下崇光适配
+        const auto buff崇光   = buffGet(28194, 1);
+        const auto buff斩恶   = buffGet(28195, 1);
+        const auto buff连击   = buffGet(28196, 1);
+        const auto buff降灵尊 = buffGet(25731, 1);
+        if (buff连击 && buff连击->isValid && buff连击->nStackNum < 3)
             cast(37335); // 崇光斩恶, 连击
-        if (buffCG && buffCG->isValid && buffCG->nStackNum == 5 && buffZE && buffZE->isValid)
+        if (buff崇光 && buff崇光->isValid && buff崇光->nStackNum == 5 && buff斩恶 && buff斩恶->isValid)
             cast(37335); // 崇光斩恶, 5.5 层
         cast(3974);      // 暗尘弥散
-        if (buffExist(25731, 1))
+        if (buff降灵尊 && buff降灵尊->isValid)
             cast(34347); // 悬象著明
         cast(22890);     // 诛邪镇魔
         cast(3969);      // 光明相
         cast(3966);      // 生死劫
         cast(3967);      // 净世破魔击
-        if (buffCG && buffCG->isValid && buffCG->nStackNum >= 3)
+        if (buff崇光 && buff崇光->isValid && buff崇光->nStackNum >= 3)
             cast(37335); // 崇光斩恶, 3 层
         cast(3979);      // 驱夜断愁
         cast(3963);      // 烈日斩
@@ -502,17 +472,17 @@ void MjFysj::fightConv() {
         return;
     // 空灵斩, 同时获取驱夜断愁标记
     if (nCurrentSunEnergy <= 2000 && nCurrentMoonEnergy <= 4000) {
-        bFlagFight = true;
+        bFight = true;
         if (cast(烈日斩))
             return;
         if (cast(银月斩))
             return;
     }
     // 驱夜
-    if (bFlagFight || count灵魂 >= 13)
+    if (bFight || count灵魂 >= 13)
         if (cast(驱夜断愁)) {
             if (count灵魂 < 15) {
-                bFlagFight = false;
+                bFight = false;
             }
             return;
         }
@@ -677,7 +647,7 @@ void MjFysj::fight_上限_崇光69() {
 
     // 起手双斩
     if (now < 3 * 1024) {
-        stopInitiative.emplace(1);
+        fightStopWait.emplace(1);
         if (time目标日斩 == 0)
             if (cast(烈日斩))
                 return;
@@ -688,7 +658,7 @@ void MjFysj::fight_上限_崇光69() {
 
     // 调试
     if (now > 2 * fightTick)
-        stopInitiative.emplace(0);
+        fightStopWait.emplace(0);
 
     // 处理日月同辉溢出
     if (count灵魂 >= 18 && (nSunPowerValue || nMoonPowerValue))
@@ -698,8 +668,8 @@ void MjFysj::fight_上限_崇光69() {
     // 连击崇光
     if (stacknum连击 > 0 && stacknum连击 < 3) {
         if (cast(崇光斩恶)) {
-            if (stacknum连击 == 2 && stopInitiative.value() == 2)
-                stopInitiative.emplace(0);
+            if (stacknum连击 == 2 && fightStopWait.value() == 2)
+                fightStopWait.emplace(0);
             return;
         }
     }
@@ -752,7 +722,7 @@ void MjFysj::fight_上限_崇光69() {
             now - fightTick > -20 * 1024             // 距离预定的收尾时间不到20s, 或已经超过了预定的收尾时间
         )
             if (cast(崇光斩恶)) {
-                stopInitiative.emplace(2);
+                fightStopWait.emplace(2);
                 return;
             }
         if (stacknum崇光 >= 5 &&     // 有5层崇光, 并且
@@ -765,6 +735,42 @@ void MjFysj::fight_上限_崇光69() {
             if (cast(崇光斩恶))
                 return;
         return framePublicCooldown <= 14 ? fightConvVar() : fightConv();
+    }
+}
+
+void MjFysj::fight_简单_齐光两键() {
+    if (bFight) {
+        cast(outsetSimple[nFight]);
+        nFight++;
+        if (nFight == outsetSimple.size()) {
+            bFight = false;
+        }
+    } else [[likely]] {
+        // 顺便做一下崇光适配
+        const auto buff崇光   = buffGet(28194, 1);
+        const auto buff斩恶   = buffGet(28195, 1);
+        const auto buff连击   = buffGet(28196, 1);
+        const auto buff降灵尊 = buffGet(25731, 1);
+        const auto buff灵日   = buffGet(9910, 0);
+        const auto buff魂月   = buffGet(9911, 0);
+        if (buff连击 && buff连击->isValid && buff连击->nStackNum < 3)
+            cast(37335); // 崇光斩恶, 连击
+        if (buff崇光 && buff崇光->isValid && buff崇光->nStackNum == 5 && buff斩恶 && buff斩恶->isValid)
+            cast(37335); // 崇光斩恶, 5.5 层
+        cast(3974);      // 暗尘弥散
+        if (buff降灵尊 && buff降灵尊->isValid)
+            cast(34347); // 悬象著明
+        cast(22890);     // 诛邪镇魔
+        cast(3969);      // 光明相
+        if ((buff灵日 && buff灵日->isValid) || (buff魂月 && buff魂月->isValid))
+            cast(3966); // 生死劫
+        cast(3967);     // 净世破魔击
+        if (buff崇光 && buff崇光->isValid && buff崇光->nStackNum >= 3)
+            cast(37335); // 崇光斩恶, 3 层
+        cast(3979);      // 驱夜断愁
+        cast(3963);      // 烈日斩
+        cast(3960);      // 银月斩
+        cast(3962);      // 赤日轮
     }
 }
 
@@ -794,5 +800,145 @@ void MjFysj::fight_简单_崇光洞若() {
     cast(银月斩);
     cast(赤日轮);
 }
+
+static const std::vector<int> queue崇光69 {
+    日斩, 月斩, 月悬, 延迟隐身, 日劫, 隐身,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, 日斩,
+    驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪, 日斩,
+    驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪, 日斩,
+    月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 特效腰坠, 日破, 诛邪, 月破, 诛邪, 日斩, 崇光, 崇光, 崇光,
+    驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪, 日斩,
+    驱夜, 日破, 月斩, 月劫, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 崇光, 崇光, 崇光, 诛邪, 日斩,
+    月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, 日斩,
+    驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪, 日斩,
+    驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪, 日斩,
+    月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 特效腰坠, 日破, 诛邪, 月破, 诛邪, 日斩, 崇光, 崇光, 崇光,
+    驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪, 日斩,
+    驱夜, 日破, 月斩, 月劫, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 崇光, 崇光, 崇光, 诛邪, 日斩,
+    月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, 日斩,
+    驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪, 日斩,
+    驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪, 日斩,
+    月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 特效腰坠, 日破, 诛邪, 月破, 诛邪, 日斩, 崇光, 崇光, 崇光,
+    驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪, 日斩,
+    驱夜, 日破, 月斩, 月劫, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 崇光, 崇光, 崇光, 诛邪, 日斩,
+    月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, 日斩, 崇光, 崇光, 崇光
+};
+
+static const std::vector<int> queue崇光699 {
+    日斩, 月斩, 月悬, 延迟隐身, 日劫, 隐身,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    月斩, 日斩, 驱夜, 月破, 日劫, 月斩, 崇光, 崇光, 崇光, 诛邪, 月斩, 月破,
+    日斩, 驱夜, 日破, 诛邪, 月斩, 月破, 日斩, 驱夜, 日劫, 诛邪, 月轮, 月破,
+    日斩, 驱夜, 日破, 点诛, 月斩, 月破, 崇光, 崇光, 崇光,
+    日斩, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 特效腰坠, 日破, 诛邪, 月破, 诛邪,
+    月斩, 日斩, 崇光, 崇光, 崇光, 驱夜, 月破, 日劫, 月斩, 崇光, 崇光, 崇光, 诛邪, 月斩, 月破,
+    日斩, 驱夜, 日破, 诛邪, 月斩, 月破, 日斩, 驱夜, 日劫, 诛邪, 月轮, 月破,
+    日斩, 驱夜, 日破, 点诛, 月斩, 月破, 崇光, 崇光, 崇光,
+    日斩, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    月斩, 日斩, 驱夜, 月破, 日劫, 月斩, 崇光, 崇光, 崇光, 点诛, 月斩, 月破, 崇光, 崇光, 崇光,
+    日斩, 驱夜, 日破, 点诛, 月斩, 月破, 日斩, 驱夜, 日劫, 诛邪, 月轮, 月破,
+    日斩, 驱夜, 日破, 点诛, 月斩, 月破, 崇光, 崇光, 崇光,
+    日斩, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 点诛,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    月斩, 日斩, 驱夜, 月破, 日劫, 月斩, 崇光, 崇光, 崇光, 诛邪, 月斩, 月破,
+    日斩, 驱夜, 日破, 诛邪, 月斩, 月破, 日斩, 驱夜, 日劫, 诛邪, 月轮, 月破,
+    日斩, 驱夜, 日破, 点诛, 月斩, 月破, 崇光, 崇光, 崇光,
+    日斩, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    月斩, 日斩, 崇光, 崇光, 崇光, 驱夜, 月破, 日劫, 月斩, 崇光, 崇光, 崇光, 诛邪, 月斩, 月破,
+    日斩, 驱夜, 日破, 诛邪, 月斩, 月破, 日斩, 驱夜, 日劫, 诛邪, 月轮, 月破,
+    日斩, 驱夜, 日破, 点诛, 月斩, 月破, 崇光, 崇光, 崇光,
+    日斩, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 特效腰坠, 月破, 诛邪,
+    月斩, 日斩, 驱夜, 月破, 日劫, 月斩, 崇光, 崇光, 崇光, 点诛, 月斩, 月破, 崇光, 崇光, 崇光,
+    日斩, 驱夜, 日破, 点诛, 月斩, 月破, 日斩, 驱夜, 日劫, 诛邪, 月轮, 月破,
+    日斩, 驱夜, 日破, 点诛, 月斩, 月破, 崇光, 崇光, 崇光,
+    日斩, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 崇光, 崇光, 崇光
+};
+
+static const std::vector<int> queue齐光30 {
+    月斩, 月破, 日破, 日斩,
+    隐身, 特效腰坠, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日斩, 日破, 月斩, 光明相, 月劫, 日破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 特殊处理1, 月破, 日斩,
+    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日轮, 日破, 月斩, 月劫, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 特殊处理1, 月破, 日斩,
+    隐身, 特效腰坠, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日斩, 日破, 月斩, 光明相, 月劫, 日破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 特殊处理1, 月破, 日斩,
+    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日轮, 日破, 月斩, 月劫, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 特殊处理1, 月破, 日斩,
+    隐身, 特效腰坠, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日斩, 日破, 月斩, 光明相, 月劫, 日破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 特殊处理1, 月破, 日斩,
+    隐身, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日轮, 日破, 月斩, 月劫, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 月破, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月轮, 月劫, 诛邪, 驱夜, 日斩, 日破, 月斩, 月破, 诛邪,
+    驱夜, 日斩, 日破, 月斩, 特殊处理1, 月破, 日斩,
+    隐身, 特效腰坠, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
+    驱夜, 月破, 诛邪, 月斩, 日斩, 日破
+};
+
+static const std::vector<int> queue齐光35 {
+    日斩, 月破, 日破, 驱夜, 月斩, 光明相, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 月斩, 驱夜, 月破, 日劫, 诛邪, 日斩, 月斩, 驱夜, 月破, 日破, 诛邪,
+    日斩, 月斩, 驱夜, 月破, 日破, 诛邪, 日斩, 月轮, 驱夜, 月破, 日劫,
+    月斩, 诛邪, 月斩, 月破, 日斩, 驱夜, 日破, 诛邪, 月轮, 月破,
+    日斩, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 驱夜, 日破, 月斩, 光明相, 月劫, 诛邪, 日破,
+    日斩, 月斩, 驱夜, 月破, 诛邪, 日破, 日斩, 月斩, 驱夜, 月破, 诛邪, 日破,
+    月斩, 驱夜, 月劫, 诛邪, 日斩, 日破, 日斩, 月斩, 驱夜, 月破, 诛邪, 日破,
+    日斩, 月轮, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 月斩, 驱夜, 月破, 日劫, 诛邪, 日斩, 月斩, 驱夜, 月破, 日破, 诛邪,
+    日斩, 月斩, 驱夜, 月破, 日破, 诛邪, 日斩, 月轮, 驱夜, 月破, 日劫,
+    月斩, 诛邪, 月斩, 月破, 日斩, 驱夜, 日破, 诛邪, 月轮, 月破,
+    日斩, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 驱夜, 日破, 月斩, 光明相, 月劫, 诛邪, 日破,
+    日斩, 月斩, 驱夜, 月破, 诛邪, 日破, 日斩, 月斩, 驱夜, 月破, 诛邪, 日破,
+    月斩, 驱夜, 月劫, 诛邪, 日斩, 日破, 日斩, 月斩, 驱夜, 月破, 诛邪, 日破,
+    日斩, 月轮, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 月斩, 驱夜, 月破, 日劫, 诛邪, 日斩, 月斩, 驱夜, 月破, 日破, 诛邪,
+    日斩, 月斩, 驱夜, 月破, 日破, 诛邪, 日斩, 月轮, 驱夜, 月破, 日劫,
+    月斩, 诛邪, 月斩, 月破, 日斩, 驱夜, 日破, 诛邪, 月轮, 月破,
+    日斩, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
+    日斩, 驱夜, 日破, 月斩, 光明相, 月劫, 诛邪, 日破,
+    日斩, 月斩, 驱夜, 月破, 诛邪, 日破, 日斩, 月斩, 驱夜, 月破, 诛邪, 日破,
+    月斩, 驱夜, 月劫, 诛邪, 日斩, 日破, 日斩, 月斩, 驱夜, 月破, 诛邪, 日破,
+    日斩, 月轮, 月斩, 驱夜, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
+    月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪
+};
+
+static const std::vector<int> outsetSimple {
+    月斩, 月破, 日破, 日斩
+};
 
 } // namespace
