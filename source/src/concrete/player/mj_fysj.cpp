@@ -801,7 +801,7 @@ void MjFysj::fight_简单_崇光洞若() {
     cast(赤日轮);
 }
 
-static const std::vector<int> queue崇光69 {
+const std::vector<int> queue崇光69 {
     日斩, 月斩, 月悬, 延迟隐身, 日劫, 隐身,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, 日斩,
     驱夜, 日破, 月斩, 月劫, 崇光, 崇光, 崇光, 诛邪, 日斩, 驱夜, 日破, 月斩, 月破, 诛邪, 日斩,
@@ -830,7 +830,7 @@ static const std::vector<int> queue崇光69 {
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, 日斩, 崇光, 崇光, 崇光
 };
 
-static const std::vector<int> queue崇光699 {
+const std::vector<int> queue崇光699 {
     日斩, 月斩, 月悬, 延迟隐身, 日劫, 隐身,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 月斩, 崇光, 崇光, 崇光, 诛邪, 月斩, 月破,
@@ -866,7 +866,7 @@ static const std::vector<int> queue崇光699 {
     日斩, 崇光, 崇光, 崇光
 };
 
-static const std::vector<int> queue齐光30 {
+const std::vector<int> queue齐光30 {
     月斩, 月破, 日破, 日斩,
     隐身, 特效腰坠, 日悬, 月劫, 诛邪, 驱夜, 月斩, 月破, 诛邪, 日破, 诛邪,
     驱夜, 月破, 诛邪, 月斩, 日斩, 日破, 月斩, 光明相, 月劫, 日破, 诛邪,
@@ -902,7 +902,7 @@ static const std::vector<int> queue齐光30 {
     驱夜, 月破, 诛邪, 月斩, 日斩, 日破
 };
 
-static const std::vector<int> queue齐光35 {
+const std::vector<int> queue齐光35 {
     日斩, 月破, 日破, 驱夜, 月斩, 光明相, 月悬, 延迟隐身, 日劫, 隐身, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     日斩, 月斩, 驱夜, 月破, 日劫, 诛邪, 日斩, 月斩, 驱夜, 月破, 日破, 诛邪,
@@ -937,7 +937,7 @@ static const std::vector<int> queue齐光35 {
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪
 };
 
-static const std::vector<int> outsetSimple {
+const std::vector<int> outsetSimple {
     月斩, 月破, 日破, 日斩
 };
 
