@@ -33,14 +33,12 @@ private:
         // 简单循环
         简单_齐光一键 = 1 << 10,
         简单_崇光两键,
-        简单_齐光两键,
         简单_崇光洞若,
     };
 
     int  nFight = 0;
     bool bFight = true;
     void fightStrict(const std::vector<int> &queue);
-    void fightSimple();
 
     void fightBurst();
     void fightConv();    // conventional fight
@@ -48,9 +46,8 @@ private:
     void fightCW();
 
     void fight_上限_崇光69();
-    // void fight_简单_齐光一键(); // see fightSimple
-    // void fight_简单_崇光两键(); // see fightSimple
-    void fight_简单_齐光两键();
+    void fight_简单_齐光一键();
+    void fight_简单_崇光两键();
     void fight_简单_崇光洞若();
 };
 } // namespace
@@ -255,15 +252,13 @@ void MjFysj::fightEmbed() {
     case static_cast<int>(EmbedType::严格_齐光35):
         return fightStrict(queue齐光35);
     case static_cast<int>(EmbedType::简单_齐光一键):
-        // do nothing and fall through
+        return fight_简单_齐光一键();
     case static_cast<int>(EmbedType::简单_崇光两键):
-        return fightSimple();
-    case static_cast<int>(EmbedType::简单_齐光两键):
-        return fight_简单_齐光两键();
+        return fight_简单_崇光两键();
     case static_cast<int>(EmbedType::简单_崇光洞若):
         return fight_简单_崇光洞若();
     default:
-        return fightSimple();
+        return fight_简单_齐光一键();
     }
 }
 
@@ -317,41 +312,6 @@ void MjFysj::fightStrict(const std::vector<int> &queue) {
     }
     if (nFight == queue.size()) [[unlikely]]
         fightStopWait.emplace(0);
-}
-
-extern const std::vector<int> outsetSimple;
-
-void MjFysj::fightSimple() {
-    if (bFight) {
-        cast(outsetSimple[nFight]);
-        nFight++;
-        if (nFight == outsetSimple.size()) {
-            bFight = false;
-        }
-    } else [[likely]] {
-        // 顺便做一下崇光适配
-        const auto buff崇光   = buffGet(28194, 1);
-        const auto buff斩恶   = buffGet(28195, 1);
-        const auto buff连击   = buffGet(28196, 1);
-        const auto buff降灵尊 = buffGet(25731, 1);
-        if (buff连击 && buff连击->isValid && buff连击->nStackNum < 3)
-            cast(37335); // 崇光斩恶, 连击
-        if (buff崇光 && buff崇光->isValid && buff崇光->nStackNum == 5 && buff斩恶 && buff斩恶->isValid)
-            cast(37335); // 崇光斩恶, 5.5 层
-        cast(3974);      // 暗尘弥散
-        if (buff降灵尊 && buff降灵尊->isValid)
-            cast(34347); // 悬象著明
-        cast(22890);     // 诛邪镇魔
-        cast(3969);      // 光明相
-        cast(3966);      // 生死劫
-        cast(3967);      // 净世破魔击
-        if (buff崇光 && buff崇光->isValid && buff崇光->nStackNum >= 3)
-            cast(37335); // 崇光斩恶, 3 层
-        cast(3979);      // 驱夜断愁
-        cast(3963);      // 烈日斩
-        cast(3960);      // 银月斩
-        cast(3962);      // 赤日轮
-    }
 }
 
 void MjFysj::fightBurst() {
@@ -738,39 +698,69 @@ void MjFysj::fight_上限_崇光69() {
     }
 }
 
-void MjFysj::fight_简单_齐光两键() {
+extern const std::vector<int> outset齐光一键;
+
+void MjFysj::fight_简单_齐光一键() {
     if (bFight) {
-        cast(outsetSimple[nFight]);
+        cast(outset齐光一键[nFight]);
         nFight++;
-        if (nFight == outsetSimple.size()) {
+        if (nFight == outset齐光一键.size()) {
             bFight = false;
         }
     } else [[likely]] {
-        // 顺便做一下崇光适配
-        const auto buff崇光   = buffGet(28194, 1);
-        const auto buff斩恶   = buffGet(28195, 1);
-        const auto buff连击   = buffGet(28196, 1);
         const auto buff降灵尊 = buffGet(25731, 1);
-        const auto buff灵日   = buffGet(9910, 0);
-        const auto buff魂月   = buffGet(9911, 0);
+        cast(3974); // 暗尘弥散
+        if (buff降灵尊 && buff降灵尊->isValid) {
+            itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+            itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
+            cast(悬象著明);
+        }
+        cast(诛邪镇魔);
+        cast(光明相);
+        cast(生死劫);
+        cast(净世破魔击);
+        cast(驱夜断愁);
+        cast(烈日斩);
+        cast(银月斩);
+        cast(赤日轮);
+    }
+}
+
+extern const std::vector<int> outset崇光两键;
+
+void MjFysj::fight_简单_崇光两键() {
+    if (bFight) {
+        cast(outset崇光两键[nFight]);
+        nFight++;
+        if (nFight == outset崇光两键.size()) {
+            bFight = false;
+        }
+    } else [[likely]] {
+        const auto buff崇光 = buffGet(28194, 1);
+        const auto buff斩恶 = buffGet(28195, 1);
+        const auto buff连击 = buffGet(28196, 1);
         if (buff连击 && buff连击->isValid && buff连击->nStackNum < 3)
             cast(37335); // 崇光斩恶, 连击
         if (buff崇光 && buff崇光->isValid && buff崇光->nStackNum == 5 && buff斩恶 && buff斩恶->isValid)
             cast(37335); // 崇光斩恶, 5.5 层
-        cast(3974);      // 暗尘弥散
-        if (buff降灵尊 && buff降灵尊->isValid)
-            cast(34347); // 悬象著明
-        cast(22890);     // 诛邪镇魔
-        cast(3969);      // 光明相
-        if ((buff灵日 && buff灵日->isValid) || (buff魂月 && buff魂月->isValid))
-            cast(3966); // 生死劫
-        cast(3967);     // 净世破魔击
-        if (buff崇光 && buff崇光->isValid && buff崇光->nStackNum >= 3)
+        if (nCurrentMoonEnergy <= 2000)
+            cast(暗尘弥散);
+        const auto buff降灵尊 = buffGet(25731, 1);
+        if (buff降灵尊 && buff降灵尊->isValid) {
+            itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+            itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
+            cast(悬象著明);
+        }
+        cast(诛邪镇魔);
+        cast(生死劫);
+        cast(净世破魔击);
+        if (!(buff降灵尊 && buff降灵尊->isValid) && buff崇光 && buff崇光->isValid && buff崇光->nStackNum >= 3)
             cast(37335); // 崇光斩恶, 3 层
-        cast(3979);      // 驱夜断愁
-        cast(3963);      // 烈日斩
-        cast(3960);      // 银月斩
-        cast(3962);      // 赤日轮
+        if (nCurrentMoonEnergy < 6000)
+            cast(驱夜断愁);
+        cast(烈日斩);
+        cast(银月斩);
+        cast(幽月轮);
     }
 }
 
@@ -937,8 +927,12 @@ const std::vector<int> queue齐光35 {
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪
 };
 
-const std::vector<int> outsetSimple {
+const std::vector<int> outset齐光一键 {
     月斩, 月破, 日破, 日斩
+};
+
+const std::vector<int> outset崇光两键 {
+    月破, 日破
 };
 
 } // namespace
