@@ -186,6 +186,8 @@ int ChAttr::getPoisonOvercome() const {
 
 // 防御
 int ChAttr::getPhysicsShield(int srcShieldIgnorePercent) const {
+    if (atPhysicsShieldPercent <= -1024 || srcShieldIgnorePercent >= 1024)
+        return 0;
     int res = (atPhysicsShieldBase +
                atPhysicsShieldBase * atPhysicsShieldPercent / 1024 +
                atPhysicsShieldAdditional) *
@@ -194,6 +196,8 @@ int ChAttr::getPhysicsShield(int srcShieldIgnorePercent) const {
     return res > 768 ? 768 : res;
 }
 int ChAttr::getSolarShield(int srcShieldIgnorePercent) const {
+    if (atSolarMagicShieldPercent <= -1024 || srcShieldIgnorePercent >= 1024)
+        return 0;
     int res = ((atSolarMagicShieldBase + atMagicShield) +
                (atSolarMagicShieldBase + atMagicShield) * atSolarMagicShieldPercent / 1024) *
               (1024 - srcShieldIgnorePercent) / 1024;
@@ -201,6 +205,8 @@ int ChAttr::getSolarShield(int srcShieldIgnorePercent) const {
     return res > 768 ? 768 : res;
 }
 int ChAttr::getLunarShield(int srcShieldIgnorePercent) const {
+    if (atLunarMagicShieldPercent <= -1024 || srcShieldIgnorePercent >= 1024)
+        return 0;
     int res = ((atLunarMagicShieldBase + atMagicShield) +
                (atLunarMagicShieldBase + atMagicShield) * atLunarMagicShieldPercent / 1024) *
               (1024 - srcShieldIgnorePercent) / 1024;
@@ -208,6 +214,8 @@ int ChAttr::getLunarShield(int srcShieldIgnorePercent) const {
     return res > 768 ? 768 : res;
 }
 int ChAttr::getNeutralShield(int srcShieldIgnorePercent) const {
+    if (atNeutralMagicShieldPercent <= -1024 || srcShieldIgnorePercent >= 1024)
+        return 0;
     int res = ((atNeutralMagicShieldBase + atMagicShield) +
                (atNeutralMagicShieldBase + atMagicShield) * atNeutralMagicShieldPercent / 1024) *
               (1024 - srcShieldIgnorePercent) / 1024;
@@ -215,6 +223,8 @@ int ChAttr::getNeutralShield(int srcShieldIgnorePercent) const {
     return res > 768 ? 768 : res;
 }
 int ChAttr::getPoisonShield(int srcShieldIgnorePercent) const {
+    if (atPoisonMagicShieldPercent <= -1024 || srcShieldIgnorePercent >= 1024)
+        return 0;
     int res = ((atPoisonMagicShieldBase + atMagicShield) +
                (atPoisonMagicShieldBase + atMagicShield) * atPoisonMagicShieldPercent / 1024) *
               (1024 - srcShieldIgnorePercent) / 1024;
@@ -247,7 +257,7 @@ int ChAttr::getSurplus() const {
 
 // 伤害加成
 int ChAttr::getPhysicsDamageAddPercent() const {
-    return atAllDamageAddPercent;
+    return atAllDamageAddPercent + atAllPhysicsDamageAddPercent;
 }
 int ChAttr::getSolarDamageAddPercent() const {
     return atAllDamageAddPercent + atAllMagicDamageAddPercent;

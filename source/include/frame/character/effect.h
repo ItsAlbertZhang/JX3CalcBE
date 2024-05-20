@@ -9,7 +9,7 @@ namespace jx3calc {
 namespace frame {
 class Effect {
 public:
-    virtual void active(frame::Character *obj) const = 0;
+    virtual void active(frame::Character *obj) = 0;
 };
 } // namespace frame
 

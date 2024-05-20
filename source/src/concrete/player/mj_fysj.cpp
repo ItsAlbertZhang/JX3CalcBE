@@ -170,7 +170,7 @@ enum operation {
 };
 
 MjFysj::MjFysj() :
-    Player(10242, 13, 503) {}
+    Player(8, 10242, 13, 503) {}
 
 auto MjFysj::getSkills(const typeSkillMap &custom) -> typeSkillMap {
     static const typeSkillMap skill {
@@ -565,19 +565,22 @@ void MjFysj::fightCW() {
         cast(生死劫);
     }
     // 处理一种特殊情况: 在特效内打诛邪.
-    if (buff悬象 && buff悬象->isValid && cd生死劫 > 0 &&                                 // 有悬象, 并且生死劫在CD中, 并且
-        (buff目标日劫 && buff目标日劫->isValid && buff目标月劫 && buff目标月劫->isValid) // 目标身上没有双buff
-    ) {
-        const auto 悬象层数   = buff悬象->nStackNum;
-        const auto 劫前技能数 = cd生死劫 / 1024 + 1;
-        const auto 连满技能数 = (time橙武CD - 25 * 1024) / 1024 + 1;
-        // 如果悬象层数大于劫前技能数, 那么没有修正的必要
-        // 如果连满技能数小于劫前技能数, 那么没有修正的可能
-        const bool intervene  = 悬象层数 <= 劫前技能数 && 连满技能数 >= 劫前技能数;
-        if (intervene) {
-            cast(诛邪镇魔);
-        }
-    }
+    // 2024.5.20 note: 发现不处理对 DPS 没啥影响, 好像还高几百.
+    // 暂时注释, 先不处理.
+    // if (buff悬象 && buff悬象->isValid && cd生死劫 > 0 &&                                  // 有悬象, 并且生死劫在CD中, 并且
+    //     !(buff目标日劫 && buff目标日劫->isValid && buff目标月劫 && buff目标月劫->isValid) // 目标身上没有双buff
+    // ) {
+    //     const auto 悬象层数   = buff悬象->nStackNum - 1; // 留 1 层容错为异色劫需求
+    //     const auto GCD时间    = framePublicCooldown * 1024 / 16 + delayBase + delayRand;
+    //     const auto 劫前技能数 = cd生死劫 / GCD时间 + 1;
+    //     const auto 连满技能数 = (time橙武CD - 25 * 1024) / GCD时间 + 1;
+    //     // 如果悬象层数大于劫前技能数, 那么没有修正的必要
+    //     // 如果连满技能数小于劫前技能数, 那么没有修正的可能
+    //     const bool intervene  = 悬象层数 <= 劫前技能数 && 连满技能数 >= 劫前技能数;
+    //     if (intervene) {
+    //         cast(诛邪镇魔);
+    //     }
+    // }
     cast(净世破魔击);
 }
 

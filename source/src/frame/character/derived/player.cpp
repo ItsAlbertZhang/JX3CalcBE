@@ -70,14 +70,15 @@ Player::typeTalentArray Player::overrideTalent(
 }
 
 Player::Player(
+    int mountID,
     int kungfuID,
     int kungfuLevel,
     int publicCooldownID
-)
-    : Character(),
-      publicCooldownID(publicCooldownID) {
-
+) :
+    Character(),
+    publicCooldownID(publicCooldownID) {
     this->isPlayer    = true;
+    this->mountID     = mountID;
     this->kungfuID    = kungfuID;
     this->kungfuLevel = kungfuLevel;
 

@@ -22,6 +22,7 @@ namespace frame {
 class Player : public Character {
 public:
     Player(
+        int mountID,
         int kungfuID,
         int kungfuLevel,
         int publicCooldownID

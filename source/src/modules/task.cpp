@@ -159,7 +159,7 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
         for (auto &[key, value] : j.at("skills").items()) {
             data.skills.emplace(
                 std::stoi(key),
-                frame::Player::Skill{
+                frame::Player::Skill {
                     .id      = value.at("id").get<int>(),
                     .level   = value.at("level").get<int>(),
                     .recipes = value.at("recipes").get<std::array<int, CountRecipesPerSkill>>(),
@@ -204,13 +204,13 @@ static auto asyncRun(Server *self, asio::io_context &io, Task &task) -> asio::aw
             }
             cntPre = task.cntCompleted;
             asio::steady_timer timer(io);
-            timer.expires_after(std::chrono::seconds{1});
+            timer.expires_after(std::chrono::seconds {1});
             co_await timer.async_wait(asio::use_awaitable);
         }
     }
     if (!task.stop.load()) { // 正常结束
         asio::steady_timer timer(io);
-        timer.expires_after(std::chrono::seconds{60}); // 等待 60 秒, 随后释放内存
+        timer.expires_after(std::chrono::seconds {60}); // 等待 60 秒, 随后释放内存
         co_await timer.async_wait(asio::use_awaitable);
     }
     asyncStop(self, task);
@@ -249,13 +249,13 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
 
     std::unique_ptr<frame::NPC> npc = concrete::createNPC(concrete::NPC::NPC124);
     player->targetSelect            = npc.get();
+    frame::Event::clear();
 
     player->attrImportFromBackup(arg.attrBackup);
     for (auto &it : arg.effects) {
         it->active(player.get());
     }
 
-    frame::Event::clear();
     player->init(arg.skills, arg.talents);
     player->fightStart();
     while (true) {
@@ -294,6 +294,7 @@ static int calcDetail(const Task::Data &data, frame::ChDamage *detail) {
     *detail = std::move(player->chDamage);
 #ifdef D_CONSTEXPR_LOG
     plugin::log::info.save();
+    plugin::log::info.enable = false;
     plugin::log::error.save();
 #endif
 #ifdef D_CONSTEXPR_CHANNELINTERVAL
@@ -453,7 +454,7 @@ std::string Task::queryDamageAnalysis() {
                 } else {
                     name = frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
                 }
-                damageAnalysisMap[everyDamage.id][everyDamage.level] = DamageAnalysisItem{
+                damageAnalysisMap[everyDamage.id][everyDamage.level] = DamageAnalysisItem {
                     .id        = everyDamage.id,
                     .level     = everyDamage.level,
                     .name      = name,

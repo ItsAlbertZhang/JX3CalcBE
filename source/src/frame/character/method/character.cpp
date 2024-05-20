@@ -7,7 +7,7 @@ using namespace jx3calc;
 using namespace frame;
 
 Character::Character() {
-    this->dwID = static_cast<int>(characterList.size());
+    this->dwID = static_cast<int>(characterList.size() + 1); // 从 1 开始, 以便在出现异常情况时核查.
     characterList.push_back(this);
     characterMap.emplace(this, this->dwID);
 }
@@ -21,7 +21,7 @@ Character::Character() {
 
 Character::~Character() {
     // if (this->dwID >= 0) {
-    characterList.at(this->dwID) = nullptr;
+    characterList.at(this->dwID - 1) = nullptr;
     // 不能偷懒省掉哈希表的移除, 否则大量 Character 析构紧接构造时, 非常有可能出现:
     // 新构造的对象指针地址与上一个析构的对象指针地址相同. 此时会引发哈希冲突.
     for (auto &it : autoRollbackAttribList) {
@@ -35,10 +35,10 @@ Character::~Character() {
 }
 
 Character *Character::characterGet(int nCharacterID) {
-    if (nCharacterID < 0 || nCharacterID >= static_cast<int>(characterList.size())) {
+    if (nCharacterID <= 0 || nCharacterID > static_cast<int>(characterList.size())) {
         return nullptr;
     } else {
-        return characterList.at(nCharacterID);
+        return characterList.at(nCharacterID - 1);
     }
 }
 

@@ -59,7 +59,8 @@ public:
     std::set<AutoRollbackAttribute *> autoRollbackAttributeList; // 自动回滚的魔法属性列表
 
     // ---------- 以下属性和方法未被游戏 lua 调用 ----------
-    int kungfuID    = 0;
+    int mountID     = 0; // 门派 ID, 见 skills.tab 中的 MountRequestType
+    int kungfuID    = 0; // 心法 ID, 是一个技能 ID, 游戏内按住 Ctrl 并将鼠标放在心法图标上即可看到
     int kungfuLevel = 0;
 
     // character
