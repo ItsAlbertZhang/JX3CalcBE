@@ -534,13 +534,11 @@ void MjFysj::fightConvVar() {
 
 void MjFysj::fightCW() {
     // 后续计算所需资源
-    const auto cd生死劫     = skillCooldownLeftTick(生死劫);
-    const auto cd暗尘弥散   = skillCooldownLeftTick(暗尘弥散);
-    const auto buff悬象     = buffGet(25716, 0);
-    const auto buff橙武CD   = buffGet(2584, 0);
-    const auto time橙武CD   = buff橙武CD && buff橙武CD->isValid ? buff橙武CD->nLeftFrame * 1024 / 16 : 0;
-    const auto buff目标日劫 = buffGet(25725, 0);
-    const auto buff目标月劫 = buffGet(25726, 0);
+    const auto cd生死劫   = skillCooldownLeftTick(生死劫);
+    const auto cd暗尘弥散 = skillCooldownLeftTick(暗尘弥散);
+    const auto buff悬象   = buffGet(25716, 0);
+    const auto buff橙武CD = buffGet(2584, 0);
+    const auto time橙武CD = buff橙武CD && buff橙武CD->isValid ? buff橙武CD->nLeftFrame * 1024 / 16 : 0;
     // 悬象. 可以提前放.
     if (time橙武CD > 27 * 1024 && cd暗尘弥散 < 1024)
         cast(悬象著明); // 提前放悬象
