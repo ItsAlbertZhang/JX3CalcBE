@@ -10,7 +10,7 @@ using namespace modules;
 using json   = nlohmann::json;
 namespace fs = std::filesystem;
 
-const std::string version = "v1.1.1.050801";
+const std::string version = "v1.1.1.052001";
 
 static inline bool stringContains(const std::string &str, const std::string &substr) {
     return str.find(substr) != std::string::npos;
@@ -68,7 +68,7 @@ bool config::init(const std::string &jsonstr) {
         json     j;
         fs::path pathConfig = pExeDir / "config.json";
         if (fs::exists(pathConfig)) {
-            std::ifstream fileConfig{pathConfig};
+            std::ifstream fileConfig {pathConfig};
             fileConfig >> j;
         }
         j.update(json::parse(jsonstr));
@@ -76,7 +76,7 @@ bool config::init(const std::string &jsonstr) {
         if (dataAvailable == dataStatus::unavailable) {
             return false;
         }
-        std::ofstream fileConfig{pathConfig};
+        std::ofstream fileConfig {pathConfig};
         fileConfig << j.dump(4);
         return true;
     } catch (...) {

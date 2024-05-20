@@ -149,8 +149,14 @@ auto concrete::createEffect(const std::string &type, const std::string &jsonstr)
 
 namespace {
 const typeMap effect_map {
-    {"套装·技能", anyMap {{"焚影圣诀", tSkillrecipe {948, 2}}}},
-    {"套装·特效", anyMap {{"焚影圣诀", tSkillevent {1922}}}},
+    {"套装·技能", [](frame::Character *obj) { switch(obj->kungfuID){
+            case 10242:obj->skillrecipeAdd(948, 2);break;
+            default: break;
+    } }},
+    {"套装·特效", [](frame::Character *obj) { switch(obj->kungfuID){
+            case 10242:obj->skilleventAdd(1922);break;
+            default: break;
+    } }},
     {"大附魔·腰", tSkillevent {2623}},
     {"大附魔·腕", anyMap {{"万灵当歌", tSkillevent {2554}}, {"雾海寻龙", tSkillevent {2624}}}},
     {"大附魔·鞋", anyMap {{"万灵当歌", tSkillevent {2555}}, {"雾海寻龙", tSkillevent {2625}}}},
