@@ -108,10 +108,15 @@ auto concrete::createEffect(const std::string &type, const std::string &jsonstr)
                 using T = std::decay_t<decltype(arg)>;
                 if constexpr (std::is_same_v<T, tBuff>) {
                     if (value.is_object()) {
-                        if (value.contains("stacknum") && value.at("stacknum").is_number_integer())
+                        if (value.contains("stacknum") && value.at("stacknum").is_number_integer()) {
                             it.stacknum = value.at("stacknum").get<int>();
-                        if (value.contains("covrate") && value.at("covrate").is_number())
+                            it.stacknum = std::max(1, it.stacknum);
+                        }
+                        if (value.contains("covrate") && value.at("covrate").is_number()) {
                             it.covrate = value.at("covrate").get<double>();
+                            it.covrate = std::max(0.0, it.covrate);
+                            it.covrate = std::min(1.0, it.covrate);
+                        }
                     }
                 }
                 return it;
