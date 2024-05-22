@@ -16,37 +16,35 @@ local skillDict = {
 }
 
 local skillQueueQishou = {
-    -- "日斩", "月破", "日破", "光明相", "驱夜", "月斩",
-    "日斩", "月破", "日破", "驱夜", "月斩",
+    "日斩", "月破", "日破", "驱夜", "月斩", "光明相",
 }
 
 local skillChanggui = {
     "月悬", "日劫", "隐身", "诛邪", "月破", "诛邪", "日破", "驱夜",
     "诛邪", "月破", "诛邪", "驱夜", "日破", "诛邪", "月破", "诛邪",
 
-    "日斩", "驱夜", "日破", "月斩", "月劫",
-    "日斩", "诛邪", "驱夜", "日破", "月斩", "月破",
-    "日斩", "诛邪", "驱夜", "日破", "月斩", "月破",
-    "日斩", "诛邪", "驱夜", "日破", "月轮", "月劫",
-    "月斩", "诛邪", "月轮", "月斩", "月破",
+    "日斩", "月斩", "驱夜", "月破", "日劫", "诛邪",
+    "日斩", "月斩", "驱夜", "月破", "日破", "诛邪",
+    "日斩", "月斩", "驱夜", "月破", "日破", "诛邪",
+    "日斩", "月轮", "驱夜", "月破", "日劫",
+    "月斩", "诛邪", "月斩", "月破",
     "日斩", "驱夜", "日破", "诛邪", "月轮", "月破",
-    "月斩", "日斩", "驱夜",
+    "日斩", "月斩", "驱夜",
 }
 
 local skillGmx = {
     "月悬", "日劫", "隐身", "诛邪", "月破", "诛邪", "日破", "驱夜",
     "诛邪", "月破", "诛邪", "驱夜", "日破", "诛邪", "月破", "诛邪",
 
-    "日斩", "月斩", "驱夜", "月破", "光明相", "日劫",
-    "诛邪", "月破", "日斩", "驱夜", "日破",
-    "月斩", "诛邪", "月破", "日斩", "驱夜", "日破",
-    "月轮", "诛邪", "月破", "日斩", "驱夜", "日劫",
-    "月斩", "诛邪", "月斩", "月破",
-    "日斩", "驱夜", "日破", "诛邪", "月轮", "月破",
-    "月斩", "日斩", "驱夜",
+    "日斩", "驱夜", "日破", "月斩", "光明相", "月劫", "诛邪", "日破",
+    "日斩", "月斩", "驱夜", "月破", "诛邪", "日破",
+    "日斩", "月斩", "驱夜", "月破", "诛邪", "日破",
+    "月斩", "驱夜", "月劫", "诛邪", "日斩", "日破",
+    "日斩", "月斩", "驱夜", "月破", "诛邪", "日破",
+    "日斩", "月轮", "月斩", "驱夜",
 }
 
-local idx = 1
+local idx = 1;
 
 function Init()
     idx = 1;
@@ -61,29 +59,11 @@ function Macro0(player)
         if idx > #skillQueueQishou then
             idx = 1;
             player.macroIdx = 1;
-            player.nCurrentSunEnergy = 10000; -- 手动给个光明相, 测试点崇光的情况下该循环的健壮性
         end
     end
 end
 
 function Macro1(player)
-    local id = skillDict[skillGmx[idx]];
-    if idx == 3 then -- 隐身前开腰坠
-        player:itemUse(1, 38789);
-    end
-    if player:cast(id) then
-        idx = idx + 1;   -- idx 此时为下一个技能的索引
-        if idx == 3 then -- 下一个技能是隐身
-            player.delayCustom = 400;
-        end
-        if idx > #skillGmx then
-            idx = 1;
-            player.macroIdx = 2;
-        end
-    end
-end
-
-function Macro2(player)
     local id = skillDict[skillChanggui[idx]];
     if idx == 3 then -- 隐身前开腰坠
         player:itemUse(1, 38789);
@@ -94,6 +74,23 @@ function Macro2(player)
             player.delayCustom = 400;
         end
         if idx > #skillChanggui then
+            idx = 1;
+            player.macroIdx = 2;
+        end
+    end
+end
+
+function Macro2(player)
+    local id = skillDict[skillGmx[idx]];
+    if idx == 3 then -- 隐身前开腰坠
+        player:itemUse(1, 38789);
+    end
+    if player:cast(id) then
+        idx = idx + 1;   -- idx 此时为下一个技能的索引
+        if idx == 3 then -- 下一个技能是隐身
+            player.delayCustom = 400;
+        end
+        if idx > #skillGmx then
             idx = 1;
             player.macroIdx = 1;
         end

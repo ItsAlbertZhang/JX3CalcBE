@@ -40,8 +40,8 @@ void SkillEventManager::add(int ID) {
     skillevent.SkillLevel   = std::stoi(skillevent.tab["SkillLevel"]);
     skillevent.SkillCaster  = m_ct.at(skillevent.tab["SkillCaster"]);
     skillevent.SkillTarget  = m_ct.at(skillevent.tab["SkillTarget"]);
-    skillevent.EventMask1   = std::stoi(skillevent.tab["EventMask1"]);
-    skillevent.EventMask2   = std::stoi(skillevent.tab["EventMask2"]);
+    skillevent.EventMask1   = static_cast<uint32_t>(std::stoull(skillevent.tab["EventMask1"]));
+    skillevent.EventMask2   = static_cast<uint32_t>(std::stoull(skillevent.tab["EventMask2"]));
     skillevent.EventSkillID = std::stoi(skillevent.tab["EventSkillID"]);
     // 将 SkillEvent 存入缓存
     data[ID]                = std::move(skillevent);

@@ -15,7 +15,7 @@ const std::unordered_set<std::string> frame::lua::statics::LuaBlacklistFiles = {
     "scripts/player/include/Kungfu2ArenaType.lh",
 };
 
-const char *const frame::lua::statics::luaFuncList[]{
+const char *const frame::lua::statics::luaFuncList[] {
     // Skill
     "SetDelaySubSkill",
     "AddAttribute",
@@ -62,6 +62,7 @@ const char *const frame::lua::statics::luaFuncList[]{
     "SetBuffLeftActiveCount",
     "SetBuffNextActiveFrame",
     "LearnSkillLevel",
+    "SuperCustomDamage",
 };
 const size_t frame::lua::statics::luaFuncListSize =
     sizeof(frame::lua::statics::luaFuncList) / sizeof(frame::lua::statics::luaFuncList[0]);
@@ -72,8 +73,7 @@ static void FileNotExistEmptyFunction() {
 
 sol::state *frame::lua::statics::luaInit() {
     auto lua = lua::interface::getLuaState();
-    lua->open_libraries(sol::lib::base);
-    lua->open_libraries(sol::lib::table);
+    lua->open_libraries(sol::lib::base, sol::lib::table, sol::lib::math);
 
     // lua 类型
 
@@ -183,6 +183,7 @@ sol::state *frame::lua::statics::luaInit() {
     character["DestroyPublicShadow"]       = &Character::otherDestroyPublicShadow;
     character["DoAction"]                  = &Character::otherDoAction;
     character["PlayPublicShadowAnimation"] = &Character::otherPlayPublicShadowAnimation;
+    character["SuperCustomDamage"]         = &Character::otherSuperCustomDamage;
     character["dwID"]                      = &Character::dwID;
     character["nLevel"]                    = &Character::nLevel;
     character["nX"]                        = &Character::nX;

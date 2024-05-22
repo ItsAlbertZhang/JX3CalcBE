@@ -16,15 +16,16 @@ static void callbackActiveBuff(void *selfPtr, void *param) {
     Character *self = (Character *)selfPtr;
     BuffItem  *it   = (BuffItem *)param;
     static_cast<AutoRollbackAttrib *>(it->ptrAttrib)->active(); // ActivateAttrib
-    (it->nLeftActiveCount)--;
-    if (it->nLeftActiveCount <= 0) {
+    if (it->nLeftActiveCount <= 1) {
         staticDelBuff(self, it);
     } else {
-        // 防止在回调函数中被删除, 需要判断其是否存在
+        // 防止在 activeAttrib 中被删除, 需要判断其是否存在
         if (it->isValid) {
-            it->tickActive = Event::add(it->interval * 1024 / 16, callbackActiveBuff, self, it); // 重新注册回调函数
+            // 如果存在, 则重新注册回调函数
+            it->tickActive = Event::add(it->interval * 1024 / 16, callbackActiveBuff, self, it);
         }
     }
+    (it->nLeftActiveCount)--;
 }
 
 static void staticDelBuff(Character *self, BuffItem *it) {
@@ -155,7 +156,7 @@ bool Character::buffExist(int buffID, int buffLevel) {
 }
 
 void Character::buffFlushLeftFrame(BuffItem *item) {
-    item->nLeftFrame       = item->interval * item->nLeftActiveCount + static_cast<int>(item->tickActive - Event::now() + 63) / 64;
+    item->nLeftFrame       = item->interval * (item->nLeftActiveCount - 1) + static_cast<int>(item->tickActive - Event::now() + 63) / 64;
     item->nNextActiveFrame = static_cast<int>(item->tickActive - Event::now() + 63) / 64;
 }
 

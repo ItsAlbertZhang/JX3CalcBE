@@ -27,7 +27,10 @@ public:
     std::string                                  Name;
 
     ref::Skill::KindType KindType;
+    ref::Skill::CastMode CastMode;
 
+    int      MountRequestType;
+    int      MountRequestDetail;
     bool     IsPassiveSkill;
     bool     HasCriticalStrike;
     uint32_t SkillEventMask1;
@@ -51,12 +54,12 @@ public:
     // ---------- GetSkillLevelData 函数中通过 Skill 类的成员函数初始化的属性类 ----------
     class SkillAttribute {
     public:
-        SkillAttribute(int mode, int type, int param1Int, int param2)
-            : mode(mode), type(type), param1Int(param1Int), param2(param2) {}
-        SkillAttribute(int mode, int type, const std::string &param1Str, int param2)
-            : mode(mode), type(type), param1Str(param1Str), param2(param2) {}
-        SkillAttribute(int mode, int type, double param1Double, int param2)
-            : mode(mode), type(type), param1Int(static_cast<int>(param1Double)), param2(param2) {}
+        SkillAttribute(int mode, int type, int param1Int, int param2) :
+            mode(mode), type(type), param1Int(param1Int), param2(param2) {}
+        SkillAttribute(int mode, int type, const std::string &param1Str, int param2) :
+            mode(mode), type(type), param1Str(param1Str), param2(param2) {}
+        SkillAttribute(int mode, int type, double param1Double, int param2) :
+            mode(mode), type(type), param1Int(static_cast<int>(param1Double)), param2(param2) {}
         int         mode      = -1;
         int         type      = -1;
         int         param1Int = -1;
@@ -72,8 +75,8 @@ public:
             selfOwn,
             destOwn,
         };
-        SkillCheckBuff(TypeEnum type, int dwBuffID, int nStackNum, int nStackNumCompareFlag, int nLevel, int nLevelCompareFlag)
-            : type(type), dwBuffID(dwBuffID), nStackNum(nStackNum), nStackNumCompareFlag(nStackNumCompareFlag), nLevel(nLevel), nLevelCompareFlag(nLevelCompareFlag) {}
+        SkillCheckBuff(TypeEnum type, int dwBuffID, int nStackNum, int nStackNumCompareFlag, int nLevel, int nLevelCompareFlag) :
+            type(type), dwBuffID(dwBuffID), nStackNum(nStackNum), nStackNumCompareFlag(nStackNumCompareFlag), nLevel(nLevel), nLevelCompareFlag(nLevelCompareFlag) {}
         TypeEnum type;
         int      dwBuffID;
         int      nStackNum;
@@ -84,8 +87,8 @@ public:
 
     class SkillCheckSelfLearntSkill {
     public:
-        SkillCheckSelfLearntSkill(int dwSkillID, int dwSkillLevel, int nLevelCompareFlag)
-            : dwSkillID(dwSkillID), dwSkillLevel(dwSkillLevel), nLevelCompareFlag(nLevelCompareFlag) {}
+        SkillCheckSelfLearntSkill(int dwSkillID, int dwSkillLevel, int nLevelCompareFlag) :
+            dwSkillID(dwSkillID), dwSkillLevel(dwSkillLevel), nLevelCompareFlag(nLevelCompareFlag) {}
         int dwSkillID;
         int dwSkillLevel;
         int nLevelCompareFlag;
@@ -147,8 +150,8 @@ public:
 
     class DelaySubSkill {
     public:
-        DelaySubSkill(int delay, int skillID, int skillLevel)
-            : delay(delay), skillID(skillID), skillLevel(skillLevel) {}
+        DelaySubSkill(int delay, int skillID, int skillLevel) :
+            delay(delay), skillID(skillID), skillLevel(skillLevel) {}
         int delay      = 0;
         int skillID    = 0;
         int skillLevel = 0;

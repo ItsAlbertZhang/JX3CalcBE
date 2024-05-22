@@ -1,27 +1,30 @@
----
 # 参见: https://clang.llvm.org/docs/ClangFormatStyleOptions.html
 # 需要版本: clang-format 17
 Language: Cpp
 BasedOnStyle: LLVM
+
 AccessModifierOffset: -4 # 访问说明符的偏移
 AlignAfterOpenBracket: BlockIndent # 如果要对小括号换行, 则在小括号后换行, 且在新行关闭尾括号
-AlignArrayOfStructures: Left # 对齐结构体数组
 AlignConsecutiveAssignments: AcrossComments # 跨注释行对齐连续赋值
 AlignConsecutiveBitFields: AcrossComments # 跨注释行对齐连续位域
 AlignConsecutiveDeclarations: AcrossComments # 跨注释行对齐连续声明
 AlignConsecutiveMacros: AcrossComments # 跨注释行对齐连续宏
+AlignConsecutiveShortCaseStatements:
+    Enabled: true # 对齐连续短 case 语句
+    AcrossEmptyLines: true # 跨空行对齐
+    AcrossComments: true # 跨注释行对齐
 AllowAllArgumentsOnNextLine: true # 允许函数调用时所有参数都在下一行
 AllowAllConstructorInitializersOnNextLine: true # 允许构造函数的所有参数都在下一行
 AllowAllParametersOfDeclarationOnNextLine: true # 允许函数声明的所有参数都在下一行
+AllowShortCaseLabelsOnASingleLine: true # 允许短 case 标签在单行
 AllowShortFunctionsOnASingleLine: Empty # 仅允许空函数在单行
 AlwaysBreakBeforeMultilineStrings: true # 总是在多行字符串之前换行
-BinPackArguments: false # 函数调用的参数无法放置在一行时, 将它们每个都单独放在一行
-BinPackParameters: false # 函数声明的参数无法放置在一行时, 将它们每个都单独放在一行
+BreakConstructorInitializers: AfterColon # 构造函数初始化列表在冒号后换行
 ColumnLimit: 0 # 列宽
 IndentWidth: 4 # 缩进宽度
 InsertNewlineAtEOF: true # 在文件末尾插入新行
 LineEnding: LF # 行尾换行符
+RemoveSemicolon: true # 移除分号
+SpaceBeforeCpp11BracedList: true # C++11 列表初始化前空格
 TabWidth: 4 # Tab 宽度
 UseTab: Never # 不使用 Tab
----
-

@@ -20,7 +20,6 @@ void Log::save() {
     std::ofstream file(modules::config::pExeDir / ("log_" + name + ".tab"));
     file << data;
     file.close();
-    enable = false;
 }
 
 #endif // D_CONSTEXPR_LOG

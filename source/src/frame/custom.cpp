@@ -46,7 +46,7 @@ static std::string convertRValSunMoon(const char *start, size_t len) {
     if (0 == len) {
         return ">0";
     }
-    std::string str{start + 1, len - 1};
+    std::string str {start + 1, len - 1};
     if (str == "sun") {
         str = "player.nCurrentSunEnergy";
     } else if (str == "moon") {
@@ -66,17 +66,17 @@ static std::string convertCondition(const char *cond) {
     public:
         const size_t      len;
         const std::string name;
-        std::string       (*convert)(const char *start, size_t len);
+        std::string (*convert)(const char *start, size_t len);
     };
     static const std::unordered_map<std::string, CondType> condMap = {
-        {"buff",      {4, "player:macroBuff", convertRValBuff}            },
-        {"nobuff",    {6, "player:macroNoBuff", nullptr}                  },
-        {"bufftime",  {8, "player:macroBufftime", nullptr}                },
-        {"tbuff",     {5, "player:macroTBuff", convertRValBuff}           },
-        {"tnobuff",   {7, "player:macroTNoBuff", nullptr}                 },
-        {"tbufftime", {9, "player:macroTBufftime", nullptr}               },
-        {"sun",       {3, "player.nCurrentSunEnergy", convertRValSunMoon} },
-        {"moon",      {4, "player.nCurrentMoonEnergy", convertRValSunMoon}},
+        {"buff", {4, "player:macroBuff", convertRValBuff}},
+        {"nobuff", {6, "player:macroNoBuff", nullptr}},
+        {"bufftime", {8, "player:macroBufftime", nullptr}},
+        {"tbuff", {5, "player:macroTBuff", convertRValBuff}},
+        {"tnobuff", {7, "player:macroTNoBuff", nullptr}},
+        {"tbufftime", {9, "player:macroTBufftime", nullptr}},
+        {"sun", {3, "player.nCurrentSunEnergy", convertRValSunMoon}},
+        {"moon", {4, "player.nCurrentMoonEnergy", convertRValSunMoon}},
     };
     if (*cond == '\0') {
         return "";
@@ -166,7 +166,7 @@ CustomLua::CustomLua(const std::string &script) {
 }
 
 static void constructorBefore(CustomLua *self) {
-    self->lua.open_libraries(sol::lib::base);
+    self->lua.open_libraries(sol::lib::base, sol::lib::math);
 
     auto chAttr = self->lua.new_usertype<ChAttr>("ChAttr");
 

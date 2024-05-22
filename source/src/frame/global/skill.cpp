@@ -51,6 +51,9 @@ void SkillManager::add(int skillID, int skillLevel) {
     }
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     skill.KindType             = Ref<ref::Skill::KindType>::map.at(skill.tab["KindType"]);
+    skill.CastMode             = Ref<ref::Skill::CastMode>::map.at(skill.tab["CastMode"]);
+    skill.MountRequestType     = atoi(skill.tab["MountRequestType"].c_str());
+    skill.MountRequestDetail   = atoi(skill.tab["MountRequestDetail"].c_str());
     skill.IsPassiveSkill       = skill.tab["IsPassiveSkill"] == "1";
     skill.HasCriticalStrike    = skill.tab["HasCriticalStrike"] == "1";
     skill.SkillEventMask1      = atoi(skill.tab["SkillEventMask1"].c_str());

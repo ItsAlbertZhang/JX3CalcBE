@@ -146,8 +146,8 @@ cmake --version # 应正确输出版本信息
 
 ```shell
 sudo apt update
-sudo apt install -y clang cmake
-clang --version # 应正确输出版本信息
+sudo apt install -y cmake llvm-17 clang-17 lldb-17 lld-17 libc++-17-dev libc++abi-17-dev
+clang-17 --version # 应正确输出版本信息
 ```
 
 ## 编译运行

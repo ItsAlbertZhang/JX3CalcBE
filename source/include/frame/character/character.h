@@ -59,7 +59,8 @@ public:
     std::set<AutoRollbackAttribute *> autoRollbackAttributeList; // 自动回滚的魔法属性列表
 
     // ---------- 以下属性和方法未被游戏 lua 调用 ----------
-    int kungfuID    = 0;
+    int mountID     = 0; // 门派 ID, 见 skills.tab 中的 MountRequestType
+    int kungfuID    = 0; // 心法 ID, 是一个技能 ID, 游戏内按住 Ctrl 并将鼠标放在心法图标上即可看到
     int kungfuLevel = 0;
 
     // character
@@ -99,6 +100,7 @@ public:
     auto skilleventGet(ref::SkillEvent::EventType type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2) -> std::set<const SkillEvent *>;
     void skilleventAdd(int eventID);
     void skilleventRemove(int eventID);
+    bool skilleventExist(int eventID);
 
     // calc
     Damage calcDamage(
@@ -131,7 +133,7 @@ public:
     bool   macroTNoBuff(std::string buffName);
     double macroTBufftime(std::string buffName);
 
-    // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua_static.cpp ----------
+    // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua/static.cpp ----------
 
     // character
     auto characterGetSelect() -> Character *;
@@ -175,6 +177,7 @@ public:
     void otherDestroyPublicShadow(int a, bool b);
     void otherDoAction(int a, int b);
     void otherPlayPublicShadowAnimation(int a, int b, bool c, bool d);
+    void otherSuperCustomDamage(int sourceID, int skillID, int skillLevel, int type, int damage);
 
     //  ---------- 被游戏 lua 调用的属性, 通常为匈牙利命名法 ----------
     int    dwID;                          // 角色 ID

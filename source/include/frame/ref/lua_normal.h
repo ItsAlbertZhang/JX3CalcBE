@@ -46,8 +46,8 @@ enum class ref::lua::TARGET {
 enum class ref::lua::SKILL_KIND_TYPE {
     PHYSICS,
     SOLAR_MAGIC,
-    LUNAR_MAGIC,
     NEUTRAL_MAGIC,
+    LUNAR_MAGIC,
     POISON_MAGIC,
     COUNT,
 };

@@ -1,8 +1,9 @@
 #include "modules/task.h"
-#include "concrete/effect.h"
-#include "concrete/npc.h"
-#include "concrete/player.h"
+#include "concrete.h"
+#include "frame/character/derived/npc.h"
 #include "frame/character/derived/player.h"
+#include "frame/character/effect.h"
+#include "frame/common/constant.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
 #include "frame/global/skill.h"
@@ -71,7 +72,7 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     res.next();
 
     // 3. basic Data. 此步骤未成功, catch 会返回 Error in base: missing field or invalid option.
-    data.playerType    = concrete::player::refType.at(j.at("player").get<std::string>()),
+    data.playerType    = concrete::playerMap.at(j.at("player").get<std::string>()),
     data.delayNetwork  = j.at("delayNetwork").get<int>(),
     data.delayKeyboard = j.at("delayKeyboard").get<int>(),
     data.fightTime     = j.at("fightTime").get<int>(),
@@ -88,7 +89,7 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     res.next();
 
     // 5. attribute. 此步骤未成功, catch 会返回 Error in attribute.
-    auto player   = concrete::create(data.playerType);
+    auto player   = concrete::createPlayer(data.playerType);
     auto attrType = refAttributeType.at(j.at("attribute")["method"].get<std::string>());
     switch (attrType) {
     case enumAttributeType::data: {
@@ -106,14 +107,14 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
     res.next();
 
     // 6. effect. 此步骤未成功, catch 会返回 Error in effect.
-    std::vector<std::shared_ptr<concrete::effect::Base>> effectList;
+    std::vector<std::shared_ptr<frame::Effect>> effectList;
     effectList.reserve(j.at("effects").size());
-    for (auto &x : j.at("effects").items()) {
-        auto name = x.value().get<std::string>();
-        if (!concrete::effect::refType.contains(name)) [[unlikely]] {
-            throw std::runtime_error("unknown effect: " + name);
+    for (auto &[key, value] : j.at("effects").items()) {
+        auto ptr = concrete::createEffect(key, value.dump());
+        if (ptr == nullptr) [[unlikely]] {
+            throw std::runtime_error("effect error: " + key);
         }
-        effectList.emplace_back(concrete::create(concrete::effect::refType.at(name)));
+        effectList.emplace_back(std::move(ptr));
     }
     data.effects = std::move(effectList);
     res.next();
@@ -140,21 +141,33 @@ static void createTaskData(Task::Data &data, Response &res, const std::string &j
             }
 
         } else if (fight.contains("data") && fight.at("data").is_number_integer()) {
-            data.embedFightType = j.at("fight").at("data").get<int>();
+            player->fightType = j.at("fight").at("data").get<int>();
+            data.fightType    = player->fightType;
         }
     }
     res.next();
 
     // 8. talents (可选). 此步骤未成功, catch 会返回 Error in talents.
     if (j.contains("talents")) {
-        data.talents.emplace(j.at("talents").get<std::vector<int>>());
+        data.talents = j.at("talents").get<frame::Player::typeTalentArray>();
     }
+    data.talents = player->getTalents(data.talents);
     res.next();
 
-    // 9. recipes (可选). 此步骤未成功, catch 会返回 Error in recipes.
-    if (j.contains("recipes")) {
-        data.recipes.emplace(j.at("recipes").get<std::vector<int>>());
+    // 9. skills (可选). 此步骤未成功, catch 会返回 Error in skills.
+    if (j.contains("skills")) {
+        for (auto &[key, value] : j.at("skills").items()) {
+            data.skills.emplace(
+                std::stoi(key),
+                frame::Player::Skill {
+                    .id      = value.at("id").get<int>(),
+                    .level   = value.at("level").get<int>(),
+                    .recipes = value.at("recipes").get<std::array<int, CountRecipesPerSkill>>(),
+                }
+            );
+        }
     }
+    data.skills = player->getSkills(data.skills);
     res.next();
 }
 
@@ -191,13 +204,13 @@ static auto asyncRun(Server *self, asio::io_context &io, Task &task) -> asio::aw
             }
             cntPre = task.cntCompleted;
             asio::steady_timer timer(io);
-            timer.expires_after(std::chrono::seconds{1});
+            timer.expires_after(std::chrono::seconds {1});
             co_await timer.async_wait(asio::use_awaitable);
         }
     }
     if (!task.stop.load()) { // 正常结束
         asio::steady_timer timer(io);
-        timer.expires_after(std::chrono::seconds{60}); // 等待 60 秒, 随后释放内存
+        timer.expires_after(std::chrono::seconds {60}); // 等待 60 秒, 随后释放内存
         co_await timer.async_wait(asio::use_awaitable);
     }
     asyncStop(self, task);
@@ -225,32 +238,29 @@ void modules::task::Server::stop(std::string id) {
 }
 
 static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
-    std::unique_ptr<frame::Player> player = concrete::create(arg.playerType);
+    std::unique_ptr<frame::Player> player = concrete::createPlayer(arg.playerType);
     player->delayBase                     = arg.delayNetwork;
     player->delayRand                     = arg.delayKeyboard;
-    player->embedFightType                = arg.embedFightType;
-    if (arg.talents.has_value()) {
-        player->initTalents = &arg.talents.value();
-    }
-    if (arg.recipes.has_value()) {
-        player->initRecipes = &arg.recipes.value();
-    }
+    player->fightType                     = arg.fightType;
+    player->fightTick                     = arg.fightTime * 1024;
     if (arg.fight.has_value()) {
         player->customLua = frame::CustomLua::get(arg.fight.value());
     }
 
-    std::unique_ptr<frame::NPC> npc = concrete::create(concrete::npc::Type::NPC124);
+    std::unique_ptr<frame::NPC> npc = concrete::createNPC(concrete::NPC::NPC124);
     player->targetSelect            = npc.get();
+    frame::Event::clear();
 
     player->attrImportFromBackup(arg.attrBackup);
     for (auto &it : arg.effects) {
         it->active(player.get());
     }
-    frame::Event::clear();
+
+    player->init(arg.skills, arg.talents);
     player->fightStart();
     while (true) {
-        if (player->stopInitiative.has_value()) {
-            if (player->stopInitiative.value()) [[unlikely]]
+        if (player->fightStopWait.has_value()) {
+            if (player->fightStopWait.value() == 0) [[unlikely]]
                 break;
         } else if (frame::Event::now() >= static_cast<frame::event_tick_t>(arg.fightTime) * 1024) [[unlikely]]
             break;
@@ -284,6 +294,7 @@ static int calcDetail(const Task::Data &data, frame::ChDamage *detail) {
     *detail = std::move(player->chDamage);
 #ifdef D_CONSTEXPR_LOG
     plugin::log::info.save();
+    plugin::log::info.enable = false;
     plugin::log::error.save();
 #endif
 #ifdef D_CONSTEXPR_CHANNELINTERVAL
@@ -443,7 +454,7 @@ std::string Task::queryDamageAnalysis() {
                 } else {
                     name = frame::SkillManager::get(everyDamage.id, everyDamage.level).Name;
                 }
-                damageAnalysisMap[everyDamage.id][everyDamage.level] = DamageAnalysisItem{
+                damageAnalysisMap[everyDamage.id][everyDamage.level] = DamageAnalysisItem {
                     .id        = everyDamage.id,
                     .level     = everyDamage.level,
                     .name      = name,

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "concrete/effect.h"
-#include "concrete/player.h"
+#include "frame/character/derived/player.h"
+#include "frame/character/effect.h"
 #include "frame/character/property/attribute.h"
 #include "frame/common/damage.h"
 #include "modules/pool.h"
@@ -41,22 +41,24 @@ public:
     class Data {
     public:
         ~Data();
-        concrete::player::Type playerType;
+        concrete::Player playerType;
 
         int delayNetwork;
         int delayKeyboard;
         int fightTime;
         int fightCount;
 
-        frame::ChAttr                                        attrBackup;
-        std::vector<std::shared_ptr<concrete::effect::Base>> effects;
+        frame::ChAttr                               attrBackup;
+        std::vector<std::shared_ptr<frame::Effect>> effects;
 
-        int embedFightType = 0;
+        // 战斗类型. -1 代表自定义战斗(不使用内置), 非负数代表使用内置, 且数值等于内置枚举索引, 其中 0 为默认内置循环.
+        // 具体数值代表的状态由各心法负责具体实现.
+        int fightType = 0;
 
-        std::optional<std::string>                       fight;
-        std::optional<std::vector<std::tuple<int, int>>> skills; // 目前未启用
-        std::optional<std::vector<int>>                  talents;
-        std::optional<std::vector<int>>                  recipes;
+        frame::Player::typeSkillMap    skills;
+        frame::Player::typeTalentArray talents;
+
+        std::optional<std::string> fight;
 
     } data;
 
@@ -79,7 +81,7 @@ enum class enumAttributeType {
     jx3box,
 };
 inline const std::unordered_map<std::string, enumAttributeType> refAttributeType{
-    {"从数据导入", enumAttributeType::data  },
+    {"从数据导入", enumAttributeType::data},
     {"从JX3BOX导入", enumAttributeType::jx3box},
 };
 
@@ -89,9 +91,9 @@ enum class enumCustom {
     jx3,
 };
 inline std::unordered_map<std::string, enumCustom> refCustom{
-  // {"使用内置循环", enumCustom::none},
+    // {"使用内置循环", enumCustom::none},
     {"使用lua编程语言", enumCustom::lua},
-    {"使用游戏内宏",    enumCustom::jx3},
+    {"使用游戏内宏", enumCustom::jx3},
 };
 
 class Response {
@@ -105,7 +107,7 @@ class Response {
         "Error in effect: ",
         "Error in fight: ",
         "Error in talents: ",
-        "Error in recipes: ",
+        "Error in skills: ",
     };
 
 public:

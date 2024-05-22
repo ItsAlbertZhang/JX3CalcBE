@@ -147,8 +147,9 @@ public:
     int atMeleeWeaponDamageBase = 0; // 武器伤害
     int atMeleeWeaponDamageRand = 0; // 武器伤害浮动
 
-    int atAllDamageAddPercent      = 0; // 造成的全伤害和治疗效果提升1024分数
-    int atAllMagicDamageAddPercent = 0; // 造成的内功伤害和治疗效果提升1024分数
+    int atAllDamageAddPercent        = 0; // 造成的全伤害和治疗效果提升1024分数
+    int atAllPhysicsDamageAddPercent = 0; // 造成的外功伤害和治疗效果提升1024分数
+    int atAllMagicDamageAddPercent   = 0; // 造成的内功伤害和治疗效果提升1024分数
 
     int atAllShieldIgnorePercent  = 0; // 无视防御1024分数
     int atActiveThreatCoefficient = 0; // 仇恨提升1024分数

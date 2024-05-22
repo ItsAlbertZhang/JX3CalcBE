@@ -156,11 +156,19 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
 
     // 1. 检查 tab 中的释放条件
 
-    // 1.1 检查战斗状态
+    // 检查门派 ID
+    if (skill.MountRequestType > 0 && skill.MountRequestType != mountID)
+        return false;
+    if (skill.MountRequestDetail > 0 && skill.MountRequestDetail != kungfuID)
+        return false;
+
+    // 检查战斗状态
     if (skill.NeedOutOfFight && this->bFightState)
         return false; // 需要处于非战斗状态, 但当前处于战斗状态, CastSkill 失败
 
-    // 1.2 检查目标
+    // 检查目标
+    if (skill.CastMode == ref::Skill::CastMode::TargetLeader)
+        return false; // 不处理阵眼效果
     if ((target == nullptr && !skill.TargetRelationNone) ||
         (target != nullptr && target != this && !skill.TargetRelationEnemy)) {
         if (skill.TargetRelationSelf)
@@ -226,7 +234,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     CONSTEXPR_LOG_INFO("{} # {} cast successfully!", skillID, skillLevel);
 
     // 构造技能运行时资源: RuntimeCastSkill
-    RuntimeCastSkill runtime{this, skillID, skillLevel};
+    RuntimeCastSkill runtime {this, skillID, skillLevel};
 
     // 1. 执行 SkillEvent: PreCast
     staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
@@ -252,7 +260,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
 
     // 4. 处理魔法属性
     // 构造技能运行时资源: AutoRollbackAttribute
-    AutoRollbackAttribute autoRollbackAttribute{this, target, &runtime, skill};
+    AutoRollbackAttribute autoRollbackAttribute {this, target, &runtime, skill};
 
     // 5. 处理其他
 
@@ -486,7 +494,7 @@ static inline Skill::SkillCoolDown staticGetCooldown(Character *self, int skillI
     // 获取技能
     int skillLevel = self->skillGetLevel(skillID);
     if (skillLevel == 0) {
-        return Skill::SkillCoolDown{};
+        return Skill::SkillCoolDown {};
     }
     const Skill                  &skill           = SkillManager::get(skillID, skillLevel);
     Skill::SkillCoolDown          cooldown        = skill.attrCoolDown;
