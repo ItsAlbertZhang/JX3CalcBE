@@ -439,6 +439,7 @@ std::string Task::queryDamageAnalysis() {
         int         id;
         int         level;
         std::string name;
+        int         count;
         int         damageMin;
         int         damageMax;
         int         damageSum;
@@ -458,11 +459,13 @@ std::string Task::queryDamageAnalysis() {
                     .id        = everyDamage.id,
                     .level     = everyDamage.level,
                     .name      = name,
+                    .count     = 1,
                     .damageMin = everyDamage.damageBase,
                     .damageMax = everyDamage.damageCritical,
                     .damageSum = everyDamage.damageExcept,
                 };
             } else {
+                damageAnalysisMap[everyDamage.id][everyDamage.level].count += 1;
                 damageAnalysisMap[everyDamage.id][everyDamage.level].damageMin = std::min(damageAnalysisMap[everyDamage.id][everyDamage.level].damageMin, everyDamage.damageBase);
                 damageAnalysisMap[everyDamage.id][everyDamage.level].damageMax = std::max(damageAnalysisMap[everyDamage.id][everyDamage.level].damageMax, everyDamage.damageCritical);
                 damageAnalysisMap[everyDamage.id][everyDamage.level].damageSum += everyDamage.damageExcept;
@@ -477,6 +480,7 @@ std::string Task::queryDamageAnalysis() {
             objDamage["id"]         = it.id;
             objDamage["level"]      = it.level;
             objDamage["name"]       = it.name;
+            objDamage["count"]      = it.count;
             objDamage["damageMin"]  = it.damageMin;
             objDamage["damageMax"]  = it.damageMax;
             objDamage["proportion"] = static_cast<double>(it.damageSum) / sumDamage;
