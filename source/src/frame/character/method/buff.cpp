@@ -71,6 +71,8 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         it.interval         = buff.Interval * 1024 / (1024 + it.attr.getHaste());
         it.interval         = it.interval > buff.MaxInterval ? buff.MaxInterval : it.interval;
         it.interval         = it.interval < buff.MinInterval ? buff.MinInterval : it.interval;
+        // 清空 customValue
+        it.nCustomValue     = 0;
         // 注册回调函数
         it.tickActive       = Event::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it);
         // 其他工作

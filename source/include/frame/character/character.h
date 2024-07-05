@@ -136,6 +136,7 @@ public:
     // ---------- 以下方法直接被游戏 lua 调用. 注意, 这些函数在 lua 内的名称是不同的, 详情可查 frame/lua/static.cpp ----------
 
     // character
+    auto characterGetEmployer() -> Character *;
     auto characterGetSelect() -> Character *;
     int  characterGetTargetID();
     // buff
