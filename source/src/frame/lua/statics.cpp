@@ -54,6 +54,7 @@ const char *const frame::lua::statics::luaFuncList[] {
     "IsInParty",
     "DoAction",
     "ResetCD",
+    "GetEmployer",
     "GetSelectCharacter",
     "IsSkillRecipeActive",
     "DelMultiGroupBuffByID",
@@ -146,6 +147,7 @@ sol::state *frame::lua::statics::luaInit() {
 
     auto character = lua->new_usertype<Character>("Character");
 
+    character["GetEmployer"]            = &Character::characterGetEmployer;
     character["GetSelectCharacter"]     = &Character::characterGetSelect;
     character["GetSkillTarget"]         = &Character::characterGetTargetID;
     character["IsHaveBuff"]             = &Character::buffExist;

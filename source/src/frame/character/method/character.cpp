@@ -50,6 +50,11 @@ int Character::characterGetID(Character *character) {
     }
 }
 
+Character *Character::characterGetEmployer() {
+    // 五毒宠物 / 长歌影子会返回主人. 此处直接置空.
+    return nullptr;
+}
+
 Character *Character::characterGetSelect() {
     return targetSelect;
 }

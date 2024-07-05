@@ -189,6 +189,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case ref::Attrib::atPoisonDamageCoefficient:                   self->chAttr.atPoisonDamageCoefficient += attrib.valueAInt * c * stack; break;
     // 单列属性
     case ref::Attrib::atAllShieldIgnorePercent:                    self->chAttr.atAllShieldIgnorePercent += attrib.valueAInt * c * stack; break;
+    case ref::Attrib::atDstNpcDamageCoefficient:                   self->chAttr.atDstNpcDamageCoefficient += attrib.valueAInt * c * stack; break;
     case ref::Attrib::atHasteBase:                                 self->chAttr.atHasteBase += attrib.valueAInt * c * stack; break;
     case ref::Attrib::atSurplusValueBase:                          self->chAttr.atSurplusValueBase += attrib.valueAInt * c * stack; break;
     case ref::Attrib::atStrainBase:                                self->chAttr.atStrainBase += attrib.valueAInt * c * stack; break;
@@ -216,6 +217,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case ref::Attrib::atNoLimitChangeSkillIcon:                    break;
     case ref::Attrib::atAddTransparencyValue:                      break; // 透明度
     case ref::Attrib::atSetSelectableType:                         break;
+    case ref::Attrib::atGlobalResistPercent:                       break; // 减伤
     default:
         CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, Ref<ref::Attrib>::names[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;

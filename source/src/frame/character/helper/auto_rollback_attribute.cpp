@@ -127,6 +127,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE_RAND):                       this->atDamageRand[static_cast<int>(DamageType::Lunar)] += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE):                           this->atDamage[static_cast<int>(DamageType::Poison)] += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE_RAND):                      this->atDamageRand[static_cast<int>(DamageType::Poison)] += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::ALL_DAMAGE_ADD_PERCENT):                        self->chAttr.atAllDamageAddPercent += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DST_NPC_DAMAGE_COEFFICIENT):                    self->chAttr.atDstNpcDamageCoefficient += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MAGIC_SHIELD):                                  self->chAttr.atMagicShield += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::PHYSICS_SHIELD_BASE):                           self->chAttr.atPhysicsShieldBase += it.param1Int * c; break;
@@ -137,6 +138,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SOLAR_ATTACK_POWER_BASE):                       self->chAttr.atSolarAttackPowerBase += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::LUNAR_ATTACK_POWER_BASE):                       self->chAttr.atLunarAttackPowerBase += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::PHYSICS_ATTACK_POWER_PERCENT):                  self->chAttr.atPhysicsAttackPowerPercent += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SOLAR_ATTACK_POWER_PERCENT):                    self->chAttr.atSolarAttackPowerPercent += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::LUNAR_ATTACK_POWER_PERCENT):                    self->chAttr.atLunarAttackPowerPercent += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DECRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE):     self->chAttr.atDecriticalDamagePowerBaseKiloNumRate += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::PHYSICS_CRITICAL_STRIKE_BASE_RATE):             self->chAttr.atPhysicsCriticalStrikeBaseRate += it.param1Int * c; break;

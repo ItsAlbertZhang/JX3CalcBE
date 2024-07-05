@@ -224,6 +224,7 @@ static void constructorBefore(CustomLua *self) {
     auto player = self->lua.new_usertype<Player>("Player");
 
     player["chAttr"]                 = &Player::chAttr;
+    player["characterGetEmployer"]   = &Player::characterGetEmployer;
     player["characterGetSelect"]     = &Player::characterGetSelect;
     player["characterGetTargetID"]   = &Player::characterGetTargetID;
     player["buffExist"]              = &Player::buffExist;
