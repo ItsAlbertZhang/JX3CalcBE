@@ -233,6 +233,7 @@ static void constructorBefore(CustomLua *self) {
     player["buffAdd"]                = &Player::buffAddOptional;
     player["buffDel"]                = &Player::buffDel;
     player["buffDelGroup"]           = &Player::buffDelGroup;
+    player["buffDelMultiCount"]      = &Player::buffDelMultiCount;
     player["buffDelMultiGroupByID"]  = &Player::buffDelMultiGroupByID;
     player["buffSetLeftActiveCount"] = &Player::buffSetLeftActiveCount;
     player["buffSetNextActiveFrame"] = &Player::buffSetNextActiveFrame;
