@@ -127,6 +127,20 @@ void Character::buffDel(int buffID, int buffLevel) {
     }
 }
 
+void Character::buffDelMultiCount(int buffID, int buffLevel, int count) {
+    BuffItem *ptr = buffGet(buffID, buffLevel);
+    // 返回的一定是 isValie == true 的 Item.
+    if (nullptr != ptr) {
+        if (ptr->nStackNum > count) {
+            // 层数大于 1, 则层数 -1
+            ptr->nStackNum -= count;
+        } else {
+            // 层数等于 1, 则删除该 buff
+            staticDelBuff(this, ptr);
+        }
+    }
+}
+
 void Character::buffDelGroup(int buffID, int buffLevel) {
     BuffItem *ptr = buffGet(buffID, buffLevel);
     // 返回的一定是 isValie == true 的 Item.

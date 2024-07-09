@@ -146,6 +146,7 @@ public:
     void buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, int count = 1, int param6 = 0, int stacknum = 1);
     void buffAddOptional(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, std::optional<int> count, std::optional<int> param6, std::optional<int> stacknum);
     void buffDel(int buffID, int buffLevel);
+    void buffDelMultiCount(int buffID, int buffLevel, int count);
     void buffDelGroup(int buffID, int buffLevel);
     void buffDelMultiGroupByID(int buffID);
     void buffSetLeftActiveCount(int buffIndex, int count);

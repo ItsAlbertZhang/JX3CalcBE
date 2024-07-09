@@ -57,6 +57,7 @@ const char *const frame::lua::statics::luaFuncList[] {
     "GetEmployer",
     "GetSelectCharacter",
     "IsSkillRecipeActive",
+    "DelMultiCountBuff",
     "DelMultiGroupBuffByID",
     "DestroyPublicShadow",
     "CreatePublicShadow",
@@ -156,6 +157,7 @@ sol::state *frame::lua::statics::luaInit() {
     character["AddBuff"]                = &Character::buffAddOptional;
     character["DelBuff"]                = &Character::buffDel;
     character["DelGroupBuff"]           = &Character::buffDelGroup;
+    character["DelMultiCountBuff"]      = &Character::buffDelMultiCount;
     character["DelMultiGroupBuffByID"]  = &Character::buffDelMultiGroupByID;
     character["SetBuffLeftActiveCount"] = &Character::buffSetLeftActiveCount;
     character["SetBuffNextActiveFrame"] = &Character::buffSetNextActiveFrame;
