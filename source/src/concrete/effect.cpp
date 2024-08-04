@@ -274,6 +274,7 @@ const typeMap effect_map {
          {"天罗诡道·千机百变阵", anyMultiple {tBuff {3307, 6, 1024}, tBuff {3310, 1, 1, 1, 1.0}}},
          {"莫问·万籁金弦阵", anyMultiple {tBuff {9485, 1, 1024}, tBuff {9492, 1, 1, 1, 1.0}}},
          {"山海心诀·苍梧引灵阵", anyMultiple {tBuff {27236, 6, 1024}, tBuff {27238, 1, 1, 1, 1.0}}},
+         {"无界端·无界行侠阵", [](frame::Character *obj) { obj->chAttr.atAllDamageAddPercent += 51; obj->chAttr.atStrainRate += 102; }}
      }}
 };
 }
