@@ -49,6 +49,9 @@ static void initFromJson(const json &j) {
     if (j.contains("allowCustom") && j["allowCustom"].is_boolean()) {
         config::taskdata::allowCustom = j["allowCustom"].get<bool>();
     }
+    if (j.contains("maxTaskDuration") && j["maxTaskDuration"].is_number_integer()) {
+        config::taskdata::maxTaskDuration = j["maxTaskDuration"].get<int>();
+    }
 }
 
 void config::init(int argc, char *argv[]) {

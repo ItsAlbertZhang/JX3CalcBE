@@ -34,8 +34,8 @@ namespace task {
 
 class Task {
 public:
-    Task(const std::string &id)
-        : id(id){};
+    Task(const std::string &id) :
+        id(id) {};
     const std::string id;
 
     class Data {
@@ -62,7 +62,7 @@ public:
 
     } data;
 
-    std::atomic<bool>             stop{false};
+    std::atomic<bool>             stop {false};
     std::vector<std::future<int>> futures;
     std::mutex                    mutex; // 用于保护 results 和 details, 被 io 线程和 web 线程同时访问
     std::vector<int>              results;
@@ -80,7 +80,7 @@ enum class enumAttributeType {
     data,
     jx3box,
 };
-inline const std::unordered_map<std::string, enumAttributeType> refAttributeType{
+inline const std::unordered_map<std::string, enumAttributeType> refAttributeType {
     {"从数据导入", enumAttributeType::data},
     {"从JX3BOX导入", enumAttributeType::jx3box},
 };
@@ -90,14 +90,14 @@ enum class enumCustom {
     lua,
     jx3,
 };
-inline std::unordered_map<std::string, enumCustom> refCustom{
+inline std::unordered_map<std::string, enumCustom> refCustom {
     // {"使用内置循环", enumCustom::none},
     {"使用lua编程语言", enumCustom::lua},
     {"使用游戏内宏", enumCustom::jx3},
 };
 
 class Response {
-    inline static const char *status[]{
+    inline static const char *status[] {
         "",
         "config.json not available.",
         "json parse error.",
@@ -135,7 +135,9 @@ public:
     void stop(std::string id);
 
     std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;
-    Pool                                                   pool;
+
+    using tPoolRet = int;
+    Pool<tPoolRet> pool;
 
 private:
     std::thread      ioThread;

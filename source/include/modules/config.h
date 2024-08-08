@@ -23,6 +23,7 @@ inline int  maxDelayKeyboard = 1024;    // 最大按键延迟
 inline int  maxFightTime     = 1 << 30; // 最大战斗时间
 inline int  maxFightCount    = 1 << 30; // 最大战斗次数
 inline bool allowCustom      = true;    // 是否允许自定义战斗
+inline int  maxTaskDuration  = 1 << 30; // 最大任务持续时间
 
 } // namespace taskdata
 
