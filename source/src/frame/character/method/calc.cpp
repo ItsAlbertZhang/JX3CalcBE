@@ -67,14 +67,14 @@ Damage Character::calcDamage(
     int              buffInterval,
     int              buffCount
 ) {
-    int atStrain                  = this->chAttr.getStrain();               // 类型× 快照
-    int atSurplus                 = this->chAttr.getSurplus();              // 类型× 快照
-    int atDstNpcDamageCoefficient = this->chAttr.atDstNpcDamageCoefficient; // 类型× 快照
-    int atGlobalDamageFactor      = this->chAttr.atGlobalDamageFactor;      // 类型× 快照
-    int atAddDamageByDstMoveState = this->chAttr.atAddDamageByDstMoveState; // 类型× 快照
+    int atStrain                  = this->chAttr.getStrain();               // 类型× 自身实时
+    int atSurplus                 = this->chAttr.getSurplus();              // 类型× 自身实时
+    int atDstNpcDamageCoefficient = this->chAttr.atDstNpcDamageCoefficient; // 类型× 自身实时
+    int atGlobalDamageFactor      = this->chAttr.atGlobalDamageFactor;      // 类型× 自身实时
+    int atAddDamageByDstMoveState = this->chAttr.atAddDamageByDstMoveState; // 类型× 自身实时
 
-    int atAttackPower           = 0; // 类型√ 快照
-    int atDamageAddPercent      = 0; // 类型√ 快照
+    int atAttackPower           = 0; // 类型√ 快照√
+    int atDamageAddPercent      = 0; // 类型√ 快照√
     int atOvercome              = 0; // 类型√ 自身实时
     int targetShield            = 0; // 类型√ 目标实时
     int targetDamageCoefficient = 0; // 类型√ 目标实时

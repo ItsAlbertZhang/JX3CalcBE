@@ -176,6 +176,32 @@ static void asyncStop(Server *self, Task &task) {
     self->taskMap.erase(task.id);
 }
 
+// int calcDetail(const Data &data, frame::ChDamage *detail)
+using t1Arg1 = const Task::Data &;
+using t1Arg2 = std::vector<frame::Damage> *;
+using t1Func = Server::tPoolRet (&)(t1Arg1, t1Arg2);
+
+template void modules::Pool<Server::tPoolRet>::emplace<t1Func, t1Arg1, t1Arg2>(
+    const std::string &,
+    int,
+    std::vector<std::future<Server::tPoolRet>> &,
+    t1Func,
+    t1Arg1 &&,
+    t1Arg2 &&
+);
+
+// int calcBrief(const Data &arg)
+using t2Arg1 = const Task::Data &;
+using t2Func = Server::tPoolRet (&)(t2Arg1);
+
+template void modules::Pool<Server::tPoolRet>::emplace<t2Func, t2Arg1>(
+    const std::string &,
+    int,
+    std::vector<std::future<Server::tPoolRet>> &,
+    t2Func,
+    t2Arg1 &&
+);
+
 static auto asyncRun(Server *self, asio::io_context &io, Task &task) -> asio::awaitable<void> {
     using namespace modules::task;
 
@@ -183,14 +209,20 @@ static auto asyncRun(Server *self, asio::io_context &io, Task &task) -> asio::aw
     const int cntCalcDetail = task.data.fightCount > CNT_DETAIL_TASKS ? CNT_DETAIL_TASKS : task.data.fightCount;
     task.details.resize(cntCalcDetail); // 注意, 此处不是 reserve, 因为获得的内存地址需要传递给线程池
     const Task::Data &data = task.data;
-    for (int i = 0; i < cntCalcDetail; i++) {
+    for (int i = 0; i < cntCalcDetail; i++)
         self->pool.emplace(task.id, 1, task.futures, calcDetail, data, &task.details[i]);
-    }
     self->pool.emplace(task.id, task.data.fightCount - cntCalcDetail, task.futures, calcBrief, data);
 
     task.results.reserve(task.data.fightCount);
-    int cntPre = 0;
+    int  cntPre    = 0;
+    auto timeStart = std::chrono::steady_clock::now();
     while (!task.stop.load() && task.cntCompleted < task.data.fightCount) [[likely]] {
+        auto duration = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - timeStart).count();
+        if (duration > modules::config::taskdata::maxTaskDuration) {
+            self->pool.erase(task.id);
+            task.stop.store(true);
+            break;
+        }
         if (task.futures[task.cntCompleted].wait_for(std::chrono::milliseconds(0)) == std::future_status::ready) {
             {
                 std::lock_guard<std::mutex> lock(task.mutex);

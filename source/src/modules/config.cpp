@@ -10,7 +10,7 @@ using namespace modules;
 using json   = nlohmann::json;
 namespace fs = std::filesystem;
 
-const std::string version = "v1.2.0.070801";
+const std::string version = "v1.2.1.080801";
 
 static inline bool stringContains(const std::string &str, const std::string &substr) {
     return str.find(substr) != std::string::npos;
@@ -48,6 +48,9 @@ static void initFromJson(const json &j) {
     }
     if (j.contains("allowCustom") && j["allowCustom"].is_boolean()) {
         config::taskdata::allowCustom = j["allowCustom"].get<bool>();
+    }
+    if (j.contains("maxTaskDuration") && j["maxTaskDuration"].is_number_integer()) {
+        config::taskdata::maxTaskDuration = j["maxTaskDuration"].get<int>();
     }
 }
 

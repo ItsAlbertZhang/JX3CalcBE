@@ -1,8 +1,8 @@
 #pragma once
 
 #include <condition_variable>
-#include <functional>
 #include <future>
+#include <list>
 #include <queue>
 #include <string>
 #include <thread>
@@ -12,69 +12,110 @@
 namespace jx3calc {
 namespace modules {
 
+template <typename return_type>
 class Pool {
-
-    /**
-     *  TaskList 是一个双向循环链表, 它的每一个结点都是一列任务.
-     *  每从当前列任务取出一个任务时, 它就会指向下一列任务, 以保证均匀地响应每一列任务.
-     *  注意! 线程安全需自行确保!
-     */
-    class TaskList {
-
-        /**
-         *  Node 是 TaskList 的结点, 它的每一个结点都是一列任务.
-         */
-        class Node {
-        public:
-            // 任务队列. 注意, 这个任务队列永不为空, 当任务队列为空时, 就应当进行结点删除操作.
-            std::queue<std::function<void()>> tasks;
-            std::string                       id;   // 本列任务的 ID
-            Node                             *next; // 下一个结点 (下一列任务)
-            Node                             *prev; // 上一个结点 (上一列任务)
-        };
-
-    private:
-        // TaskList 有两种查找结点 (任务列) 的方式:
-
-        // 1. 当前指向的结点 (任务列). 它被 pop 方法使用: 执行 pop 操作会从该结点 (任务列) 中取出一个任务, 并将其指向下一个结点 (任务列).
-        Node *curr = nullptr;
-
-        // 2. 哈希表, 通过任务 ID 直接定位任务. 它被 erase 方法使用: 执行 erase 操作会删除指定 ID 的结点 (任务列).
-        std::unordered_map<std::string, Node *> map;
-
-    public:
-        bool empty();
-
-        // 从当前结点 (任务列) 中取出一个任务, 并将当前结点指针指向下一个结点 (任务列).
-        // 注意! 使用前应当先调用 empty() 方法检查 TaskList 是否为空.
-        std::function<void()> pop();
-
-        // 向指定 ID 的任务列中添加一个任务 (若 ID 不存在则创建)
-        // 注意! 需要自行保证 ID 的唯一性.
-        void emplace(const std::string &id, std::function<void()> task);
-
-        // 删除指定 ID 的结点 (任务列)
-        void erase(const std::string &id);
-
-        void clear();
-    };
-
-public:
-    Pool();
-
-    template <class F, class... Args>
-    void emplace(const std::string &id, int count, std::vector<std::future<typename std::invoke_result<F, Args...>::type>> &res, F &&f, Args &&...args);
-
-    void erase(const std::string &id);
-
-    void join();
 
 private:
     std::vector<std::thread> workers;
-    TaskList                 tasks;
-    std::mutex               queue_mutex;
-    std::condition_variable  condition;
+    std::mutex               mtx;
+    std::condition_variable  cond;
     bool                     stop = false;
+
+    struct Task {
+        std::queue<std::packaged_task<return_type()>> queue;
+        std::string                                   id;
+    };
+    std::list<Task>           tasks;
+    std::list<Task>::iterator curr = tasks.end();
+
+    using TaskIter = typename std::list<Task>::iterator;
+    std::unordered_map<std::string, TaskIter> map;
+
+public:
+    Pool() {
+#if defined(D_CONSTEXPR_LOG) || defined(D_CONSTEXPR_CHANNELINTERVAL)
+        constexpr unsigned int corecnt = 1;
+#else
+        const unsigned int corecnt = std::thread::hardware_concurrency();
+#endif
+        for (unsigned int i = 0; i < corecnt; i++)
+            workers.emplace_back([this] {
+                // thread_init();
+                while (true) {
+                    std::packaged_task<return_type()> task;
+                    {
+                        std::unique_lock<std::mutex> lock(this->mtx); // 上锁
+                        this->cond.wait(lock, [this] { return this->stop || this->curr != tasks.end(); });
+                        if (this->stop) [[unlikely]] {
+                            return;
+                        }
+                        // curr != tasks.end()
+                        task = std::move(this->curr->queue.front()); // 从 curr 中获取一个任务
+                        this->curr->queue.pop();                     // 从 curr 的队列中删除这个任务
+                        if (this->curr->queue.empty()) {             // 若 curr 的队列为空
+                            this->map.erase(this->curr->id);         // 从哈希表中删除
+                            curr = this->tasks.erase(this->curr);    // 从链表中删除, 并将 curr 指向下一个结点
+                        } else {                                     // 否则
+                            curr++;                                  // 直接将 curr 指向下一个结点
+                        }
+                        if (curr == tasks.end()) { // 若 curr 已经是最后一个结点
+                            curr = tasks.begin();  // 则将 curr 指向第一个结点(可能仍为 tasks.end())
+                        }
+                    }
+                    task();
+                }
+            });
+    }
+
+    template <class F, class... Args>
+    void emplace(const std::string &id, int count, std::vector<std::future<return_type>> &res, F &&f, Args &&...args) {
+        res.reserve(res.size() + count);
+        {
+            std::unique_lock<std::mutex>       lock(mtx); // 上锁
+            typename std::list<Task>::iterator it;
+            if (map.contains(id)) {                        // 若哈希表中已经存在 id
+                it = map.at(id);                           // 则直接从哈希表中由 id 获取迭代器
+            } else {                                       // 否则
+                it = tasks.emplace(curr, Task {.id = id}); // 在 curr 之前插入一个新的 Task
+                map.emplace(id, it);                       // 将 id 和迭代器插入哈希表
+                if (curr == tasks.end()) {                 // 若 curr 已经是最后一个结点(当前没有任务)
+                    curr = it;                             // 则将 curr 指向新插入的结点
+                }
+            }
+            for (int i = 0; i < count; i++) {
+                auto task = std::packaged_task<return_type()>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+                res.emplace_back(task.get_future());
+                it->queue.emplace(std::move(task));
+            }
+        }
+        cond.notify_all();
+        return;
+    }
+
+    void erase(const std::string &id) {
+        if (!map.contains(id))
+            return;
+        std::unique_lock<std::mutex>        lock(mtx); // 上锁
+        typename std::list<Task>::iterator &it = map.at(id);
+        if (it == curr) {
+            curr++;
+        }
+        tasks.erase(it);
+        map.erase(id);
+    }
+
+    void join() {
+        {
+            std::unique_lock<std::mutex> lock(mtx);
+            tasks.clear(); // 清空任务队列
+            map.clear();   // 清空哈希表
+            stop = true;   // 向线程标识退出
+        }
+        cond.notify_all();
+        for (std::thread &worker : workers) {
+            worker.join();
+        }
+    }
 };
 
 } // namespace modules
