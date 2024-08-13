@@ -11,8 +11,11 @@ build/
 # OS
 .DS_Store
 
-# .vscode
+# vscode
 .vscode/
 
-# clangd cache
+# clangd
 .cache/
+
+# python
+env/

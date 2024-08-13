@@ -1,13 +1,11 @@
-// 如果你不懂 C++ 语言, 不需要关注开头的部分.
-// ----------始----------
+// 如果你不懂 C++ 语言, 不需要关注开头这一部分.
 #include <string>
 using namespace std;
 extern class Character;
 extern class ChAttr;
 extern class BuffItem;
-// ----------终----------
 
-// 以下为 C++ 暴露给 lua 的 API. 你可以在 lua 中直接调用它们.
+// 本文件为 C++ 暴露给 lua 的 API. 你可以在 lua 中直接调用它们.
 
 // --------------------分割线--------------------
 // Player. 这些属性和方法可以直接通过 lua 函数的参数 player 进行调用.
