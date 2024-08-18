@@ -117,6 +117,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::BEAT_BACK_RATE):                                break; // 未做相关实现, 推测为运功被打退概率
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MAX_LIFE_PERCENT_ADD):                          break; // 未做相关实现, 额外最大生命值
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MANA_REPLENISH_PERCENT):                        break; // 未做相关实现, 推测为内力回复
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::KUNGFU_TYPE):                                   break; // 未做相关实现, 推测为武学类型, 用于心法 lua 中转换全能属性
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_PHYSICS_DAMAGE):                          this->atDamage[static_cast<int>(DamageType::Physics)] += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_PHYSICS_DAMAGE_RAND):                     this->atDamageRand[static_cast<int>(DamageType::Physics)] += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_SOLAR_DAMAGE):                            this->atDamage[static_cast<int>(DamageType::Solar)] += it.param1Int * c; break;

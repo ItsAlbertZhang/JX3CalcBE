@@ -27,6 +27,7 @@ struct ref {
         enum class SKILL_KIND_TYPE;
         enum class ROLE_TYPE;
         enum class ABSORB_ATTRIBUTE_SHIELD_TYPE;
+        enum class PLAYER_ARENA_TYPE;
     };
 };
 
