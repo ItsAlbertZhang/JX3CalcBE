@@ -10,7 +10,7 @@ using namespace modules;
 using json   = nlohmann::json;
 namespace fs = std::filesystem;
 
-const std::string version = "v1.2.1.080801";
+const std::string version = "v1.2.1.081801";
 
 static inline bool stringContains(const std::string &str, const std::string &substr) {
     return str.find(substr) != std::string::npos;

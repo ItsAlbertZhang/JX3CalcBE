@@ -60,5 +60,12 @@ enum class ref::lua::ROLE_TYPE {
     COUNT,
 };
 
+enum class ref::lua::PLAYER_ARENA_TYPE {
+    DPS,
+    THERAPY,
+    T,
+    COUNT,
+};
+
 } // namespace frame
 } // namespace jx3calc

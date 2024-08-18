@@ -294,6 +294,14 @@ sol::state *frame::lua::statics::luaInit() {
     }
     (*lua)["ABSORB_ATTRIBUTE_SHIELD_TYPE"] = ABSORB_ATTRIBUTE_SHIELD_TYPE;
 
+    sol::table PLAYER_ARENA_TYPE = lua->create_table();
+    for (int i = 0; i < static_cast<int>(Ref<ref::lua::PLAYER_ARENA_TYPE>::count); i++) {
+        PLAYER_ARENA_TYPE[Ref<ref::lua::PLAYER_ARENA_TYPE>::names[i]] = i;
+    }
+    (*lua)["PLAYER_ARENA_TYPE"] = PLAYER_ARENA_TYPE;
+
+    // special
+
     sol::table MOVE_STATE = lua->create_table();
     for (int i = 0; i < static_cast<int>(Ref<ref::lua::MOVE_STATE>::count); i++) {
         MOVE_STATE[Ref<ref::lua::MOVE_STATE>::names[i]] = i;
