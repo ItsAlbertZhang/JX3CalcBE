@@ -113,7 +113,7 @@ brew --version  # 应正确输出版本信息
 运行以下命令以安装 Clang 工具链:
 
 ```shell
-brew install llvm
+brew install llvm@17
 ```
 
 安装完成后, 将 llvm 工具链添加至 path, lib 与 include 中.
@@ -121,14 +121,14 @@ brew install llvm
 打开 `~/.zshrc` , 追加如下内容: (注意 Homebrew 安装位置)
 
 ```shell
-export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
-export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
+export PATH="/opt/homebrew/opt/llvm@17/bin:$PATH"
+export LDFLAGS="-L/opt/homebrew/opt/llvm@17/lib"
+export CPPFLAGS="-I/opt/homebrew/opt/llvm@17/include"
 ```
 
 ```shell
 source ~/.zshrc # 重启终端
-clang --versoin # 应正确输出版本信息
+clang-17 --versoin # 应正确输出版本信息
 ```
 
 #### Step 3: 配置构建工具
