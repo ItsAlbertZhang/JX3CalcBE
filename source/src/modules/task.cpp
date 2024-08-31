@@ -437,7 +437,7 @@ std::string Task::queryDamageList() {
             }
             json objDamage;
             objDamage["time"]           = everyDamage.tick / 1024.0;
-            objDamage["type"]           = static_cast<int>(everyDamage.damageType);
+            objDamage["type"]           = everyDamage.damageType;
             objDamage["id"]             = everyDamage.id;
             objDamage["level"]          = everyDamage.level;
             objDamage["damageBase"]     = everyDamage.damageBase;

@@ -175,7 +175,7 @@ Damage Character::calcDamage(
 
     return Damage {
         .tick           = Event::now(),
-        .damageType     = typeDamage,
+        .damageType     = 1 << static_cast<int>(typeDamage),
         .id             = id,
         .level          = level,
         .damageBase     = static_cast<int>(damage),
@@ -229,7 +229,7 @@ void Character::otherSuperCustomDamage(int sourceID, int skillID, int skillLevel
     // 加入伤害记录
     src->chDamage.emplace_back(Damage {
         .tick           = Event::now(),
-        .damageType     = damageType,
+        .damageType     = 1 << static_cast<int>(damageType),
         .id             = skillID,
         .level          = skillLevel,
         .damageBase     = damage,
