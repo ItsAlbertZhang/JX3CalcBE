@@ -47,7 +47,8 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
                 false,
                 false,
                 1,
-                1
+                1,
+                skill.IsFrost
             );
         }
         for (int idxTime = 0; idxTime < callSurplusDamage[idxType]; idxTime++) {
@@ -68,7 +69,8 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
                 true,
                 false,
                 1,
-                1
+                1,
+                skill.IsFrost
             );
         }
     }

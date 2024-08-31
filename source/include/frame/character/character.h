@@ -120,7 +120,8 @@ public:
         bool             isSurplus,
         bool             isBuff,
         int              buffInterval,
-        int              buffCount
+        int              buffCount,
+        bool             isFrost
     );
     std::tuple<int, int> calcCritical(const ChAttr &attrSelf, int skillID, int skillLevel);
 

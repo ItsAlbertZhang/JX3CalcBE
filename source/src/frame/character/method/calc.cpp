@@ -65,7 +65,8 @@ Damage Character::calcDamage(
     bool             isSurplus,
     bool             isBuff,
     int              buffInterval,
-    int              buffCount
+    int              buffCount,
+    bool             isFrost
 ) {
     int atStrain                  = this->chAttr.getStrain();               // 类型× 自身实时
     int atSurplus                 = this->chAttr.getSurplus();              // 类型× 自身实时
@@ -172,6 +173,13 @@ Damage Character::calcDamage(
 
     ull damageCritical = damage * (1792 + atCriticalDamagePower) / 1024;
     ull damageExcept   = (damage * (10000 - atCriticalStrike) + damageCritical * atCriticalStrike) / 10000;
+
+    if (isFrost) { // 无质
+        damage           = damageExcept;
+        damageCritical   = damageExcept;
+        atCriticalStrike = 0;
+        isCritical       = false;
+    }
 
     return Damage {
         .tick           = Event::now(),

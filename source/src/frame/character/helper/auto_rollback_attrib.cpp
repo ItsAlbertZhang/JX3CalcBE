@@ -82,7 +82,8 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
             false,
             true,
             item->rawInterval,
-            item->rawCount
+            item->rawCount,
+            false
         ));
         src->bFightState = true;
     } break;
@@ -113,7 +114,8 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
             false,
             true,
             item->rawInterval,
-            item->rawCount
+            item->rawCount,
+            false
         ));
         src->bFightState = true;
     } break;

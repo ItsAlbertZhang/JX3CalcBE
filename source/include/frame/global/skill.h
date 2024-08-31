@@ -42,10 +42,12 @@ public:
     bool     TargetRelationSelf;
     bool     TargetRelationEnemy;
     int      RecipeType;
-    int      SunSubsectionSkillID;
-    int      SunSubsectionSkillLevel;
-    int      MoonSubsectionSkillID;
-    int      MoonSubsectionSkillLevel;
+    bool     IsFrost;
+
+    int SunSubsectionSkillID;
+    int SunSubsectionSkillLevel;
+    int MoonSubsectionSkillID;
+    int MoonSubsectionSkillLevel;
 
     // ---------- 技能等级 ----------
     int dwSkillID = -1;
