@@ -65,6 +65,7 @@ void SkillManager::add(int skillID, int skillLevel) {
     skill.TargetRelationSelf   = skill.tab["TargetRelationSelf"] == "1";
     skill.TargetRelationEnemy  = skill.tab["TargetRelationEnemy"] == "1";
     skill.RecipeType           = atoi(skill.tab["RecipeType"].c_str());
+    skill.IsFrost              = skill.tab["IsFrost"] == "1";
     // 处理默认武器伤害.
     // 目前推测: WeaponRequest 字段非 0 的技能默认拥有 1024 的武器伤害 (可以在后续 lua 的 getGetSkillLevelData 中被覆盖).
     // 注意: 拥有武器伤害不一定代表会造成武器伤害. 造成武器伤害与 AddAttribute 中的 CALL_PHYSICS_DAMAGE 有关.

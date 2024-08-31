@@ -437,7 +437,7 @@ std::string Task::queryDamageList() {
             }
             json objDamage;
             objDamage["time"]           = everyDamage.tick / 1024.0;
-            objDamage["type"]           = static_cast<int>(everyDamage.damageType);
+            objDamage["type"]           = everyDamage.damageType;
             objDamage["id"]             = everyDamage.id;
             objDamage["level"]          = everyDamage.level;
             objDamage["damageBase"]     = everyDamage.damageBase;
@@ -512,7 +512,7 @@ std::string Task::queryDamageAnalysis() {
             objDamage["id"]         = it.id;
             objDamage["level"]      = it.level;
             objDamage["name"]       = it.name;
-            objDamage["count"]      = static_cast<double>(it.count / CNT_DETAIL_TASKS);
+            objDamage["count"]      = static_cast<double>(it.count) / CNT_DETAIL_TASKS;
             objDamage["damageMin"]  = it.damageMin;
             objDamage["damageMax"]  = it.damageMax;
             objDamage["proportion"] = static_cast<double>(it.damageSum) / sumDamage;

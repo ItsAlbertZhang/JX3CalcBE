@@ -27,9 +27,10 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
     std::uniform_int_distribution<> dis(0, 9999);
     bool                            isCritical = dis(gen) < atCriticalStrike;
     // 计算伤害
+    Damage                          item;
     for (int idxType = 0; idxType < static_cast<int>(DamageType::COUNT); idxType++) {
         for (int idxTime = 0; idxTime < callDamage[idxType]; idxTime++) {
-            runtime->damageList.emplace_back(self->calcDamage(
+            item += self->calcDamage(
                 skill.dwSkillID,
                 skill.dwLevel,
                 self->chAttr,
@@ -46,11 +47,12 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
                 false,
                 false,
                 1,
-                1
-            ));
+                1,
+                skill.IsFrost
+            );
         }
         for (int idxTime = 0; idxTime < callSurplusDamage[idxType]; idxTime++) {
-            runtime->damageList.emplace_back(self->calcDamage(
+            item += self->calcDamage(
                 skill.dwSkillID,
                 skill.dwLevel,
                 self->chAttr,
@@ -67,10 +69,13 @@ bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
                 true,
                 false,
                 1,
-                1
-            ));
+                1,
+                skill.IsFrost
+            );
         }
     }
+    if (item.damageType)
+        runtime->damageList.emplace_back(std::move(item));
     return isCritical;
 }
 
