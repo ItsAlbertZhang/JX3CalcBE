@@ -35,6 +35,11 @@ bool init(const std::string &jsonstr);
 // 返回当前配置的状态
 std::string status();
 
+// 判断是否为测试服. 正式服更新合并测试服时, 注意检查此函数调用.
+inline bool isExp() {
+    return dataAvailable == dataStatus::jx3_exp;
+}
+
 }; // namespace config
 } // namespace modules
 } // namespace jx3calc

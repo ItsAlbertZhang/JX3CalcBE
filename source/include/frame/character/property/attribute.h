@@ -23,7 +23,7 @@ public:
         return *this;
     }
 
-    int atLevel = 120; // 等级
+    int atLevel = 100; // 等级
 
     int atBasePotentialAdd       = 0; // 所有主属性
     int atVitalityBase           = 0; // 体质

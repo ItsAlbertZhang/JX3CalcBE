@@ -1,13 +1,15 @@
 #include "frame/character/character.h"
 #include "frame/character/helper/auto_rollback_attrib.h"
 #include "frame/character/helper/auto_rollback_attribute.h"
+#include "modules/config.h"
 #include <cstdlib>
 
 using namespace jx3calc;
 using namespace frame;
 
 Character::Character() {
-    this->dwID = static_cast<int>(characterList.size() + 1); // 从 1 开始, 以便在出现异常情况时核查.
+    this->dwID           = static_cast<int>(characterList.size() + 1); // 从 1 开始, 以便在出现异常情况时核查.
+    this->chAttr.atLevel = modules::config::isExp() ? 130 : 120;
     characterList.push_back(this);
     characterMap.emplace(this, this->dwID);
 }

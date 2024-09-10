@@ -279,7 +279,7 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
         player->customLua = frame::CustomLua::get(arg.fight.value());
     }
 
-    std::unique_ptr<frame::NPC> npc = concrete::createNPC(concrete::NPC::NPC124);
+    std::unique_ptr<frame::NPC> npc = concrete::createNPC(concrete::NPC::NPCatLevelAdd4);
     player->targetSelect            = npc.get();
     frame::Event::clear();
 

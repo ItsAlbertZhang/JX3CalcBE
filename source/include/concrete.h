@@ -8,15 +8,15 @@ namespace concrete {
 enum class Player {
     MjFysj,
 };
-inline const std::unordered_map<std::string, Player> playerMap{
+inline const std::unordered_map<std::string, Player> playerMap {
     {"焚影圣诀", Player::MjFysj},
 };
 
 enum class NPC {
-    NPC124,
+    NPCatLevelAdd4,
 };
-inline const std::unordered_map<std::string, NPC> npcMap{
-    {"124级NPC目标", NPC::NPC124},
+inline const std::unordered_map<std::string, NPC> npcMap {
+    {"高4级NPC目标", NPC::NPCatLevelAdd4},
 };
 
 } // namespace concrete

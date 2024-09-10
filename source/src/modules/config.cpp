@@ -102,7 +102,7 @@ std::string config::status() {
         userinput["maxFightCount"]    = taskdata::maxFightCount;
 
         data["custom"] = taskdata::allowCustom;
-        data["isExp"]  = dataAvailable == dataStatus::jx3_exp;
+        data["isExp"]  = isExp();
     }
     return j.dump();
 }

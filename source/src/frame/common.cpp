@@ -1,11 +1,14 @@
 #include "frame/common/globalparam.h"
 #include "gdi.h"
+#include "modules/config.h"
 #include "plugin/log.h"
 
 using namespace jx3calc::frame;
 
 int GlobalParam::levelCof(int level) {
-    if (level > 110)
+    if (jx3calc::modules::config::isExp() && level > 120)
+        return 1155 * (level - 120) * 8250;
+    else if (level > 110)
         return 450 * (level - 110) + 3750;
     else if (level > 100)
         return 205 * (level - 100) + 1700;
