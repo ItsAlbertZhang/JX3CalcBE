@@ -1,3 +1,4 @@
+#include "frame/common/globalparam.h"
 #include "frame/lua/statics.h"
 #include "gdi.h"
 #include "modules/config.h"
@@ -17,7 +18,11 @@ int main(int argc, char *argv[]) {
     // 初始化程序
     modules::config::init(argc, argv);
     // 初始化接口
-    int ret = gdi::luaInit(frame::lua::statics::luaInit, frame::lua::statics::luaFuncList, frame::lua::statics::luaFuncListSize);
+    int ret = gdi::luaInit(
+        frame::lua::statics::luaInit,
+        frame::lua::statics::luaFuncList,
+        frame::lua::statics::luaFuncListSize
+    );
     if (0 != ret) {
         std::cerr << "Init failed." << std::endl;
 #ifdef _WIN32
@@ -25,7 +30,10 @@ int main(int argc, char *argv[]) {
 #endif
         return 0;
     }
+    // 初始化全局变量 (不需要每个线程都初始化一次, 因此不在 luaInit 中初始化)
+    frame::GlobalParam::init();
 
+    // 运行 Web 服务器
     modules::web::run();
 
     return 0;

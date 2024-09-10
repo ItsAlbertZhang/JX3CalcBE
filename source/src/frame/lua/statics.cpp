@@ -1,5 +1,6 @@
 #include "frame/lua/statics.h"
 #include "frame/character/character.h"
+#include "frame/common/globalparam.h"
 #include "frame/global/skill.h"
 #include "frame/lua/global_func.h"
 #include "frame/lua/interface.h"
@@ -235,6 +236,8 @@ sol::state *frame::lua::statics::luaInit() {
     (*lua)["Random"]                   = &lua::gfunc::Random;
     (*lua)["GetEditorString"]          = &lua::gfunc::GetEditorString;
     (*lua)["IsClient"]                 = &lua::gfunc::IsClient;
+    (*lua)["GetSkillGlobalParam"]      = &lua::gfunc::GetSkillGlobalParam;
+    (*lua)["Log"]                      = &lua::gfunc::Log;
 
     // lua 常量
 
@@ -300,7 +303,7 @@ sol::state *frame::lua::statics::luaInit() {
     }
     (*lua)["PLAYER_ARENA_TYPE"] = PLAYER_ARENA_TYPE;
 
-    // special
+    // 特殊 lua 表
 
     sol::table MOVE_STATE = lua->create_table();
     for (int i = 0; i < static_cast<int>(Ref<ref::lua::MOVE_STATE>::count); i++) {
@@ -315,6 +318,30 @@ sol::state *frame::lua::statics::luaInit() {
         KUNGFU_ADAPTIVETYPE_LIST[static_cast<int>(it.first)] = sub_table;
     }
     (*lua)["KUNGFU_ADAPTIVETYPE_LIST"] = KUNGFU_ADAPTIVETYPE_LIST;
+
+    // 全局变量
+    auto globalparam                                             = lua->new_usertype<GlobalParam>("GlobalParam");
+    globalparam["fPlayerCriticalCof"]                            = &GlobalParam::fPlayerCriticalCof;
+    globalparam["fCriticalStrikeParam"]                          = &GlobalParam::fCriticalStrikeParam;
+    globalparam["fCriticalStrikePowerParam"]                     = &GlobalParam::fCriticalStrikePowerParam;
+    globalparam["fDefCriticalStrikeParam"]                       = &GlobalParam::fDefCriticalStrikeParam;
+    globalparam["fDecriticalStrikePowerParam"]                   = &GlobalParam::fDecriticalStrikePowerParam;
+    globalparam["fHitValueParam"]                                = &GlobalParam::fHitValueParam;
+    globalparam["fDodgeParam"]                                   = &GlobalParam::fDodgeParam;
+    globalparam["fParryParam"]                                   = &GlobalParam::fParryParam;
+    globalparam["fInsightParam"]                                 = &GlobalParam::fInsightParam;
+    globalparam["fPhysicsShieldParam"]                           = &GlobalParam::fPhysicsShieldParam;
+    globalparam["fMagicShieldParam"]                             = &GlobalParam::fMagicShieldParam;
+    globalparam["fOvercomeParam"]                                = &GlobalParam::fOvercomeParam;
+    globalparam["fHasteRate"]                                    = &GlobalParam::fHasteRate;
+    globalparam["fToughnessDecirDamageCof"]                      = &GlobalParam::fToughnessDecirDamageCof;
+    globalparam["fSurplusParam"]                                 = &GlobalParam::fSurplusParam;
+    globalparam["fAssistedPowerCof"]                             = &GlobalParam::fAssistedPowerCof;
+    globalparam["fDecriticalDamagePowerToPhysicsAttackPowerCof"] = &GlobalParam::fDecriticalDamagePowerToPhysicsAttackPowerCof;
+    globalparam["fDecriticalDamagePowerToMagicAttackPowerCof"]   = &GlobalParam::fDecriticalDamagePowerToMagicAttackPowerCof;
+    globalparam["fDecriticalDamagePowerToMaxLifeBaseCof"]        = &GlobalParam::fDecriticalDamagePowerToMaxLifeBaseCof;
+    globalparam["nMaxDecriticalDamagePowerEableConvert"]         = &GlobalParam::nMaxDecriticalDamagePowerEableConvert;
+    globalparam["fDecriticalDamagePVPCof"]                       = &GlobalParam::fDecriticalDamagePVPCof;
 
     return lua;
 }

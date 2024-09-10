@@ -1,5 +1,5 @@
-#include "frame/character/character.h"
 #include "frame/lua/global_func.h"
+#include "frame/character/character.h"
 #include "frame/lua/interface.h"
 #include "plugin/log.h"
 #include <random>
@@ -142,4 +142,12 @@ std::string lua::gfunc::GetEditorString(int a, int b) {
 
 bool lua::gfunc::IsClient() {
     return false;
+}
+
+GlobalParam *lua::gfunc::GetSkillGlobalParam() {
+    return GlobalParam::instance();
+}
+
+void lua::gfunc::Log(const std::string &msg) {
+    std::cout << msg << std::endl;
 }
