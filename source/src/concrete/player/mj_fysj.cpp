@@ -2,6 +2,7 @@
 #include "frame/character/derived/player.h"
 #include "frame/common/event.h"
 #include "frame/event.h"
+#include "modules/config.h"
 
 using namespace jx3calc;
 
@@ -166,7 +167,7 @@ enum operation {
 };
 
 MjFysj::MjFysj() :
-    Player(8, 10242, 13, 503) {}
+    Player(8, 10242, modules::config::isExp() ? 14 : 13, 503) {}
 
 auto MjFysj::getSkills(const typeSkillMap &custom) -> typeSkillMap {
     static const typeSkillMap skill {
