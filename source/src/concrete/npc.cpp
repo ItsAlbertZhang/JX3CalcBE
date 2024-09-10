@@ -8,7 +8,6 @@ namespace {
 class NPC124 : public frame::NPC {
 public:
     NPC124() {
-        nLevel                     = 124;
         chAttr.atLevel             = 124;
         chAttr.atPhysicsShieldBase = 27550;
         chAttr.atMagicShield       = 27550;

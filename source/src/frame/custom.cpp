@@ -263,7 +263,6 @@ static void constructorBefore(CustomLua *self) {
     player["otherDoAction"]                  = &Player::otherDoAction;
     player["otherPlayPublicShadowAnimation"] = &Player::otherPlayPublicShadowAnimation;
     player["dwID"]                           = &Player::dwID;
-    player["nLevel"]                         = &Player::nLevel;
     player["nX"]                             = &Player::nX;
     player["nY"]                             = &Player::nY;
     player["nZ"]                             = &Player::nZ;
@@ -277,6 +276,7 @@ static void constructorBefore(CustomLua *self) {
     player["bFightState"]                    = &Player::bFightState;
     player["fMaxLife64"]                     = &Player::fMaxLife64;
     player["fCurrentLife64"]                 = &Player::fCurrentLife64;
+    player["nLevel"]                         = sol::property(&Player::nLevel_getter, &Player::nLevel_setter);
     player["attrImportFromData"]             = &Player::attrImportFromData;
     player["attrImportFromJX3BOX"]           = &Player::attrImportFromJX3BOX;
     player["buffTimeLeftTick"]               = &Player::buffTimeLeftTick;

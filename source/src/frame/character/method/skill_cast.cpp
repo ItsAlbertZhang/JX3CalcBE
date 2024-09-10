@@ -304,7 +304,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     // 8. 绑定 buff
     for (int i = 0; i < 4; i++) {
         if (bindbuff.isValid[i] && target != nullptr) {
-            target->buffBind(dwID, nLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+            target->buffBind(dwID, chAttr.atLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
         }
     }
 

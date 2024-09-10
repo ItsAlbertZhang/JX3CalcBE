@@ -97,7 +97,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SUN_POWER_VALUE):           self->nSunPowerValue = it.param1Int; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MOON_POWER_VALUE):          self->nMoonPowerValue = it.param1Int; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_BUFF):
-                self->buffAdd(self->dwID, self->nLevel, it.param1Int, it.param2);
+                self->buffAdd(self->dwID, self->chAttr.atLevel, it.param1Int, it.param2);
                 break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DEL_SINGLE_BUFF_BY_ID_AND_LEVEL):
                 self->buffDel(it.param1Int, it.param2);
@@ -280,7 +280,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
                     CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
             } break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_BUFF):
-                target->buffAdd(self->dwID, self->nLevel, it.param1Int, it.param2);
+                target->buffAdd(self->dwID, self->chAttr.atLevel, it.param1Int, it.param2);
                 break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DASH):
                 // 未做相关实现, 推测为冲刺

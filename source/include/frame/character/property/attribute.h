@@ -6,7 +6,10 @@ namespace jx3calc {
 namespace frame {
 /**
  * @brief ChAttr 类
- * @note 作为 Character 类的一个属性, 其作用是封装, 避免 Character 类过于臃肿.
+ * @note 从某种意义上来说, 这个类不应当存在, 其下的所有成员变量和函数应当直接放在 Character 类中.
+ * @note 然而, 为了避免 Character 类过于臃肿, 同时方便快照, 此处对其进行了封装.
+ * @note 设计依据: 是否常用 ROLLBACK. 如果常用回滚, 则放在本类中; 否则放在 Character 类中.
+ * @note 例如, 对于日灵月魂, maxEnergy 为 rollback, 因此放在本类中. 而 currentEnergy 为非 rollback, 因此放在 Character 类中.
  * @warning 注意该类的默认构造函数和拷贝构造函数! 应尽量避免向此类中添加高级数据类型, 如 std::string 等. 如果一定要添加, 请注意拷贝构造函数的实现.
  */
 class ChAttr {
@@ -232,6 +235,7 @@ public:
 
     int atSpunkToSolarAndLunarAttackPowerCof    = 0; // 元气转换为阳性和阴性内功攻击的系数
     int atSpunkToSolarAndLunarCriticalStrikeCof = 0; // 元气转换为阳性和阴性内功会心的系数
+    // ... 其余未出现的属性暂时省略
 
     int atMaxSunEnergy  = 0; // 最大日灵
     int atMaxMoonEnergy = 0; // 最大月魂

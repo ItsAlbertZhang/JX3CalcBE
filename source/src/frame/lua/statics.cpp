@@ -190,7 +190,6 @@ sol::state *frame::lua::statics::luaInit() {
     character["PlayPublicShadowAnimation"] = &Character::otherPlayPublicShadowAnimation;
     character["SuperCustomDamage"]         = &Character::otherSuperCustomDamage;
     character["dwID"]                      = &Character::dwID;
-    character["nLevel"]                    = &Character::nLevel;
     character["nX"]                        = &Character::nX;
     character["nY"]                        = &Character::nY;
     character["nZ"]                        = &Character::nZ;
@@ -205,6 +204,7 @@ sol::state *frame::lua::statics::luaInit() {
     character["bFightState"]               = &Character::bFightState;
     character["fMaxLife64"]                = &Character::fMaxLife64;
     character["fCurrentLife64"]            = &Character::fCurrentLife64;
+    character["nLevel"]                    = sol::property(&Character::nLevel_getter, &Character::nLevel_setter);
 
     auto buff                = lua->new_usertype<BuffItem>("Buff");
     buff["nLevel"]           = &BuffItem::nLevel;

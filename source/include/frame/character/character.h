@@ -182,9 +182,8 @@ public:
     void otherPlayPublicShadowAnimation(int a, int b, bool c, bool d);
     void otherSuperCustomDamage(int sourceID, int skillID, int skillLevel, int type, int damage);
 
-    //  ---------- 被游戏 lua 调用的属性, 通常为匈牙利命名法 ----------
+    //  ---------- 被游戏 lua 调用的属性 ----------
     int    dwID;                          // 角色 ID
-    int    nLevel = chAttr.atLevel;       // 等级, 这是唯一一个同时存在于此处和 chAttr 内部的属性
     int    nX, nY, nZ;                    // 坐标
     int    nCurrentSunEnergy     = 0;     // 当前日灵
     int    nCurrentMoonEnergy    = 0;     // 当前月魂
@@ -192,11 +191,18 @@ public:
     int    nMoonPowerValue       = 0;     // 满月
     int    nRoleType             = 0;     // 角色体型
     int    nTouchRange           = 0;     // 距离补偿
-    bool   bSurplusAutoCast      = false; // 出现于 明教_套路_内功_焚影圣诀.lua
-    bool   bSurplusAutoReplenish = true;  // 出现于 明教_套路_内功_焚影圣诀.lua
-    bool   bFightState           = false; // 是否处于战斗状态
-    double fMaxLife64            = 0;     // 最大生命值
-    double fCurrentLife64        = 0;     // 当前生命值
+    bool   bSurplusAutoCast      = false; // 破招自动施展
+    bool   bSurplusAutoReplenish = true;  // 破招自动充能
+    bool   bFightState           = false; // 战斗状态
+    double fMaxLife64            = 0;     // 最大气血值
+    double fCurrentLife64        = 0;     // 当前气血值
+
+    int nLevel_getter() {
+        return chAttr.atLevel;
+    }
+    void nLevel_setter(int value) {
+        chAttr.atLevel = value;
+    }
 
 private:
     static inline thread_local std::vector<Character *>             characterList; // 角色列表
