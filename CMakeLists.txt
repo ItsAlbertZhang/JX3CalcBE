@@ -98,6 +98,19 @@ if(NOT DEFINED JX3CALC_ENV_OK)
     set(JX3CALC_ENV_OK)
 endif()
 
+# ########## platform ##########
+
+if(WIN32)
+    set(GDI_DLL gdi.dll)
+    set(JX3CALC_EXE jx3calc_windows)
+elseif(APPLE)
+    set(GDI_DLL libgdi.dylib)
+    set(JX3CALC_EXE jx3calc_macos)
+else()
+    set(GDI_DLL libgdi.so)
+    set(JX3CALC_EXE jx3calc_linux)
+endif()
+
 # ########## private ##########
 if(EXISTS "${CMAKE_SOURCE_DIR}/private")
     add_subdirectory(private) # 若 private 目录存在, 则构建
@@ -107,13 +120,6 @@ else()
         GDI
         NAMES gdi
         PATHS "${CMAKE_SOURCE_DIR}/source/lib")
-    if(WIN32)
-        set(GDI_DLL gdi.dll)
-    elseif(APPLE)
-        set(GDI_DLL libgdi.dylib)
-    else()
-        set(GDI_DLL libgdi.so)
-    endif()
     file(COPY "${CMAKE_SOURCE_DIR}/source/lib/${GDI_DLL}" DESTINATION "${OUTPUT_DIRECTORY}")
 endif()
 
@@ -123,19 +129,19 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DD_CONSTEXPR_CHANNELINTERVAL)
 endif()
 
-file(GLOB_RECURSE MAIN_SOURCES "${CMAKE_SOURCE_DIR}/source/src/*.cpp" "${CMAKE_SOURCE_DIR}/source/lib/*.cpp")
-add_executable(jx3calc ${MAIN_SOURCES}) # 编译为可执行文件
+file(GLOB_RECURSE MAIN_SOURCES "${CMAKE_SOURCE_DIR}/source/src/*.cpp")
+add_executable(${JX3CALC_EXE} ${MAIN_SOURCES}) # 编译为可执行文件
 
-target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/extern/asio/asio/include")
-target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/extern/cpp-httplib")
-target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/extern/crow/include")
-target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/extern/nlohmann-json/include")
-target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/source/lib")
-target_include_directories(jx3calc PRIVATE "${CMAKE_SOURCE_DIR}/source/include")
+target_include_directories(${JX3CALC_EXE} PRIVATE "${CMAKE_SOURCE_DIR}/extern/asio/asio/include")
+target_include_directories(${JX3CALC_EXE} PRIVATE "${CMAKE_SOURCE_DIR}/extern/cpp-httplib")
+target_include_directories(${JX3CALC_EXE} PRIVATE "${CMAKE_SOURCE_DIR}/extern/crow/include")
+target_include_directories(${JX3CALC_EXE} PRIVATE "${CMAKE_SOURCE_DIR}/extern/nlohmann-json/include")
+target_include_directories(${JX3CALC_EXE} PRIVATE "${CMAKE_SOURCE_DIR}/source/lib")
+target_include_directories(${JX3CALC_EXE} PRIVATE "${CMAKE_SOURCE_DIR}/source/include")
 
-target_link_libraries(jx3calc PRIVATE ${GDI}) # 链接 gdi 库
-target_link_libraries(jx3calc PRIVATE ${LUA}) # 链接 lua 库
+target_link_libraries(${JX3CALC_EXE} PRIVATE ${GDI}) # 链接 gdi 库
+target_link_libraries(${JX3CALC_EXE} PRIVATE ${LUA}) # 链接 lua 库
 if(DEFINED CROW_ENABLE_SSL)
     add_definitions(-DCROW_ENABLE_SSL)
-    target_link_libraries(jx3calc PRIVATE ssl crypto) # 链接 ssl 库
+    target_link_libraries(${JX3CALC_EXE} PRIVATE ssl crypto) # 链接 ssl 库
 endif()

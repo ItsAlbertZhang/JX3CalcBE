@@ -1,0 +1,64 @@
+on: push
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - {
+              os: ubuntu-24.04,
+              compiler-c: /usr/bin/clang-17,
+              compiler-cpp: /usr/bin/clang++-17,
+            }
+          - {
+              os: macos-latest,
+              compiler-c: /opt/homebrew/opt/llvm@17/bin/clang,
+              compiler-cpp: /opt/homebrew/opt/llvm@17/bin/clang++,
+            }
+          - { os: windows-latest }
+    runs-on: ${{ matrix.config.os }}
+    name: ${{ matrix.config.os }}
+
+    steps:
+      - name: 1. Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 2. Init submodules
+        run: git submodule update --init --recursive
+
+      - name: 3. Prepare Environment (macOS)
+        if: matrix.config.os == 'macos-latest'
+        run: |
+          brew install llvm@17
+          export PATH="/opt/homebrew/opt/llvm@17/bin:$PATH"
+          export LDFLAGS="-L/opt/homebrew/opt/llvm@17/lib"
+          export CPPFLAGS="-I/opt/homebrew/opt/llvm@17/include"
+
+      - name: 3. Prepare Environment (Linux)
+        if: matrix.config.os == 'ubuntu-24.04'
+        run: |
+          sudo apt update
+          sudo apt install -y clang-17 lldb-17 lld-17 libc++-17-dev libc++abi-17-dev
+
+      - name: 4. Build Project
+        uses: threeal/cmake-action@v2
+        with:
+          build-dir: ./build/obj/Release
+          options: |
+            CMAKE_BUILD_TYPE=Release
+          c-compiler: ${{ matrix.config.compiler-c || '' }}
+          cxx-compiler: ${{ matrix.config.compiler-cpp || '' }}
+
+      - name: 5. Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ runner.os }}
+          path: |
+            ./build/bin/Release/libgdi.so
+            ./build/bin/Release/libgdi.dylib
+            ./build/bin/Release/gdi.dll
+            ./build/bin/Release/gdi.lib
+            ./build/bin/Release/jx3calc_windows.exe
+            ./build/bin/Release/jx3calc_macos
+            ./build/bin/Release/jx3calc_linux
