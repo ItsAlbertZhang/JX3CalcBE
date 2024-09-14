@@ -76,7 +76,7 @@ if(NOT DEFINED JX3CALC_ENV_OK)
     endfunction()
 
     if(WIN32)
-        download_lua("https://nchc.dl.sourceforge.net/project/luabinaries/5.4.2/Windows%20Libraries/Static/lua-5.4.2_Win64_vc17_lib.zip" "lua-5.4.2_Win64_vc17_lib.zip")
+        download_lua("https://sourceforge.net/projects/luabinaries/files/5.4.2/Windows%20Libraries/Static/lua-5.4.2_Win64_vc17_lib.zip/download" "lua-5.4.2_Win64_vc17_lib.zip")
         find_library(
             LUA
             NAMES lua54
