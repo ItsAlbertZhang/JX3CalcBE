@@ -20,7 +20,7 @@
 namespace gdi {
 
 /**
- * @brief 初始化 data.
+ * @brief 初始化 data, 由 gdi 库实现.
  * @param jx3Dir 剑网3 (JX3) 目录. 该项可以为空, 但不可与 unpackDir 同时为空.
  * @param unpackDir 未打包的数据目录. 该项可以为空, 但不可与 jx3Dir 同时为空.
  * @warning 传入的字符串中如果包含中文, 应当为 utf-8 编码.
@@ -29,7 +29,7 @@ namespace gdi {
 int dataInit(const char *jx3Dir, const char *unpackDir);
 
 /**
- * @brief 初始化 lua.
+ * @brief 初始化 lua, 由 gdi 库实现.
  * @param initLua lua 初始化函数.
  * @param luaFuncList lua 函数列表.
  * @param luaFuncListSize lua 函数列表大小.
@@ -43,7 +43,7 @@ int dataInit(const char *jx3Dir, const char *unpackDir);
 int luaInit(sol::state *(*initLua)(), const char *const luaFuncList[], size_t luaFuncListSize);
 
 /**
- * @brief 执行 lua 文件.
+ * @brief 执行 lua 文件, 由 gdi 库实现.
  * @param path 文件路径.
  * @warning 传入的字符串中如果包含中文, 应当为 utf-8 编码.
  * @note 如果 path 是从 tab 获取的, 那么它天生就是 utf-8 编码的.
@@ -52,12 +52,18 @@ int luaInit(sol::state *(*initLua)(), const char *const luaFuncList[], size_t lu
 int luaExecuteFile(const char *path);
 
 /**
- * @brief 获取 lua 函数.
+ * @brief 获取 lua 函数, 由 gdi 库实现.
  * @param name 函数名.
  * @warning 注意在 luaInit 函数的 details 中强调的线程安全问题, 不要让返回值被其他线程使用!
  * @return lua 函数.
  */
 sol::protected_function luaGetFunction(const char *name);
+
+/**
+ * @brief tabSelect 所用到的实际接口, 由 gdi 库实现.
+ * @note 使用方法详见下文的定义及实现.
+ */
+void tabQuery(int tabIdx, char *data, size_t dataSize); // 实际接口, 由 gdi 库实现
 
 /**
  * @brief 表枚举
@@ -165,15 +171,18 @@ inline select_t deserialize(const char *buffer, size_t size) {
     return data;
 }
 
-void tabQuery(int tabIdx, char *data, size_t dataSize); // 实际接口
-
 /**
  * @brief 查询满足 key-value 的行
  * @param arg 是一个 `select_t` 类型的变量, 用于传入和传出数据. 详情请查看其定义.
+ * @note 对于不同的表而言, tabSelect 是线程安全的.
  * @warning 对于相同的表而言, tabSelect 不是线程安全的.
  * 在每个线程中维护同一份数据从设计角度上来说是不必要的. 请自行确保进入同一份表时的线程安全.
- * @warning 这个函数不会被 gdi 库定义, 实现见 gdi.cpp .
  */
-void tabSelect(Tab tab, select_t &arg);
+inline void tabSelect(Tab tab, select_t &arg) {
+    const size_t                                size = 1024 * 1024 * 16;
+    static thread_local std::unique_ptr<char[]> data(new char[size]); // 保证在不同表之间不会出现数据竞争
+    tabQuery(static_cast<int>(tab), serialize(arg, data.get(), size), size);
+    arg = deserialize(data.get(), size);
+}
 
 } // namespace gdi

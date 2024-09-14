@@ -1,21 +1,10 @@
-# gitkeep
 !*.gitkeep
 
-# gdi
-JX3CalcBEgdi/
-
-# build
-bin/
+private/
 build/
 
-# OS
+# external tools
 .DS_Store
-
-# vscode
 .vscode/
-
-# clangd
 .cache/
-
-# python
 env/
