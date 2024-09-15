@@ -5,7 +5,6 @@
 #include "frame/character/property/attribute.h"
 #include "frame/common/damage.h"
 #include "modules/pool.h"
-#include <format>
 #include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
@@ -34,8 +33,6 @@ namespace task {
 
 class Task {
 public:
-    Task(const std::string &id) :
-        id(id) {};
     const std::string id;
 
     class Data {
@@ -55,12 +52,15 @@ public:
         // 具体数值代表的状态由各心法负责具体实现.
         int fightType = 0;
 
-        frame::Player::typeSkillMap    skills;
-        frame::Player::typeTalentArray talents;
+        frame::Player::typeTalents talents;
+        frame::Player::typeRecipes recipes;
 
         std::optional<std::string> fight;
 
     } data;
+
+    Task(const std::string &id, const Data &data) :
+        id(id), data(data) {}
 
     std::atomic<bool>             stop {false};
     std::vector<std::future<int>> futures;
@@ -96,42 +96,12 @@ inline std::unordered_map<std::string, enumCustom> refCustom {
     {"使用游戏内宏", enumCustom::jx3},
 };
 
-class Response {
-    inline static const char *status[] {
-        "",
-        "config.json not available.",
-        "json parse error.",
-        "Error in base: missing field or invalid option: ",
-        "Error in base: invalid input value.",
-        "Error in attribute: ",
-        "Error in effect: ",
-        "Error in fight: ",
-        "Error in talents: ",
-        "Error in skills: ",
-    };
-
-public:
-    int         idx = 1;
-    std::string message;
-
-    void next() {
-        assert(idx > 0);
-        idx++;
-        if (idx == sizeof(status) / sizeof(status[0])) [[unlikely]]
-            idx = 0;
-    }
-    std::string format() {
-        return std::format("{{\"status\":{},\"data\":\"{}{}\"}}", idx, status[idx], message);
-    }
-};
-
 class Server {
 public:
     Server();  // 构造函数会非阻塞异步启动子线程任务模块.
     ~Server(); // 析构函数会停止子线程任务模块并同步等待其退出.
-    auto validate(const std::string &jsonstr) -> Response;
-    auto create(const std::string &jsonstr) -> Response;
-    void pause(std::string id);
+    auto create(const std::string &jsonstr) -> std::string;
+    // void pause(std::string id);
     void stop(std::string id);
 
     std::unordered_map<std::string, std::unique_ptr<Task>> taskMap;

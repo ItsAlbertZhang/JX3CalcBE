@@ -34,10 +34,10 @@ void Character::skillActive(int skillID) {
     }
     CONSTEXPR_LOG_INFO("ActiveSkill: {} # {}", skillID, skillLevel);
     const Skill           &skill = SkillManager::get(skillID, skillLevel);
-    RuntimeCastSkill       runtime{this, skillID, skillLevel};
-    AutoRollbackAttribute *ptr = new AutoRollbackAttribute{this, nullptr, &runtime, skill};
+    RuntimeCastSkill       runtime {this, skillID, skillLevel};
+    AutoRollbackAttribute *ptr = new AutoRollbackAttribute {this, nullptr, &runtime, skill};
     autoRollbackAttributeList.emplace(ptr);
-    this->chSkill.skillActived.emplace(skillID, ChSkill::SkillActived{skillLevel, static_cast<void *>(ptr)});
+    this->chSkill.skillActived.emplace(skillID, ChSkill::SkillActived {skillLevel, static_cast<void *>(ptr)});
 }
 
 void Character::skillDeactive(int skillID) {
@@ -53,6 +53,7 @@ void Character::skillDeactive(int skillID) {
 void Character::skillLearn(int skillID, int skillLevel) {
     this->chSkill.skillLearned[skillID] = skillLevel;
     const Skill &it                     = SkillManager::get(skillID, skillLevel);
+    // 将主动技能加入反查表, 以使用技能名施展技能
     if (!it.IsPassiveSkill)
         chSkill.skillRef[it.Name] = skillID;
 }

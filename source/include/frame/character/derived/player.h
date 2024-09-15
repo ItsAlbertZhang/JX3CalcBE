@@ -27,30 +27,30 @@ public:
         int kungfuLevel,
         int publicCooldownID
     );
-    struct Skill {
-        const int                                   id;
-        const int                                   level;
-        const std::array<int, CountRecipesPerSkill> recipes;
 
-        // The newSkill's recipes will be used first, and the oldSkill's recipes
-        // will be appended in order. Duplicates and redundancies will be discarded.
-        // e.g. newSkill.recipes = {1, 2}, oldSkill.recipes = {2, 3, 4, 5}, then
-        // the result will be {1, 2, 3, 4}.
-        static Skill override(const Skill &oldSkill, const Skill &newSkill);
-    };
-    using typeSkillMap    = std::unordered_map<int, Skill>;
-    using typeTalentArray = std::array<int, CountTalents>;
+    using typeTalents = std::array<int, TALENT_COUNT>;
+    using typeRecipe  = std::array<int, RECIPE_COUNT>;
+    using typeRecipes = std::unordered_map<int, typeRecipe>;
 
-    // Every item in newSkills must be existed in oldSkills, otherwise it will be ignored.
-    static typeSkillMap overrideSkill(const typeSkillMap &oldSkills, const typeSkillMap &newSkills);
-
-    static typeTalentArray overrideTalent(const typeTalentArray &oldTalents, const typeTalentArray &newTalents);
-
-    virtual auto getSkills(const typeSkillMap &custom) -> typeSkillMap        = 0;
-    virtual auto getTalents(const typeTalentArray &custom) -> typeTalentArray = 0;
-    virtual auto fightWeaponAttack() -> event_tick_t                          = 0;
-    virtual void fightPrepare()                                               = 0;
-    virtual void fightEmbed()                                                 = 0;
+    virtual auto fightWeaponAttack() -> event_tick_t = 0; // 应在其中实现普通攻击
+    virtual void fightPrepare()                      = 0; // 应在其中实现开始战斗前的准备
+    virtual void fightEmbed()                        = 0; // 应在其中实现内置战斗的逻辑
+    /**
+     * @brief 角色初始化的数据验证. 应在其中完成对奇穴和秘籍的数据验证 (并修改).
+     * @note 奇穴秘籍数据的优先级应当是: 强制 > 传入 > 默认. (在继承类中自行实现)
+     */
+    virtual void initValidate(
+        typeTalents &talents,
+        typeRecipes &recipes
+    ) = 0;
+    /**
+     * @brief 角色初始化. 应在其中完成技能, 奇穴和秘籍的初始化.
+     * @note 传入的奇穴秘籍应当是经 initValidate 验证过的.
+     */
+    virtual void init(
+        const typeTalents &talents,
+        const typeRecipes &recipes
+    ) = 0;
 
     int publicCooldownID = 0;
     int delayBase        = 0;
@@ -67,7 +67,6 @@ public:
     // 等待停止标志. 当该标志 has_value() 时, 将不再以战斗时间作为判断停止的依据, 而是将该值为 0 作为停止的依据.
     std::optional<int> fightStopWait = std::nullopt;
 
-    void init(const typeSkillMap &skills, const typeTalentArray &talents);
     void fightStart();
 };
 } // namespace frame

@@ -1,7 +1,9 @@
 #include "concrete.h"
 #include "frame/character/derived/player.h"
+#include "frame/common/constant.h"
 #include "frame/common/event.h"
 #include "frame/event.h"
+#include "frame/global/skill.h"
 #include "modules/config.h"
 
 using namespace jx3calc;
@@ -13,12 +15,17 @@ public:
     MjFysj();
 
 private:
-    virtual auto getSkills(const typeSkillMap &custom) -> typeSkillMap override;
-    virtual auto getTalents(const typeTalentArray &custom) -> typeTalentArray override;
-
     virtual void fightPrepare() override;
     virtual auto fightWeaponAttack() -> frame::event_tick_t override;
     virtual void fightEmbed() override;
+    virtual void initValidate(
+        typeTalents &talents,
+        typeRecipes &recipes
+    ) override;
+    virtual void init(
+        const typeTalents &talents,
+        const typeRecipes &recipes
+    ) override;
 
     int framePublicCooldown = 0;
 
@@ -143,6 +150,38 @@ enum recipe {
     驱夜断愁_伤害5    = 1053, // 驱夜断愁, 伤害提高5%
 };
 
+const std::set<int> recipeAvailable {
+    赤日轮_会心4,
+    赤日轮_伤害3,
+    赤日轮_伤害4,
+    赤日轮_伤害5,
+    烈日斩_会心4,
+    烈日斩_伤害4,
+    烈日斩_伤害5,
+    烈日斩_静止10,
+    生死劫_伤害3,
+    生死劫_伤害4,
+    生死劫_伤害5,
+    净世破魔击_会心5,
+    净世破魔击_伤害4,
+    净世破魔击_伤害5,
+    净世破魔击_20月魂,
+    幽月轮_会心4,
+    幽月轮_会心5,
+    幽月轮_伤害3,
+    幽月轮_伤害4,
+    银月斩_会心3,
+    银月斩_会心4,
+    银月斩_会心5,
+    光明相_调息10_1,
+    光明相_调息10_2,
+    光明相_调息10_3,
+    驱夜断愁_会心4,
+    驱夜断愁_会心5,
+    驱夜断愁_伤害4,
+    驱夜断愁_伤害5,
+};
+
 enum skillAlias {
     日轮 = 赤日轮,
     月轮 = 幽月轮,
@@ -169,48 +208,119 @@ enum operation {
 MjFysj::MjFysj() :
     Player(8, 10242, modules::config::isExp() ? 14 : 13, 503) {}
 
-auto MjFysj::getSkills(const typeSkillMap &custom) -> typeSkillMap {
-    static const typeSkillMap skill {
-        {赤日轮, {赤日轮, 33, {赤日轮_会心4, 赤日轮_伤害3, 赤日轮_伤害4, 赤日轮_伤害5}}},
-        {烈日斩, {烈日斩, 32, {烈日斩_会心4, 烈日斩_伤害4, 烈日斩_伤害5, 烈日斩_静止10}}},
-        {生死劫, {生死劫, 1, {生死劫_伤害3, 生死劫_伤害4, 生死劫_伤害5}}},
-        {净世破魔击, {净世破魔击, 32, {净世破魔击_会心5, 净世破魔击_伤害4, 净世破魔击_伤害5, 净世破魔击_20月魂}}},
-        {幽月轮, {幽月轮, 24, {幽月轮_会心4, 幽月轮_会心5, 幽月轮_伤害3, 幽月轮_伤害4}}},
-        {银月斩, {银月斩, 18, {银月斩_会心3, 银月斩_会心4, 银月斩_会心5}}},
-        {光明相, {光明相, 1, {光明相_调息10_1, 光明相_调息10_2, 光明相_调息10_3}}},
-        {暗尘弥散, {暗尘弥散, 1, {}}},
-        {驱夜断愁, {驱夜断愁, 29, {驱夜断愁_会心4, 驱夜断愁_会心5, 驱夜断愁_伤害4, 驱夜断愁_伤害5}}},
-        {诛邪镇魔, {诛邪镇魔, 1, {}}},
-    };
-    static const typeSkillMap skillForced {
-        {净世破魔击, {净世破魔击, 0, {净世破魔击_20月魂}}},
-    };
-    return overrideSkill(overrideSkill(skill, custom), skillForced);
-}
-
-auto MjFysj::getTalents(const typeTalentArray &custom) -> typeTalentArray {
-    static const typeTalentArray talent {腾焰飞芒_奇穴, 净身明礼_奇穴, 诛邪镇魔_奇穴, 无明业火_奇穴, 明光恒照_奇穴, 日月同辉_奇穴, 靡业报劫_奇穴, 用晦而明_奇穴, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 崇光斩恶_奇穴};
-    static const typeTalentArray talentCG {0, 0, 诛邪镇魔_奇穴, 0, 0, 日月同辉_奇穴, 靡业报劫_奇穴, 0, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 崇光斩恶_奇穴};
-    static const typeTalentArray talentQG {0, 0, 诛邪镇魔_奇穴, 0, 0, 日月同辉_奇穴, 靡业报劫_奇穴, 0, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 日月齐光_奇穴};
-
-    typeTalentArray temp = overrideTalent(talent, custom);
-    for (int i = 0; i < CountTalents; i++)
-        if (!talentAvailable.contains(temp[i]))
-            temp[i] = talent[i];
-
+void MjFysj::initValidate(typeTalents &talents, typeRecipes &recipes) {
+    // 奇穴
+    const typeTalents  talentsDefault {腾焰飞芒_奇穴, 净身明礼_奇穴, 诛邪镇魔_奇穴, 无明业火_奇穴, 明光恒照_奇穴, 日月同辉_奇穴, 靡业报劫_奇穴, 用晦而明_奇穴, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 崇光斩恶_奇穴};
+    const typeTalents  talentsForcedEmbedCG {0, 0, 诛邪镇魔_奇穴, 0, 0, 日月同辉_奇穴, 靡业报劫_奇穴, 0, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 崇光斩恶_奇穴};
+    const typeTalents  talentsForcedEmbedQG {0, 0, 诛邪镇魔_奇穴, 0, 0, 日月同辉_奇穴, 靡业报劫_奇穴, 0, 净体不畏_奇穴, 降灵尊_奇穴, 悬象著明_奇穴, 日月齐光_奇穴};
+    typeTalents        talentsTemp;
+    const typeTalents *talentsForced = nullptr;
     switch (static_cast<int>(fightType)) {
     case static_cast<int>(EmbedType::上限_崇光):
-        return overrideTalent(temp, talentCG);
+        talentsForced = &talentsForcedEmbedCG;
+        break;
     case static_cast<int>(EmbedType::严格_崇光月日):
-        return overrideTalent(temp, talentCG);
+        talentsForced = &talentsForcedEmbedCG;
+        break;
     case static_cast<int>(EmbedType::严格_齐光错轴):
-        return overrideTalent(temp, talentQG);
+        talentsForced = &talentsForcedEmbedQG;
+        break;
     case static_cast<int>(EmbedType::严格_崇光双驱三满):
-        return overrideTalent(temp, talentCG);
+        talentsForced = &talentsForcedEmbedCG;
+        break;
     case static_cast<int>(EmbedType::严格_崇光双驱三满压缩):
-        return overrideTalent(temp, talentCG);
+        talentsForced = &talentsForcedEmbedCG;
+        break;
     default:
-        return temp;
+        break;
+    }
+    for (int i = 0; i < TALENT_COUNT; i++) {
+        if (talentsForced && (*talentsForced)[i] > 0) {
+            talentsTemp[i] = (*talentsForced)[i]; // 使用强制奇穴
+        } else if (talents[i] > 0 && talentAvailable.contains(talents[i])) {
+            talentsTemp[i] = talents[i]; // 使用传入奇穴
+        } else {
+            talentsTemp[i] = talentsDefault[i]; // 使用默认奇穴
+        }
+    }
+    talents = std::move(talentsTemp);
+
+    // 秘籍
+    const typeRecipes recipesDefault {
+        {赤日轮, {赤日轮_伤害5, 赤日轮_伤害4, 赤日轮_会心4, 赤日轮_伤害3}},
+        {烈日斩, {烈日斩_静止10, 烈日斩_伤害5, 烈日斩_伤害4, 烈日斩_会心4}},
+        {生死劫, {生死劫_伤害5, 生死劫_伤害4, 生死劫_伤害3}},
+        {净世破魔击, {净世破魔击_20月魂, 净世破魔击_会心5, 净世破魔击_伤害5, 净世破魔击_伤害4}},
+        {幽月轮, {幽月轮_会心5, 幽月轮_伤害4, 幽月轮_会心4, 幽月轮_伤害3}},
+        {银月斩, {银月斩_会心5, 银月斩_会心4, 银月斩_会心3}},
+        {光明相, {光明相_调息10_1, 光明相_调息10_2, 光明相_调息10_3}},
+        {驱夜断愁, {驱夜断愁_伤害5, 驱夜断愁_会心5, 驱夜断愁_伤害4, 驱夜断愁_会心4}},
+    };
+    const typeRecipes recipesForced {
+        {净世破魔击, {净世破魔击_20月魂}},
+    };
+    typeRecipes recipesTemp;
+    auto        addRecipe = [](typeRecipes &recipes, int skill, int recipe) {
+        if (!recipeAvailable.contains(recipe))
+            return;
+        for (int i = 0; i < RECIPE_COUNT; i++) {
+            if (recipes[skill][i] == 0) { // 最靠前的空位
+                recipes[skill][i] = recipe;
+                break;
+            } else if (recipes[skill][i] == recipe) { // 已存在
+                break;
+            }
+        }
+    };
+    auto addRecipes = [&addRecipe](typeRecipes &recipesTarget, const typeRecipes &recipesAdd) {
+        for (const auto [skill, recipes] : recipesAdd) {
+            for (const auto &recipe : recipes) {
+                addRecipe(recipesTarget, skill, recipe);
+            }
+        }
+    };
+    addRecipes(recipesTemp, recipesForced);
+    addRecipes(recipesTemp, recipes);
+    addRecipes(recipesTemp, recipesDefault);
+    recipes = std::move(recipesTemp);
+}
+
+void MjFysj::init(const typeTalents &talents, const typeRecipes &recipes) {
+    // 技能
+    const std::unordered_map<int, int> skills {
+        {赤日轮, 33},
+        {烈日斩, 32},
+        {生死劫, 1},
+        {净世破魔击, 32},
+        {幽月轮, 24},
+        {银月斩, 18},
+        {光明相, 1},
+        {暗尘弥散, 1},
+        {驱夜断愁, 29},
+        {诛邪镇魔, 1},
+    };
+    for (const auto &it : skills) {
+        skillLearn(it.first, it.second);
+        auto &skill = frame::SkillManager::get(it.first, it.second);
+        if (skill.IsPassiveSkill) {
+            skillActive(it.first);
+        }
+    }
+    // 奇穴
+    for (const auto &it : talents) {
+        skillLearn(it, 1);
+        auto &skill = frame::SkillManager::get(it, 1);
+        if (skill.IsPassiveSkill) {
+            skillActive(it);
+        }
+    }
+    // 秘籍
+    for (const auto &it : recipes) {
+        for (const auto &recipe : it.second) {
+            if (recipe > 0) {
+                skillrecipeAdd(recipe, 1);
+            }
+        }
     }
 }
 

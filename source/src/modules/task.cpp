@@ -3,7 +3,6 @@
 #include "frame/character/derived/npc.h"
 #include "frame/character/derived/player.h"
 #include "frame/character/effect.h"
-#include "frame/common/constant.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
 #include "frame/global/skill.h"
@@ -12,6 +11,7 @@
 #include "plugin/log.h"
 #include <asio/co_spawn.hpp>
 #include <chrono>
+#include <format>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -61,114 +61,142 @@ static int calcDetail(const Task::Data &data, frame::ChDamage *detail);
 template <typename TypeValue>
 static std::string genID(const std::unordered_map<std::string, TypeValue> &map, int length = 6);
 
-static void createTaskData(Task::Data &data, Response &res, const std::string &jsonstr) {
-    // 1. 验证数据可用性. 此步骤未成功, catch 会返回 config.json not available.
+static Task::Data createTaskData(const std::string &jsonstr) {
+    // 1. 验证数据可用性
     if (modules::config::dataAvailable == modules::config::dataStatus::unavailable) [[unlikely]]
-        throw std::runtime_error("");
-    res.next();
-    // 2. 解析 json. 此步骤未成功, 返回 json parse error.
+        throw std::runtime_error("服务器数据不可用, 请检查 config.json.");
+    // 2. 解析 json
     using json   = nlohmann::json;
-    const json j = json::parse(jsonstr);
-    res.next();
+    const json j = json::parse(jsonstr); // 解析失败会自动抛出异常
 
-    // 3. basic Data. 此步骤未成功, catch 会返回 Error in base: missing field or invalid option.
-    data.playerType    = concrete::playerMap.at(j.at("player").get<std::string>()),
-    data.delayNetwork  = j.at("delayNetwork").get<int>(),
-    data.delayKeyboard = j.at("delayKeyboard").get<int>(),
-    data.fightTime     = j.at("fightTime").get<int>(),
-    data.fightCount    = j.at("fightCount").get<int>(),
-    res.next();
+    Task::Data data;
 
-    // 4. 检查 basic Data. 此步骤未成功, catch 会返回 Error in base: invalid input value.
-    if (data.delayNetwork < 0 || data.delayNetwork > modules::config::taskdata::maxDelayNetwork ||
-        data.delayKeyboard < 0 || data.delayKeyboard > modules::config::taskdata::maxDelayKeyboard ||
-        data.fightTime < 0 || data.fightTime > modules::config::taskdata::maxFightTime ||
-        data.fightCount < 0 || data.fightCount > modules::config::taskdata::maxFightCount) [[unlikely]] {
-        throw std::runtime_error("");
+    // 3. 解析基础字段
+    try {
+        data.playerType = concrete::playerMap.at(j.at("player").get<std::string>());
+    } catch (const std::exception &e) {
+        throw std::runtime_error("字段非法: player.");
     }
-    res.next();
-
-    // 5. attribute. 此步骤未成功, catch 会返回 Error in attribute.
-    auto player   = concrete::createPlayer(data.playerType);
-    auto attrType = refAttributeType.at(j.at("attribute")["method"].get<std::string>());
-    switch (attrType) {
-    case enumAttributeType::data: {
-        std::string dataJsonStr = j.at("attribute")["data"].dump();
-        if (!player->attrImportFromData(dataJsonStr))
-            throw std::runtime_error("import from data failed.");
-    } break;
-    case enumAttributeType::jx3box: {
-        std::string pzid = j.at("attribute")["data"]["pzid"].get<std::string>();
-        if (!player->attrImportFromJX3BOX(pzid))
-            throw std::runtime_error("import from jx3box failed.");
-    } break;
+    try {
+        data.delayNetwork = j.at("delayNetwork").get<int>();
+        if (data.delayNetwork < 0 || data.delayNetwork > modules::config::taskdata::maxDelayNetwork)
+            throw;
+    } catch (const std::exception &e) {
+        throw std::runtime_error("字段非法: delayNetwork.");
     }
-    data.attrBackup = player->chAttr;
-    res.next();
+    try {
+        data.delayKeyboard = j.at("delayKeyboard").get<int>();
+        if (data.delayKeyboard < 0 || data.delayKeyboard > modules::config::taskdata::maxDelayKeyboard)
+            throw;
+    } catch (const std::exception &e) {
+        throw std::runtime_error("字段非法: delayKeyboard.");
+    }
+    try {
+        data.fightTime = j.at("fightTime").get<int>();
+        if (data.fightTime < 0 || data.fightTime > modules::config::taskdata::maxFightTime)
+            throw;
+    } catch (const std::exception &e) {
+        throw std::runtime_error("字段非法: fightTime.");
+    }
+    try {
+        data.fightCount = j.at("fightCount").get<int>();
+        if (data.fightCount < 0 || data.fightCount > modules::config::taskdata::maxFightCount)
+            throw;
+    } catch (const std::exception &e) {
+        throw std::runtime_error("字段非法: fightCount.");
+    }
 
-    // 6. effect. 此步骤未成功, catch 会返回 Error in effect.
-    std::vector<std::shared_ptr<frame::Effect>> effectList;
-    effectList.reserve(j.at("effects").size());
-    for (auto &[key, value] : j.at("effects").items()) {
-        auto ptr = concrete::createEffect(key, value.dump());
-        if (ptr == nullptr) [[unlikely]] {
-            throw std::runtime_error("effect error: " + key);
+    auto player = concrete::createPlayer(data.playerType);
+
+    // 4. 解析 attribute
+    try {
+        auto attrType = refAttributeType.at(j.at("attribute")["method"].get<std::string>());
+        switch (attrType) {
+        case enumAttributeType::data: {
+            std::string dataJsonStr = j.at("attribute")["data"].dump();
+            if (!player->attrImportFromData(dataJsonStr))
+                throw std::runtime_error("import from data failed.");
+        } break;
+        case enumAttributeType::jx3box: {
+            std::string pzid = j.at("attribute")["data"]["pzid"].get<std::string>();
+            if (!player->attrImportFromJX3BOX(pzid))
+                throw std::runtime_error("import from jx3box failed.");
+        } break;
         }
-        effectList.emplace_back(std::move(ptr));
+        data.attrBackup = player->chAttr;
+    } catch (const std::exception &e) {
+        throw std::runtime_error("字段错误: attribute." + std::string(e.what()));
     }
-    data.effects = std::move(effectList);
-    res.next();
 
-    // 7. fight (可选). 此步骤未成功, catch 会返回 Error in fight.
-    if (j.contains("fight")) {
-        const json &fight = j.at("fight");
-        if (fight.contains("method") && refCustom.contains(fight.at("method").get<std::string>())) {
-            switch (refCustom.at(fight.at("method").get<std::string>())) {
-            case enumCustom::lua:
-                if (!modules::config::taskdata::allowCustom) [[unlikely]]
-                    throw std::runtime_error("custom fight is not allowed.");
-                // fight["data"] 为 string, 内容为 lua 代码
-                data.fight.emplace(fight.at("data").get<std::string>());
-                break;
-            case enumCustom::jx3:
-                // fight["data"] 为 string[], 每一项都是一个游戏内宏
-                std::vector<std::string> v;
-                for (auto &it : fight.at("data")) {
-                    v.emplace_back(it.get<std::string>());
-                }
-                data.fight.emplace(frame::CustomLua::parse(v));
-                break;
+    // 5. 解析 effects
+    try {
+        std::vector<std::shared_ptr<frame::Effect>> effectList;
+        effectList.reserve(j.at("effects").size());
+        for (auto &[key, value] : j.at("effects").items()) {
+            auto ptr = concrete::createEffect(key, value.dump());
+            if (ptr == nullptr) [[unlikely]] {
+                throw std::runtime_error("effect error: " + key);
             }
-
-        } else if (fight.contains("data") && fight.at("data").is_number_integer()) {
-            player->fightType = j.at("fight").at("data").get<int>();
-            data.fightType    = player->fightType;
+            effectList.emplace_back(std::move(ptr));
         }
+        data.effects = std::move(effectList);
+    } catch (const std::exception &e) {
+        throw std::runtime_error("字段错误: effects." + std::string(e.what()));
     }
-    res.next();
 
-    // 8. talents (可选). 此步骤未成功, catch 会返回 Error in talents.
-    if (j.contains("talents")) {
-        data.talents = j.at("talents").get<frame::Player::typeTalentArray>();
-    }
-    data.talents = player->getTalents(data.talents);
-    res.next();
-
-    // 9. skills (可选). 此步骤未成功, catch 会返回 Error in skills.
-    if (j.contains("skills")) {
-        for (auto &[key, value] : j.at("skills").items()) {
-            data.skills.emplace(
-                std::stoi(key),
-                frame::Player::Skill {
-                    .id      = value.at("id").get<int>(),
-                    .level   = value.at("level").get<int>(),
-                    .recipes = value.at("recipes").get<std::array<int, CountRecipesPerSkill>>(),
+    // 6. 解析 fight (可选)
+    if (j.contains("fight")) {
+        try {
+            const json &fight = j.at("fight");
+            if (fight.contains("method") && refCustom.contains(fight.at("method").get<std::string>())) {
+                switch (refCustom.at(fight.at("method").get<std::string>())) {
+                case enumCustom::lua:
+                    if (!modules::config::taskdata::allowCustom) [[unlikely]]
+                        throw std::runtime_error("custom fight is not allowed.");
+                    // fight["data"] 为 string, 内容为 lua 代码
+                    data.fight.emplace(fight.at("data").get<std::string>());
+                    break;
+                case enumCustom::jx3:
+                    // fight["data"] 为 string[], 每一项都是一个游戏内宏
+                    std::vector<std::string> v;
+                    for (auto &it : fight.at("data")) {
+                        v.emplace_back(it.get<std::string>());
+                    }
+                    data.fight.emplace(frame::CustomLua::parse(v));
+                    break;
                 }
-            );
+
+            } else if (fight.contains("data") && fight.at("data").is_number_integer()) {
+                player->fightType = j.at("fight").at("data").get<int>();
+                data.fightType    = player->fightType;
+            }
+        } catch (const std::exception &e) {
+            throw std::runtime_error("字段错误: fight." + std::string(e.what()));
         }
     }
-    data.skills = player->getSkills(data.skills);
-    res.next();
+
+    // 7. 解析 talents (可选)
+    if (j.contains("talents")) {
+        try {
+            data.talents = j.at("talents").get<frame::Player::typeTalents>();
+        } catch (const std::exception &e) {
+            throw std::runtime_error("字段错误: talents.");
+        }
+    }
+    // 8. 解析 recipes (可选)
+    if (j.contains("recipes")) {
+        try {
+            for (auto &[key, value] : j.at("recipes").items()) {
+                int skillID           = std::stoi(key);
+                data.recipes[skillID] = value.get<frame::Player::typeRecipe>();
+            }
+        } catch (const std::exception &e) {
+            throw std::runtime_error("字段错误: recipes.");
+        }
+    }
+    player->initValidate(data.talents, data.recipes);
+
+    return data;
 }
 
 static void asyncStop(Server *self, Task &task) {
@@ -248,19 +276,17 @@ static auto asyncRun(Server *self, asio::io_context &io, Task &task) -> asio::aw
     asyncStop(self, task);
 }
 
-auto modules::task::Server::create(const std::string &jsonstr) -> Response {
-    Response    res;
+auto modules::task::Server::create(const std::string &jsonstr) -> std::string {
     std::string id = genID(taskMap);
-    auto       &it = taskMap.emplace(id, std::make_unique<Task>(id)).first->second;
+
     try {
-        createTaskData(it->data, res, jsonstr);
+        auto &it = taskMap.emplace(id, std::make_unique<Task>(id, createTaskData(jsonstr))).first->second;
         asio::co_spawn(ioContext, asyncRun(this, ioContext, *it), asio::detached);
-        res.message = std::move(id);
+        return std::format("{{\"status\":0,\"data\":\"{}\"}}", id);
     } catch (const std::exception &e) {
         taskMap.erase(id);
-        res.message = e.what();
+        return std::format("{{\"status\":-1,\"data\":\"{}\"}}", e.what());
     }
-    return res;
 }
 
 void modules::task::Server::stop(std::string id) {
@@ -288,7 +314,7 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
         it->active(player.get());
     }
 
-    player->init(arg.skills, arg.talents);
+    player->init(arg.talents, arg.recipes);
     player->fightStart();
     while (true) {
         if (player->fightStopWait.has_value()) {

@@ -1,4 +1,4 @@
 #pragma once
 
-constexpr int CountTalents         = 12;
-constexpr int CountRecipesPerSkill = 4;
+constexpr int TALENT_COUNT = 12;
+constexpr int RECIPE_COUNT = 4;
