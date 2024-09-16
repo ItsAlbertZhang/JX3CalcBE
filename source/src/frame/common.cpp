@@ -23,7 +23,7 @@ int GlobalParam::levelCof(int level) {
 }
 
 bool GlobalParam::init() {
-    auto ret = gdi::luaExecuteFile("scripts/skill/GlobalParam.lua");
+    gdi::luaExecuteFile("scripts/skill/GlobalParam.lua");
     auto res = gdi::luaGetFunction("Load")();
     if (!res.valid()) {
         sol::error err = res;

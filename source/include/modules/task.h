@@ -52,6 +52,7 @@ public:
         // 具体数值代表的状态由各心法负责具体实现.
         int fightType = 0;
 
+        frame::Player::typeSkills  skills;
         frame::Player::typeTalents talents;
         frame::Player::typeRecipes recipes;
 

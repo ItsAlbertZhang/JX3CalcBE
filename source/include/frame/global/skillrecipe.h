@@ -55,8 +55,8 @@ private:
     struct tuple_hash {
         template <class T1, class T2>
         std::size_t operator()(const std::tuple<T1, T2> &t) const {
-            auto h1 = std::hash<T1>{}(std::get<0>(t));
-            auto h2 = std::hash<T2>{}(std::get<1>(t));
+            auto h1 = std::hash<T1> {}(std::get<0>(t));
+            auto h2 = std::hash<T2> {}(std::get<1>(t));
             return h1 ^ h2;
         }
     };
@@ -71,9 +71,9 @@ private:
      * @brief 初始化 SkillRecipe. 将指定 ID 的 SkillRecipe 数据存至缓存.
      * @param RecipeID
      */
-    static void add(int RecipeID, int RecipeLevel);
+    static const SkillRecipe &add(int RecipeID, int RecipeLevel);
 
-    static void addScriptSkill(const SkillRecipe *skillrecipe, const Skill *skill);
+    static const Skill *addScriptSkill(const SkillRecipe *skillrecipe, const Skill *skill);
 };
 
 } // namespace frame

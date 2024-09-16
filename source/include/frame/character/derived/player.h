@@ -28,6 +28,7 @@ public:
         int publicCooldownID
     );
 
+    using typeSkills  = std::vector<int>;
     using typeTalents = std::array<int, TALENT_COUNT>;
     using typeRecipe  = std::array<int, RECIPE_COUNT>;
     using typeRecipes = std::unordered_map<int, typeRecipe>;
@@ -40,16 +41,9 @@ public:
      * @note 奇穴秘籍数据的优先级应当是: 强制 > 传入 > 默认. (在继承类中自行实现)
      */
     virtual void initValidate(
+        typeSkills  &skills,
         typeTalents &talents,
         typeRecipes &recipes
-    ) = 0;
-    /**
-     * @brief 角色初始化. 应在其中完成技能, 奇穴和秘籍的初始化.
-     * @note 传入的奇穴秘籍应当是经 initValidate 验证过的.
-     */
-    virtual void init(
-        const typeTalents &talents,
-        const typeRecipes &recipes
     ) = 0;
 
     int publicCooldownID = 0;
@@ -66,6 +60,16 @@ public:
     event_tick_t       fightTick     = 0;
     // 等待停止标志. 当该标志 has_value() 时, 将不再以战斗时间作为判断停止的依据, 而是将该值为 0 作为停止的依据.
     std::optional<int> fightStopWait = std::nullopt;
+
+    /**
+     * @brief 角色初始化.
+     * @note 传入的技能, 奇穴, 秘籍应当是经 initValidate 验证过的.
+     */
+    void init(
+        const typeSkills  &skills,
+        const typeTalents &talents,
+        const typeRecipes &recipes
+    );
 
     void fightStart();
 };

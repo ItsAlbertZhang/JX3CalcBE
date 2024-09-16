@@ -54,7 +54,7 @@ private:
      * @brief 初始化 Cooldown. 将指定 ID 的 Cooldown 数据存至缓存.
      * @param ID
      */
-    static void add(int ID);
+    static const Cooldown &add(int ID);
 };
 
 } // namespace frame

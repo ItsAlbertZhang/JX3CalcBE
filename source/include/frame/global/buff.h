@@ -41,8 +41,8 @@ public:
 
     class Attrib {
     public:
-        Attrib(ref::Attrib type, const std::string &valueA, const std::string &valueB)
-            : type(type), valueAStr(valueA), valueBStr(valueB) {}
+        Attrib(ref::Attrib type, const std::string &valueA, const std::string &valueB) :
+            type(type), valueAStr(valueA), valueBStr(valueB) {}
         ref::Attrib type;
         std::string valueAStr;
         std::string valueBStr;
@@ -76,8 +76,8 @@ private:
     struct tuple_hash {
         template <class T1, class T2>
         std::size_t operator()(const std::tuple<T1, T2> &t) const {
-            auto h1 = std::hash<T1>{}(std::get<0>(t));
-            auto h2 = std::hash<T2>{}(std::get<1>(t));
+            auto h1 = std::hash<T1> {}(std::get<0>(t));
+            auto h2 = std::hash<T2> {}(std::get<1>(t));
             return h1 ^ h2;
         }
     };
@@ -93,7 +93,7 @@ private:
      * @param buffID
      * @param buffLevel
      */
-    static void add(int buffID, int buffLevel);
+    static const Buff &add(int buffID, int buffLevel);
 };
 
 } // namespace frame

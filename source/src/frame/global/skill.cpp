@@ -9,31 +9,39 @@ using namespace jx3calc;
 using namespace frame;
 
 const Skill &SkillManager::get(int skillID, int skillLevel) {
-    // 若技能 ID 不存在, 则添加
-    if (data.find(skillID) == data.end()) {
-        add(skillID, skillLevel);
-    } else {
-        // 若技能 ID 存在, 但技能等级不存在, 则添加
-        if (data[skillID].find(skillLevel) == data[skillID].end()) {
-            add(skillID, skillLevel);
-        }
+    // 处理一种特殊情况: skillLevel 为 0 时, 代表获取该技能的最高等级.
+    if (skillLevel == 0) {
+        if (data.contains(skillID) && !data.at(skillID).empty() &&
+            data.at(skillID).contains(data.at(skillID).begin()->second.MaxLevel))
+            return data.at(skillID).at(data.at(skillID).begin()->second.MaxLevel);
+        else
+            return add(skillID, skillLevel);
     }
-    return data[skillID][skillLevel];
+
+    // skillLevel 不为 0 的情况
+    if (!data.contains(skillID)) [[unlikely]]
+        // 若技能 ID 不存在, 则添加并返回
+        return add(skillID, skillLevel);
+    else if (!data.at(skillID).contains(skillLevel)) [[unlikely]]
+        // 若技能 ID 存在, 但技能等级不存在, 则添加并返回
+        return add(skillID, skillLevel);
+    else
+        return data.at(skillID).at(skillLevel);
 }
 
-void SkillManager::add(int skillID, int skillLevel) {
+const Skill &SkillManager::add(int skillID, int skillLevel) {
     std::lock_guard<std::mutex> lock(mutex); // 加锁
     // 可能有多个线程同时进入了 add 函数. 因此, 需要在加锁后再次判断技能是否存在.
-    if (data.find(skillID) != data.end() && data[skillID].find(skillLevel) != data[skillID].end()) {
+    if (data.contains(skillID) && data.at(skillID).contains(skillLevel)) {
         // 若技能 ID 存在, 且技能等级存在, 则直接返回
-        return; // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
+        return data.at(skillID).at(skillLevel); // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
     }
     // 初始化技能
     Skill skill;
     skill.dwSkillID = skillID;
     skill.dwLevel   = skillLevel;
     // 获取 tab
-    if (data.find(skillID) == data.end()) {
+    if (!data.contains(skillID)) {
         // 如果没有该技能 ID, 则先获取 tab
         gdi::select_t arg;
         arg.emplace_back();
@@ -41,15 +49,16 @@ void SkillManager::add(int skillID, int skillLevel) {
         gdi::tabSelect(gdi::Tab::skills, arg);
         if (arg.size() == 0) {
             CONSTEXPR_LOG_ERROR("SkillManager::add: 技能 ID {} 不存在.", skillID);
-            return;
+            data[skillID][skillLevel] = std::move(skill);
+            return data.at(skillID).at(skillLevel);
         }
         skill.tab = std::move(arg[0]);
     } else {
         // 如果该技能 ID 已存在, 则复用同 ID 技能的 tab
-        auto it   = data[skillID].begin();
-        skill.tab = it->second.tab;
+        skill.tab = data[skillID].begin()->second.tab;
     }
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
+    skill.MaxLevel             = atoi(skill.tab["MaxLevel"].c_str());
     skill.KindType             = Ref<ref::Skill::KindType>::map.at(skill.tab["KindType"]);
     skill.CastMode             = Ref<ref::Skill::CastMode>::map.at(skill.tab["CastMode"]);
     skill.MountRequestType     = atoi(skill.tab["MountRequestType"].c_str());
@@ -74,33 +83,45 @@ void SkillManager::add(int skillID, int skillLevel) {
     // 2. 部分不造成武器伤害的外功技能, 似乎都在 lua 中显式声明了其 nWeaponDamagePercent = 0. (例如, 丐帮的诸多需要武器施展的技能.)
     // 暂时按照该推测进行处理.
     skill.nWeaponDamagePercent = !skill.tab["WeaponRequest"].empty() && skill.tab["WeaponRequest"] != "0" ? 1024 : 0;
-    // 执行 GetSkillLevelData
-    std::string name           = "scripts/skill/" + skill.tab["ScriptFile"];
-    bool        res            = lua::interface::analysis(
-        lua::interface::getGetSkillLevelData(name)(skill), name, lua::interface::FuncType::GetSkillLevelData
-    );
 
-    if (res) {
-        // 查询技能 UI
-        gdi::select_t arg;
-        arg.emplace_back();
-        arg[0]["SkillID"] = std::to_string(skillID);
-        arg[0]["Level"]   = std::to_string(skillLevel);
-        arg.emplace_back();
-        arg[1]["SkillID"] = std::to_string(skillID);
-        arg[1]["Level"]   = "0";
-        gdi::tabSelect(gdi::Tab::ui_skill, arg);
-        if (arg.size() == 0) {
-            skill.Name = "未知技能";
-        } else {
-            skill.ui   = std::move(arg[0]);
-            skill.Name = skill.ui["Name"];
-        }
-        // 将技能存入缓存
-        data[skillID][skillLevel] = std::move(skill);
-    } else {
+    // 处理 skillLevel 为 0 的情况
+    if (skillLevel == 0) {
+        skillLevel    = skill.MaxLevel;
+        skill.dwLevel = skillLevel;
+    }
+
+    // 执行 GetSkillLevelData
+    std::string name = "scripts/skill/" + skill.tab["ScriptFile"];
+    bool        res  = lua::interface::analysis(
+        lua::interface::getGetSkillLevelData(name)(
+            skill
+        ),
+        name,
+        lua::interface::FuncType::GetSkillLevelData
+    );
+    if (!res) {
         CONSTEXPR_LOG_ERROR("LuaFunc::getGetSkillLevelData(\"{}\") failed.", name);
     }
+
+    // 查询技能 UI
+    gdi::select_t arg;
+    arg.emplace_back();
+    arg[0]["SkillID"] = std::to_string(skillID);
+    arg[0]["Level"]   = std::to_string(skillLevel);
+    arg.emplace_back();
+    arg[1]["SkillID"] = std::to_string(skillID);
+    arg[1]["Level"]   = "0";
+    gdi::tabSelect(gdi::Tab::ui_skill, arg);
+    if (arg.size() == 0) {
+        skill.Name = "未知技能";
+    } else {
+        skill.ui   = std::move(arg[0]);
+        skill.Name = skill.ui["Name"];
+    }
+
+    // 将 Skill 存入缓存
+    data[skillID][skillLevel] = std::move(skill);
+    return data.at(skillID).at(skillLevel);
 }
 
 void Skill::SetDelaySubSkill(int a, int b, int c) {
@@ -120,7 +141,7 @@ void Skill::AddAttribute(int a, int b, std::string c, int d) {
 }
 
 void Skill::AddAttribute(int a, int b, std::optional<char> nil, int d) {
-    // std::optional<char> 其实是 nil
+    // std::optional<char> 泛用于所有 nil (char 是随便写的, 换成其他类型也一样)
     // 出现于 scripts/skill/江湖/110级CW新增特效焚影伤害子技能.lua, 原代码如下:
     /*
 tSkillData =
@@ -131,7 +152,7 @@ tSkillData =
     skill.AddAttribute(
         ATTRIBUTE_EFFECT_MODE.EFFECT_TO_SELF_AND_ROLLBACK,
         ATTRIBUTE_TYPE.SKILL_LUNAR_DAMAGE,
-        tSkillData[dwSkillLevel].nDamage, // 注意这里不是 nDamageBase 而是 nDamage
+        tSkillData[dwSkillLevel].nDamage, // 注意, 这里实际上传了一个 nil 进去
         0
     );
     */

@@ -1,5 +1,6 @@
 #include "frame/character/derived/player.h"
 #include "frame/event.h"
+#include "frame/global/skill.h"
 #include "plugin/log.h"
 #include <random>
 
@@ -23,6 +24,33 @@ Player::Player(
 
     skillLearn(kungfuID, kungfuLevel);
     skillActive(kungfuID);
+
+    if (kungfuLevel == 0) { // kungfuLevel 为 0 时, 会学习该技能的最高等级.
+        this->kungfuLevel = skillGetLevel(kungfuID);
+    }
+}
+
+void Player::init(const typeSkills &skills, const typeTalents &talents, const typeRecipes &recipes) {
+    // 技能
+    for (const auto &it : skills) {
+        skillLearn(it, 0);
+    }
+    // 奇穴
+    for (const auto &it : talents) {
+        skillLearn(it, 1);
+        auto &skill = SkillManager::get(it, 1);
+        if (skill.IsPassiveSkill) {
+            skillActive(it);
+        }
+    }
+    // 秘籍
+    for (const auto &it : recipes) {
+        for (const auto &recipe : it.second) {
+            if (recipe > 0) {
+                skillrecipeAdd(recipe, 1);
+            }
+        }
+    }
 }
 
 static void callbackMacroDefault(void *self, void *nullparam);

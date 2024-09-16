@@ -6,11 +6,11 @@ using namespace jx3calc;
 using namespace frame;
 
 const Buff &BuffManager::get(int buffID, int buffLevel) {
-    // 若 Buff ID 和 Level 任一不存在, 则添加
-    if (data.find(std::make_tuple(buffID, buffLevel)) == data.end()) {
-        add(buffID, buffLevel);
-    }
-    return data[std::make_tuple(buffID, buffLevel)];
+    if (!data.contains(std::make_tuple(buffID, buffLevel)))
+        // 若 Buff 不存在, 则添加并返回
+        return add(buffID, buffLevel);
+    else
+        return data[std::make_tuple(buffID, buffLevel)];
 }
 
 static inline void addAttribute(std::vector<frame::Buff::Attrib> &attrib, ref::Attrib type, const std::string &valueA, const std::string &valueB) {
@@ -19,12 +19,13 @@ static inline void addAttribute(std::vector<frame::Buff::Attrib> &attrib, ref::A
     it.valueAInt = atoi(valueA.c_str());
     it.valueBInt = atoi(valueB.c_str());
 }
-void BuffManager::add(int buffID, int buffLevel) {
+const Buff &BuffManager::add(int buffID, int buffLevel) {
     std::lock_guard<std::mutex> lock(mutex); // 加锁
+    std::tuple<int, int>        key = std::make_tuple(buffID, buffLevel);
     // 可能有多个线程同时进入了 add 函数. 因此, 需要在加锁后再次判断 Buff 是否存在.
-    if (data.find(std::make_tuple(buffID, buffLevel)) != data.end()) {
+    if (data.contains(key)) {
         // 若 Buff ID 存在, 且 Buff 等级存在, 则直接返回
-        return; // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
+        return data.at(key); // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
     }
 
     // 初始化 buff
@@ -39,7 +40,8 @@ void BuffManager::add(int buffID, int buffLevel) {
     gdi::tabSelect(gdi::Tab::buff, arg);
     if (arg.size() == 0) {
         CONSTEXPR_LOG_ERROR("BuffManager::add: Buff ID {} 不存在.", buffID);
-        return;
+        data[key] = std::move(buff);
+        return data.at(key);
     }
     buff.tab         = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
@@ -53,8 +55,9 @@ void BuffManager::add(int buffID, int buffLevel) {
     buff.CanCancel   = buff.tab["CanCancel"] == "1";
     buff.MinInterval = std::stoi(buff.tab["MinInterval"]);
     buff.MaxInterval = std::stoi(buff.tab["MaxInterval"]);
+
     // 初始化 buff Attrib
-    static const std::string attribName[]{"Begin", "Active", "EndTime"};
+    static const std::string attribName[] {"Begin", "Active", "EndTime"};
     for (int attribIdx = 0; attribIdx < 3; attribIdx++) {
         for (int i = 1; buff.tab.find(attribName[attribIdx] + "Attrib" + std::to_string(i)) != buff.tab.end(); i++) {
 
@@ -101,5 +104,6 @@ void BuffManager::add(int buffID, int buffLevel) {
     }
 
     // 将 Buff 存入缓存
-    data[std::make_tuple(buffID, buffLevel)] = std::move(buff);
+    data[key] = std::move(buff);
+    return data.at(key);
 }

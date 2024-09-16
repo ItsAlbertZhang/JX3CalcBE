@@ -146,8 +146,10 @@ auto concrete::createEffect(const std::string &type, const std::string &jsonstr)
             }
             if (arg.contains(name))
                 return std::visit(visitorAny, arg.at(name));
-        }
-        return nullptr;
+            else
+                return nullptr;
+        } else
+            return nullptr;
     };
     return std::visit(visitor, effect);
 }
@@ -277,4 +279,4 @@ const typeMap effect_map {
          {"无界端·无界行侠阵", [](frame::Character *obj) { obj->chAttr.atAllDamageAddPercent += 51; obj->chAttr.atStrainRate += 102; }}
      }}
 };
-}
+} // namespace

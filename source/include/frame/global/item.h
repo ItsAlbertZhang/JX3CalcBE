@@ -56,7 +56,7 @@ private:
      * @brief 初始化 Item. 将指定 ItemType 和 ID 的 Item 数据存至缓存.
      * @param ID
      */
-    static void add(ItemType type, int ID);
+    static const Item &add(ItemType type, int ID);
 };
 
 } // namespace frame

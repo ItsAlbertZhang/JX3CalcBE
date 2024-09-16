@@ -1,5 +1,6 @@
 #include "frame/global/item.h"
 #include "gdi.h"
+#include "plugin/log.h"
 #include <cstdlib>
 #include <stdexcept>
 
@@ -7,19 +8,19 @@ using namespace jx3calc;
 using namespace frame;
 
 const Item &ItemManager::get(ItemType type, int ID) {
-    // 若 Item ID 不存在, 则添加
-    if (!data[static_cast<size_t>(type)].contains(ID)) {
-        add(type, ID);
-    }
-    return data[static_cast<size_t>(type)][ID];
+    if (!data[static_cast<size_t>(type)].contains(ID))
+        // 若 Item ID 不存在, 则添加并返回
+        return add(type, ID);
+    else
+        return data.at(static_cast<size_t>(type)).at(ID);
 }
 
-void ItemManager::add(ItemType type, int ID) {
+const Item &ItemManager::add(ItemType type, int ID) {
     std::lock_guard<std::mutex> lock(mutex); // 加锁
     // 可能有多个线程同时进入了 add 函数. 因此, 需要在加锁后再次判断 Item 是否存在.
-    if (data[static_cast<size_t>(type)].contains(ID)) {
+    if (data.at(static_cast<size_t>(type)).contains(ID)) {
         // 若 Item ID 存在, 则直接返回
-        return; // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
+        return data.at(static_cast<size_t>(type)).at(ID); // 返回时, 会自动调用 lock 的析构函数, 从而释放锁
     }
 
     // 初始化 Item
@@ -42,8 +43,12 @@ void ItemManager::add(ItemType type, int ID) {
     default:
         throw std::range_error("Invalid ItemType");
     }
-    item.tab = std::move(arg[0]);
-
+    if (arg.size() == 0) {
+        CONSTEXPR_LOG_ERROR("ItemManager::add: Item ID {} 不存在.", ID);
+        data[static_cast<size_t>(type)][ID] = std::move(item);
+        return data.at(static_cast<size_t>(type)).at(ID);
+    }
+    item.tab        = std::move(arg[0]);
     // 初始化数据. std::stoi() 用于确定字段存在的情况. 若该字段可能为空, 必须使用 atoi().
     item.type       = type;
     item.SkillID    = atoi(item.tab["SkillID"].c_str());
@@ -52,4 +57,5 @@ void ItemManager::add(ItemType type, int ID) {
 
     // 将 Item 存入缓存
     data[static_cast<size_t>(type)][ID] = std::move(item);
+    return data.at(static_cast<size_t>(type)).at(ID);
 }

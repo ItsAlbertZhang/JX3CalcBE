@@ -74,35 +74,35 @@ static Task::Data createTaskData(const std::string &jsonstr) {
     // 3. 解析基础字段
     try {
         data.playerType = concrete::playerMap.at(j.at("player").get<std::string>());
-    } catch (const std::exception &e) {
+    } catch (...) {
         throw std::runtime_error("字段非法: player.");
     }
     try {
         data.delayNetwork = j.at("delayNetwork").get<int>();
         if (data.delayNetwork < 0 || data.delayNetwork > modules::config::taskdata::maxDelayNetwork)
             throw;
-    } catch (const std::exception &e) {
+    } catch (...) {
         throw std::runtime_error("字段非法: delayNetwork.");
     }
     try {
         data.delayKeyboard = j.at("delayKeyboard").get<int>();
         if (data.delayKeyboard < 0 || data.delayKeyboard > modules::config::taskdata::maxDelayKeyboard)
             throw;
-    } catch (const std::exception &e) {
+    } catch (...) {
         throw std::runtime_error("字段非法: delayKeyboard.");
     }
     try {
         data.fightTime = j.at("fightTime").get<int>();
         if (data.fightTime < 0 || data.fightTime > modules::config::taskdata::maxFightTime)
             throw;
-    } catch (const std::exception &e) {
+    } catch (...) {
         throw std::runtime_error("字段非法: fightTime.");
     }
     try {
         data.fightCount = j.at("fightCount").get<int>();
         if (data.fightCount < 0 || data.fightCount > modules::config::taskdata::maxFightCount)
             throw;
-    } catch (const std::exception &e) {
+    } catch (...) {
         throw std::runtime_error("字段非法: fightCount.");
     }
 
@@ -179,7 +179,7 @@ static Task::Data createTaskData(const std::string &jsonstr) {
     if (j.contains("talents")) {
         try {
             data.talents = j.at("talents").get<frame::Player::typeTalents>();
-        } catch (const std::exception &e) {
+        } catch (...) {
             throw std::runtime_error("字段错误: talents.");
         }
     }
@@ -190,11 +190,11 @@ static Task::Data createTaskData(const std::string &jsonstr) {
                 int skillID           = std::stoi(key);
                 data.recipes[skillID] = value.get<frame::Player::typeRecipe>();
             }
-        } catch (const std::exception &e) {
+        } catch (...) {
             throw std::runtime_error("字段错误: recipes.");
         }
     }
-    player->initValidate(data.talents, data.recipes);
+    player->initValidate(data.skills, data.talents, data.recipes);
 
     return data;
 }
@@ -314,7 +314,7 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
         it->active(player.get());
     }
 
-    player->init(arg.talents, arg.recipes);
+    player->init(arg.skills, arg.talents, arg.recipes);
     player->fightStart();
     while (true) {
         if (player->fightStopWait.has_value()) {

@@ -3,8 +3,6 @@
 #include "frame/common/constant.h"
 #include "frame/common/event.h"
 #include "frame/event.h"
-#include "frame/global/skill.h"
-#include "modules/config.h"
 
 using namespace jx3calc;
 
@@ -19,12 +17,9 @@ private:
     virtual auto fightWeaponAttack() -> frame::event_tick_t override;
     virtual void fightEmbed() override;
     virtual void initValidate(
+        typeSkills  &skills,
         typeTalents &talents,
         typeRecipes &recipes
-    ) override;
-    virtual void init(
-        const typeTalents &talents,
-        const typeRecipes &recipes
     ) override;
 
     int framePublicCooldown = 0;
@@ -192,9 +187,12 @@ constexpr int 腰坠 = -(1 << 10);
 constexpr int 特00 = -(1 << 20) + 0; // 提前隐身
 
 MjFysj::MjFysj() :
-    Player(8, 10242, modules::config::isExp() ? 14 : 13, 503) {}
+    Player(8, 10242, 0, 503) {}
 
-void MjFysj::initValidate(typeTalents &talents, typeRecipes &recipes) {
+void MjFysj::initValidate(typeSkills &skills, typeTalents &talents, typeRecipes &recipes) {
+    // 技能, 直接覆盖
+    skills = {技能_赤日轮, 技能_烈日斩, 技能_生死劫, 技能_净世破魔击, 技能_幽月轮, 技能_银月斩, 技能_光明相, 技能_暗尘弥散, 技能_驱夜断愁, 技能_诛邪镇魔};
+
     // 奇穴
     const typeTalents  talentsDefault {奇穴_腾焰飞芒, 奇穴_净身明礼, 奇穴_诛邪镇魔, 奇穴_无明业火, 奇穴_明光恒照, 奇穴_日月同辉, 奇穴_靡业报劫, 奇穴_用晦而明, 奇穴_净体不畏, 奇穴_降灵尊, 奇穴_悬象著明, 奇穴_崇光斩恶};
     const typeTalents  talentsForcedEmbedCG {0, 0, 奇穴_诛邪镇魔, 0, 0, 奇穴_日月同辉, 奇穴_靡业报劫, 0, 奇穴_净体不畏, 奇穴_降灵尊, 奇穴_悬象著明, 奇穴_崇光斩恶};
@@ -269,45 +267,6 @@ void MjFysj::initValidate(typeTalents &talents, typeRecipes &recipes) {
     addRecipes(recipesTemp, recipes);
     addRecipes(recipesTemp, recipesDefault);
     recipes = std::move(recipesTemp);
-}
-
-void MjFysj::init(const typeTalents &talents, const typeRecipes &recipes) {
-    // 技能
-    const std::unordered_map<int, int> skills {
-        {技能_赤日轮, 33},
-        {技能_烈日斩, 32},
-        {技能_生死劫, 1},
-        {技能_净世破魔击, 32},
-        {技能_幽月轮, 24},
-        {技能_银月斩, 18},
-        {技能_光明相, 1},
-        {技能_暗尘弥散, 1},
-        {技能_驱夜断愁, 29},
-        {技能_诛邪镇魔, 1},
-    };
-    for (const auto &it : skills) {
-        skillLearn(it.first, it.second);
-        auto &skill = frame::SkillManager::get(it.first, it.second);
-        if (skill.IsPassiveSkill) {
-            skillActive(it.first);
-        }
-    }
-    // 奇穴
-    for (const auto &it : talents) {
-        skillLearn(it, 1);
-        auto &skill = frame::SkillManager::get(it, 1);
-        if (skill.IsPassiveSkill) {
-            skillActive(it);
-        }
-    }
-    // 秘籍
-    for (const auto &it : recipes) {
-        for (const auto &recipe : it.second) {
-            if (recipe > 0) {
-                skillrecipeAdd(recipe, 1);
-            }
-        }
-    }
 }
 
 void MjFysj::fightPrepare() {

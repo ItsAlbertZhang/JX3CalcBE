@@ -26,23 +26,23 @@ public:
     std::unordered_map<std::string, std::string> ui;  // ui_skill.tab 中的数据
     std::string                                  Name;
 
+    int                  MaxLevel;
     ref::Skill::KindType KindType;
     ref::Skill::CastMode CastMode;
-
-    int      MountRequestType;
-    int      MountRequestDetail;
-    bool     IsPassiveSkill;
-    bool     HasCriticalStrike;
-    uint32_t SkillEventMask1;
-    uint32_t SkillEventMask2;
-    bool     NeedOutOfFight;
-    bool     TargetTypePlayer;
-    bool     TargetTypeNpc;
-    bool     TargetRelationNone;
-    bool     TargetRelationSelf;
-    bool     TargetRelationEnemy;
-    int      RecipeType;
-    bool     IsFrost;
+    int                  MountRequestType;
+    int                  MountRequestDetail;
+    bool                 IsPassiveSkill;
+    bool                 HasCriticalStrike;
+    uint32_t             SkillEventMask1;
+    uint32_t             SkillEventMask2;
+    bool                 NeedOutOfFight;
+    bool                 TargetTypePlayer;
+    bool                 TargetTypeNpc;
+    bool                 TargetRelationNone;
+    bool                 TargetRelationSelf;
+    bool                 TargetRelationEnemy;
+    int                  RecipeType;
+    bool                 IsFrost;
 
     int SunSubsectionSkillID;
     int SunSubsectionSkillLevel;
@@ -292,7 +292,7 @@ private:
      * @param skillID
      * @param skillLevel
      */
-    static void add(int skillID, int skillLevel);
+    static const Skill &add(int skillID, int skillLevel);
 };
 
 } // namespace frame

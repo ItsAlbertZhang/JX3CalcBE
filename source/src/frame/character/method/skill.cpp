@@ -51,8 +51,9 @@ void Character::skillDeactive(int skillID) {
 }
 
 void Character::skillLearn(int skillID, int skillLevel) {
-    this->chSkill.skillLearned[skillID] = skillLevel;
+    // skillLevel 可以为 0. 若如此做, 则将技能等级设为最高等级.
     const Skill &it                     = SkillManager::get(skillID, skillLevel);
+    this->chSkill.skillLearned[skillID] = it.dwLevel; // skillLevel 为 0 时, it.dwLevel 为最高等级, 否则等于 skillLevel.
     // 将主动技能加入反查表, 以使用技能名施展技能
     if (!it.IsPassiveSkill)
         chSkill.skillRef[it.Name] = skillID;

@@ -62,7 +62,7 @@ private:
      * @brief 初始化 SkillEvent. 将指定 ID 的 SkillEvent 数据存至缓存.
      * @param ID
      */
-    static void add(int ID);
+    static const SkillEvent &add(int ID);
 };
 
 } // namespace frame
