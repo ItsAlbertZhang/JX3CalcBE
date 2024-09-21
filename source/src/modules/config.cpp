@@ -12,26 +12,34 @@ namespace fs = std::filesystem;
 
 const std::string version = "v1.2.1.083101";
 
-static inline bool stringContains(const std::string &str, const std::string &substr) {
-    return str.find(substr) != std::string::npos;
-}
-
-static void initFromJson(const json &j) {
+static bool initFromJson(const json &j) {
     using namespace config;
-    std::string spJX3;
+    std::string spSeasunGame;
     std::string spUnpack;
-    if (j.contains("JX3Dir") && j["JX3Dir"].is_string()) {
-        spJX3 = j["JX3Dir"].get<std::string>();
+    if (j.contains("dirSeasunGame") && j.at("dirSeasunGame").is_string()) {
+        spSeasunGame = j.at("dirSeasunGame").get<std::string>();
     }
-    if (j.contains("UnpackDir") && j["UnpackDir"].is_string()) {
-        spUnpack = j["UnpackDir"].get<std::string>();
+    if (j.contains("dirUnpacked") && j.at("dirUnpacked").is_string()) {
+        spUnpack = j.at("dirUnpacked").get<std::string>();
     }
-    if (0 == gdi::dataInit(spJX3.c_str(), spUnpack.c_str())) {
-        if (stringContains(spJX3, "exp") || stringContains(spUnpack, "exp") ||
-            stringContains(spJX3, "EXP") || stringContains(spUnpack, "EXP"))
-            dataAvailable = dataStatus::jx3_exp;
-        else
-            dataAvailable = dataStatus::jx3;
+    ClientType client = ClientType::jx3_hd;
+    if (j.contains("clientType") && j.at("clientType").is_string()) {
+        std::string s = j.at("clientType").get<std::string>();
+        for (const auto &[key, value] : ClientTypeMap) {
+            if (value.name == s) {
+                client = key;
+                break;
+            }
+        }
+    }
+    std::string spBin64 = std::format(
+        "{}/Game/{}/bin/{}/bin64",
+        spSeasunGame, ClientTypeMap.at(client).path1, ClientTypeMap.at(client).path2
+    );
+    if (0 == gdi::dataInit(spBin64.c_str(), spUnpack.c_str())) {
+        clientType = client;
+    } else {
+        return false;
     }
 
     if (j.contains("maxDelayNetwork") && j["maxDelayNetwork"].is_number_integer()) {
@@ -52,9 +60,10 @@ static void initFromJson(const json &j) {
     if (j.contains("maxTaskDuration") && j["maxTaskDuration"].is_number_integer()) {
         config::taskdata::maxTaskDuration = j["maxTaskDuration"].get<int>();
     }
+    return true;
 }
 
-void config::init(int argc, char *argv[]) {
+bool config::init(int argc, char *argv[]) {
     UNREFERENCED_PARAMETER(argc);
     pExeDir = fs::absolute(argv[0]).parent_path();
     json     j;
@@ -63,24 +72,23 @@ void config::init(int argc, char *argv[]) {
         std::ifstream fileConfig(pathConfig);
         fileConfig >> j;
     }
-    initFromJson(j);
+    return initFromJson(j);
 }
 
-bool config::init(const std::string &jsonstr) {
+bool config::configure(const std::string &jsonstr) {
     try {
-        json     j;
+        json     jNew       = json::parse(jsonstr);
         fs::path pathConfig = pExeDir / "config.json";
-        if (fs::exists(pathConfig)) {
+        if (jNew.contains("update") && fs::exists(pathConfig)) {
+            json          jOld;
             std::ifstream fileConfig {pathConfig};
-            fileConfig >> j;
-        }
-        j.update(json::parse(jsonstr));
-        initFromJson(j);
-        if (dataAvailable == dataStatus::unavailable) {
-            return false;
+            fileConfig >> jOld;
+            jOld.update(jNew);
+            jNew = std::move(jOld);
+            jNew.erase("update");
         }
         std::ofstream fileConfig {pathConfig};
-        fileConfig << j.dump(4);
+        fileConfig << jNew.dump(4);
         return true;
     } catch (...) {
         return false;
@@ -89,9 +97,9 @@ bool config::init(const std::string &jsonstr) {
 
 std::string config::status() {
     json j;
-    j["status"] = dataAvailable != dataStatus::unavailable ? 0 : -1;
+    j["status"] = clientType != ClientType::unknown ? 0 : -1;
 
-    if (dataAvailable != dataStatus::unavailable) {
+    if (clientType != ClientType::unknown) {
         auto &data      = j["data"];
         data["version"] = version;
 
@@ -102,7 +110,7 @@ std::string config::status() {
         userinput["maxFightCount"]    = taskdata::maxFightCount;
 
         data["custom"] = taskdata::allowCustom;
-        data["isExp"]  = isExp();
+        data["client"] = ClientTypeMap.at(clientType).name;
     }
     return j.dump();
 }

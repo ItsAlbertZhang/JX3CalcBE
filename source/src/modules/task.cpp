@@ -63,7 +63,7 @@ static std::string genID(const std::unordered_map<std::string, TypeValue> &map, 
 
 static Task::Data createTaskData(const std::string &jsonstr) {
     // 1. 验证数据可用性
-    if (modules::config::dataAvailable == modules::config::dataStatus::unavailable) [[unlikely]]
+    if (modules::config::clientType == modules::config::ClientType::unknown) [[unlikely]]
         throw std::runtime_error("服务器数据不可用, 请检查 config.json.");
     // 2. 解析 json
     using json   = nlohmann::json;
