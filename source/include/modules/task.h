@@ -1,7 +1,6 @@
 #pragma once
 
-#include "frame/character/derived/player.h"
-#include "frame/character/effect.h"
+#include "concrete.h"
 #include "frame/character/property/attribute.h"
 #include "frame/common/damage.h"
 #include "modules/pool.h"
@@ -38,7 +37,7 @@ public:
     class Data {
     public:
         ~Data();
-        concrete::Player playerType;
+        concrete::PlayerType playerType;
 
         int delayNetwork;
         int delayKeyboard;

@@ -1,4 +1,5 @@
-#include "frame/character/effect.h"
+
+#include "concrete.h"
 #include "frame/character/character.h"
 #include "frame/event.h"
 #include <nlohmann/json.hpp>
@@ -157,11 +158,11 @@ auto concrete::createEffect(const std::string &type, const std::string &jsonstr)
 namespace {
 const typeMap effect_map {
     {"套装·技能", [](frame::Character *obj) { switch(obj->kungfuID){
-            case 10242:obj->skillrecipeAdd(948, 2);break;
+            case 10242: obj->skillrecipeAdd(948, 2); break;
             default: break;
     } }},
     {"套装·特效", [](frame::Character *obj) { switch(obj->kungfuID){
-            case 10242:obj->skilleventAdd(1922);break;
+            case 10242: obj->skilleventAdd(1922); break;
             default: break;
     } }},
     {"大附魔·腰", tSkillevent {2623}},

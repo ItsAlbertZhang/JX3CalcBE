@@ -1,8 +1,5 @@
 #include "modules/task.h"
 #include "concrete.h"
-#include "frame/character/derived/npc.h"
-#include "frame/character/derived/player.h"
-#include "frame/character/effect.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
 #include "frame/global/skill.h"
@@ -305,7 +302,7 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
         player->customLua = frame::CustomLua::get(arg.fight.value());
     }
 
-    std::unique_ptr<frame::NPC> npc = concrete::createNPC(concrete::NPC::NPCatLevelAdd4);
+    std::unique_ptr<frame::NPC> npc = concrete::createNPC(concrete::NPCType::NPCatLevelAdd4);
     player->targetSelect            = npc.get();
     frame::Event::clear();
 

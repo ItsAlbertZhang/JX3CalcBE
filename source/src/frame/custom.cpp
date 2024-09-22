@@ -1,4 +1,4 @@
-#include "frame/character/derived/player.h"
+#include "frame/character/player.h"
 #include <format>
 #include <string>
 #include <unordered_map>
