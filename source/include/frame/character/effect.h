@@ -1,6 +1,8 @@
 #pragma once
 
 #include "frame/character/character.h"
+#include <memory>
+#include <variant>
 
 namespace jx3calc {
 namespace frame {
