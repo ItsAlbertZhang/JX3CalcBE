@@ -1,5 +1,6 @@
 #include "modules/config.h"
 #include "gdi.h"
+#include <format>
 #include <fstream>
 #include <nlohmann/json.hpp>
 
