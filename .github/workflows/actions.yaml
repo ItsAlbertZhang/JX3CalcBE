@@ -45,6 +45,7 @@ jobs:
         uses: threeal/cmake-action@v2
         with:
           build-dir: ./build/obj/Release
+          build-args: --config Release
           options: |
             CMAKE_BUILD_TYPE=Release
           c-compiler: ${{ matrix.config.compiler-c || '' }}
