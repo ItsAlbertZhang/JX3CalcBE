@@ -26,14 +26,18 @@ inline const std::unordered_map<std::string, NPCType> npcMap {
 
 // 内部实现使用模板函数, 方便在不同 .cpp 下进行实例化.
 template <PlayerType type, modules::config::ClientType>
-extern std::unique_ptr<frame::Player> createPlayer();
+extern auto createPlayer() -> std::unique_ptr<frame::Player>;
 template <NPCType type, modules::config::ClientType>
-extern std::unique_ptr<frame::NPC> createNPC();
+extern auto createNPC() -> std::unique_ptr<frame::NPC>;
+template <modules::config::ClientType>
+extern auto createEffect(const std::string &type, const std::string &jsonstr) -> std::shared_ptr<frame::Effect>;
 
 // 外部接口
 std::unique_ptr<frame::Player> createPlayer(PlayerType type);
 std::unique_ptr<frame::NPC>    createNPC(NPCType type);
 std::shared_ptr<frame::Effect> createEffect(const std::string &type, const std::string &jsonstr);
+
+void dummyFunc(); // fix unused includes warning
 
 } // namespace concrete
 } // namespace jx3calc

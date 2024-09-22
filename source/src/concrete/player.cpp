@@ -1,5 +1,4 @@
 #include "concrete.h"
-#include "modules/config.h"
 
 using namespace jx3calc;
 
