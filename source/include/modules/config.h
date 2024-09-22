@@ -45,6 +45,7 @@ bool configure(const std::string &jsonstr);
 std::string status();
 
 // 判断是否为测试服. 正式服更新合并测试服时, 注意检查此函数调用.
+// 注意: 仅限全局相关内容使用这个函数. 如果是 concrete 相关, 应使用模板实例化.
 inline bool isExp() {
     return clientType == ClientType::jx3_exp;
 }

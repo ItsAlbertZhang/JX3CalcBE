@@ -8,6 +8,10 @@ auto concrete::createEffect(const std::string &type, const std::string &jsonstr)
          [](const std::string &type, const std::string &jsonstr) {
              return createEffect<modules::config::ClientType::jx3_hd>(type, jsonstr);
          }},
+        {modules::config::ClientType::jx3_exp,
+         [](const std::string &type, const std::string &jsonstr) {
+             return createEffect<modules::config::ClientType::jx3_exp>(type, jsonstr);
+         }},
     };
     return funcmap.at(modules::config::clientType)(type, jsonstr);
 }

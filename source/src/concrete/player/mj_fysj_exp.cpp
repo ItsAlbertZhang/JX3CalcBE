@@ -8,9 +8,9 @@ using namespace jx3calc;
 
 namespace {
 
-class MjFysjHd : public frame::Player {
+class MjFysjExp : public frame::Player {
 public:
-    MjFysjHd();
+    MjFysjExp();
 
 private:
     virtual void fightPrepare() override;
@@ -54,8 +54,8 @@ private:
 } // namespace
 
 template <>
-auto concrete::createPlayer<concrete::PlayerType::MjFysj, modules::config::ClientType::jx3_hd>() -> std::unique_ptr<frame::Player> {
-    return std::make_unique<MjFysjHd>();
+auto concrete::createPlayer<concrete::PlayerType::MjFysj, modules::config::ClientType::jx3_exp>() -> std::unique_ptr<frame::Player> {
+    return std::make_unique<MjFysjExp>();
 }
 
 namespace {
@@ -71,7 +71,7 @@ constexpr int 奇穴_靡业报劫 = 34372;
 constexpr int 奇穴_用晦而明 = 17567;
 constexpr int 奇穴_净体不畏 = 25166;
 constexpr int 奇穴_天地诛戮 = 5979;
-constexpr int 奇穴_降灵尊   = 34378;
+constexpr int 奇穴_降灵尊   = 38526;
 constexpr int 奇穴_悬象著明 = 34347;
 constexpr int 奇穴_崇光斩恶 = 37337;
 constexpr int 奇穴_日月齐光 = 34370;
@@ -83,9 +83,9 @@ constexpr int 技能_银月斩     = 3960;
 constexpr int 技能_净世破魔击 = 3967;
 constexpr int 技能_生死劫     = 3966;
 constexpr int 技能_光明相     = 3969;
-constexpr int 技能_暗尘弥散   = 3974;
 constexpr int 技能_驱夜断愁   = 3979;
 constexpr int 技能_诛邪镇魔   = 22890;
+constexpr int 技能_降灵尊     = 38526;
 constexpr int 技能_悬象著明   = 34347;
 constexpr int 技能_崇光斩恶   = 37335;
 
@@ -176,7 +176,7 @@ constexpr int 月破 = 技能_净世破魔击;
 constexpr int 日劫 = 技能_生死劫;
 constexpr int 月劫 = 技能_生死劫;
 constexpr int 光明 = 技能_光明相;
-constexpr int 隐身 = 技能_暗尘弥散;
+constexpr int 降灵 = 技能_降灵尊;
 constexpr int 驱夜 = 技能_驱夜断愁;
 constexpr int 诛邪 = 技能_诛邪镇魔;
 constexpr int 月悬 = 技能_悬象著明;
@@ -184,14 +184,14 @@ constexpr int 崇光 = 技能_崇光斩恶;
 // 能够用两个字表示的特殊操作
 constexpr int 腰坠 = -(1 << 10);
 // 无法用两个字表示的特殊操作, 使用编号
-constexpr int 特00 = -(1 << 20) + 0; // 提前隐身
+constexpr int 特00 = -(1 << 20) + 0; // 提前降灵
 
-MjFysjHd::MjFysjHd() :
+MjFysjExp::MjFysjExp() :
     Player(8, 10242, 0, 503) {}
 
-void MjFysjHd::initValidate(typeSkills &skills, typeTalents &talents, typeRecipes &recipes) {
+void MjFysjExp::initValidate(typeSkills &skills, typeTalents &talents, typeRecipes &recipes) {
     // 技能, 直接覆盖
-    skills = {技能_赤日轮, 技能_烈日斩, 技能_生死劫, 技能_净世破魔击, 技能_幽月轮, 技能_银月斩, 技能_光明相, 技能_暗尘弥散, 技能_驱夜断愁, 技能_诛邪镇魔};
+    skills = {技能_赤日轮, 技能_烈日斩, 技能_生死劫, 技能_净世破魔击, 技能_幽月轮, 技能_银月斩, 技能_光明相, 技能_驱夜断愁, 技能_诛邪镇魔};
 
     // 奇穴
     const typeTalents  talentsDefault {奇穴_腾焰飞芒, 奇穴_净身明礼, 奇穴_诛邪镇魔, 奇穴_无明业火, 奇穴_明光恒照, 奇穴_日月同辉, 奇穴_靡业报劫, 奇穴_用晦而明, 奇穴_净体不畏, 奇穴_降灵尊, 奇穴_悬象著明, 奇穴_崇光斩恶};
@@ -269,7 +269,7 @@ void MjFysjHd::initValidate(typeSkills &skills, typeTalents &talents, typeRecipe
     recipes = std::move(recipesTemp);
 }
 
-void MjFysjHd::fightPrepare() {
+void MjFysjExp::fightPrepare() {
     cast(3974);
     if (nSunPowerValue == 0 && nMoonPowerValue == 0) {
         if (nCurrentMoonEnergy >= 10000)
@@ -280,7 +280,7 @@ void MjFysjHd::fightPrepare() {
     framePublicCooldown = 16 * 1024 / (1024 + chAttr.getHaste());
 }
 
-auto MjFysjHd::fightWeaponAttack() -> frame::event_tick_t {
+auto MjFysjExp::fightWeaponAttack() -> frame::event_tick_t {
     skillCast(targetSelect, 4326, 1); // 大漠刀法
     int frame = 16 * 1024 / (1024 + this->chAttr.getHaste());
     return frame * 64; // 64 = 1024/16
@@ -292,7 +292,7 @@ extern const std::vector<int> queue崇光双驱三满;
 extern const std::vector<int> queue崇光双驱三满压缩;
 extern const std::vector<int> queue一键起手;
 
-void MjFysjHd::fightEmbed() {
+void MjFysjExp::fightEmbed() {
     switch (static_cast<int>(fightType)) {
     case static_cast<int>(EmbedType::上限_崇光):
         return fight_上限_崇光69();
@@ -304,9 +304,9 @@ void MjFysjHd::fightEmbed() {
     }
 }
 
-constexpr int delay隐身 = 50; // 延迟释放隐身时间: 50ms
+constexpr int delay降灵 = 50; // 延迟释放降灵时间: 50ms
 
-void MjFysjHd::fight_严格(const std::vector<int> &queue) {
+void MjFysjExp::fight_严格(const std::vector<int> &queue) {
     if (nFight == 0) [[unlikely]]
         fightStopWait.emplace(1);
     if (nFight >= queue.size()) [[unlikely]]
@@ -318,8 +318,8 @@ void MjFysjHd::fight_严格(const std::vector<int> &queue) {
             itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
         } break;
         case 特00: {
-            const auto cd = skillCooldownLeftTick(技能_暗尘弥散);
-            delayCustom   = static_cast<int>(cd < delay隐身 ? delay隐身 : cd) + delayBase + delayRand / 2;
+            const auto cd = skillCooldownLeftTick(技能_降灵尊);
+            delayCustom   = static_cast<int>(cd < delay降灵 ? delay降灵 : cd) + delayBase + delayRand / 2;
         } break;
         }
         nFight++;
@@ -338,7 +338,7 @@ void MjFysjHd::fight_严格(const std::vector<int> &queue) {
         fightStopWait.emplace(0);
 }
 
-void MjFysjHd::fight_简单_一键() {
+void MjFysjExp::fight_简单_一键() {
     if (bFight) {
         cast(queue一键起手[nFight]);
         nFight++;
@@ -354,7 +354,7 @@ void MjFysjHd::fight_简单_一键() {
         if (buff崇光 && buff崇光->isValid && buff崇光->nStackNum == 6 && buff斩恶 && buff斩恶->isValid)
             cast(37335); // 崇光斩恶, 5.5 层
         if (nCurrentMoonEnergy <= 2000)
-            cast(技能_暗尘弥散);
+            cast(技能_降灵尊);
         const auto buff降灵尊 = buffGet(25731, 1);
         if (buff降灵尊 && buff降灵尊->isValid) {
             itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
@@ -379,162 +379,162 @@ const std::vector<int> queue一键起手 {
 };
 
 const std::vector<int> queue崇光月日 {
-    日斩, 月斩, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 崇光, 崇光, 崇光, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 崇光, 崇光, 崇光, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 腰坠, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 崇光, 崇光, 崇光, 驱夜, 月破, 日劫, 崇光, 崇光, 崇光, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪, 崇光, 崇光, 崇光,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 崇光, 崇光, 崇光, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 崇光, 崇光, 崇光, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 腰坠, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 崇光, 崇光, 崇光, 驱夜, 月破, 日劫, 崇光, 崇光, 崇光, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪, 崇光, 崇光, 崇光,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 崇光, 崇光, 崇光, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 崇光, 崇光, 崇光, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 腰坠, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 崇光, 崇光, 崇光, 驱夜, 月破, 日劫, 崇光, 崇光, 崇光, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪, 月斩, 日斩, 驱夜, 月破, 日破, 诛邪, 崇光, 崇光, 崇光,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 腰坠, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, 日斩, 崇光, 崇光, 崇光
 };
 
 const std::vector<int> queue崇光双驱三满 {
-    日斩, 月斩, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, // 降灵尊
     日斩, 驱夜, 日破, 月斩, 月劫, 诛邪,                                     // 2斩2满
     日斩, 驱夜, 日破, 崇光, 崇光, 崇光,                                     // 1斩1满 + 3崇
     日斩, 驱夜, 月破, 诛邪, 日破,                                           // [1斩2满]
     月斩, 日斩, 驱夜, 月劫, 诛邪, 日破,                                     // 2斩2满, 打劫
     月斩, 日斩, 驱夜, 月破, 诛邪, 日破, 崇光, 崇光, 崇光,                   // 2斩2满 + 3崇
-    日斩, 月斩, 驱夜, 月悬, 日劫, 特00, 诛邪, 隐身,
+    日斩, 月斩, 驱夜, 月悬, 日劫, 特00, 诛邪, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 腰坠, 月破, 诛邪, // 降灵尊
     日斩, 驱夜, 日破, 月斩, 崇光, 崇光, 崇光, 月劫, 诛邪, 日斩, 驱夜, 日破, 崇光, 崇光, 崇光,
     日斩, 驱夜, 月破, 诛邪, 日破, 月斩, 日斩, 驱夜, 月劫, 诛邪, 日破,
     月斩, 日斩, 驱夜, 月破, 诛邪, 日破, 崇光, 崇光, 崇光,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身, 诛邪,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 腰坠, 月破, 诛邪, // 降灵尊
     日斩, 驱夜, 日破, 月斩, 崇光, 崇光, 崇光, 月劫, 诛邪, 日斩, 驱夜, 日破, 崇光, 崇光, 崇光,
     日斩, 驱夜, 月破, 诛邪, 日破, 月斩, 日斩, 驱夜, 月劫, 诛邪, 日破,
     月斩, 日斩, 驱夜, 月破, 诛邪, 日破, 崇光, 崇光, 崇光,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身, 诛邪,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, // 降灵尊
     日斩, 驱夜, 日破, 月斩, 月劫, 诛邪, 日斩, 驱夜, 日破, 崇光, 崇光, 崇光,
     日斩, 驱夜, 月破, 诛邪, 日破, 月斩, 日斩, 驱夜, 月劫, 诛邪, 日破,
     月斩, 日斩, 驱夜, 月破, 诛邪, 日破, 崇光, 崇光, 崇光,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身, 诛邪,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 腰坠, 月破, 诛邪, // 降灵尊
     日斩, 驱夜, 日破, 月斩, 崇光, 崇光, 崇光, 月劫, 诛邪, 日斩, 驱夜, 日破, 崇光, 崇光, 崇光,
     日斩, 驱夜, 月破, 诛邪, 日破, 月斩, 日斩, 驱夜, 月劫, 诛邪, 日破,
     月斩, 日斩, 驱夜, 月破, 诛邪, 日破, 崇光, 崇光, 崇光,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身, 诛邪,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 腰坠, 月破, 诛邪, // 降灵尊
     日斩, 驱夜, 日破, 月斩, 崇光, 崇光, 崇光, 月劫, 诛邪, 日斩, 驱夜, 日破, 崇光, 崇光, 崇光,
     日斩, 驱夜, 月破, 诛邪, 日破, 月斩, 日斩, 驱夜, 月劫, 诛邪, 日破,
     月斩, 日斩, 驱夜, 月破, 诛邪, 日破, 崇光, 崇光, 崇光,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身, 诛邪,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, 日斩, 崇光, 崇光, 崇光
 };
 
 const std::vector<int> queue崇光双驱三满压缩 {
-    日斩, 月斩, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, // 降灵尊
     日斩, 驱夜, 日劫, 月斩, 月破,                                           // 2斩2满
     日斩, 驱夜, 日破, 诛邪, 崇光, 崇光, 崇光,                               // 1斩1满 + 3崇
     日斩, 驱夜, 月破, 日破, 诛邪,                                           // [1斩2满]
     日斩, 月斩, 驱夜, 月劫, 日破,                                           // 2斩2满, 打劫
     日斩, 月斩, 驱夜, 月破, 诛邪, 崇光, 崇光, 崇光, 日破,                   // 2斩2满 + 3崇
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身, 诛邪,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, // 降灵尊
     日斩, 驱夜, 腰坠, 诛邪, 日劫, 月斩, 崇光, 崇光, 崇光, 月破,       // 2斩2满
     日斩, 驱夜, 日破, 诛邪, 崇光, 崇光, 崇光,                         // 1斩1满 + 3崇
     日斩, 驱夜, 月破, 日劫, 诛邪,                                     // [1斩2满], 打劫
     日斩, 月斩, 驱夜, 月破, 日破, 诛邪, 崇光, 崇光, 崇光,             // 2斩2满 + 3崇
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     日斩, 驱夜, 日劫, 月斩, 月破, 日斩, 驱夜, 日破, 诛邪, 崇光, 崇光, 崇光, 日斩, 驱夜, 月破, 日破, 诛邪, // [1斩2满] 收尾
     日斩, 月斩, 驱夜, 月劫, 日破, 日斩, 月斩, 驱夜, 月破, 诛邪, 崇光, 崇光, 崇光, 日破,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身, 诛邪,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破,
     日斩, 驱夜, 腰坠, 诛邪, 日劫, 月斩, 崇光, 崇光, 崇光, 月破, 日斩, 驱夜, 日破, 诛邪, 崇光, 崇光, 崇光, 日斩, 驱夜, 月破, 日劫, 诛邪, // [1斩2满] 收尾
     日斩, 月斩, 驱夜, 月破, 日破, 诛邪, 崇光, 崇光, 崇光,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     日斩, 驱夜, 日劫, 月斩, 月破, 日斩, 驱夜, 日破, 诛邪, 崇光, 崇光, 崇光, 日斩, 驱夜, 月破, 日破, 诛邪, // [1斩2满] 收尾
     日斩, 月斩, 驱夜, 月劫, 日破, 日斩, 月斩, 驱夜, 月破, 诛邪, 崇光, 崇光, 崇光, 日破,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身, 诛邪,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破,
     日斩, 驱夜, 腰坠, 诛邪, 日劫, 月斩, 崇光, 崇光, 崇光, 月破, 日斩, 驱夜, 日破, 诛邪, 崇光, 崇光, 崇光, 日斩, 驱夜, 月破, 日劫, 诛邪, // [1斩2满] 收尾
     日斩, 月斩, 驱夜, 月破, 日破, 诛邪, 崇光, 崇光, 崇光,
-    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 隐身,
+    日斩, 月斩, 驱夜, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪, 日斩, 崇光, 崇光, 崇光
 };
 
 const std::vector<int> queue齐光错劫 {
-    日斩, 月斩, 月悬, 腰坠, 光明, 特00, 日劫, 隐身,
+    日斩, 月斩, 月悬, 腰坠, 光明, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
-    月斩, 日斩, 驱夜, 月悬, 特00, 日破, 隐身, 诛邪,
+    月斩, 日斩, 驱夜, 月悬, 特00, 日破, 降灵, 诛邪,
     月破, 日劫, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪,
-    月斩, 日斩, 驱夜, 月悬, 特00, 日破, 隐身, 诛邪,
+    月斩, 日斩, 驱夜, 月悬, 特00, 日破, 降灵, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 光明, 日劫, 月破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
-    月斩, 日斩, 驱夜, 月悬, 特00, 日劫, 隐身,
+    月斩, 日斩, 驱夜, 月悬, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
-    月斩, 日斩, 驱夜, 月悬, 特00, 日破, 隐身, 光明, 诛邪,
+    月斩, 日斩, 驱夜, 月悬, 特00, 日破, 降灵, 光明, 诛邪,
     月破, 日劫, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪,
-    月斩, 日斩, 驱夜, 月悬, 特00, 日破, 隐身, 诛邪,
+    月斩, 日斩, 驱夜, 月悬, 特00, 日破, 降灵, 诛邪,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日劫, 月破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日劫, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
     月斩, 日斩, 驱夜, 月破, 日破, 诛邪,
-    月斩, 日斩, 驱夜, 月悬, 腰坠, 光明, 特00, 日劫, 隐身,
+    月斩, 日斩, 驱夜, 月悬, 腰坠, 光明, 特00, 日劫, 降灵,
     月破, 诛邪, 日破, 驱夜, 诛邪, 月破, 诛邪, 驱夜, 日破, 诛邪, 月破, 诛邪
 };
 
-void MjFysjHd::fightBurst() {
-    // 进入此小节, 隐身冷却时间一定小于 3 个 GCD.
-    // 悬象一定冷却完毕, 因为上一次悬象的释放时机一定在: 隐身前 3 个 GCD ~ 隐身后瞬间.
+void MjFysjExp::fightBurst() {
+    // 进入此小节, 降灵冷却时间一定小于 3 个 GCD.
+    // 悬象一定冷却完毕, 因为上一次悬象的释放时机一定在: 降灵前 3 个 GCD ~ 降灵后瞬间.
 
     // 获取计算资源
     const auto buff悬象   = buffGet(25716, 0);
     const auto buff橙武CD = buffGet(2584, 0);
     const auto buff灵日   = buffGet(9910, 0);
     const auto buff魂月   = buffGet(9911, 0);
-    const auto cd暗尘弥散 = skillCooldownLeftTick(技能_暗尘弥散);
+    const auto cd降灵尊   = skillCooldownLeftTick(技能_降灵尊);
     // 注意: 以下计算资源为当前一次性计算, 并不会随计算源而更新, 使用时需注意
     const auto time半边诛邪 =
         buff灵日 && buff灵日->isValid
@@ -545,17 +545,17 @@ void MjFysjHd::fightBurst() {
     const auto time橙武CD  = buff橙武CD && buff橙武CD->isValid ? buff橙武CD->nLeftFrame * 1024 / 16 : 0;
     const auto time最长GCD = framePublicCooldown * 1024 / 16 + delayBase + delayRand;
 
-    // 施展隐身. 可能在GCD内释放, 也可能在释放其他技能前释放.
+    // 施展降灵. 可能在GCD内释放, 也可能在释放其他技能前释放.
     if ((nCurrentSunEnergy < 10000 && nCurrentMoonEnergy < 10000) || // 日灵月魂均小于100, 或
         time橙武CD > 26 * 1024 + delayBase + delayRand)              // 在橙武特效中, 且不在最后一秒
-        if (cast(技能_暗尘弥散))
+        if (cast(技能_降灵尊))
             return;
 
     // 直接施展悬象
     if (cast(技能_悬象著明))
         return;
-    // 处理一种特殊情况: 没有半边诛邪, 且隐身 CD 大于 1 GCD 小于 3 GCD, 打破魔击
-    if (time半边诛邪 == 0 && cd暗尘弥散 > time最长GCD && cd暗尘弥散 < 3 * time最长GCD)
+    // 处理一种特殊情况: 没有半边诛邪, 且降灵 CD 大于 1 GCD 小于 3 GCD, 打破魔击
+    if (time半边诛邪 == 0 && cd降灵尊 > time最长GCD && cd降灵尊 < 3 * time最长GCD)
         if (cast(技能_净世破魔击))
             return;
     // 施展悬象反色生死劫
@@ -563,8 +563,8 @@ void MjFysjHd::fightBurst() {
         if ((nMoonPowerValue && buff悬象->nLevel == 1) || // 满月且有日悬, 或者
             (nSunPowerValue && buff悬象->nLevel == 2)) {  // 满日且有月悬
             if (cast(技能_生死劫)) {
-                if (cd暗尘弥散 < time最长GCD)
-                    delayCustom = static_cast<int>(cd暗尘弥散 < delay隐身 ? delay隐身 : cd暗尘弥散) + delayBase + delayRand / 2;
+                if (cd降灵尊 < time最长GCD)
+                    delayCustom = static_cast<int>(cd降灵尊 < delay降灵 ? delay降灵 : cd降灵尊) + delayBase + delayRand / 2;
                 return;
                 // } else if (cd生死劫 < 400) {
                 //     delayCustom = static_cast<int>(cd生死劫 + delayBase + delayRand / 2);
@@ -577,8 +577,8 @@ void MjFysjHd::fightBurst() {
             return;
     // 施展破魔击
     if (cast(技能_净世破魔击)) {
-        if (cd暗尘弥散 < time最长GCD)
-            delayCustom = static_cast<int>(cd暗尘弥散 < delay隐身 ? delay隐身 : cd暗尘弥散) + delayBase + delayRand / 2;
+        if (cd降灵尊 < time最长GCD)
+            delayCustom = static_cast<int>(cd降灵尊 < delay降灵 ? delay降灵 : cd降灵尊) + delayBase + delayRand / 2;
         return;
     }
     // 处理一种特殊情况: 还有3层悬象, 而灵魂状态是 x/0.
@@ -601,7 +601,7 @@ void MjFysjHd::fightBurst() {
             return;
 }
 
-void MjFysjHd::fightConv() {
+void MjFysjExp::fightConv() {
     // 获取计算资源
     const auto buff目标月斩 = targetSelect ? targetSelect->buffGet(4202, 0) : nullptr;
     const auto buff诛邪     = buffGet(9909, 0);
@@ -660,10 +660,10 @@ void MjFysjHd::fightConv() {
         return;
 }
 
-void MjFysjHd::fightCW() {
+void MjFysjExp::fightCW() {
     // 获取计算资源
     const auto cd生死劫   = skillCooldownLeftTick(技能_生死劫);
-    const auto cd暗尘弥散 = skillCooldownLeftTick(技能_暗尘弥散);
+    const auto cd降灵尊   = skillCooldownLeftTick(技能_降灵尊);
     const auto buff悬象   = buffGet(25716, 0);
     const auto buff橙武CD = buffGet(2584, 0);
     const auto buff非侠   = buffGet(28886, 1);
@@ -676,11 +676,11 @@ void MjFysjHd::fightCW() {
     itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
 
     // 悬象. 可以提前放.
-    if (time橙武CD > 27 * 1024 && cd暗尘弥散 < 1024)
+    if (time橙武CD > 27 * 1024 && cd降灵尊 < 1024)
         cast(技能_悬象著明); // 提前放悬象
-    // 隐身
-    if (time橙武CD > 26 * 1024 && cd暗尘弥散 == 0) {
-        cast(技能_暗尘弥散); // 一定能放出来
+    // 降灵
+    if (time橙武CD > 26 * 1024 && cd降灵尊 == 0) {
+        cast(技能_降灵尊);   // 一定能放出来
         cast(技能_悬象著明); // 不一定放得出来, 因为有可能悬象提前放了
     }
     // 诛邪
@@ -704,13 +704,13 @@ void MjFysjHd::fightCW() {
     cast(技能_净世破魔击);
 }
 
-void MjFysjHd::fight_上限_崇光69() {
+void MjFysjExp::fight_上限_崇光69() {
     // 获取计算资源
     const auto currentTick  = frame::Event::now();
     const auto buff目标日斩 = targetSelect ? targetSelect->buffGet(4418, 1) : nullptr;
     const auto buff目标月斩 = targetSelect ? targetSelect->buffGet(4202, 0) : nullptr;
     const auto cd生死劫     = skillCooldownLeftTick(技能_生死劫);
-    const auto cd暗尘弥散   = skillCooldownLeftTick(技能_暗尘弥散);
+    const auto cd降灵尊     = skillCooldownLeftTick(技能_降灵尊);
     const auto cd驱夜断愁   = skillCooldownLeftTick(技能_驱夜断愁);
     const auto buff悬象     = buffGet(25716, 0);
     const auto buff崇光     = buffGet(28194, 1);
@@ -791,7 +791,7 @@ void MjFysjHd::fight_上限_崇光69() {
     if (stacknum崇光 >= 3) { // 崇光
         // 降前崇
         // const auto bool诛GCD = (buff诛邪 && buff诛邪->isValid) || (buff灵日 && buff灵日->isValid) || (buff魂月 && buff魂月->isValid);
-        if (cd暗尘弥散 < time最长GCD * 9 &&                         // 诛崇崇崇斩斩驱破诛
+        if (cd降灵尊 < time最长GCD * 9 &&                           // 诛崇崇崇斩斩驱破诛
             nCurrentSunEnergy <= 2000 && nCurrentMoonEnergy <= 2000 // 空灵
         ) {
             if (cast(技能_诛邪镇魔))
@@ -834,8 +834,8 @@ void MjFysjHd::fight_上限_崇光69() {
                 return;
             }
     }
-    if (cd暗尘弥散 < 3 * time最长GCD && nCurrentSunEnergy >= 10000 && nCurrentMoonEnergy >= 10000)
-        // 隐身 CD 小于 3 GCD 且双满, 进入爆发
+    if (cd降灵尊 < 3 * time最长GCD && nCurrentSunEnergy >= 10000 && nCurrentMoonEnergy >= 10000)
+        // 降灵 CD 小于 3 GCD 且双满, 进入爆发
         return fightBurst();
     return fightConv();
 }

@@ -7,16 +7,16 @@ using namespace nlohmann;
 using namespace frame::effect;
 
 namespace {
-extern const typeMap effect_map_hd;
+extern const typeMap effect_map_exp;
 } // namespace
 
 template <>
-auto concrete::createEffect<modules::config::ClientType::jx3_hd>(const std::string &type, const std::string &jsonstr) -> std::shared_ptr<frame::Effect> {
-    return create(effect_map_hd, type, jsonstr);
+auto concrete::createEffect<modules::config::ClientType::jx3_exp>(const std::string &type, const std::string &jsonstr) -> std::shared_ptr<frame::Effect> {
+    return create(effect_map_exp, type, jsonstr);
 }
 
 namespace {
-const typeMap effect_map_hd {
+const typeMap effect_map_exp {
     {"套装·技能", [](frame::Character *obj) { switch(obj->kungfuID){
             case 10242: obj->skillrecipeAdd(948, 2); break;
             default: break;
@@ -142,6 +142,6 @@ const typeMap effect_map_hd {
 };
 } // namespace
 
-void concrete::dummyFunc1() {
+void concrete::dummyFunc2() {
     return;
 } // fix unused includes warning

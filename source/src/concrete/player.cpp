@@ -7,6 +7,7 @@ auto concrete::createPlayer(PlayerType type) -> std::unique_ptr<frame::Player> {
         {PlayerType::MjFysj,
          {
              {modules::config::ClientType::jx3_hd, []() { return createPlayer<PlayerType::MjFysj, modules::config::ClientType::jx3_hd>(); }},
+             {modules::config::ClientType::jx3_exp, []() { return createPlayer<PlayerType::MjFysj, modules::config::ClientType::jx3_exp>(); }},
          }},
     };
     return funcmap.at(type).at(modules::config::clientType)();

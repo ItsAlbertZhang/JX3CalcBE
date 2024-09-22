@@ -37,7 +37,8 @@ std::unique_ptr<frame::Player> createPlayer(PlayerType type);
 std::unique_ptr<frame::NPC>    createNPC(NPCType type);
 std::shared_ptr<frame::Effect> createEffect(const std::string &type, const std::string &jsonstr);
 
-void dummyFunc(); // fix unused includes warning
+void dummyFunc1(); // fix unused includes warning
+void dummyFunc2(); // fix unused includes warning
 
 } // namespace concrete
 } // namespace jx3calc
