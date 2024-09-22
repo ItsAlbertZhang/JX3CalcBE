@@ -1,8 +1,5 @@
 #include "modules/task.h"
 #include "concrete.h"
-#include "frame/character/derived/npc.h"
-#include "frame/character/derived/player.h"
-#include "frame/character/effect.h"
 #include "frame/event.h"
 #include "frame/global/buff.h"
 #include "frame/global/skill.h"
@@ -63,7 +60,7 @@ static std::string genID(const std::unordered_map<std::string, TypeValue> &map, 
 
 static Task::Data createTaskData(const std::string &jsonstr) {
     // 1. 验证数据可用性
-    if (modules::config::dataAvailable == modules::config::dataStatus::unavailable) [[unlikely]]
+    if (modules::config::clientType == modules::config::ClientType::unknown) [[unlikely]]
         throw std::runtime_error("服务器数据不可用, 请检查 config.json.");
     // 2. 解析 json
     using json   = nlohmann::json;
@@ -305,7 +302,7 @@ static auto calc(const Task::Data &arg) -> std::unique_ptr<frame::Player> {
         player->customLua = frame::CustomLua::get(arg.fight.value());
     }
 
-    std::unique_ptr<frame::NPC> npc = concrete::createNPC(concrete::NPC::NPCatLevelAdd4);
+    std::unique_ptr<frame::NPC> npc = concrete::createNPC(concrete::NPCType::NPCatLevelAdd4);
     player->targetSelect            = npc.get();
     frame::Event::clear();
 

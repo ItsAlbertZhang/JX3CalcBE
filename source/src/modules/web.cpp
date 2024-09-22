@@ -60,9 +60,14 @@ void jx3calc::modules::web::run() {
     auto futureApp = app.bindaddr("0.0.0.0").port(12897).multithreaded().run_async();
 
     CROW_ROUTE(manager, "/config")
-        .methods("POST"_method)([](const crow::request &req) {
-            bool ret = modules::config::init(req.body);
-            return crow::response {ret ? 200 : 400};
+        .methods("POST"_method)([&stop](const crow::request &req) {
+            bool ret = modules::config::configure(req.body);
+            if (ret) {
+                stop.store(true);
+                return crow::response {200};
+            } else {
+                return crow::response {400};
+            }
         });
 
     CROW_ROUTE(manager, "/stop")

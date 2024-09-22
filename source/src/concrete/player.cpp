@@ -1,13 +1,14 @@
-#include "frame/character/derived/player.h"
 #include "concrete.h"
 
 using namespace jx3calc;
 
-auto concrete::createPlayer(Player type) -> std::unique_ptr<frame::Player> {
-    switch (type) {
-    case Player::MjFysj:
-        return createPlayer<Player::MjFysj>();
-    default:
-        throw std::range_error("Invalid playerType");
-    }
+auto concrete::createPlayer(PlayerType type) -> std::unique_ptr<frame::Player> {
+    const std::unordered_map<PlayerType, std::unordered_map<modules::config::ClientType, std::function<std::unique_ptr<frame::Player>()>>> funcmap {
+        {PlayerType::MjFysj,
+         {
+             {modules::config::ClientType::jx3_hd, []() { return createPlayer<PlayerType::MjFysj, modules::config::ClientType::jx3_hd>(); }},
+             {modules::config::ClientType::jx3_exp, []() { return createPlayer<PlayerType::MjFysj, modules::config::ClientType::jx3_exp>(); }},
+         }},
+    };
+    return funcmap.at(type).at(modules::config::clientType)();
 }

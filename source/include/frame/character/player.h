@@ -1,22 +1,11 @@
 #pragma once
 
-#include "concrete.h"
 #include "frame/character/character.h"
 #include "frame/common/constant.h"
 #include "frame/common/event.h"
 #include "frame/custom.h"
 
 namespace jx3calc {
-
-namespace frame {
-class Player;
-}
-
-namespace concrete {
-template <Player type>
-extern auto createPlayer() -> std::unique_ptr<frame::Player>;
-auto        createPlayer(Player type) -> std::unique_ptr<frame::Player>;
-} // namespace concrete
 
 namespace frame {
 class Player : public Character {

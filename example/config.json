@@ -1,4 +1,5 @@
 {
-    "JX3Dir": "G:/Games/SeasunGame/Game/JX3/bin/zhcn_hd/bin64",
-    "UnpackDir": "../../../../../jx3src/jx3_hd_src"
+    "clientType": "jx3_hd",
+    "dirSeasunGame": "G:\\Games\\SeasunGame",
+    "dirUnpacked": "../../../../../jx3src/jx3_hd_src"
 }

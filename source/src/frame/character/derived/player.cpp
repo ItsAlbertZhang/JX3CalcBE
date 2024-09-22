@@ -1,4 +1,4 @@
-#include "frame/character/derived/player.h"
+#include "frame/character/player.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
 #include "plugin/log.h"

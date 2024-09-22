@@ -1,7 +1,5 @@
-#include "frame/character/derived/npc.h"
 #include "concrete.h"
 #include "modules/config.h"
-#include <stdexcept>
 
 using namespace jx3calc;
 
@@ -31,14 +29,22 @@ public:
 
 } // namespace
 
-auto concrete::createNPC(NPC type) -> std::unique_ptr<frame::NPC> {
-    switch (type) {
-    case NPC::NPCatLevelAdd4:
-        if (modules::config::isExp())
-            return std::make_unique<NPC134>();
-        else
-            return std::make_unique<NPC124>();
-    default:
-        throw std::range_error("Invalid npcType");
-    }
+template <>
+auto concrete::createNPC<concrete::NPCType::NPCatLevelAdd4, modules::config::ClientType::jx3_hd>() -> std::unique_ptr<frame::NPC> {
+    return std::make_unique<NPC124>();
+}
+template <>
+auto concrete::createNPC<concrete::NPCType::NPCatLevelAdd4, modules::config::ClientType::jx3_exp>() -> std::unique_ptr<frame::NPC> {
+    return std::make_unique<NPC134>();
+}
+
+auto concrete::createNPC(NPCType type) -> std::unique_ptr<frame::NPC> {
+    const std::unordered_map<NPCType, std::unordered_map<modules::config::ClientType, std::function<std::unique_ptr<frame::NPC>()>>> funcmap {
+        {NPCType::NPCatLevelAdd4,
+         {
+             {modules::config::ClientType::jx3_hd, []() { return createNPC<NPCType::NPCatLevelAdd4, modules::config::ClientType::jx3_hd>(); }},
+             {modules::config::ClientType::jx3_exp, []() { return createNPC<NPCType::NPCatLevelAdd4, modules::config::ClientType::jx3_exp>(); }},
+         }},
+    };
+    return funcmap.at(type).at(modules::config::clientType)();
 }
