@@ -83,6 +83,7 @@ constexpr int 技能_银月斩     = 3960;
 constexpr int 技能_净世破魔击 = 3967;
 constexpr int 技能_生死劫     = 3966;
 constexpr int 技能_光明相     = 3969;
+constexpr int 技能_暗尘弥散   = 3974;
 constexpr int 技能_驱夜断愁   = 3979;
 constexpr int 技能_诛邪镇魔   = 22890;
 constexpr int 技能_降灵尊     = 38526;
@@ -191,7 +192,7 @@ MjFysjExp::MjFysjExp() :
 
 void MjFysjExp::initValidate(typeSkills &skills, typeTalents &talents, typeRecipes &recipes) {
     // 技能, 直接覆盖
-    skills = {技能_赤日轮, 技能_烈日斩, 技能_生死劫, 技能_净世破魔击, 技能_幽月轮, 技能_银月斩, 技能_光明相, 技能_驱夜断愁, 技能_诛邪镇魔};
+    skills = {技能_赤日轮, 技能_烈日斩, 技能_生死劫, 技能_净世破魔击, 技能_幽月轮, 技能_银月斩, 技能_光明相, 技能_暗尘弥散, 技能_驱夜断愁, 技能_诛邪镇魔};
 
     // 奇穴
     const typeTalents  talentsDefault {奇穴_腾焰飞芒, 奇穴_净身明礼, 奇穴_诛邪镇魔, 奇穴_无明业火, 奇穴_明光恒照, 奇穴_日月同辉, 奇穴_靡业报劫, 奇穴_用晦而明, 奇穴_净体不畏, 奇穴_降灵尊, 奇穴_悬象著明, 奇穴_崇光斩恶};
@@ -270,7 +271,7 @@ void MjFysjExp::initValidate(typeSkills &skills, typeTalents &talents, typeRecip
 }
 
 void MjFysjExp::fightPrepare() {
-    cast(3974);
+    cast(技能_暗尘弥散);
     if (nSunPowerValue == 0 && nMoonPowerValue == 0) {
         if (nCurrentMoonEnergy >= 10000)
             nMoonPowerValue = 1;
