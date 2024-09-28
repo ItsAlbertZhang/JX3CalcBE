@@ -11,14 +11,13 @@ if os.name == "nt":
     }
     launch_type = "cppvsdbg"
 elif os.name == "posix":
-    settings_add = {
-        "clangd.arguments": ["--compile-commands-dir=build/obj/Debug"],
-    }
+    settings_add = {}
     launch_type = "lldb"
 else:
     raise Exception("Unsupported OS")
 
 settings: dict = {
+    "clangd.arguments": ["--compile-commands-dir=build/obj/Debug"],
     "cmake.buildDirectory": "${workspaceFolder}/build/obj/${buildType}",
 }
 settings.update(settings_add)
