@@ -21,7 +21,13 @@ static void callbackActiveBuff(void *selfPtr, void *param) {
     } else {
         // 防止在 activeAttrib 中被删除, 需要判断其是否存在
         if (it->isValid) {
-            // 如果存在, 则重新注册回调函数
+            // 如果存在, 则取出回调并重新注册回调函数
+            Event::cancel(it->tickActive, callbackActiveBuff, self, it);
+            // 此处的调用链为: Event::run() 取出回调并调用本函数, 然后本函数负责处理回调事件并视情况重新注册回调函数.
+            // 因此, 此处在大部分情况下, 不需要手动取出回调 (因为正是取出回调, 才触发的本函数)
+            // 但有一种情况除外: buff 在回调事件中重新添加了它自己. 这时, 必须手动取出, 否则会导致重复注册回调.
+            // issue #17 正是这种情况, buff 为 (12492, 2).
+            // #14, #15 的修改导致了重复注册回调会重复触发 (在此之前 std::set 重复注册回调会覆盖), 将这一问题暴露了出来.
             it->tickActive = Event::add(it->interval * 1024 / 16, callbackActiveBuff, self, it);
         }
     }
