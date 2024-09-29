@@ -195,6 +195,7 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case ref::Attrib::atHasteBase:                                 self->chAttr.atHasteBase += attrib.valueAInt * c * stack; break;
     case ref::Attrib::atSurplusValueBase:                          self->chAttr.atSurplusValueBase += attrib.valueAInt * c * stack; break;
     case ref::Attrib::atStrainBase:                                self->chAttr.atStrainBase += attrib.valueAInt * c * stack; break;
+    case ref::Attrib::atStrainPercent:                             self->chAttr.atStrainPercent += attrib.valueAInt * c * stack; break;
     case ref::Attrib::atStrainRate:                                self->chAttr.atStrainRate += attrib.valueAInt * c * stack; break;
     case ref::Attrib::atToughnessBaseRate:                         self->chAttr.atToughnessBaseRate += attrib.valueAInt * c * stack; break;
     case ref::Attrib::atTherapyPowerBase:                          self->chAttr.atTherapyPowerBase += attrib.valueAInt * c * stack; break;
