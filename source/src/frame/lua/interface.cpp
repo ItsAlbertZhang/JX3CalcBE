@@ -1,14 +1,16 @@
 #include "frame/lua/interface.h"
 #include "frame/lua/statics.h"
 #include "gdi.h"
+#include "modules/config.h"
 #include "plugin/log.h"
+#include "utils/conv.h"
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
 using namespace jx3calc;
 using namespace frame;
 
-static const std::string names[]{
+static const std::string names[] {
     "GetSkillLevelData",
     "GetSkillRecipeData",
     "Apply",
@@ -26,12 +28,21 @@ static thread_local std::unordered_set<std::string>                   includedFi
 //     return filenameList[idx];
 // }
 
+inline static std::string convFilename(const std::string &name) {
+#ifdef _WIN32
+    return modules::config::isUTF8 ? utils::utf82gbk(name) : name;
+#else
+    return modules::config::isUTF8 ? name : utils::gbk2utf8(name);
+#endif
+}
+
 static void add(const std::string &filename) {
     // 由于 data 是线程本地的, 因此不用考虑线程安全问题
     filenameMap[filename] = static_cast<int>(filefuncList.size());
     filenameList.emplace_back(filename);
-    std::vector<sol::protected_function> &funcs = filefuncList.emplace_back();
-    if (!lua::statics::LuaBlacklistFiles.contains(filename) && 0 == gdi::luaExecuteFile(filename.c_str())) {
+    auto       &funcs = filefuncList.emplace_back();
+    std::string fn    = convFilename(filename);
+    if (!lua::statics::LuaBlacklistFiles.contains(filename) && 0 == gdi::luaExecuteFile(fn.c_str())) {
         CONSTEXPR_LOG_INFO("luaExecuteFile success: {}.", filename);
         for (int i = 0; i < static_cast<int>(lua::interface::FuncType::COUNT); i++) {
             /**
@@ -57,7 +68,8 @@ int lua::interface::getIndex(std::string &filename, bool reload) {
     if (filenameMap.find(filename) == filenameMap.end()) {
         add(filename);
     } else if (reload) {
-        gdi::luaExecuteFile(filename.c_str());
+        std::string fn = convFilename(filename);
+        gdi::luaExecuteFile(fn.c_str());
     }
     return filenameMap[filename];
 }
@@ -130,6 +142,8 @@ void lua::interface::include(const std::string &filename) {
         return;
     }
     includedFiles.insert(filename);
-    if (!lua::statics::LuaBlacklistFiles.contains(filename))
-        gdi::luaExecuteFile(filename.c_str());
+    if (!lua::statics::LuaBlacklistFiles.contains(filename)) {
+        std::string fn = convFilename(filename);
+        gdi::luaExecuteFile(fn.c_str());
+    }
 }

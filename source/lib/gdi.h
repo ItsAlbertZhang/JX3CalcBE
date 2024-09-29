@@ -21,8 +21,8 @@ namespace gdi {
 
 /**
  * @brief 初始化 data, 由 gdi 库实现.
- * @param jx3Dir 剑网3 (JX3) 目录. 该项可以为空, 但不可与 unpackDir 同时为空.
- * @param unpackDir 未打包的数据目录. 该项可以为空, 但不可与 jx3Dir 同时为空.
+ * @param jx3Dir 剑网3 (JX3) 目录. 该项可以为空, 但不可与 unpackDir 同时为空. 传入的字符串中如果包含中文, 应当为 utf-8 编码.
+ * @param unpackDir 未打包的数据目录. 该项可以为空, 但不可与 jx3Dir 同时为空. 传入的字符串中如果包含中文, 应当为 utf-8 编码.
  * @warning 传入的字符串中如果包含中文, 应当为 utf-8 编码.
  * @return 0 表示成功, -1 表示失败.
  */
@@ -45,8 +45,7 @@ int luaInit(sol::state *(*initLua)(), const char *const luaFuncList[], size_t lu
 /**
  * @brief 执行 lua 文件, 由 gdi 库实现.
  * @param path 文件路径.
- * @warning 传入的字符串中如果包含中文, 应当为 utf-8 编码.
- * @note 如果 path 是从 tab 获取的, 那么它天生就是 utf-8 编码的.
+ * @warning 传入的路径字符串在 Windows 平台下应为 gbk 编码, 在 Linux 平台下应为 utf-8 编码.
  * @return int 0 表示成功, -1 表示失败.
  */
 int luaExecuteFile(const char *path);

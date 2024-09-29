@@ -33,6 +33,9 @@ static bool initFromJson(const json &j) {
             }
         }
     }
+    if (j.contains("isUTF8") && j.at("isUTF8").is_boolean()) {
+        config::isUTF8 = j.at("isUTF8").get<bool>();
+    }
     std::string spBin64 = std::format(
         "{}/Game/{}/bin/{}/bin64",
         spSeasunGame, ClientTypeMap.at(client).path1, ClientTypeMap.at(client).path2

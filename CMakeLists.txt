@@ -145,3 +145,6 @@ if(DEFINED CROW_ENABLE_SSL)
     add_definitions(-DCROW_ENABLE_SSL)
     target_link_libraries(${JX3CALC_EXE} PRIVATE ssl crypto) # 链接 ssl 库
 endif()
+if(APPLE)
+    target_link_libraries(${JX3CALC_EXE} PRIVATE iconv) # macOS 的 iconv 库为动态库, 需要链接
+endif()

@@ -6,6 +6,7 @@
 #include "modules/config.h"
 #include "plugin/channelinterval.h"
 #include "plugin/log.h"
+#include "utils/conv.h"
 #include <asio/co_spawn.hpp>
 #include <chrono>
 #include <format>
@@ -369,7 +370,7 @@ static std::string genID(const std::unordered_map<std::string, TValue> &map, int
 
     std::string random_string;
     while (random_string.empty() || map.contains(random_string)) {
-        for (size_t i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             random_string += CHARACTERS[distribution(generator)];
         }
     }
@@ -468,7 +469,7 @@ std::string Task::queryDamageList() {
             objDamage["damageExcept"]   = everyDamage.damageExcept;
             objDamage["criticalRate"]   = everyDamage.criticalRate;
             objDamage["isCritical"]     = everyDamage.isCritical;
-            objDamage["name"]           = name;
+            objDamage["name"]           = config::isUTF8 ? name : utils::gbk2utf8(name);
             objFight.emplace_back(objDamage);
         }
         j.at("data").emplace_back(objFight);
@@ -534,7 +535,7 @@ std::string Task::queryDamageAnalysis() {
             json  objDamage;
             objDamage["id"]         = it.id;
             objDamage["level"]      = it.level;
-            objDamage["name"]       = it.name;
+            objDamage["name"]       = config::isUTF8 ? it.name : utils::gbk2utf8(it.name);
             objDamage["count"]      = static_cast<double>(it.count) / CNT_DETAIL_TASKS;
             objDamage["damageMin"]  = it.damageMin;
             objDamage["damageMax"]  = it.damageMax;
