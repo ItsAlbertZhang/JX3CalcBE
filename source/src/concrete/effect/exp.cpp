@@ -26,8 +26,8 @@ const typeMap effect_map_exp {
             default: break;
     } }},
     {"大附魔·腰", tSkillevent {2623}},
-    {"大附魔·腕", anyMap {{"万灵当歌", tSkillevent {2554}}, {"雾海寻龙", tSkillevent {2624}}, {"丝路风语-低品", tSkillevent {2663}}, {"丝路风语-高品", tSkillevent {2673}}}},
-    {"大附魔·鞋", anyMap {{"万灵当歌", tSkillevent {2555}}, {"雾海寻龙", tSkillevent {2625}}, {"丝路风语-低品", tSkillevent {2664}}, {"丝路风语-高品", tSkillevent {2674}}}},
+    {"大附魔·腕", anyMap {{"万灵当歌", tSkillevent {2554}}, {"雾海寻龙", tSkillevent {2624}}, {"风语-低品", tSkillevent {2663}}, {"风语-高品", tSkillevent {2673}}}},
+    {"大附魔·鞋", anyMap {{"万灵当歌", tSkillevent {2555}}, {"雾海寻龙", tSkillevent {2625}}, {"风语-低品", tSkillevent {2664}}, {"风语-高品", tSkillevent {2674}}}},
     {"腰坠·特效", anyMap {{"吹香雪", tItem {frame::ItemType::Trinket, 38789}}, {"梧桐影", tItem {frame::ItemType::Trinket, 39853}}}},
     {"武器·特效",
      anyMap {
