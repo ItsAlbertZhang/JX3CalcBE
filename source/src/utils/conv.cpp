@@ -35,11 +35,11 @@ std::string utils::utf82gbk(const std::string &utf8) {
 
     if (cd == (iconv_t)-1)
         return utf8;
-
-    size_t            len = utf8.length();
+    std::string       str = utf8;
+    size_t            len = str.length();
     std::vector<char> v;
     v.resize(len * 2 + 1);
-    char  *inbuf        = utf8.c_str();
+    char  *inbuf        = str.data();
     char  *outbuf       = v.data();
     size_t inbytesleft  = len;
     size_t outbytesleft = len * 2;
@@ -77,11 +77,11 @@ std::string utils::gbk2utf8(const std::string &gbk) {
 
     if (cd == (iconv_t)-1)
         return gbk;
-
-    size_t            len = gbk.length();
+    std::string       str = gbk;
+    size_t            len = str.length();
     std::vector<char> v;
     v.resize(len * 2 + 1);
-    char  *inbuf        = gbk.c_str();
+    char  *inbuf        = str.data();
     char  *outbuf       = v.data();
     size_t inbytesleft  = len;
     size_t outbytesleft = len * 2;
