@@ -90,7 +90,7 @@ const typeMap effect_map_exp {
     {"武器·熔锭",
      anyMap {
          {"风语·坠宵熔锭（内攻）", [](frame::Character *obj) { obj->chAttr.atMagicAttackPowerBase += 949; }},
-         {"风语·坠宵磨石（内伤）", [](frame::Character *obj) { obj->chAttr.atMagicAttackPowerBase += 475; }},
+         {"风语·坠宵磨石（内攻）", [](frame::Character *obj) { obj->chAttr.atMagicAttackPowerBase += 475; }},
      }},
     {"宴席", anyMap {{"风语·二十四桥明月夜", tBuff {29284, 2}}}},
     {"同泽宴", tBuff {18428, 1}},
