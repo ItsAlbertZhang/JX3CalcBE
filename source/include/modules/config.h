@@ -24,6 +24,7 @@ inline std::unordered_map<ClientType, ClientStruct> ClientTypeMap {
 
 inline std::filesystem::path pExeDir;                          // 可执行文件所在目录的路径
 inline ClientType            clientType = ClientType::unknown; // 客户端类型
+inline bool                  isUTF8     = false;               // 本地文件是否为 UTF-8 编码
 
 namespace taskdata {
 

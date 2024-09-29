@@ -10,11 +10,6 @@
 int main(int argc, char *argv[]) {
     using namespace jx3calc;
 
-    // 如果是 Windows 操作系统, 将控制台编码设置为 UTF-8, 以便输出中文.
-#ifdef _WIN32
-    SetConsoleOutputCP(CP_UTF8);
-#endif
-
     // 初始化数据
     bool ret = modules::config::init(argc, argv);
     if (ret) {

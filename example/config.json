@@ -1,5 +1,6 @@
 {
     "clientType": "jx3_hd",
     "dirSeasunGame": "G:\\Games\\SeasunGame",
-    "dirUnpacked": "../../../../../jx3src/jx3_hd_src"
+    "dirUnpacked": "../../../../../jx3src/jx3_hd_src",
+    "isUTF8": true
 }
