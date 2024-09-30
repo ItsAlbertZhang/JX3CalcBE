@@ -127,6 +127,7 @@ const typeMap effect_map_exp {
     {"疏狂", tBuff {11456, 1}},     // {covrate: double}
     {"小队阵法",
      anyMap {
+         {"周天功·含章挺秀阵", anyMultiple {tBuff {29481, 6, 1024}, tBuff {29482, 1, 1, 1, 1.0}}},
          {"易筋经·天鼓雷音阵", anyMultiple {tBuff {919, 6, 1024}, tBuff {920, 1, 1, 5, 1.0}}},
          {"花间游·七绝逍遥阵", tBuff {934, 6, 1024}},
          {"紫霞功·九宫八卦阵", anyMultiple {tBuff {938, 6, 1024}, tBuff {943, 1, 1, 5, 1.0}}},
