@@ -46,6 +46,7 @@ enum class ref::Attrib {
     atMagicCriticalDamagePowerBaseKiloNumRate,
     atMagicOvercome,
     atMagicShield,
+    atMaxSkillRadiusPercent,
     atMoveSpeedPercent,
     atNeutralAttackPowerPercent,
     atNeutralCriticalStrikeBaseRate,
