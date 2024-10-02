@@ -201,26 +201,28 @@ void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
     case ref::Attrib::atTherapyPowerBase:                          self->chAttr.atTherapyPowerBase += attrib.valueAInt * c * stack; break;
     case ref::Attrib::atBeTherapyCoefficient:                      self->chAttr.atBeTherapyCoefficient += attrib.valueAInt * c * stack; break;
     // 无关紧要的属性
-    case ref::Attrib::atTransferDamage:                            break;
-    case ref::Attrib::atFormationEffect:                           break;
-    case ref::Attrib::atAddExpPercent:                             break;
-    case ref::Attrib::atAddReputationPercent:                      break;
-    case ref::Attrib::atKnockedBackRate:                           break;
-    case ref::Attrib::atRepulsedRate:                              break;
-    case ref::Attrib::atDamageToLifeForSelf:                       break;
-    case ref::Attrib::atKnockedOffRate:                            break;
-    case ref::Attrib::atStealth:                                   break; // 隐身
-    case ref::Attrib::atMoveSpeedPercent:                          break;
-    case ref::Attrib::atKnockedDownRate:                           break;
-    case ref::Attrib::atBeImmunisedStealthEnable:                  break;
-    case ref::Attrib::atImmunity:                                  break;
-    case ref::Attrib::atImmuneSkillMove:                           break;
     case ref::Attrib::atActiveThreatCoefficient:                   break;
-    case ref::Attrib::atHalt:                                      break; // 禁止移动
-    case ref::Attrib::atNoLimitChangeSkillIcon:                    break;
+    case ref::Attrib::atAddExpPercent:                             break;
     case ref::Attrib::atAddTransparencyValue:                      break; // 透明度
-    case ref::Attrib::atSetSelectableType:                         break;
+    case ref::Attrib::atAddReputationPercent:                      break;
+    case ref::Attrib::atBeImmunisedStealthEnable:                  break;
+    case ref::Attrib::atDamageToLifeForSelf:                       break;
+    case ref::Attrib::atFormationEffect:                           break;
     case ref::Attrib::atGlobalResistPercent:                       break; // 减伤
+    case ref::Attrib::atHalt:                                      break; // 禁止移动
+    case ref::Attrib::atImmuneSkillMove:                           break;
+    case ref::Attrib::atImmunity:                                  break;
+    case ref::Attrib::atKnockedBackRate:                           break;
+    case ref::Attrib::atKnockedDownRate:                           break;
+    case ref::Attrib::atKnockedOffRate:                            break;
+    case ref::Attrib::atMaxSkillRadiusPercent:                     break; // 技能范围
+    case ref::Attrib::atMoveSpeedPercent:                          break;
+    case ref::Attrib::atNoLimitChangeSkillIcon:                    break;
+    case ref::Attrib::atRepulsedRate:                              break;
+    case ref::Attrib::atSetSelectableType:                         break;
+    case ref::Attrib::atStealth:                                   break; // 隐身
+    case ref::Attrib::atTransferDamage:                            break;
+
     default:
         CONSTEXPR_LOG_ERROR("Undefined: {} {} Unknown Attribute: {} {}", item->nID, item->nLevel, Ref<ref::Attrib>::names[static_cast<int>(attrib.type)], attrib.valueAInt);
         break;
