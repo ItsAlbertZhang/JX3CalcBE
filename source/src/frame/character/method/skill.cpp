@@ -1,7 +1,6 @@
 #include "frame/global/skill.h"
 #include "frame/character/character.h"
 #include "frame/character/helper/auto_rollback_attribute.h"
-#include "frame/character/helper/runtime_castskill.h"
 #include "plugin/log.h"
 
 using namespace jx3calc;
@@ -34,8 +33,7 @@ void Character::skillActive(int skillID) {
     }
     CONSTEXPR_LOG_INFO("ActiveSkill: {} # {}", skillID, skillLevel);
     const Skill           &skill = SkillManager::get(skillID, skillLevel);
-    RuntimeCastSkill       runtime {this, skillID, skillLevel};
-    AutoRollbackAttribute *ptr = new AutoRollbackAttribute {this, nullptr, &runtime, skill};
+    AutoRollbackAttribute *ptr   = new AutoRollbackAttribute {this, nullptr, nullptr, skill, nullptr, 0, 0, 0, false};
     autoRollbackAttributeList.emplace(ptr);
     this->chSkill.skillActived.emplace(skillID, ChSkill::SkillActived {skillLevel, static_cast<void *>(ptr)});
 }

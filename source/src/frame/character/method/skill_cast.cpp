@@ -6,7 +6,6 @@
 #include "frame/global/skill.h"
 #include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"
-#include "frame/ref/lua_attribute_type.h"
 #include "plugin/log.h"
 #include <memory> // std::unique_ptr
 #include <random>
@@ -234,16 +233,16 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     CONSTEXPR_LOG_INFO("{} # {} cast successfully!", skillID, skillLevel);
 
     // 构造技能运行时资源: RuntimeCastSkill
-    RuntimeCastSkill runtime {this, skillID, skillLevel};
+    RuntimeCastSkill runtime {this};
 
     // 1. 执行 SkillEvent: PreCast
     staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
 
     // 2. 处理 SkillRecipe: CoolDownAdd. 顺便处理 DamageAddPercent.
-    int DamageAddPercent = 0;
+    int damageAddPercent = 0;
     for (const auto &it : skillrecipeList) {
         cooldown.add(it->CoolDownAdd1, it->CoolDownAdd2, it->CoolDownAdd3);
-        DamageAddPercent += it->DamageAddPercent; // DamageAddPercent 仅能作用于当前技能.
+        damageAddPercent += it->DamageAddPercent; // DamageAddPercent 仅能作用于当前技能.
     }
 
     // 3. 触发 CD
@@ -258,57 +257,54 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
         }
     }
 
-    // 4. 处理魔法属性
+    // 4. 处理 SkillRecipe: ScriptFile, 计算会心, 随后回滚.
+    std::vector<std::unique_ptr<AutoRollbackAttribute>> skillAutoRollbackAttributeList;
+    skillAutoRollbackAttributeList.reserve(recipeskillList.size());
+    for (const auto &it : recipeskillList) {
+        skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this, target, &runtime, *it, nullptr, 0, 0, 0, false));
+    }
+    auto [criticalStrike, criticalDamagePower] = this->calcCritical(this->chAttr, skillID, skillLevel);
+    std::random_device              rd;
+    std::mt19937                    gen(rd());
+    std::uniform_int_distribution<> dis(0, 9999);
+    bool                            isCritical = dis(gen) < criticalStrike;
+    skillAutoRollbackAttributeList.clear();
+
+    // 5. 处理魔法属性
     // 构造技能运行时资源: AutoRollbackAttribute
-    AutoRollbackAttribute autoRollbackAttribute {this, target, &runtime, skill};
+    AutoRollbackAttribute autoRollbackAttribute {this, target, &runtime, skill, &recipeskillList, damageAddPercent, criticalStrike, criticalDamagePower, isCritical};
 
-    // 5. 处理其他
+    // 6. 处理其他
 
-    // 5.1 处理日月豆子技能
+    // 6.1 处理日月豆子技能
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
-            runtime.skillQueue.emplace(
-                static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_NOT_ROLLBACK),
-                static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL),
-                skill.SunSubsectionSkillID,
-                skill.SunSubsectionSkillLevel
-            );
+            runtime.skillQueue.emplace(std::make_tuple(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel));
             this->nSunPowerValue = 0;
         } else if (this->nMoonPowerValue) {
-            runtime.skillQueue.emplace(
-                static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_NOT_ROLLBACK),
-                static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL),
-                skill.MoonSubsectionSkillID,
-                skill.MoonSubsectionSkillLevel
-            );
+            runtime.skillQueue.emplace(std::make_tuple(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel));
             this->nMoonPowerValue = 0;
         }
     }
 
-    // 5.2 处理延迟子技能
+    // 6.2 处理延迟子技能
     for (auto &it : skill.attrDelaySubSkill) {
         Event::add(it.delay * 1024 / 16, callbackDelaySubSkill, this, static_cast<void *>(const_cast<Skill::DelaySubSkill *>(&it)));
     }
 
-    // 6. 处理 SkillRecipe: ScriptFile
-    // 构造技能运行时资源: vector<unique_ptr<AutoRollbackAttribute>>
-    std::vector<std::unique_ptr<AutoRollbackAttribute>> skillAutoRollbackAttributeList;
+    // 7. 绑定 buff
     skillAutoRollbackAttributeList.reserve(recipeskillList.size());
     for (const auto &it : recipeskillList) {
-        skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this, target, &runtime, *it));
+        skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this, target, &runtime, *it, nullptr, 0, 0, 0, false));
     }
-
-    // 7. 计算伤害
-    bool isCritical = autoRollbackAttribute.CallDamage(DamageAddPercent);
-
-    // 8. 绑定 buff
     for (int i = 0; i < 4; i++) {
         if (bindbuff.isValid[i] && target != nullptr) {
             target->buffBind(dwID, chAttr.atLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
         }
     }
+    skillAutoRollbackAttributeList.clear();
 
-    // 9. 执行 SkillEvent: Cast, Hit, CriticalStrike
+    // 8. 执行 SkillEvent: Cast, Hit, CriticalStrike
     /* 注:
         1. SkillEvent 的顺序尚不确定.
         2. 其余的 SkillEvent 尚未实现.
@@ -321,9 +317,13 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     }
 
     return true;
-    // 10. (自动执行) 析构 SkillRecipe: ScriptFile. 秘籍加成的 attribute 在这里回滚.
-    // 11. (自动执行) 析构 魔法属性. 魔法属性的 attribute 在这里回滚.
-    // 12. (自动执行) 析构 技能运行时资源: RuntimeCastSkill. 添加至 runtime 的技能队列中的技能被依次执行, 随后添加至 runtime 的伤害被添加至 chDamage.
+    // 9.  (自动执行) 析构 SkillRecipe: ScriptFile. 秘籍加成的 attribute 在这里回滚.
+    // 10. (自动执行) 析构 AutoRollbackAttribute. 它的析构函数会依次:
+    //     - 执行 call damage 与 execute script
+    //     - 回滚魔法属性
+    //     - 执行 cast skill
+    //     - 将 damage 添加至 chDamage
+    //     See: AutoRollbackAttribute::~AutoRollbackAttribute
 }
 
 event_tick_t Character::skillCooldownLeftTick(int skillID) {

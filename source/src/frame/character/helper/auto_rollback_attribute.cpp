@@ -6,114 +6,113 @@
 #include "frame/ref/lua_attribute_type.h" // ref::lua::ATTRIBUTE_TYPE
 #include "frame/ref/lua_normal.h"         // ref::lua::ATTRIBUTE_EFFECT_MODE
 #include "plugin/log.h"
-#include <random>
+#include <optional>
+// #include <queue>
+// #include <variant>
 
 using namespace jx3calc;
 using namespace frame;
 
-AutoRollbackAttribute::AutoRollbackAttribute(Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill) :
-    self(self), target(target), runtime(runtime), skill(skill) {
+AutoRollbackAttribute::AutoRollbackAttribute(
+    Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill, const std::vector<const Skill *> *skillrecipeList,
+    int damageAddPercent, int atCriticalStrike, int atCriticalDamagePower, bool isCritical
+) :
+    self(self), target(target), runtime(runtime), skill(skill), skillrecipeList(skillrecipeList),
+    damageAddPercent(damageAddPercent), criticalStrike(atCriticalStrike),
+    criticalDamagePower(atCriticalDamagePower), isCritical(isCritical) // constructor
+{
     handle(false);
 }
 AutoRollbackAttribute::~AutoRollbackAttribute() {
     handle(true);
 }
 
-bool AutoRollbackAttribute::CallDamage(int DamageAddPercent) {
-    // 计算会心
-    auto [atCriticalStrike, atCriticalDamagePower] = self->calcCritical(self->chAttr, skill.dwSkillID, skill.dwLevel);
-    std::random_device              rd;
-    std::mt19937                    gen(rd());
-    std::uniform_int_distribution<> dis(0, 9999);
-    bool                            isCritical = dis(gen) < atCriticalStrike;
-    // 计算伤害
-    Damage                          item;
-    for (int idxType = 0; idxType < static_cast<int>(DamageType::COUNT); idxType++) {
-        for (int idxTime = 0; idxTime < callDamage[idxType]; idxTime++) {
-            item += self->calcDamage(
-                skill.dwSkillID,
-                skill.dwLevel,
-                self->chAttr,
-                target,
-                static_cast<DamageType>(idxType),
-                atCriticalStrike,
-                atCriticalDamagePower,
-                atDamage[idxType],
-                atDamageRand[idxType],
-                DamageAddPercent,
-                static_cast<int>(skill.nChannelInterval),
-                skill.nWeaponDamagePercent,
-                isCritical,
-                false,
-                false,
-                1,
-                1,
-                skill.IsFrost
-            );
-        }
-        for (int idxTime = 0; idxTime < callSurplusDamage[idxType]; idxTime++) {
-            item += self->calcDamage(
-                skill.dwSkillID,
-                skill.dwLevel,
-                self->chAttr,
-                target,
-                static_cast<DamageType>(idxType),
-                atCriticalStrike,
-                atCriticalDamagePower,
-                0,
-                0,
-                DamageAddPercent,
-                1, // 破招伤害的调整是通过 atGlobalDamageFactor 实现的, 这符合游戏内的实际原理
-                0,
-                isCritical,
-                true,
-                false,
-                1,
-                1,
-                skill.IsFrost
-            );
-        }
-    }
-    if (item.damageType)
-        runtime->damageList.emplace_back(std::move(item));
-    return isCritical;
-}
+namespace {
+struct ItemCallDamage {
+    bool       isDest;
+    DamageType type;
+    const int *ptrDamageBase;
+    const int *ptrDamageRand;
+    bool       isSurplus;
+};
+struct ItemExecuteScript {
+    bool               isDest;
+    std::string        param1Str;
+    std::optional<int> param2;
+    bool               isRollback;
+};
+} // namespace
 
 void AutoRollbackAttribute::handle(bool isRollback) {
+    const auto callDamage = [this](bool isDest, DamageType type, const int *ptrDamageBase, const int *ptrDamageRand, bool isSurplus) -> void {
+        if (this->runtime == nullptr || (isDest && this->target == nullptr)) [[unlikely]]
+            return;
+
+        // skill recipe
+        std::vector<std::unique_ptr<AutoRollbackAttribute>> autoRollbackAttributeList;
+        if (this->skillrecipeList != nullptr) {
+            autoRollbackAttributeList.reserve(this->skillrecipeList->size());
+            for (const auto &it : *this->skillrecipeList) {
+                autoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this->self, this->target, this->runtime, *it, nullptr, 0, 0, 0, false));
+            }
+        }
+
+        Character *target     = isDest ? this->target : this->self;
+        const int  damageBase = ptrDamageBase ? *ptrDamageBase : 0;
+        const int  damageRand = ptrDamageRand ? *ptrDamageRand : 0;
+
+        this->self->bFightState = true;
+        this->runtime->damage += self->calcDamage(
+            this->skill.dwSkillID,
+            this->skill.dwLevel,
+            this->self->chAttr,
+            target,
+            type,
+            this->criticalStrike,
+            this->criticalDamagePower,
+            damageBase,
+            damageRand,
+            this->damageAddPercent,
+            isSurplus ? 1 : static_cast<int>(this->skill.nChannelInterval),
+            isSurplus ? 0 : this->skill.nWeaponDamagePercent,
+            this->isCritical,
+            isSurplus,
+            false,
+            1,
+            1,
+            this->skill.IsFrost
+        );
+
+        autoRollbackAttributeList.clear();
+    };
+    const auto executeScript = [this](bool isDest, const std::string &param1Str, std::optional<int> param2, bool isRollback) -> void {
+        if (isDest && this->target == nullptr) [[unlikely]]
+            return;
+        auto target        = isDest ? this->target : this->self;
+        auto filename      = "scripts/" + param1Str;
+        auto luaFunc       = isRollback ? lua::interface::getUnApply : lua::interface::getApply;
+        auto dwCharacterID = Character::characterGetID(target);
+        auto dwSkillSrcID  = Character::characterGetID(this->self);
+        auto res =
+            param2.has_value()
+                ? luaFunc(filename)(dwCharacterID, param2.value(), dwSkillSrcID)
+                : luaFunc(filename)(dwCharacterID, dwSkillSrcID);
+        if (!lua::interface::analysis(std::move(res), filename, lua::interface::FuncType::Apply))
+            CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", filename);
+    };
+    // const auto visitor = [&callDamage, &executeScript](auto &&arg) {
+    //     using T = std::decay_t<decltype(arg)>;
+    //     if constexpr (std::is_same_v<T, ItemCallDamage>) {
+    //         callDamage(arg.isDest, arg.type, arg.ptrDamageBase, arg.ptrDamageRand, arg.isSurplus);
+    //     } else if constexpr (std::is_same_v<T, ItemExecuteScript>) {
+    //         executeScript(arg.isDest, arg.param1Str, arg.param2, arg.isRollback);
+    //     }
+    // };
+    // std::queue<std::variant<ItemCallDamage, ItemExecuteScript>> queue;
+
     int c = isRollback ? -1 : 1;
     for (auto &it : skill.attrAttributes) {
         switch (it.mode) {
-
-        case static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_NOT_ROLLBACK): {
-            if (isRollback) // NOT_ROLLBACK
-                break;
-            switch (it.type) {
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL):                runtime->skillQueue.emplace(it); break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):     runtime->skillQueue.emplace(it); break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):            runtime->skillQueue.emplace(it); break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): runtime->skillQueue.emplace(it); break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CURRENT_SUN_ENERGY):        self->nCurrentSunEnergy += it.param1Int; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CURRENT_MOON_ENERGY):       self->nCurrentMoonEnergy += it.param1Int; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SUN_POWER_VALUE):           self->nSunPowerValue = it.param1Int; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MOON_POWER_VALUE):          self->nMoonPowerValue = it.param1Int; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_BUFF):
-                self->buffAdd(self->dwID, self->chAttr.atLevel, it.param1Int, it.param2);
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DEL_SINGLE_BUFF_BY_ID_AND_LEVEL):
-                self->buffDel(it.param1Int, it.param2);
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DEL_MULTI_GROUP_BUFF_BY_FUNCTIONTYPE):
-                break; // 未做相关实现, 目前其仅在解控时使用
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DEL_MULTI_GROUP_BUFF_BY_ID):
-                self->buffDelMultiGroupByID(it.param1Int);
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::STOP):      break; // 未做相关实现, 推测为停止, 用于解除击飞
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DO_ACTION): break; // 未做相关实现, 推测为动作
-            default:
-                CONSTEXPR_LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", Ref<ref::lua::ATTRIBUTE_EFFECT_MODE>::names[it.mode], Ref<ref::lua::ATTRIBUTE_TYPE>::names[it.type], it.param1Int, it.param2, isRollback);
-                break;
-            }
-        } break; // EFFECT_TO_SELF_NOT_ROLLBACK
 
         case static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_AND_ROLLBACK): {
             switch (it.type) {
@@ -123,16 +122,16 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MAX_LIFE_PERCENT_ADD):                          break; // 未做相关实现, 额外最大生命值
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MANA_REPLENISH_PERCENT):                        break; // 未做相关实现, 推测为内力回复
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::KUNGFU_TYPE):                                   break; // 未做相关实现, 推测为武学类型, 用于心法 lua 中转换全能属性
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_PHYSICS_DAMAGE):                          this->atDamage[static_cast<int>(DamageType::Physics)] += it.param1Int * c; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_PHYSICS_DAMAGE_RAND):                     this->atDamageRand[static_cast<int>(DamageType::Physics)] += it.param1Int * c; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_SOLAR_DAMAGE):                            this->atDamage[static_cast<int>(DamageType::Solar)] += it.param1Int * c; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_SOLAR_DAMAGE_RAND):                       this->atDamageRand[static_cast<int>(DamageType::Solar)] += it.param1Int * c; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_NEUTRAL_DAMAGE):                          this->atDamage[static_cast<int>(DamageType::Neutral)] += it.param1Int * c; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_NEUTRAL_DAMAGE_RAND):                     this->atDamageRand[static_cast<int>(DamageType::Neutral)] += it.param1Int * c; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE):                            this->atDamage[static_cast<int>(DamageType::Lunar)] += it.param1Int * c; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE_RAND):                       this->atDamageRand[static_cast<int>(DamageType::Lunar)] += it.param1Int * c; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE):                           this->atDamage[static_cast<int>(DamageType::Poison)] += it.param1Int * c; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE_RAND):                      this->atDamageRand[static_cast<int>(DamageType::Poison)] += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_PHYSICS_DAMAGE):                          this->atPhysicsDamage += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_PHYSICS_DAMAGE_RAND):                     this->atPhysicsDamageRand += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_SOLAR_DAMAGE):                            this->atSolarDamage += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_SOLAR_DAMAGE_RAND):                       this->atSolarDamageRand += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_NEUTRAL_DAMAGE):                          this->atNeutralDamage += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_NEUTRAL_DAMAGE_RAND):                     this->atNeutralDamageRand += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE):                            this->atLunarDamage += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_LUNAR_DAMAGE_RAND):                       this->atLunarDamageRand += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE):                           this->atPoisonDamage += it.param1Int * c; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SKILL_POISON_DAMAGE_RAND):                      this->atPoisonDamageRand += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::ALL_DAMAGE_ADD_PERCENT):                        self->chAttr.atAllDamageAddPercent += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DST_NPC_DAMAGE_COEFFICIENT):                    self->chAttr.atDstNpcDamageCoefficient += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MAGIC_SHIELD):                                  self->chAttr.atMagicShield += it.param1Int * c; break;
@@ -154,25 +153,10 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::POISON_CRITICAL_STRIKE_BASE_RATE):              self->chAttr.atPoisonCriticalStrikeBaseRate += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MAGIC_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE): self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += it.param1Int * c; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SOLAR_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE): self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += it.param1Int * c; break;
-
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):                                {
-                if (!isRollback) {
-                    std::string paramStr      = "scripts/" + it.param1Str;
-                    int         dwCharacterID = Character::characterGetID(self);
-                    int         dwSkillSrcID  = Character::characterGetID(self);
-                    if (!lua::interface::analysis(lua::interface::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, lua::interface::FuncType::Apply))
-                        CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
-                }
-            } break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): {
-                if (!isRollback) {
-                    std::string paramStr      = "scripts/" + it.param1Str;
-                    int         dwCharacterID = Character::characterGetID(self);
-                    int         dwSkillSrcID  = Character::characterGetID(self);
-                    if (!lua::interface::analysis(lua::interface::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, lua::interface::FuncType::Apply))
-                        CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
-                }
-            } break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):                                executeScript(false, it.param1Str, std::nullopt, isRollback); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM):                     executeScript(false, it.param1Str, it.param2, isRollback); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):                                queue.emplace(ItemExecuteScript {false, it.param1Str, std::nullopt, isRollback}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM):                     queue.emplace(ItemExecuteScript {false, it.param1Str, it.param2, isRollback}); break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SET_ADAPTIVE_SKILL_TYPE):
                 self->atAdaptiveSkillType = static_cast<ref::lua::SKILL_KIND_TYPE>(it.param1Int);
                 break;
@@ -198,99 +182,6 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             }
         } break; // EFFECT_TO_SELF_AND_ROLLBACK
 
-        case static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_DEST_NOT_ROLLBACK): {
-            if (target == nullptr) // TO_DEST
-                break;
-            if (isRollback) // NOT_ROLLBACK
-                break;
-            switch (it.type) {
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_PHYSICS_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Physics)] += 1;
-                this->self->bFightState = true;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SOLAR_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Solar)] += 1;
-                this->self->bFightState = true;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_NEUTRAL_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Neutral)] += 1;
-                this->self->bFightState = true;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_LUNAR_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Lunar)] += 1;
-                this->self->bFightState = true;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_POISON_DAMAGE):
-                this->callDamage[static_cast<int>(DamageType::Poison)] += 1;
-                this->self->bFightState = true;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_ADAPTIVE_DAMAGE): {
-                switch (self->atAdaptiveSkillType) {
-                case ref::lua::SKILL_KIND_TYPE::PHYSICS:
-                    this->callDamage[static_cast<int>(DamageType::Physics)] += 1;
-                    break;
-                case ref::lua::SKILL_KIND_TYPE::SOLAR_MAGIC:
-                    this->callDamage[static_cast<int>(DamageType::Solar)] += 1;
-                    break;
-                case ref::lua::SKILL_KIND_TYPE::NEUTRAL_MAGIC:
-                    this->callDamage[static_cast<int>(DamageType::Neutral)] += 1;
-                    break;
-                case ref::lua::SKILL_KIND_TYPE::LUNAR_MAGIC:
-                    this->callDamage[static_cast<int>(DamageType::Lunar)] += 1;
-                    break;
-                case ref::lua::SKILL_KIND_TYPE::POISON_MAGIC:
-                    this->callDamage[static_cast<int>(DamageType::Poison)] += 1;
-                    break;
-                default:
-                    break;
-                }
-            } break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_PHYSICS_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Physics)] += 1;
-                this->self->bFightState = true;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_SOLAR_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Solar)] += 1;
-                this->self->bFightState = true;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_NEUTRAL_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Neutral)] += 1;
-                this->self->bFightState = true;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_LUNAR_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Lunar)] += 1;
-                this->self->bFightState = true;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_POISON_DAMAGE):
-                this->callSurplusDamage[static_cast<int>(DamageType::Poison)] += 1;
-                this->self->bFightState = true;
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT): {
-                std::string paramStr      = "scripts/" + it.param1Str;
-                int         dwCharacterID = Character::characterGetID(target);
-                int         dwSkillSrcID  = Character::characterGetID(self);
-                if (!lua::interface::analysis(lua::interface::getApply(paramStr)(dwCharacterID, dwSkillSrcID), paramStr, lua::interface::FuncType::Apply))
-                    CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
-            } break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): {
-                std::string paramStr      = "scripts/" + it.param1Str;
-                int         dwCharacterID = Character::characterGetID(target);
-                int         dwSkillSrcID  = Character::characterGetID(self);
-                if (!lua::interface::analysis(lua::interface::getApply(paramStr)(dwCharacterID, it.param2, dwSkillSrcID), paramStr, lua::interface::FuncType::Apply))
-                    CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", paramStr);
-            } break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_BUFF):
-                target->buffAdd(self->dwID, self->chAttr.atLevel, it.param1Int, it.param2);
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DASH):
-                // 未做相关实现, 推测为冲刺
-                break;
-            default:
-                CONSTEXPR_LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", Ref<ref::lua::ATTRIBUTE_EFFECT_MODE>::names[it.mode], Ref<ref::lua::ATTRIBUTE_TYPE>::names[it.type], it.param1Int, it.param2, isRollback);
-                break;
-            }
-        } break; // EFFECT_TO_DEST_NOT_ROLLBACK
-
         case static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_DEST_AND_ROLLBACK): {
             if (target == nullptr) // TO_DEST
                 break;
@@ -311,5 +202,118 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             break;
 
         } // switch (it.mode)
-    }
+    } // for (auto &it : skill.attrAttributes)
+
+    for (auto &it : skill.attrAttributes) {
+        switch (it.mode) {
+
+        case static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_NOT_ROLLBACK): {
+            if (isRollback) // NOT_ROLLBACK
+                break;
+            switch (it.type) {
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL):
+                if (runtime)
+                    runtime->skillQueue.emplace(std::make_tuple(it.param1Int, it.param2));
+                break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):
+                if (runtime)
+                    runtime->skillQueue.emplace(std::make_tuple(it.param1Int, it.param2));
+                break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CURRENT_SUN_ENERGY):  self->nCurrentSunEnergy += it.param1Int; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CURRENT_MOON_ENERGY): self->nCurrentMoonEnergy += it.param1Int; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SUN_POWER_VALUE):     self->nSunPowerValue = it.param1Int; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MOON_POWER_VALUE):    self->nMoonPowerValue = it.param1Int; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_BUFF):
+                self->buffAdd(self->dwID, self->chAttr.atLevel, it.param1Int, it.param2);
+                break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DEL_SINGLE_BUFF_BY_ID_AND_LEVEL):
+                self->buffDel(it.param1Int, it.param2);
+                break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DEL_MULTI_GROUP_BUFF_BY_FUNCTIONTYPE):
+                break; // 未做相关实现, 目前其仅在解控时使用
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DEL_MULTI_GROUP_BUFF_BY_ID):
+                self->buffDelMultiGroupByID(it.param1Int);
+                break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::STOP):                      break; // 未做相关实现, 推测为停止, 用于解除击飞
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DO_ACTION):                 break; // 未做相关实现, 推测为动作
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):            executeScript(false, it.param1Str, std::nullopt, false); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): executeScript(false, it.param1Str, it.param2, false); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):            queue.emplace(ItemExecuteScript {false, it.param1Str, std::nullopt, false}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM): queue.emplace(ItemExecuteScript {false, it.param1Str, it.param2, false}); break;
+            default:
+                CONSTEXPR_LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", Ref<ref::lua::ATTRIBUTE_EFFECT_MODE>::names[it.mode], Ref<ref::lua::ATTRIBUTE_TYPE>::names[it.type], it.param1Int, it.param2, isRollback);
+                break;
+            }
+        } break; // EFFECT_TO_SELF_NOT_ROLLBACK
+
+        case static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_DEST_NOT_ROLLBACK): {
+            if (target == nullptr) // TO_DEST
+                break;
+            if (isRollback) // NOT_ROLLBACK
+                break;
+            switch (it.type) {
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_PHYSICS_DAMAGE):  queue.emplace(ItemCallDamage {true, DamageType::Physics, &atPhysicsDamage, &atPhysicsDamageRand, false}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SOLAR_DAMAGE):    queue.emplace(ItemCallDamage {true, DamageType::Solar, &atSolarDamage, &atSolarDamageRand, false}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_NEUTRAL_DAMAGE):  queue.emplace(ItemCallDamage {true, DamageType::Neutral, &atNeutralDamage, &atNeutralDamageRand, false}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_LUNAR_DAMAGE):    queue.emplace(ItemCallDamage {true, DamageType::Lunar, &atLunarDamage, &atLunarDamageRand, false}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_POISON_DAMAGE):   queue.emplace(ItemCallDamage {true, DamageType::Poison, &atPoisonDamage, &atPoisonDamageRand, false}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_ADAPTIVE_DAMAGE): {
+            //     switch (self->atAdaptiveSkillType) {
+            //     case ref::lua::SKILL_KIND_TYPE::PHYSICS:       queue.emplace(ItemCallDamage {true, DamageType::Physics, &atPhysicsDamage, &atPhysicsDamageRand, false}); break;
+            //     case ref::lua::SKILL_KIND_TYPE::SOLAR_MAGIC:   queue.emplace(ItemCallDamage {true, DamageType::Solar, &atSolarDamage, &atSolarDamageRand, false}); break;
+            //     case ref::lua::SKILL_KIND_TYPE::NEUTRAL_MAGIC: queue.emplace(ItemCallDamage {true, DamageType::Neutral, &atNeutralDamage, &atNeutralDamageRand, false}); break;
+            //     case ref::lua::SKILL_KIND_TYPE::LUNAR_MAGIC:   queue.emplace(ItemCallDamage {true, DamageType::Lunar, &atLunarDamage, &atLunarDamageRand, false}); break;
+            //     case ref::lua::SKILL_KIND_TYPE::POISON_MAGIC:  queue.emplace(ItemCallDamage {true, DamageType::Poison, &atPoisonDamage, &atPoisonDamageRand, false}); break;
+            //     default:                                       break;
+            //     }
+            // } break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_PHYSICS_DAMAGE): queue.emplace(ItemCallDamage {true, DamageType::Physics, nullptr, nullptr, true}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_SOLAR_DAMAGE):   queue.emplace(ItemCallDamage {true, DamageType::Solar, nullptr, nullptr, true}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_NEUTRAL_DAMAGE): queue.emplace(ItemCallDamage {true, DamageType::Neutral, nullptr, nullptr, true}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_LUNAR_DAMAGE):   queue.emplace(ItemCallDamage {true, DamageType::Lunar, nullptr, nullptr, true}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_POISON_DAMAGE):  queue.emplace(ItemCallDamage {true, DamageType::Poison, nullptr, nullptr, true}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):              queue.emplace(ItemExecuteScript {true, it.param1Str, std::nullopt, false}); break;
+            // case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM):   queue.emplace(ItemExecuteScript {true, it.param1Str, it.param2, false}); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_PHYSICS_DAMAGE):  callDamage(true, DamageType::Physics, &atPhysicsDamage, &atPhysicsDamageRand, false); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SOLAR_DAMAGE):    callDamage(true, DamageType::Solar, &atSolarDamage, &atSolarDamageRand, false); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_NEUTRAL_DAMAGE):  callDamage(true, DamageType::Neutral, &atNeutralDamage, &atNeutralDamageRand, false); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_LUNAR_DAMAGE):    callDamage(true, DamageType::Lunar, &atLunarDamage, &atLunarDamageRand, false); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_POISON_DAMAGE):   callDamage(true, DamageType::Poison, &atPoisonDamage, &atPoisonDamageRand, false); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_ADAPTIVE_DAMAGE): {
+                switch (self->atAdaptiveSkillType) {
+                case ref::lua::SKILL_KIND_TYPE::PHYSICS:       callDamage(true, DamageType::Physics, &atPhysicsDamage, &atPhysicsDamageRand, false); break;
+                case ref::lua::SKILL_KIND_TYPE::SOLAR_MAGIC:   callDamage(true, DamageType::Solar, &atSolarDamage, &atSolarDamageRand, false); break;
+                case ref::lua::SKILL_KIND_TYPE::NEUTRAL_MAGIC: callDamage(true, DamageType::Neutral, &atNeutralDamage, &atNeutralDamageRand, false); break;
+                case ref::lua::SKILL_KIND_TYPE::LUNAR_MAGIC:   callDamage(true, DamageType::Lunar, &atLunarDamage, &atLunarDamageRand, false); break;
+                case ref::lua::SKILL_KIND_TYPE::POISON_MAGIC:  callDamage(true, DamageType::Poison, &atPoisonDamage, &atPoisonDamageRand, false); break;
+                default:                                       break;
+                }
+            } break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_PHYSICS_DAMAGE): callDamage(true, DamageType::Physics, nullptr, nullptr, true); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_SOLAR_DAMAGE):   callDamage(true, DamageType::Solar, nullptr, nullptr, true); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_NEUTRAL_DAMAGE): callDamage(true, DamageType::Neutral, nullptr, nullptr, true); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_LUNAR_DAMAGE):   callDamage(true, DamageType::Lunar, nullptr, nullptr, true); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_SURPLUS_POISON_DAMAGE):  callDamage(true, DamageType::Poison, nullptr, nullptr, true); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT):              executeScript(true, it.param1Str, std::nullopt, false); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::EXECUTE_SCRIPT_WITH_PARAM):   executeScript(true, it.param1Str, it.param2, false); break;
+
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_BUFF):                   target->buffAdd(self->dwID, self->chAttr.atLevel, it.param1Int, it.param2); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::DASH):                        break; // 未做相关实现, 推测为冲刺
+            default:
+                CONSTEXPR_LOG_ERROR("Undefined: {}, {}: {} {}, rollback={}", Ref<ref::lua::ATTRIBUTE_EFFECT_MODE>::names[it.mode], Ref<ref::lua::ATTRIBUTE_TYPE>::names[it.type], it.param1Int, it.param2, isRollback);
+                break;
+            }
+        } break; // EFFECT_TO_DEST_NOT_ROLLBACK
+
+        default:
+            break;
+
+        } // switch (it.mode)
+    } // for (auto &it : skill.attrAttributes)
+
+    // while (!queue.empty()) {
+    //     auto item = std::move(queue.front());
+    //     queue.pop();
+    //     std::visit(visitor, item);
+    // }
 }

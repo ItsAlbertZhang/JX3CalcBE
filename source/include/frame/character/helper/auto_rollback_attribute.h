@@ -1,6 +1,5 @@
 #pragma once
 
-#include "frame/common/damage.h"
 #include "frame/global/skill.h"
 
 namespace jx3calc {
@@ -17,25 +16,44 @@ class RuntimeCastSkill;
  */
 class AutoRollbackAttribute {
 public:
-    AutoRollbackAttribute(Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill);
+    AutoRollbackAttribute(
+        Character                        *self,
+        Character                        *target,
+        RuntimeCastSkill                 *runtime,
+        const Skill                      &skill,
+        const std::vector<const Skill *> *skillrecipeList,
+        int                               damageAddPercent,
+        int                               criticalStrike,
+        int                               criticalDamagePower,
+        bool                              isCritical
+    );
     AutoRollbackAttribute(const AutoRollbackAttribute &)            = delete;
     AutoRollbackAttribute &operator=(const AutoRollbackAttribute &) = delete;
     AutoRollbackAttribute(AutoRollbackAttribute &&)                 = delete;
     AutoRollbackAttribute &operator=(AutoRollbackAttribute &&)      = delete;
     ~AutoRollbackAttribute();
 
-    bool CallDamage(int DamageAddPercent);
-
 private:
-    Character        *self;
-    Character        *target;
-    RuntimeCastSkill *runtime;
-    const Skill      &skill;
+    Character                        *self;
+    Character                        *target;
+    RuntimeCastSkill                 *runtime;
+    const Skill                      &skill;
+    const std::vector<const Skill *> *skillrecipeList;
+    int                               damageAddPercent;
+    int                               criticalStrike;
+    int                               criticalDamagePower;
+    bool                              isCritical;
 
-    int atDamage[static_cast<int>(DamageType::COUNT)]          = {0};
-    int atDamageRand[static_cast<int>(DamageType::COUNT)]      = {0};
-    int callDamage[static_cast<int>(DamageType::COUNT)]        = {0};
-    int callSurplusDamage[static_cast<int>(DamageType::COUNT)] = {0};
+    int atPhysicsDamage     = 0;
+    int atPhysicsDamageRand = 0;
+    int atSolarDamage       = 0;
+    int atSolarDamageRand   = 0;
+    int atNeutralDamage     = 0;
+    int atNeutralDamageRand = 0;
+    int atLunarDamage       = 0;
+    int atLunarDamageRand   = 0;
+    int atPoisonDamage      = 0;
+    int atPoisonDamageRand  = 0;
 
     void handle(bool isRollback);
 };

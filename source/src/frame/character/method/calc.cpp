@@ -53,7 +53,7 @@ Damage Character::calcDamage(
     int              level,
     const ChAttr    &attrSelf,
     const Character *target,
-    DamageType       typeDamage,
+    DamageType       type,
     int              atCriticalStrike,
     int              atCriticalDamagePower,
     int              damageBase,
@@ -89,7 +89,7 @@ Damage Character::calcDamage(
     int coeffInterval = isBuff ? buffInterval * buffCount / 12 : 1;
     coeffInterval     = coeffInterval > 16 ? coeffInterval : 16;
 
-    switch (typeDamage) {
+    switch (type) {
     case DamageType::Physics:
         atAttackPower           = attrSelf.getPhysicsAttackPower();
         atDamageAddPercent      = attrSelf.getPhysicsDamageAddPercent();
@@ -129,7 +129,7 @@ Damage Character::calcDamage(
         targetDamageCoefficient = target->chAttr.atPoisonDamageCoefficient;
         break;
     default:
-        CONSTEXPR_LOG_ERROR("Unknown damage type: {}", static_cast<int>(typeDamage));
+        CONSTEXPR_LOG_ERROR("Unknown damage type: {}", static_cast<int>(type));
         break;
     }
 
@@ -183,7 +183,7 @@ Damage Character::calcDamage(
 
     return Damage {
         .tick           = Event::now(),
-        .damageType     = 1 << static_cast<int>(typeDamage),
+        .damageType     = 1 << static_cast<int>(type),
         .id             = id,
         .level          = level,
         .damageBase     = static_cast<int>(damage),

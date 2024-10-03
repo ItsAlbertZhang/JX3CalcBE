@@ -108,7 +108,7 @@ public:
         int              level,
         const ChAttr    &attrSelf,
         const Character *target,
-        DamageType       typeDamage,
+        DamageType       type,
         int              atCriticalStrike,
         int              atCriticalDamagePower,
         int              damageBase,
