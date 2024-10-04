@@ -20,24 +20,21 @@ AutoRollbackAttribute::AutoRollbackAttribute(
     self(self), target(target), ancestor(ancestor ? ancestor : this), skill(skill), skillrecipeList(skillrecipeList),
     skillID(skillID), skillLevel(skillLevel), damageAddPercent(damageAddPercent) // constructor
 {
-    // 4. 处理 SkillRecipe: ScriptFile, 计算会心, 随后回滚.
-    if (skillrecipeList != nullptr) {
-        std::vector<std::unique_ptr<AutoRollbackAttribute>> skillAutoRollbackAttributeList;
-        skillAutoRollbackAttributeList.reserve(skillrecipeList->size());
-        for (const auto &it : *skillrecipeList) {
-            skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(self, target, ancestor, *it, nullptr, skillID, skillLevel, 0));
-        }
-        std::tuple<int, int> res = self->calcCritical(self->chAttr, skillID, skillLevel);
-        criticalStrike           = std::get<0>(res);
-        criticalDamagePower      = std::get<1>(res);
+
+    loadRecipe();
+    {
+        std::tuple<int, int> res  = this->self->calcCritical(this->self->chAttr, this->skillID, this->skillLevel);
+        this->criticalStrike      = std::get<0>(res);
+        this->criticalDamagePower = std::get<1>(res);
         std::random_device              rd;
         std::mt19937                    gen(rd());
         std::uniform_int_distribution<> dis(0, 9999);
-        isCritical = dis(gen) < criticalStrike;
-        skillAutoRollbackAttributeList.clear();
+        this->isCritical = dis(gen) < this->criticalStrike;
     }
+    unloadRecipe();
     handle(false);
 }
+
 AutoRollbackAttribute::~AutoRollbackAttribute() {
     handle(true);
     while (!skillQueue.empty()) {
@@ -58,26 +55,31 @@ std::tuple<int, int> &AutoRollbackAttribute::emplace(int skillID, int skillLevel
     return skillQueue.emplace(std::make_tuple(skillID, skillLevel));
 }
 
+void AutoRollbackAttribute::loadRecipe() {
+    if (skillrecipeList == nullptr)
+        return;
+    this->recipeSkills.clear();
+    this->recipeSkills.reserve(skillrecipeList->size());
+    for (const auto &it : *skillrecipeList) {
+        this->recipeSkills.emplace_back(std::make_unique<AutoRollbackAttribute>(self, target, ancestor, *it, nullptr, skillID, skillLevel, 0));
+    }
+}
+
+void AutoRollbackAttribute::unloadRecipe() {
+    this->recipeSkills.clear();
+}
+
 void AutoRollbackAttribute::handle(bool isRollback) {
     const auto callDamage = [this](bool isDest, DamageType type, const int *ptrDamageBase, const int *ptrDamageRand, bool isSurplus) -> void {
         if (isDest && this->target == nullptr) [[unlikely]]
             return;
-
-        // skill recipe
-        std::vector<std::unique_ptr<AutoRollbackAttribute>> autoRollbackAttributeList;
-        if (this->skillrecipeList != nullptr) {
-            autoRollbackAttributeList.reserve(this->skillrecipeList->size());
-            for (const auto &it : *this->skillrecipeList) {
-                autoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this->self, this->target, ancestor, *it, nullptr, skillID, skillLevel, 0));
-            }
-        }
-
+        this->loadRecipe();
         Character *target     = isDest ? this->target : this->self;
         const int  damageBase = ptrDamageBase ? *ptrDamageBase : 0;
         const int  damageRand = ptrDamageRand ? *ptrDamageRand : 0;
 
         this->self->bFightState = true;
-        this->ancestor->damage += self->calcDamage(
+        this->ancestor->damage += this->self->calcDamage(
             this->skill.dwSkillID,
             this->skill.dwLevel,
             this->self->chAttr,
@@ -97,8 +99,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             1,
             this->skill.IsFrost
         );
-
-        autoRollbackAttributeList.clear();
+        this->unloadRecipe();
     };
     const auto executeScript = [this](bool isDest, const std::string &param1Str, std::optional<int> param2, bool isRollback) -> void {
         if (isDest && this->target == nullptr) [[unlikely]]

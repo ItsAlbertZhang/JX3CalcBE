@@ -36,6 +36,9 @@ public:
     bool                  getCritical() const;
     std::tuple<int, int> &emplace(int skillID, int skillLevel);
 
+    void loadRecipe();
+    void unloadRecipe();
+
 private:
     Character                        *self;
     Character                        *target;
@@ -62,6 +65,8 @@ private:
 
     std::queue<std::tuple<int, int>> skillQueue;
     Damage                           damage;
+
+    std::vector<std::unique_ptr<AutoRollbackAttribute>> recipeSkills;
 
     void handle(bool isRollback);
 };

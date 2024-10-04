@@ -6,7 +6,6 @@
 #include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"
 #include "plugin/log.h"
-#include <memory> // std::unique_ptr
 #include <random>
 
 #define UNREFERENCED_PARAMETER(P) (P)
@@ -276,17 +275,13 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     }
 
     // 7. 绑定 buff
-    std::vector<std::unique_ptr<AutoRollbackAttribute>> skillAutoRollbackAttributeList;
-    skillAutoRollbackAttributeList.reserve(recipeskillList.size());
-    for (const auto &it : recipeskillList) {
-        skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this, target, &autoRollbackAttribute, *it, nullptr, skillID, skillLevel, 0));
-    }
+    autoRollbackAttribute.loadRecipe();
     for (int i = 0; i < 4; i++) {
         if (bindbuff.isValid[i] && target != nullptr) {
-            target->buffBind(dwID, chAttr.atLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+            target->buffBind(this->dwID, this->chAttr.atLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
         }
     }
-    skillAutoRollbackAttributeList.clear();
+    autoRollbackAttribute.unloadRecipe();
 
     // 8. 执行 SkillEvent: Cast, Hit, CriticalStrike
     /* 注:
