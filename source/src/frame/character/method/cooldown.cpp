@@ -5,14 +5,14 @@
 using namespace jx3calc;
 using namespace frame;
 
-static event_tick_t calcDuration(Character *self, const frame::Cooldown &cooldown) {
+static event_tick_t s_calc_duration(Character *self, const frame::Cooldown &cooldown) {
     int durationFrame = cooldown.DurationFrame * 1024 / (1024 + self->chAttr.getHaste());
     durationFrame     = durationFrame > cooldown.MinDurationFrame ? durationFrame : cooldown.MinDurationFrame;
     durationFrame     = durationFrame < cooldown.MaxDurationFrame ? durationFrame : cooldown.MaxDurationFrame;
     return durationFrame * 1024 / 16;
 }
 
-static void callbackModifyCoolDown(void *selfPtr, void *cooldownID) {
+static void cb_cooldown_modify(void *selfPtr, void *cooldownID) {
     // 利用 void * 传递一个 int 值, 避免内存的申请与回收.
     Character               *self     = (Character *)selfPtr;
     int                      ID       = static_cast<int>(reinterpret_cast<intptr_t>(cooldownID));
@@ -23,7 +23,7 @@ static void callbackModifyCoolDown(void *selfPtr, void *cooldownID) {
 
     // 充能技能处理
     if (item.countAvailable < cooldown.MaxCount) {
-        event_tick_t duration = calcDuration(self, cooldown); // 计算 duration
+        event_tick_t duration = s_calc_duration(self, cooldown); // 计算 duration
 
         // 如果 tickOverAdd 更短, 则使用 tickOverAdd.
         // 正常情况下, tickOverAdd 应当是 duration 的整数倍, 并且应该等于
@@ -32,7 +32,7 @@ static void callbackModifyCoolDown(void *selfPtr, void *cooldownID) {
         // 截至目前 (2024年5月), 剑三不存在这种情况, 即 CD 受益于加速的同时是一个充能技能.
         duration = duration > item.tickOverAdd ? item.tickOverAdd : duration;
 
-        item.tickOverCurr = Event::add(duration, callbackModifyCoolDown, self, cooldownID);
+        item.tickOverCurr = Event::add(duration, cb_cooldown_modify, self, cooldownID);
         item.tickOverAdd -= duration;
         // } else {
         //     item.tickOverAdd = 0;
@@ -42,7 +42,7 @@ static void callbackModifyCoolDown(void *selfPtr, void *cooldownID) {
     }
 }
 
-static frame::ChCooldown::Item *getOrCreate(Character *self, const frame::Cooldown &cooldown) {
+static frame::ChCooldown::Item *s_get_or_create(Character *self, const frame::Cooldown &cooldown) {
     if (self->chCooldown.cooldownList.contains(cooldown.ID)) {
         return &self->chCooldown.cooldownList[cooldown.ID];
     } else {
@@ -59,7 +59,7 @@ void Character::cooldownClearTime(int cooldownID) {
     ChCooldown::Item      &item     = this->chCooldown.cooldownList.at(cooldownID);
     const frame::Cooldown &cooldown = CooldownManager::get(cooldownID); // Global
     if (item.countAvailable < cooldown.MaxCount) {
-        Event::cancel(item.tickOverCurr, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
+        Event::cancel(item.tickOverCurr, cb_cooldown_modify, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
         item.countAvailable = cooldown.MaxCount;
         item.tickOverAdd    = 0;
     }
@@ -79,17 +79,17 @@ void Character::cooldownModify(int cooldownID, int frame, int count) {
     }
     // 获取资源
     const frame::Cooldown   &cooldown = CooldownManager::get(cooldownID); // Global
-    frame::ChCooldown::Item *item     = getOrCreate(this, cooldown);
+    frame::ChCooldown::Item *item     = s_get_or_create(this, cooldown);
     event_tick_t             delay    = 0;
 
     // 若该 CD 正在冷却, 则取消 Event 并获取距离当前层冷却完毕的剩余时间
     if (item->countAvailable < cooldown.MaxCount)
-        delay = Event::cancel(item->tickOverCurr, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
+        delay = Event::cancel(item->tickOverCurr, cb_cooldown_modify, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
     // 如果技能没有在冷却, 那么可以认为是离满层还差 1 层, 并且还有 0 tick 的时间就冷却好了
     else
         item->countAvailable--;
 
-    event_tick_t duration = calcDuration(this, cooldown);
+    event_tick_t duration = s_calc_duration(this, cooldown);
     event_tick_t delayAll = delay + item->tickOverAdd + frame * 1024 / 16 + count * duration;
     // 当前层的剩余冷却时间 + 其他层数的总冷却时间 + 本次修改的冷却时间
     if (delayAll <= 0) {
@@ -106,7 +106,7 @@ void Character::cooldownModify(int cooldownID, int frame, int count) {
     }
     item->countAvailable = cooldown.MaxCount - cnt;
     item->tickOverAdd    = delayAll - delay;
-    item->tickOverCurr   = Event::add(delay, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
+    item->tickOverCurr   = Event::add(delay, cb_cooldown_modify, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
 }
 
 void Character::cooldownModify(int cooldownID, int frame) {
@@ -115,13 +115,13 @@ void Character::cooldownModify(int cooldownID, int frame) {
 
 void Character::cooldownReset(int cooldownID) {
     const frame::Cooldown   &cooldown = CooldownManager::get(cooldownID); // Global
-    frame::ChCooldown::Item *item     = getOrCreate(this, cooldown);
+    frame::ChCooldown::Item *item     = s_get_or_create(this, cooldown);
     if (item->countAvailable < cooldown.MaxCount) {
         // 若该 CD 正在冷却, 则取消 Event
-        Event::cancel(item->tickOverCurr, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
+        Event::cancel(item->tickOverCurr, cb_cooldown_modify, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
     }
     item->countAvailable  = 0;
-    event_tick_t duration = calcDuration(this, cooldown);
+    event_tick_t duration = s_calc_duration(this, cooldown);
     item->tickOverAdd     = duration * (cooldown.MaxCount - 1);
-    item->tickOverCurr    = Event::add(duration, callbackModifyCoolDown, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
+    item->tickOverCurr    = Event::add(duration, cb_cooldown_modify, this, reinterpret_cast<void *>(static_cast<intptr_t>(cooldown.ID)));
 }

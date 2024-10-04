@@ -1,6 +1,6 @@
 #include "frame/character/character.h"
-#include "frame/character/helper/auto_rollback_attrib.h"
-#include "frame/character/helper/auto_rollback_attribute.h"
+#include "frame/character/helper/buff.h"
+#include "frame/character/helper/skill.h"
 #include "modules/config.h"
 #include <cstdlib>
 

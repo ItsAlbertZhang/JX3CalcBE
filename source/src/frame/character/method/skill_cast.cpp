@@ -1,15 +1,10 @@
 #include "frame/character/character.h"
-#include "frame/character/helper/auto_rollback_attribute.h"
-#include "frame/character/helper/runtime_castskill.h"
+#include "frame/character/helper/skill.h"
 #include "frame/common/event.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
-#include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"
-#include "frame/ref/lua_attribute_type.h"
 #include "plugin/log.h"
-#include <memory> // std::unique_ptr
-#include <random>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
@@ -134,17 +129,15 @@ end
 
 */
 
-static void callbackDelaySubSkill(void *self, void *item);
+static void cb_skill_DelaySubSkill(void *self, void *item);
 
-static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill);
-static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue);
-static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skill);
-static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue);
-// static inline void staticTriggerCoolDown(Character *self, int nCoolDownID, int nCoolDownAdd);
-static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent);
-
-static inline event_tick_t         staticCooldownLeftTick(Character *self, const Skill::SkillCoolDown &cooldown);
-static inline Skill::SkillCoolDown staticGetCooldown(Character *self, int skillID);
+static inline bool s_check_buff(Character *self, Character *target, const Skill &skill);
+static inline bool s_check_buff_compare(int flag, int luaValue, int buffValue);
+static inline bool s_check_self_learnt_skill(Character *self, const Skill &skill);
+static inline bool s_check_self_learnt_skill_compare(int flag, int luaValue, int skillValue);
+// static inline void s_trigger_cooldown(Character *self, int nCoolDownID, int nCoolDownAdd);
+static inline auto s_cooldown_left_tick(Character *self, const Skill::SkillCoolDown &cooldown) -> event_tick_t;
+static inline auto s_get_cooldown(Character *self, int skillID) -> Skill::SkillCoolDown;
 
 bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     CONSTEXPR_LOG_INFO("Try to CastSkill: {} # {}", skillID, skillLevel);
@@ -186,11 +179,11 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     // 2. 检查 lua 中添加的释放条件
 
     // 2.1 检查 buff
-    if (!staticCheckBuff(this, target, skill))
+    if (!s_check_buff(this, target, skill))
         return false;
 
     // 2.2 检查自身已学技能
-    if (!staticCheckSelfLearntSkill(this, skill))
+    if (!s_check_self_learnt_skill(this, skill))
         return false;
 
     // 2.3 检查日月豆要求
@@ -204,135 +197,103 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     Skill::SkillBindBuff bindbuff = skill.attrBindBuff;
 
     // 2.4.1 准备 SkillRecipe (后续的 2.5 步需要用到该资源)
-    std::set<const SkillRecipe *> skillrecipeList     = this->skillrecipeGet(skillID, 0);
-    std::set<const SkillRecipe *> skillrecipeTypeList = this->skillrecipeGet(0, skill.RecipeType);
-    std::vector<const Skill *>    recipeskillList;
-    for (const auto &it : skillrecipeList) {
+    std::set<const SkillRecipe *> recipes       = this->skillrecipeGet(skillID, 0);
+    std::set<const SkillRecipe *> recipesByType = this->skillrecipeGet(0, skill.RecipeType);
+    std::vector<const Skill *>    recipeSkills;
+    for (const auto &it : recipes) {
         const Skill *ptrSkill = SkillRecipeManager::getScriptSkill(it, &skill);
-        if (nullptr != ptrSkill) {                  // 如果技能的秘籍存在对应技能
-            recipeskillList.emplace_back(ptrSkill); // 将秘籍的技能加入列表
+        if (nullptr != ptrSkill) {               // 如果技能的秘籍存在对应技能
+            recipeSkills.emplace_back(ptrSkill); // 将秘籍的技能加入列表
             // 使用秘籍的技能重载当前的 CD 和 bindbuff
             cooldown.overload(ptrSkill->attrCoolDown);
             bindbuff.overload(ptrSkill->attrBindBuff);
         }
     }
-    for (const auto &it : skillrecipeTypeList) {
+    for (const auto &it : recipesByType) {
         const Skill *ptrSkill = SkillRecipeManager::getScriptSkill(it, &skill);
-        if (nullptr != ptrSkill) {                  // 如果技能的秘籍存在对应技能
-            recipeskillList.emplace_back(ptrSkill); // 将秘籍的技能加入列表
+        if (nullptr != ptrSkill) {               // 如果技能的秘籍存在对应技能
+            recipeSkills.emplace_back(ptrSkill); // 将秘籍的技能加入列表
             // 使用 skillrecipeType 获取到的秘籍, 不重载当前的 CD 和 bindbuff.
             // 例如, 无界测试服中, 银月斩通过秘籍的方式重载了 CD, 若子技能也随之重载 CD, 会导致子技能 CD 不满足条件无法释放.
         }
     }
-    skillrecipeList.insert(skillrecipeTypeList.begin(), skillrecipeTypeList.end());
+    recipes.insert(recipesByType.begin(), recipesByType.end());
 
     // 2.5 检查 CD
-    if (staticCooldownLeftTick(this, cooldown) > 0)
+    if (s_cooldown_left_tick(this, cooldown) > 0)
         return false;
 
     // ---------- 检查完毕, 释放技能 ----------
     CONSTEXPR_LOG_INFO("{} # {} cast successfully!", skillID, skillLevel);
 
-    // 构造技能运行时资源: RuntimeCastSkill
-    RuntimeCastSkill runtime {this, skillID, skillLevel};
-
-    // 1. 执行 SkillEvent: PreCast
-    staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-
-    // 2. 处理 SkillRecipe: CoolDownAdd. 顺便处理 DamageAddPercent.
-    int DamageAddPercent = 0;
-    for (const auto &it : skillrecipeList) {
+    // 1. 处理 SkillRecipe: CoolDownAdd, 并处理 damageAddPercent.
+    int damageAddPercent = 0;
+    for (const auto &it : recipes) {
         cooldown.add(it->CoolDownAdd1, it->CoolDownAdd2, it->CoolDownAdd3);
-        DamageAddPercent += it->DamageAddPercent; // DamageAddPercent 仅能作用于当前技能.
+        damageAddPercent += it->DamageAddPercent; // DamageAddPercent 仅能作用于当前技能.
     }
 
-    // 3. 触发 CD
+    // 2. 触发 CD
     if (cooldown.isValidPublicCoolDown) {
-        // staticTriggerCoolDown(this, cooldown.nPublicCoolDown, 0);
+        // s_trigger_cooldown(this, cooldown.nPublicCoolDown, 0);
         cooldownModify(cooldown.nPublicCoolDown, 0, 1);
     }
     for (int i = 0; i < 3; i++) {
         if (cooldown.isValidNormalCoolDown[i]) {
-            // staticTriggerCoolDown(this, cooldown.nNormalCoolDownID[i], cooldown.nNormalCoolDownAdd[i]);
+            // s_trigger_cooldown(this, cooldown.nNormalCoolDownID[i], cooldown.nNormalCoolDownAdd[i]);
             cooldownModify(cooldown.nNormalCoolDownID[i], cooldown.nNormalCoolDownAdd[i], 1);
         }
     }
 
-    // 4. 处理魔法属性
-    // 构造技能运行时资源: AutoRollbackAttribute
-    AutoRollbackAttribute autoRollbackAttribute {this, target, &runtime, skill};
+    // 3. 构造技能运行时资源: HelperSkill. 它的构造函数会依次:
+    //    - 执行 skill event (PreCast)
+    //    - 计算会心
+    //    - 应用魔法属性
+    HelperSkill helper {this, target, nullptr, skill, &recipeSkills, damageAddPercent};
 
-    // 5. 处理其他
+    // 4. 处理其他
 
-    // 5.1 处理日月豆子技能
+    // 4.1 处理日月豆子技能
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
-            runtime.skillQueue.emplace(
-                static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_NOT_ROLLBACK),
-                static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL),
-                skill.SunSubsectionSkillID,
-                skill.SunSubsectionSkillLevel
-            );
+            helper.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel);
             this->nSunPowerValue = 0;
         } else if (this->nMoonPowerValue) {
-            runtime.skillQueue.emplace(
-                static_cast<int>(ref::lua::ATTRIBUTE_EFFECT_MODE::EFFECT_TO_SELF_NOT_ROLLBACK),
-                static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL),
-                skill.MoonSubsectionSkillID,
-                skill.MoonSubsectionSkillLevel
-            );
+            helper.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel);
             this->nMoonPowerValue = 0;
         }
     }
 
-    // 5.2 处理延迟子技能
+    // 4.2 处理延迟子技能
     for (auto &it : skill.attrDelaySubSkill) {
-        Event::add(it.delay * 1024 / 16, callbackDelaySubSkill, this, static_cast<void *>(const_cast<Skill::DelaySubSkill *>(&it)));
+        Event::add(it.delay * 1024 / 16, cb_skill_DelaySubSkill, this, static_cast<void *>(const_cast<Skill::DelaySubSkill *>(&it)));
     }
 
-    // 6. 处理 SkillRecipe: ScriptFile
-    // 构造技能运行时资源: vector<unique_ptr<AutoRollbackAttribute>>
-    std::vector<std::unique_ptr<AutoRollbackAttribute>> skillAutoRollbackAttributeList;
-    skillAutoRollbackAttributeList.reserve(recipeskillList.size());
-    for (const auto &it : recipeskillList) {
-        skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this, target, &runtime, *it));
-    }
-
-    // 7. 计算伤害
-    bool isCritical = autoRollbackAttribute.CallDamage(DamageAddPercent);
-
-    // 8. 绑定 buff
-    for (int i = 0; i < 4; i++) {
-        if (bindbuff.isValid[i] && target != nullptr) {
-            target->buffBind(dwID, chAttr.atLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+    // 5. 绑定 buff
+    const auto bindBuff = [](Character *self, Character *target, const Skill::SkillBindBuff &bindbuff, int skillID, int skillLevel) {
+        for (int i = 0; i < 4; i++) {
+            if (bindbuff.isValid[i] && target != nullptr) {
+                target->buffBind(self->dwID, self->chAttr.atLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+            }
         }
-    }
-
-    // 9. 执行 SkillEvent: Cast, Hit, CriticalStrike
-    /* 注:
-        1. SkillEvent 的顺序尚不确定.
-        2. 其余的 SkillEvent 尚未实现.
-        3. 目前 SkillEvent 能够享受 attribute 的加成, 暂时不清楚游戏内是否如此. (因为需要保证 PreCast 的即时插入, 所以 SkillEvent 采取了栈调用的方式)
-    */
-    staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    if (isCritical) {
-        staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    }
+    };
+    helper.proxyRecipe(bindBuff, this, target, bindbuff, skillID, skillLevel);
 
     return true;
-    // 10. (自动执行) 析构 SkillRecipe: ScriptFile. 秘籍加成的 attribute 在这里回滚.
-    // 11. (自动执行) 析构 魔法属性. 魔法属性的 attribute 在这里回滚.
-    // 12. (自动执行) 析构 技能运行时资源: RuntimeCastSkill. 添加至 runtime 的技能队列中的技能被依次执行, 随后添加至 runtime 的伤害被添加至 chDamage.
+    // 6. (自动执行) 析构 helper. 它的析构函数会依次:
+    //    - 回滚魔法属性
+    //    - 执行 cast skill
+    //    - 将 damage 添加至 chDamage
+    //    - 执行 skill event (Cast, Hit, 以及视情况 CriticalStrike)
 }
 
 event_tick_t Character::skillCooldownLeftTick(int skillID) {
-    Skill::SkillCoolDown cooldown = staticGetCooldown(this, skillID);
-    return staticCooldownLeftTick(this, cooldown);
+    Skill::SkillCoolDown cooldown = s_get_cooldown(this, skillID);
+    return s_cooldown_left_tick(this, cooldown);
 }
 
 int Character::skillCountAvailable(int skillID) {
-    Skill::SkillCoolDown cooldown = staticGetCooldown(this, skillID);
+    Skill::SkillCoolDown cooldown = s_get_cooldown(this, skillID);
     int                  ret      = 0;
     for (int i = 0; i < 3; i++) {
         if (cooldown.isValidNormalCoolDown[i] && chCooldown.cooldownList.contains(cooldown.nNormalCoolDownID[i])) {
@@ -345,13 +306,13 @@ int Character::skillCountAvailable(int skillID) {
     return ret;
 }
 
-static void callbackDelaySubSkill(void *self, void *item) {
+static void cb_skill_DelaySubSkill(void *self, void *item) {
     Character                  *ptrSelf = static_cast<Character *>(self);
     const Skill::DelaySubSkill *ptrItem = static_cast<const Skill::DelaySubSkill *>(item);
     ptrSelf->skillCast(ptrItem->skillID, ptrItem->skillLevel);
 }
 
-static inline bool staticCheckBuff(Character *self, Character *target, const Skill &skill) {
+static inline bool s_check_buff(Character *self, Character *target, const Skill &skill) {
     for (const auto &cond : skill.attrCheckBuff) {
         Character *checkbuffCharacter = nullptr;
         bool       checkbuffSrcOwn    = false;
@@ -395,14 +356,14 @@ static inline bool staticCheckBuff(Character *self, Character *target, const Ski
         if (nullptr != buff) {
             nStackNum = buff->nStackNum;
         }
-        if (!staticCheckBuffCompare(cond.nStackNumCompareFlag, cond.nStackNum, nStackNum)) {
+        if (!s_check_buff_compare(cond.nStackNumCompareFlag, cond.nStackNum, nStackNum)) {
             return false; // buff 比较不符合要求, CastSkill 失败
         }
     }
     return true;
 }
 
-static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue) {
+static inline bool s_check_buff_compare(int flag, int luaValue, int buffValue) {
     switch (flag) {
     case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::EQUAL):
         return buffValue == luaValue;
@@ -417,20 +378,20 @@ static inline bool staticCheckBuffCompare(int flag, int luaValue, int buffValue)
     return false;
 }
 
-static inline bool staticCheckSelfLearntSkill(Character *self, const Skill &skill) {
+static inline bool s_check_self_learnt_skill(Character *self, const Skill &skill) {
     for (const auto &it : skill.attrCheckSelfLearntSkill) {
         int skillValue = 0; // 技能等级为 0 代表没有学习该技能
         if (self->chSkill.skillLearned.find(it.dwSkillID) != self->chSkill.skillLearned.end()) {
             skillValue = self->chSkill.skillLearned.at(it.dwSkillID); // 获取技能等级
         }
-        if (!staticCheckSelfLearntSkillCompare(it.nLevelCompareFlag, it.dwSkillLevel, skillValue)) {
+        if (!s_check_self_learnt_skill_compare(it.nLevelCompareFlag, it.dwSkillLevel, skillValue)) {
             return false; // 技能比较不符合要求, CastSkill 失败
         }
     }
     return true;
 }
 
-static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int skillValue) {
+static inline bool s_check_self_learnt_skill_compare(int flag, int luaValue, int skillValue) {
     switch (flag) {
     case static_cast<int>(ref::lua::BUFF_COMPARE_FLAG::EQUAL):
         return skillValue == luaValue; // 其中包含 EQUAL 0 的情况
@@ -445,7 +406,7 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
     return false;
 }
 
-// static inline void staticTriggerCoolDown(Character *self, int cooldownID, int cooldownAdd) {
+// static inline void s_trigger_cooldown(Character *self, int cooldownID, int cooldownAdd) {
 //     const Cooldown &cooldown      = CooldownManager::get(cooldownID);
 //     // 计算 CD 时间
 //     int             durationFrame = cooldown.DurationFrame * 1024 / (1024 + self->chAttr.getHaste());
@@ -455,22 +416,7 @@ static inline bool staticCheckSelfLearntSkillCompare(int flag, int luaValue, int
 //     self->cooldownModify(cooldownID, durationFrame);
 // }
 
-static inline void staticTriggerSkillEvent(Character *self, const std::set<const SkillEvent *> &skillevent) {
-    for (const auto &it : skillevent) {
-        std::random_device              rd;
-        std::mt19937                    gen(rd());
-        std::uniform_int_distribution<> dis(0, 1023);
-        if (dis(gen) < it->Odds) {
-            Character *caster = it->SkillCaster == ref::SkillEvent::CasterTarget::EventTarget ? self->targetCurr : self;
-            Character *target = it->SkillTarget == ref::SkillEvent::CasterTarget::EventCaster ? self : self->targetCurr;
-            if (caster != nullptr) {
-                caster->skillCast(target, it->SkillID, it->SkillLevel);
-            }
-        }
-    }
-}
-
-static inline event_tick_t staticCooldownLeftTick(Character *self, const Skill::SkillCoolDown &cooldown) {
+static inline event_tick_t s_cooldown_left_tick(Character *self, const Skill::SkillCoolDown &cooldown) {
     event_tick_t ret = 0;
     event_tick_t tmp = 0;
     if (cooldown.isValidPublicCoolDown) {
@@ -490,7 +436,7 @@ static inline event_tick_t staticCooldownLeftTick(Character *self, const Skill::
     return ret;
 }
 
-static inline Skill::SkillCoolDown staticGetCooldown(Character *self, int skillID) {
+static inline Skill::SkillCoolDown s_get_cooldown(Character *self, int skillID) {
     // 获取技能
     int skillLevel = self->skillGetLevel(skillID);
     if (skillLevel == 0) {
