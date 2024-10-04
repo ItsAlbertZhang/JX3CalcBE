@@ -2,7 +2,9 @@
 
 #include "frame/common/damage.h"
 #include "frame/global/skill.h"
+#include "frame/global/skillevent.h"
 #include <queue>
+#include <set>
 
 namespace jx3calc {
 namespace frame {
@@ -31,7 +33,6 @@ public:
     HelperSkill &operator=(HelperSkill &&)      = delete;
     ~HelperSkill();
 
-    bool                  getCritical() const;
     std::tuple<int, int> &emplace(int skillID, int skillLevel);
 
     auto proxyRecipe(auto &&func, auto &&...args) -> decltype(func((args)...)) {
@@ -49,7 +50,7 @@ public:
 private:
     Character                        *self;
     Character                        *target;
-    HelperSkill                      *ancestor;
+    HelperSkill                      *ancestor; // 当 HelperSkill 为技能时, 为 this. 当 HelperSkill 为秘籍时, 为挂靠的父技能.
     const Skill                      &skill;
     const std::vector<const Skill *> *recipeSkills;
     int                               damageAddPercent;
@@ -71,6 +72,10 @@ private:
     Damage                                    damage;
     std::queue<std::tuple<int, int>>          skillQueue;
     std::vector<std::unique_ptr<HelperSkill>> recipesActive;
+    std::set<const SkillEvent *>              eventsPreCast;
+    std::set<const SkillEvent *>              eventsCast;
+    std::set<const SkillEvent *>              eventsHit;
+    std::set<const SkillEvent *>              eventsCriticalStrike;
 
     void handle(bool isRollback);
     void recipeLoad();

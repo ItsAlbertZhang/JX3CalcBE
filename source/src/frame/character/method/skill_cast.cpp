@@ -3,10 +3,8 @@
 #include "frame/common/event.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
-#include "frame/global/skillevent.h"
 #include "frame/global/skillrecipe.h"
 #include "plugin/log.h"
-#include <random>
 
 #define UNREFERENCED_PARAMETER(P) (P)
 
@@ -138,7 +136,6 @@ static inline bool s_check_buff_compare(int flag, int luaValue, int buffValue);
 static inline bool s_check_self_learnt_skill(Character *self, const Skill &skill);
 static inline bool s_check_self_learnt_skill_compare(int flag, int luaValue, int skillValue);
 // static inline void s_trigger_cooldown(Character *self, int nCoolDownID, int nCoolDownAdd);
-static inline void s_trigger_skillevent(Character *self, const std::set<const SkillEvent *> &skillevent);
 static inline auto s_cooldown_left_tick(Character *self, const Skill::SkillCoolDown &cooldown) -> event_tick_t;
 static inline auto s_get_cooldown(Character *self, int skillID) -> Skill::SkillCoolDown;
 
@@ -229,17 +226,14 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     // ---------- 检查完毕, 释放技能 ----------
     CONSTEXPR_LOG_INFO("{} # {} cast successfully!", skillID, skillLevel);
 
-    // 1. 执行 SkillEvent: PreCast
-    s_trigger_skillevent(this, this->skilleventGet(ref::SkillEvent::EventType::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-
-    // 2. 处理 SkillRecipe: CoolDownAdd, 并处理 damageAddPercent.
+    // 1. 处理 SkillRecipe: CoolDownAdd, 并处理 damageAddPercent.
     int damageAddPercent = 0;
     for (const auto &it : recipes) {
         cooldown.add(it->CoolDownAdd1, it->CoolDownAdd2, it->CoolDownAdd3);
         damageAddPercent += it->DamageAddPercent; // DamageAddPercent 仅能作用于当前技能.
     }
 
-    // 3. 触发 CD
+    // 2. 触发 CD
     if (cooldown.isValidPublicCoolDown) {
         // s_trigger_cooldown(this, cooldown.nPublicCoolDown, 0);
         cooldownModify(cooldown.nPublicCoolDown, 0, 1);
@@ -251,13 +245,15 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
         }
     }
 
-    // 4. 处理魔法属性
-    // 构造技能运行时资源: HelperSkill
+    // 3. 构造技能运行时资源: HelperSkill. 它的构造函数会依次:
+    //    - 执行 skill event (PreCast)
+    //    - 计算会心
+    //    - 应用魔法属性
     HelperSkill helper {this, target, nullptr, skill, &recipeSkills, damageAddPercent};
 
-    // 5. 处理其他
+    // 4. 处理其他
 
-    // 5.1 处理日月豆子技能
+    // 4.1 处理日月豆子技能
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
             helper.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel);
@@ -268,12 +264,12 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
         }
     }
 
-    // 5.2 处理延迟子技能
+    // 4.2 处理延迟子技能
     for (auto &it : skill.attrDelaySubSkill) {
         Event::add(it.delay * 1024 / 16, cb_skill_DelaySubSkill, this, static_cast<void *>(const_cast<Skill::DelaySubSkill *>(&it)));
     }
 
-    // 6. 绑定 buff
+    // 5. 绑定 buff
     const auto bindBuff = [](Character *self, Character *target, const Skill::SkillBindBuff &bindbuff, int skillID, int skillLevel) {
         for (int i = 0; i < 4; i++) {
             if (bindbuff.isValid[i] && target != nullptr) {
@@ -283,23 +279,12 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     };
     helper.proxyRecipe(bindBuff, this, target, bindbuff, skillID, skillLevel);
 
-    // 7. 执行 SkillEvent: Cast, Hit, CriticalStrike
-    /* 注:
-        1. SkillEvent 的顺序尚不确定.
-        2. 其余的 SkillEvent 尚未实现.
-        3. 目前 SkillEvent 能够享受 attribute 的加成, 暂时不清楚游戏内是否如此. (因为需要保证 PreCast 的即时插入, 所以 SkillEvent 采取了栈调用的方式)
-    */
-    s_trigger_skillevent(this, this->skilleventGet(ref::SkillEvent::EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    s_trigger_skillevent(this, this->skilleventGet(ref::SkillEvent::EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    if (helper.getCritical()) {
-        s_trigger_skillevent(this, this->skilleventGet(ref::SkillEvent::EventType::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    }
-
     return true;
-    // 8. (自动执行) 析构 helper. 它的析构函数会依次:
+    // 6. (自动执行) 析构 helper. 它的析构函数会依次:
     //    - 回滚魔法属性
     //    - 执行 cast skill
     //    - 将 damage 添加至 chDamage
+    //    - 执行 skill event (Cast, Hit, 以及视情况 CriticalStrike)
 }
 
 event_tick_t Character::skillCooldownLeftTick(int skillID) {
@@ -430,21 +415,6 @@ static inline bool s_check_self_learnt_skill_compare(int flag, int luaValue, int
 //     durationFrame                 = durationFrame + cooldownAdd;
 //     self->cooldownModify(cooldownID, durationFrame);
 // }
-
-static inline void s_trigger_skillevent(Character *self, const std::set<const SkillEvent *> &skillevent) {
-    for (const auto &it : skillevent) {
-        std::random_device              rd;
-        std::mt19937                    gen(rd());
-        std::uniform_int_distribution<> dis(0, 1023);
-        if (dis(gen) < it->Odds) {
-            Character *caster = it->SkillCaster == ref::SkillEvent::CasterTarget::EventTarget ? self->targetCurr : self;
-            Character *target = it->SkillTarget == ref::SkillEvent::CasterTarget::EventCaster ? self : self->targetCurr;
-            if (caster != nullptr) {
-                caster->skillCast(target, it->SkillID, it->SkillLevel);
-            }
-        }
-    }
-}
 
 static inline event_tick_t s_cooldown_left_tick(Character *self, const Skill::SkillCoolDown &cooldown) {
     event_tick_t ret = 0;

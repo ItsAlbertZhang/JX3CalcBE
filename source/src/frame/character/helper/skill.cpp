@@ -13,6 +13,8 @@
 using namespace jx3calc;
 using namespace frame;
 
+static inline void s_trigger_skillevent(Character *self, const std::set<const SkillEvent *> &skillevent);
+
 HelperSkill::HelperSkill(
     Character *self, Character *target, HelperSkill *ancestor, const Skill &skill,
     const std::vector<const Skill *> *recipeSkills, int damageAddPercent
@@ -20,6 +22,14 @@ HelperSkill::HelperSkill(
     self(self), target(target), ancestor(ancestor ? ancestor : this), skill(skill),
     recipeSkills(recipeSkills), damageAddPercent(damageAddPercent) // constructor
 {
+    if (this->ancestor == this) {
+        this->eventsPreCast        = self->skilleventGet(ref::SkillEvent::EventType::PreCast, skill.dwSkillID, skill.SkillEventMask1, skill.SkillEventMask2);
+        this->eventsCast           = self->skilleventGet(ref::SkillEvent::EventType::Cast, skill.dwSkillID, skill.SkillEventMask1, skill.SkillEventMask2);
+        this->eventsHit            = self->skilleventGet(ref::SkillEvent::EventType::Hit, skill.dwSkillID, skill.SkillEventMask1, skill.SkillEventMask2);
+        this->eventsCriticalStrike = self->skilleventGet(ref::SkillEvent::EventType::CriticalStrike, skill.dwSkillID, skill.SkillEventMask1, skill.SkillEventMask2);
+        s_trigger_skillevent(self, this->eventsPreCast);
+    }
+
     const auto calcCritical = [](HelperSkill *self) {
         std::tuple<int, int> res  = self->self->calcCritical(self->self->chAttr, self->skill.dwSkillID, self->skill.dwLevel);
         self->criticalStrike      = std::get<0>(res);
@@ -31,8 +41,10 @@ HelperSkill::HelperSkill(
     };
     // TODO: #29 目前根据是否是技能(而非秘籍)来判断是否需要计算会心. 技能的 ancestor 为 this, 秘籍的 ancestor 则为技能.
     // 但是, 在大多数情况下, 并不需要真正计算会心. 因此后续考虑将会心计算的条件更改为: 是否存在 Critical 的 SkillEvent.
-    if (this->ancestor == this)
+    if (this->ancestor == this) {
         proxyRecipe(calcCritical, this);
+    }
+
     handle(false);
 }
 
@@ -46,10 +58,28 @@ HelperSkill::~HelperSkill() {
     if (damage.id != 0) {
         self->chDamage.emplace_back(std::move(damage));
     }
+    if (this->ancestor == this) {
+        s_trigger_skillevent(self, this->eventsCast);
+        s_trigger_skillevent(self, this->eventsHit);
+        if (isCritical) {
+            s_trigger_skillevent(self, this->eventsCriticalStrike);
+        }
+    }
 }
 
-bool HelperSkill::getCritical() const {
-    return this->isCritical;
+static inline void s_trigger_skillevent(Character *self, const std::set<const SkillEvent *> &skillevent) {
+    for (const auto &it : skillevent) {
+        std::random_device              rd;
+        std::mt19937                    gen(rd());
+        std::uniform_int_distribution<> dis(0, 1023);
+        if (dis(gen) < it->Odds) {
+            Character *caster = it->SkillCaster == ref::SkillEvent::CasterTarget::EventTarget ? self->targetCurr : self;
+            Character *target = it->SkillTarget == ref::SkillEvent::CasterTarget::EventCaster ? self : self->targetCurr;
+            if (caster != nullptr) {
+                caster->skillCast(target, it->SkillID, it->SkillLevel);
+            }
+        }
+    }
 }
 
 std::tuple<int, int> &HelperSkill::emplace(int skillID, int skillLevel) {
