@@ -275,13 +275,14 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     }
 
     // 7. 绑定 buff
-    autoRollbackAttribute.loadRecipe();
-    for (int i = 0; i < 4; i++) {
-        if (bindbuff.isValid[i] && target != nullptr) {
-            target->buffBind(this->dwID, this->chAttr.atLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+    const auto bindBuff = [](Character *self, Character *target, const Skill::SkillBindBuff &bindbuff, int skillID, int skillLevel) {
+        for (int i = 0; i < 4; i++) {
+            if (bindbuff.isValid[i] && target != nullptr) {
+                target->buffBind(self->dwID, self->chAttr.atLevel, bindbuff.nBuffID[i], bindbuff.nBuffLevel[i], skillID, skillLevel);
+            }
         }
-    }
-    autoRollbackAttribute.unloadRecipe();
+    };
+    autoRollbackAttribute.proxyRecipe(bindBuff, this, target, bindbuff, skillID, skillLevel);
 
     // 8. 执行 SkillEvent: Cast, Hit, CriticalStrike
     /* 注:

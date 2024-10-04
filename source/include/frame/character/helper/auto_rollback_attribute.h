@@ -36,8 +36,17 @@ public:
     bool                  getCritical() const;
     std::tuple<int, int> &emplace(int skillID, int skillLevel);
 
-    void loadRecipe();
-    void unloadRecipe();
+    auto proxyRecipe(auto &&func, auto &&...args) -> decltype(func((args)...)) {
+        loadRecipe();
+        if constexpr (std::is_void_v<decltype(func((args)...))>) {
+            func((args)...);
+            unloadRecipe();
+        } else {
+            auto res = func((args)...);
+            unloadRecipe();
+            return res;
+        }
+    }
 
 private:
     Character                        *self;
@@ -69,6 +78,8 @@ private:
     std::vector<std::unique_ptr<AutoRollbackAttribute>> recipeSkills;
 
     void handle(bool isRollback);
+    void loadRecipe();
+    void unloadRecipe();
 };
 
 } // namespace frame
