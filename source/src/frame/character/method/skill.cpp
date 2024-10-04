@@ -33,7 +33,7 @@ void Character::skillActive(int skillID) {
     }
     CONSTEXPR_LOG_INFO("ActiveSkill: {} # {}", skillID, skillLevel);
     const Skill           &skill = SkillManager::get(skillID, skillLevel);
-    AutoRollbackAttribute *ptr   = new AutoRollbackAttribute {this, nullptr, nullptr, skill, nullptr, 0, 0, 0, false};
+    AutoRollbackAttribute *ptr   = new AutoRollbackAttribute {this, nullptr, nullptr, skill, nullptr, skillID, skillLevel, 0};
     autoRollbackAttributeList.emplace(ptr);
     this->chSkill.skillActived.emplace(skillID, ChSkill::SkillActived {skillLevel, static_cast<void *>(ptr)});
 }

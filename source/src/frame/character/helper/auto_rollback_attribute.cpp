@@ -1,12 +1,12 @@
 #include "frame/character/helper/auto_rollback_attribute.h"
 #include "frame/character/character.h"
-#include "frame/character/helper/runtime_castskill.h"
 #include "frame/common/damage.h"
 #include "frame/lua/interface.h"          // LuaFunc
 #include "frame/ref/lua_attribute_type.h" // ref::lua::ATTRIBUTE_TYPE
 #include "frame/ref/lua_normal.h"         // ref::lua::ATTRIBUTE_EFFECT_MODE
 #include "plugin/log.h"
 #include <optional>
+#include <random>
 // #include <queue>
 // #include <variant>
 
@@ -14,38 +14,53 @@ using namespace jx3calc;
 using namespace frame;
 
 AutoRollbackAttribute::AutoRollbackAttribute(
-    Character *self, Character *target, RuntimeCastSkill *runtime, const Skill &skill, const std::vector<const Skill *> *skillrecipeList,
-    int damageAddPercent, int atCriticalStrike, int atCriticalDamagePower, bool isCritical
+    Character *self, Character *target, AutoRollbackAttribute *ancestor, const Skill &skill, const std::vector<const Skill *> *skillrecipeList,
+    int skillID, int skillLevel, int damageAddPercent
 ) :
-    self(self), target(target), runtime(runtime), skill(skill), skillrecipeList(skillrecipeList),
-    damageAddPercent(damageAddPercent), criticalStrike(atCriticalStrike),
-    criticalDamagePower(atCriticalDamagePower), isCritical(isCritical) // constructor
+    self(self), target(target), ancestor(ancestor ? ancestor : this), skill(skill), skillrecipeList(skillrecipeList),
+    skillID(skillID), skillLevel(skillLevel), damageAddPercent(damageAddPercent) // constructor
 {
+    // 4. 处理 SkillRecipe: ScriptFile, 计算会心, 随后回滚.
+    if (skillrecipeList != nullptr) {
+        std::vector<std::unique_ptr<AutoRollbackAttribute>> skillAutoRollbackAttributeList;
+        skillAutoRollbackAttributeList.reserve(skillrecipeList->size());
+        for (const auto &it : *skillrecipeList) {
+            skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(self, target, ancestor, *it, nullptr, skillID, skillLevel, 0));
+        }
+        std::tuple<int, int> res = self->calcCritical(self->chAttr, skillID, skillLevel);
+        criticalStrike           = std::get<0>(res);
+        criticalDamagePower      = std::get<1>(res);
+        std::random_device              rd;
+        std::mt19937                    gen(rd());
+        std::uniform_int_distribution<> dis(0, 9999);
+        isCritical = dis(gen) < criticalStrike;
+        skillAutoRollbackAttributeList.clear();
+    }
     handle(false);
 }
 AutoRollbackAttribute::~AutoRollbackAttribute() {
     handle(true);
+    while (!skillQueue.empty()) {
+        auto it = std::move(skillQueue.front());
+        skillQueue.pop();
+        self->skillCast(self->targetCurr, std::get<0>(it), std::get<1>(it));
+    }
+    if (damage.id != 0) {
+        self->chDamage.emplace_back(std::move(damage));
+    }
 }
 
-namespace {
-struct ItemCallDamage {
-    bool       isDest;
-    DamageType type;
-    const int *ptrDamageBase;
-    const int *ptrDamageRand;
-    bool       isSurplus;
-};
-struct ItemExecuteScript {
-    bool               isDest;
-    std::string        param1Str;
-    std::optional<int> param2;
-    bool               isRollback;
-};
-} // namespace
+bool AutoRollbackAttribute::getCritical() const {
+    return this->isCritical;
+}
+
+std::tuple<int, int> &AutoRollbackAttribute::emplace(int skillID, int skillLevel) {
+    return skillQueue.emplace(std::make_tuple(skillID, skillLevel));
+}
 
 void AutoRollbackAttribute::handle(bool isRollback) {
     const auto callDamage = [this](bool isDest, DamageType type, const int *ptrDamageBase, const int *ptrDamageRand, bool isSurplus) -> void {
-        if (this->runtime == nullptr || (isDest && this->target == nullptr)) [[unlikely]]
+        if (isDest && this->target == nullptr) [[unlikely]]
             return;
 
         // skill recipe
@@ -53,7 +68,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
         if (this->skillrecipeList != nullptr) {
             autoRollbackAttributeList.reserve(this->skillrecipeList->size());
             for (const auto &it : *this->skillrecipeList) {
-                autoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this->self, this->target, this->runtime, *it, nullptr, 0, 0, 0, false));
+                autoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this->self, this->target, ancestor, *it, nullptr, skillID, skillLevel, 0));
             }
         }
 
@@ -62,7 +77,7 @@ void AutoRollbackAttribute::handle(bool isRollback) {
         const int  damageRand = ptrDamageRand ? *ptrDamageRand : 0;
 
         this->self->bFightState = true;
-        this->runtime->damage += self->calcDamage(
+        this->ancestor->damage += self->calcDamage(
             this->skill.dwSkillID,
             this->skill.dwLevel,
             this->self->chAttr,
@@ -211,18 +226,12 @@ void AutoRollbackAttribute::handle(bool isRollback) {
             if (isRollback) // NOT_ROLLBACK
                 break;
             switch (it.type) {
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL):
-                if (runtime)
-                    runtime->skillQueue.emplace(std::make_tuple(it.param1Int, it.param2));
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST):
-                if (runtime)
-                    runtime->skillQueue.emplace(std::make_tuple(it.param1Int, it.param2));
-                break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CURRENT_SUN_ENERGY):  self->nCurrentSunEnergy += it.param1Int; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CURRENT_MOON_ENERGY): self->nCurrentMoonEnergy += it.param1Int; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SUN_POWER_VALUE):     self->nSunPowerValue = it.param1Int; break;
-            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MOON_POWER_VALUE):    self->nMoonPowerValue = it.param1Int; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL):            this->ancestor->skillQueue.emplace(std::make_tuple(it.param1Int, it.param2)); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CAST_SKILL_TARGET_DST): this->ancestor->skillQueue.emplace(std::make_tuple(it.param1Int, it.param2)); break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CURRENT_SUN_ENERGY):    self->nCurrentSunEnergy += it.param1Int; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CURRENT_MOON_ENERGY):   self->nCurrentMoonEnergy += it.param1Int; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::SUN_POWER_VALUE):       self->nSunPowerValue = it.param1Int; break;
+            case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::MOON_POWER_VALUE):      self->nMoonPowerValue = it.param1Int; break;
             case static_cast<int>(ref::lua::ATTRIBUTE_TYPE::CALL_BUFF):
                 self->buffAdd(self->dwID, self->chAttr.atLevel, it.param1Int, it.param2);
                 break;

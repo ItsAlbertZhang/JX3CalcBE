@@ -1,6 +1,5 @@
 #include "frame/character/character.h"
 #include "frame/character/helper/auto_rollback_attribute.h"
-#include "frame/character/helper/runtime_castskill.h"
 #include "frame/common/event.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
@@ -232,9 +231,6 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     // ---------- 检查完毕, 释放技能 ----------
     CONSTEXPR_LOG_INFO("{} # {} cast successfully!", skillID, skillLevel);
 
-    // 构造技能运行时资源: RuntimeCastSkill
-    RuntimeCastSkill runtime {this};
-
     // 1. 执行 SkillEvent: PreCast
     staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
 
@@ -257,32 +253,19 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
         }
     }
 
-    // 4. 处理 SkillRecipe: ScriptFile, 计算会心, 随后回滚.
-    std::vector<std::unique_ptr<AutoRollbackAttribute>> skillAutoRollbackAttributeList;
-    skillAutoRollbackAttributeList.reserve(recipeskillList.size());
-    for (const auto &it : recipeskillList) {
-        skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this, target, &runtime, *it, nullptr, 0, 0, 0, false));
-    }
-    auto [criticalStrike, criticalDamagePower] = this->calcCritical(this->chAttr, skillID, skillLevel);
-    std::random_device              rd;
-    std::mt19937                    gen(rd());
-    std::uniform_int_distribution<> dis(0, 9999);
-    bool                            isCritical = dis(gen) < criticalStrike;
-    skillAutoRollbackAttributeList.clear();
-
     // 5. 处理魔法属性
     // 构造技能运行时资源: AutoRollbackAttribute
-    AutoRollbackAttribute autoRollbackAttribute {this, target, &runtime, skill, &recipeskillList, damageAddPercent, criticalStrike, criticalDamagePower, isCritical};
+    AutoRollbackAttribute autoRollbackAttribute {this, target, nullptr, skill, &recipeskillList, skillID, skillLevel, damageAddPercent};
 
     // 6. 处理其他
 
     // 6.1 处理日月豆子技能
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
-            runtime.skillQueue.emplace(std::make_tuple(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel));
+            autoRollbackAttribute.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel);
             this->nSunPowerValue = 0;
         } else if (this->nMoonPowerValue) {
-            runtime.skillQueue.emplace(std::make_tuple(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel));
+            autoRollbackAttribute.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel);
             this->nMoonPowerValue = 0;
         }
     }
@@ -293,9 +276,10 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     }
 
     // 7. 绑定 buff
+    std::vector<std::unique_ptr<AutoRollbackAttribute>> skillAutoRollbackAttributeList;
     skillAutoRollbackAttributeList.reserve(recipeskillList.size());
     for (const auto &it : recipeskillList) {
-        skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this, target, &runtime, *it, nullptr, 0, 0, 0, false));
+        skillAutoRollbackAttributeList.emplace_back(std::make_unique<AutoRollbackAttribute>(this, target, &autoRollbackAttribute, *it, nullptr, skillID, skillLevel, 0));
     }
     for (int i = 0; i < 4; i++) {
         if (bindbuff.isValid[i] && target != nullptr) {
@@ -312,7 +296,7 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     */
     staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    if (isCritical) {
+    if (autoRollbackAttribute.getCritical()) {
         staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     }
 

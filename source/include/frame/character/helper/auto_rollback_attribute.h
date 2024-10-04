@@ -1,12 +1,13 @@
 #pragma once
 
+#include "frame/common/damage.h"
 #include "frame/global/skill.h"
+#include <queue>
 
 namespace jx3calc {
 namespace frame {
 
 class Character;
-class RuntimeCastSkill;
 
 /**
  * @brief 自动回滚的魔法属性
@@ -19,13 +20,12 @@ public:
     AutoRollbackAttribute(
         Character                        *self,
         Character                        *target,
-        RuntimeCastSkill                 *runtime,
+        AutoRollbackAttribute            *ancestor,
         const Skill                      &skill,
         const std::vector<const Skill *> *skillrecipeList,
-        int                               damageAddPercent,
-        int                               criticalStrike,
-        int                               criticalDamagePower,
-        bool                              isCritical
+        int                               skillID,
+        int                               skillLevel,
+        int                               damageAddPercent
     );
     AutoRollbackAttribute(const AutoRollbackAttribute &)            = delete;
     AutoRollbackAttribute &operator=(const AutoRollbackAttribute &) = delete;
@@ -33,12 +33,17 @@ public:
     AutoRollbackAttribute &operator=(AutoRollbackAttribute &&)      = delete;
     ~AutoRollbackAttribute();
 
+    bool                  getCritical() const;
+    std::tuple<int, int> &emplace(int skillID, int skillLevel);
+
 private:
     Character                        *self;
     Character                        *target;
-    RuntimeCastSkill                 *runtime;
+    AutoRollbackAttribute            *ancestor;
     const Skill                      &skill;
     const std::vector<const Skill *> *skillrecipeList;
+    int                               skillID;
+    int                               skillLevel;
     int                               damageAddPercent;
     int                               criticalStrike;
     int                               criticalDamagePower;
@@ -54,6 +59,9 @@ private:
     int atLunarDamageRand   = 0;
     int atPoisonDamage      = 0;
     int atPoisonDamageRand  = 0;
+
+    std::queue<std::tuple<int, int>> skillQueue;
+    Damage                           damage;
 
     void handle(bool isRollback);
 };
