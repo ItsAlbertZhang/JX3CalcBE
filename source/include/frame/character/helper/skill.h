@@ -15,35 +15,33 @@ class Character;
  * @param skill 技能
  * @note 当 AutoRollbackAttribute 对象销毁时, 会自动将被 ROLLBACK 影响的属性回滚到原来的值.
  */
-class AutoRollbackAttribute {
+class HelperSkill {
 public:
-    AutoRollbackAttribute(
+    HelperSkill(
         Character                        *self,
         Character                        *target,
-        AutoRollbackAttribute            *ancestor,
+        HelperSkill                      *ancestor,
         const Skill                      &skill,
-        const std::vector<const Skill *> *skillrecipeList,
-        int                               skillID,
-        int                               skillLevel,
+        const std::vector<const Skill *> *recipeSkills,
         int                               damageAddPercent
     );
-    AutoRollbackAttribute(const AutoRollbackAttribute &)            = delete;
-    AutoRollbackAttribute &operator=(const AutoRollbackAttribute &) = delete;
-    AutoRollbackAttribute(AutoRollbackAttribute &&)                 = delete;
-    AutoRollbackAttribute &operator=(AutoRollbackAttribute &&)      = delete;
-    ~AutoRollbackAttribute();
+    HelperSkill(const HelperSkill &)            = delete;
+    HelperSkill &operator=(const HelperSkill &) = delete;
+    HelperSkill(HelperSkill &&)                 = delete;
+    HelperSkill &operator=(HelperSkill &&)      = delete;
+    ~HelperSkill();
 
     bool                  getCritical() const;
     std::tuple<int, int> &emplace(int skillID, int skillLevel);
 
     auto proxyRecipe(auto &&func, auto &&...args) -> decltype(func((args)...)) {
-        loadRecipe();
+        recipeLoad();
         if constexpr (std::is_void_v<decltype(func((args)...))>) {
             func((args)...);
-            unloadRecipe();
+            recipeUnload();
         } else {
             auto res = func((args)...);
-            unloadRecipe();
+            recipeUnload();
             return res;
         }
     }
@@ -51,11 +49,9 @@ public:
 private:
     Character                        *self;
     Character                        *target;
-    AutoRollbackAttribute            *ancestor;
+    HelperSkill                      *ancestor;
     const Skill                      &skill;
-    const std::vector<const Skill *> *skillrecipeList;
-    int                               skillID;
-    int                               skillLevel;
+    const std::vector<const Skill *> *recipeSkills;
     int                               damageAddPercent;
     int                               criticalStrike;
     int                               criticalDamagePower;
@@ -72,14 +68,13 @@ private:
     int atPoisonDamage      = 0;
     int atPoisonDamageRand  = 0;
 
-    std::queue<std::tuple<int, int>> skillQueue;
-    Damage                           damage;
-
-    std::vector<std::unique_ptr<AutoRollbackAttribute>> recipeSkills;
+    Damage                                    damage;
+    std::queue<std::tuple<int, int>>          skillQueue;
+    std::vector<std::unique_ptr<HelperSkill>> recipesActive;
 
     void handle(bool isRollback);
-    void loadRecipe();
-    void unloadRecipe();
+    void recipeLoad();
+    void recipeUnload();
 };
 
 } // namespace frame

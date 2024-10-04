@@ -1,5 +1,5 @@
 #include "frame/character/character.h"
-#include "frame/character/helper/auto_rollback_attribute.h"
+#include "frame/character/helper/skill.h"
 #include "frame/common/event.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
@@ -201,27 +201,27 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     Skill::SkillBindBuff bindbuff = skill.attrBindBuff;
 
     // 2.4.1 准备 SkillRecipe (后续的 2.5 步需要用到该资源)
-    std::set<const SkillRecipe *> skillrecipeList     = this->skillrecipeGet(skillID, 0);
-    std::set<const SkillRecipe *> skillrecipeTypeList = this->skillrecipeGet(0, skill.RecipeType);
-    std::vector<const Skill *>    recipeskillList;
-    for (const auto &it : skillrecipeList) {
+    std::set<const SkillRecipe *> recipes       = this->skillrecipeGet(skillID, 0);
+    std::set<const SkillRecipe *> recipesByType = this->skillrecipeGet(0, skill.RecipeType);
+    std::vector<const Skill *>    recipeSkills;
+    for (const auto &it : recipes) {
         const Skill *ptrSkill = SkillRecipeManager::getScriptSkill(it, &skill);
-        if (nullptr != ptrSkill) {                  // 如果技能的秘籍存在对应技能
-            recipeskillList.emplace_back(ptrSkill); // 将秘籍的技能加入列表
+        if (nullptr != ptrSkill) {               // 如果技能的秘籍存在对应技能
+            recipeSkills.emplace_back(ptrSkill); // 将秘籍的技能加入列表
             // 使用秘籍的技能重载当前的 CD 和 bindbuff
             cooldown.overload(ptrSkill->attrCoolDown);
             bindbuff.overload(ptrSkill->attrBindBuff);
         }
     }
-    for (const auto &it : skillrecipeTypeList) {
+    for (const auto &it : recipesByType) {
         const Skill *ptrSkill = SkillRecipeManager::getScriptSkill(it, &skill);
-        if (nullptr != ptrSkill) {                  // 如果技能的秘籍存在对应技能
-            recipeskillList.emplace_back(ptrSkill); // 将秘籍的技能加入列表
+        if (nullptr != ptrSkill) {               // 如果技能的秘籍存在对应技能
+            recipeSkills.emplace_back(ptrSkill); // 将秘籍的技能加入列表
             // 使用 skillrecipeType 获取到的秘籍, 不重载当前的 CD 和 bindbuff.
             // 例如, 无界测试服中, 银月斩通过秘籍的方式重载了 CD, 若子技能也随之重载 CD, 会导致子技能 CD 不满足条件无法释放.
         }
     }
-    skillrecipeList.insert(skillrecipeTypeList.begin(), skillrecipeTypeList.end());
+    recipes.insert(recipesByType.begin(), recipesByType.end());
 
     // 2.5 检查 CD
     if (staticCooldownLeftTick(this, cooldown) > 0)
@@ -233,9 +233,9 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     // 1. 执行 SkillEvent: PreCast
     staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::PreCast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
 
-    // 2. 处理 SkillRecipe: CoolDownAdd. 顺便处理 DamageAddPercent.
+    // 2. 处理 SkillRecipe: CoolDownAdd, 并处理 damageAddPercent.
     int damageAddPercent = 0;
-    for (const auto &it : skillrecipeList) {
+    for (const auto &it : recipes) {
         cooldown.add(it->CoolDownAdd1, it->CoolDownAdd2, it->CoolDownAdd3);
         damageAddPercent += it->DamageAddPercent; // DamageAddPercent 仅能作用于当前技能.
     }
@@ -252,29 +252,29 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
         }
     }
 
-    // 5. 处理魔法属性
-    // 构造技能运行时资源: AutoRollbackAttribute
-    AutoRollbackAttribute autoRollbackAttribute {this, target, nullptr, skill, &recipeskillList, skillID, skillLevel, damageAddPercent};
+    // 4. 处理魔法属性
+    // 构造技能运行时资源: HelperSkill
+    HelperSkill helper {this, target, nullptr, skill, &recipeSkills, damageAddPercent};
 
-    // 6. 处理其他
+    // 5. 处理其他
 
-    // 6.1 处理日月豆子技能
+    // 5.1 处理日月豆子技能
     if (skill.bIsSunMoonPower) { // 技能是否需要日月豆
         if (this->nSunPowerValue) {
-            autoRollbackAttribute.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel);
+            helper.emplace(skill.SunSubsectionSkillID, skill.SunSubsectionSkillLevel);
             this->nSunPowerValue = 0;
         } else if (this->nMoonPowerValue) {
-            autoRollbackAttribute.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel);
+            helper.emplace(skill.MoonSubsectionSkillID, skill.MoonSubsectionSkillLevel);
             this->nMoonPowerValue = 0;
         }
     }
 
-    // 6.2 处理延迟子技能
+    // 5.2 处理延迟子技能
     for (auto &it : skill.attrDelaySubSkill) {
         Event::add(it.delay * 1024 / 16, callbackDelaySubSkill, this, static_cast<void *>(const_cast<Skill::DelaySubSkill *>(&it)));
     }
 
-    // 7. 绑定 buff
+    // 6. 绑定 buff
     const auto bindBuff = [](Character *self, Character *target, const Skill::SkillBindBuff &bindbuff, int skillID, int skillLevel) {
         for (int i = 0; i < 4; i++) {
             if (bindbuff.isValid[i] && target != nullptr) {
@@ -282,9 +282,9 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
             }
         }
     };
-    autoRollbackAttribute.proxyRecipe(bindBuff, this, target, bindbuff, skillID, skillLevel);
+    helper.proxyRecipe(bindBuff, this, target, bindbuff, skillID, skillLevel);
 
-    // 8. 执行 SkillEvent: Cast, Hit, CriticalStrike
+    // 7. 执行 SkillEvent: Cast, Hit, CriticalStrike
     /* 注:
         1. SkillEvent 的顺序尚不确定.
         2. 其余的 SkillEvent 尚未实现.
@@ -292,18 +292,15 @@ bool Character::skillCast(Character *target, int skillID, int skillLevel) {
     */
     staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::Cast, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::Hit, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
-    if (autoRollbackAttribute.getCritical()) {
+    if (helper.getCritical()) {
         staticTriggerSkillEvent(this, this->skilleventGet(ref::SkillEvent::EventType::CriticalStrike, skillID, skill.SkillEventMask1, skill.SkillEventMask2));
     }
 
     return true;
-    // 9.  (自动执行) 析构 SkillRecipe: ScriptFile. 秘籍加成的 attribute 在这里回滚.
-    // 10. (自动执行) 析构 AutoRollbackAttribute. 它的析构函数会依次:
-    //     - 执行 call damage 与 execute script
-    //     - 回滚魔法属性
-    //     - 执行 cast skill
-    //     - 将 damage 添加至 chDamage
-    //     See: AutoRollbackAttribute::~AutoRollbackAttribute
+    // 8. (自动执行) 析构 helper. 它的析构函数会依次:
+    //    - 回滚魔法属性
+    //    - 执行 cast skill
+    //    - 将 damage 添加至 chDamage
 }
 
 event_tick_t Character::skillCooldownLeftTick(int skillID) {

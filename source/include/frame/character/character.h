@@ -22,8 +22,8 @@
 namespace jx3calc {
 namespace frame {
 
-class AutoRollbackAttrib;
-class AutoRollbackAttribute;
+class HelperBuff;
+class HelperSkill;
 
 /**
  * @brief Character 类
@@ -55,8 +55,8 @@ public:
     ChSkillEvent  chSkillEvent;  // 角色技能事件
     ChScene       chScene;       // 角色场景
 
-    std::set<AutoRollbackAttrib *>    autoRollbackAttribList;    // 自动回滚的 buff 属性列表
-    std::set<AutoRollbackAttribute *> autoRollbackAttributeList; // 自动回滚的魔法属性列表
+    std::set<HelperBuff *>  autoRollbackAttribList;    // 自动回滚的 buff 属性列表
+    std::set<HelperSkill *> autoRollbackAttributeList; // 自动回滚的魔法属性列表
 
     // ---------- 以下属性和方法未被游戏 lua 调用 ----------
     int mountID     = 0; // 门派 ID, 见 skills.tab 中的 MountRequestType

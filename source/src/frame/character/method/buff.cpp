@@ -1,6 +1,6 @@
 #include "frame/global/buff.h"
 #include "frame/character/character.h"
-#include "frame/character/helper/auto_rollback_attrib.h"
+#include "frame/character/helper/buff.h"
 #include "frame/character/property/buff.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
@@ -15,7 +15,7 @@ static void staticDelBuff(Character *self, BuffItem *it);
 static void callbackActiveBuff(void *selfPtr, void *param) {
     Character *self = (Character *)selfPtr;
     BuffItem  *it   = (BuffItem *)param;
-    static_cast<AutoRollbackAttrib *>(it->ptrAttrib)->active(); // ActivateAttrib
+    static_cast<HelperBuff *>(it->ptrAttrib)->active(); // ActivateAttrib
     if (it->nLeftActiveCount <= 1) {
         staticDelBuff(self, it);
     } else {
@@ -36,8 +36,8 @@ static void callbackActiveBuff(void *selfPtr, void *param) {
 
 static void staticDelBuff(Character *self, BuffItem *it) {
     it->isValid = false;
-    delete static_cast<AutoRollbackAttrib *>(it->ptrAttrib); // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
-    self->autoRollbackAttribList.erase(static_cast<AutoRollbackAttrib *>(it->ptrAttrib));
+    delete static_cast<HelperBuff *>(it->ptrAttrib); // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
+    self->autoRollbackAttribList.erase(static_cast<HelperBuff *>(it->ptrAttrib));
     it->ptrAttrib = nullptr;
     Event::cancel(it->tickActive, callbackActiveBuff, self, it); // 取出回调函数
 }
@@ -88,8 +88,8 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
             it.nStackNum = 1; // 应该不会有 0 层的 AddBuff ?
         }
         // 创建 AutoRollbackAttrib, 处理 BeginAttrib
-        it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
-        this->autoRollbackAttribList.emplace(static_cast<AutoRollbackAttrib *>(it.ptrAttrib));
+        it.ptrAttrib = new HelperBuff(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
+        this->autoRollbackAttribList.emplace(static_cast<HelperBuff *>(it.ptrAttrib));
     } else {
         // 当前存在该 buff
         // it.attr             = characterGet(buffSourceID)->chAttr; // 锁面板
@@ -104,7 +104,7 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         it.interval         = it.interval < buff.MinInterval ? buff.MinInterval : it.interval;
         // 其他工作
         if (buff.IsStackable) {
-            AutoRollbackAttrib *ptr = static_cast<AutoRollbackAttrib *>(it.ptrAttrib);
+            HelperBuff *ptr = static_cast<HelperBuff *>(it.ptrAttrib);
             ptr->unload(); // UnloadAttrib
             it.nStackNum += stacknum;
             it.nStackNum = it.nStackNum > buff.MaxStackNum ? buff.MaxStackNum : it.nStackNum;
