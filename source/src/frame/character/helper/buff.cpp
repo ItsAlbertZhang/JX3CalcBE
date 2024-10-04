@@ -1,4 +1,4 @@
-#include "frame/character/helper/auto_rollback_attrib.h"
+#include "frame/character/helper/buff.h"
 #include "frame/character/character.h"
 #include "frame/lua/interface.h"
 #include "frame/ref/tab_attribute.h" // ref::Attrib
@@ -8,12 +8,12 @@
 using namespace jx3calc;
 using namespace frame;
 
-AutoRollbackAttrib::AutoRollbackAttrib(Character *self, BuffItem *item, const Buff &buff) :
+HelperBuff::HelperBuff(Character *self, BuffItem *item, const Buff &buff) :
     self(self), item(item), buff(buff) {
     load();
 }
 
-AutoRollbackAttrib::~AutoRollbackAttrib() {
+HelperBuff::~HelperBuff() {
     self->buffFlushLeftFrame(item);
     for (const auto &it : buff.BeginAttrib) {
         handle(it, true);
@@ -34,24 +34,24 @@ AutoRollbackAttrib::~AutoRollbackAttrib() {
         // OnRemove(nCharacterID, BuffID, nBuffLevel, nLeftFrame, nCustomValue, dwSkillSrcID, nStackNum, nBuffIndex, dwCasterID, dwCasterSkillID)
     }
 }
-void AutoRollbackAttrib::active() {
+void HelperBuff::active() {
     self->buffFlushLeftFrame(item);
     for (const auto &it : buff.ActiveAttrib) {
         handle(it, false);
     }
 }
-void AutoRollbackAttrib::load() {
+void HelperBuff::load() {
     for (const auto &it : buff.BeginAttrib) {
         handle(it, false);
     }
 }
-void AutoRollbackAttrib::unload() {
+void HelperBuff::unload() {
     for (const auto &it : buff.BeginAttrib) {
         handle(it, true);
     }
 }
 
-void AutoRollbackAttrib::handle(const Buff::Attrib &attrib, bool isRollback) {
+void HelperBuff::handle(const Buff::Attrib &attrib, bool isRollback) {
     int c     = isRollback ? -1 : 1;
     int stack = item->nStackNum;
     switch (attrib.type) {

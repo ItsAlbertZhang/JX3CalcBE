@@ -1,6 +1,6 @@
 #include "frame/global/buff.h"
 #include "frame/character/character.h"
-#include "frame/character/helper/auto_rollback_attrib.h"
+#include "frame/character/helper/buff.h"
 #include "frame/character/property/buff.h"
 #include "frame/event.h"
 #include "frame/global/skill.h"
@@ -10,36 +10,36 @@
 using namespace jx3calc;
 using namespace frame;
 
-static void staticDelBuff(Character *self, BuffItem *it);
+static void s_buff_del(Character *self, BuffItem *it);
 
-static void callbackActiveBuff(void *selfPtr, void *param) {
+static void cb_buff_active(void *selfPtr, void *param) {
     Character *self = (Character *)selfPtr;
     BuffItem  *it   = (BuffItem *)param;
-    static_cast<AutoRollbackAttrib *>(it->ptrAttrib)->active(); // ActivateAttrib
+    static_cast<HelperBuff *>(it->ptrAttrib)->active(); // ActivateAttrib
     if (it->nLeftActiveCount <= 1) {
-        staticDelBuff(self, it);
+        s_buff_del(self, it);
     } else {
         // 防止在 activeAttrib 中被删除, 需要判断其是否存在
         if (it->isValid) {
             // 如果存在, 则取出回调并重新注册回调函数
-            Event::cancel(it->tickActive, callbackActiveBuff, self, it);
+            Event::cancel(it->tickActive, cb_buff_active, self, it);
             // 此处的调用链为: Event::run() 取出回调并调用本函数, 然后本函数负责处理回调事件并视情况重新注册回调函数.
             // 因此, 此处在大部分情况下, 不需要手动取出回调 (因为正是取出回调, 才触发的本函数)
             // 但有一种情况除外: buff 在回调事件中重新添加了它自己. 这时, 必须手动取出, 否则会导致重复注册回调.
             // issue #17 正是这种情况, buff 为 (12492, 2).
             // #14, #15 的修改导致了重复注册回调会重复触发 (在此之前 std::set 重复注册回调会覆盖), 将这一问题暴露了出来.
-            it->tickActive = Event::add(it->interval * 1024 / 16, callbackActiveBuff, self, it);
+            it->tickActive = Event::add(it->interval * 1024 / 16, cb_buff_active, self, it);
         }
     }
     (it->nLeftActiveCount)--;
 }
 
-static void staticDelBuff(Character *self, BuffItem *it) {
+static void s_buff_del(Character *self, BuffItem *it) {
     it->isValid = false;
-    delete static_cast<AutoRollbackAttrib *>(it->ptrAttrib); // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
-    self->autoRollbackAttribList.erase(static_cast<AutoRollbackAttrib *>(it->ptrAttrib));
+    delete static_cast<HelperBuff *>(it->ptrAttrib); // delete 调起析构函数, 自动回滚 BeginAttrib, 并处理 EndTimeAttrib
+    self->autoRollbackAttribList.erase(static_cast<HelperBuff *>(it->ptrAttrib));
     it->ptrAttrib = nullptr;
-    Event::cancel(it->tickActive, callbackActiveBuff, self, it); // 取出回调函数
+    Event::cancel(it->tickActive, cb_buff_active, self, it); // 取出回调函数
 }
 
 void Character::buffAddOptional(int buffSourceID, int buffSourceLevel, int buffID, int buffLevel, std::optional<int> count, std::optional<int> param6, std::optional<int> stacknum) {
@@ -80,7 +80,7 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         // 清空 customValue
         it.nCustomValue     = 0;
         // 注册回调函数
-        it.tickActive       = Event::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it);
+        it.tickActive       = Event::add(it.interval * 1024 / 16, cb_buff_active, this, &it);
         // 其他工作
         if (buff.IsStackable) {
             it.nStackNum = stacknum > buff.MaxStackNum ? buff.MaxStackNum : stacknum; // 层数
@@ -88,8 +88,8 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
             it.nStackNum = 1; // 应该不会有 0 层的 AddBuff ?
         }
         // 创建 AutoRollbackAttrib, 处理 BeginAttrib
-        it.ptrAttrib = new AutoRollbackAttrib(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
-        this->autoRollbackAttribList.emplace(static_cast<AutoRollbackAttrib *>(it.ptrAttrib));
+        it.ptrAttrib = new HelperBuff(this, &it, buff); // Attrib, 同时 new 调起构造函数, 自动处理 BeginAttrib
+        this->autoRollbackAttribList.emplace(static_cast<HelperBuff *>(it.ptrAttrib));
     } else {
         // 当前存在该 buff
         // it.attr             = characterGet(buffSourceID)->chAttr; // 锁面板
@@ -104,7 +104,7 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         it.interval         = it.interval < buff.MinInterval ? buff.MinInterval : it.interval;
         // 其他工作
         if (buff.IsStackable) {
-            AutoRollbackAttrib *ptr = static_cast<AutoRollbackAttrib *>(it.ptrAttrib);
+            HelperBuff *ptr = static_cast<HelperBuff *>(it.ptrAttrib);
             ptr->unload(); // UnloadAttrib
             it.nStackNum += stacknum;
             it.nStackNum = it.nStackNum > buff.MaxStackNum ? buff.MaxStackNum : it.nStackNum;
@@ -112,8 +112,8 @@ void Character::buffAdd(int buffSourceID, int buffSourceLevel, int buffID, int b
         }
         if (buff.Exclude) {
             // Exclude 为 1 (true), 则重置下次生效时间 (通常用于常规 buff)
-            Event::cancel(it.tickActive, callbackActiveBuff, this, &it);                        // 取出回调函数
-            it.tickActive = Event::add(it.interval * 1024 / 16, callbackActiveBuff, this, &it); // 重新注册回调函数
+            Event::cancel(it.tickActive, cb_buff_active, this, &it);                        // 取出回调函数
+            it.tickActive = Event::add(it.interval * 1024 / 16, cb_buff_active, this, &it); // 重新注册回调函数
             // else: Exclude 为 0 (false), 则不重置下次生效时间 (通常用于 DOT/HOT), 无需处理.
         }
     }
@@ -128,7 +128,7 @@ void Character::buffDel(int buffID, int buffLevel) {
             ptr->nStackNum--;
         } else {
             // 层数等于 1, 则删除该 buff
-            staticDelBuff(this, ptr);
+            s_buff_del(this, ptr);
         }
     }
 }
@@ -142,7 +142,7 @@ void Character::buffDelMultiCount(int buffID, int buffLevel, int count) {
             ptr->nStackNum -= count;
         } else {
             // 层数等于 1, 则删除该 buff
-            staticDelBuff(this, ptr);
+            s_buff_del(this, ptr);
         }
     }
 }
@@ -151,14 +151,14 @@ void Character::buffDelGroup(int buffID, int buffLevel) {
     BuffItem *ptr = buffGet(buffID, buffLevel);
     // 返回的一定是 isValie == true 的 Item.
     if (nullptr != ptr) {
-        staticDelBuff(this, ptr);
+        s_buff_del(this, ptr);
     }
 }
 
 void Character::buffDelMultiGroupByID(int buffID) {
     BuffItem *ptr = buffGet(buffID, 0);
     while (nullptr != ptr) {
-        staticDelBuff(this, ptr);
+        s_buff_del(this, ptr);
         ptr = buffGet(buffID, 0);
     }
 }
@@ -283,8 +283,8 @@ void Character::buffSetNextActiveFrame(int buffIndex, int nextActiveFrame) {
         return;
     }
     BuffItem *buff = this->chBuff.buffList.at(buffIndex);
-    Event::cancel(buff->tickActive, callbackActiveBuff, this, buff);
-    buff->tickActive = Event::add(nextActiveFrame * 1024 / 16, callbackActiveBuff, this, buff);
+    Event::cancel(buff->tickActive, cb_buff_active, this, buff);
+    buff->tickActive = Event::add(nextActiveFrame * 1024 / 16, cb_buff_active, this, buff);
 }
 
 event_tick_t Character::buffTimeLeftTick(int buffID, int buffLevel) {

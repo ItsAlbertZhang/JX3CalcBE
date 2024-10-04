@@ -15,13 +15,13 @@ void Effect::active(Character *obj) {
                 Character *it = (arg.target && obj->targetSelect) ? obj->targetSelect : obj;
                 it->buffAdd(0, 99, arg.id, arg.level, arg.count, 0, arg.stacknum);
                 if (arg.covrate > 0) {
-                    const auto delay    = static_cast<event_tick_t>(it->buffTimeLeftTick(arg.id, arg.level) / arg.covrate);
-                    const auto callback = [](void *e, void *o) {
+                    const auto delay = static_cast<event_tick_t>(it->buffTimeLeftTick(arg.id, arg.level) / arg.covrate);
+                    const auto cb    = [](void *e, void *o) {
                         auto effect = static_cast<Effect *>(e);
                         auto obj    = static_cast<Character *>(o);
                         effect->active(obj);
                     };
-                    Event::add(delay, callback, this, obj);
+                    Event::add(delay, cb, this, obj);
                 }
                 if (arg.add) {
                     arg.add(obj);
