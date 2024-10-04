@@ -21,8 +21,10 @@ AutoRollbackAttribute::AutoRollbackAttribute(
     skillID(skillID), skillLevel(skillLevel), damageAddPercent(damageAddPercent) // constructor
 {
 
-    loadRecipe();
-    {
+    // TODO: #29 目前根据是否是技能(而非秘籍)来判断是否需要计算会心. 技能的 ancestor 为 this, 秘籍的 ancestor 则为技能.
+    // 但是, 在大多数情况下, 并不需要真正计算会心. 因此后续考虑将会心计算的条件更改为: 是否存在 Critical 的 SkillEvent.
+    if (this->ancestor == this) {
+        loadRecipe();
         std::tuple<int, int> res  = this->self->calcCritical(this->self->chAttr, this->skillID, this->skillLevel);
         this->criticalStrike      = std::get<0>(res);
         this->criticalDamagePower = std::get<1>(res);
@@ -30,8 +32,8 @@ AutoRollbackAttribute::AutoRollbackAttribute(
         std::mt19937                    gen(rd());
         std::uniform_int_distribution<> dis(0, 9999);
         this->isCritical = dis(gen) < this->criticalStrike;
+        unloadRecipe();
     }
-    unloadRecipe();
     handle(false);
 }
 
