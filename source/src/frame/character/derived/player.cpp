@@ -53,19 +53,19 @@ void Player::init(const typeSkills &skills, const typeTalents &talents, const ty
     }
 }
 
-static void callbackMacroDefault(void *self, void *nullparam);
-static void callbackMacroCustomLua(void *self, void *nullparam);
-static void callbackWeaponAttack(void *self, void *nullparam);
+static void cb_macro_default(void *self, void *nullparam);
+static void cb_macro_customlua(void *self, void *nullparam);
+static void cb_weapon_attack(void *self, void *nullparam);
 
 void Player::fightStart() {
     fightPrepare(); // 战斗准备
     if (nullptr == customLua) {
-        callbackMacroDefault(this, nullptr); // 进入战斗
+        cb_macro_default(this, nullptr); // 进入战斗
     } else {
-        customLua->fightPrepareAdd();          // 初始化
-        callbackMacroCustomLua(this, nullptr); // 进入战斗
+        customLua->fightPrepareAdd();      // 初始化
+        cb_macro_customlua(this, nullptr); // 进入战斗
     }
-    callbackWeaponAttack(this, nullptr); // 开启普通攻击
+    cb_weapon_attack(this, nullptr); // 开启普通攻击
 }
 
 // 计算网络延迟和按键延迟
@@ -96,14 +96,14 @@ inline static frame::event_tick_t getDelay(Player *player) {
     return delay;
 }
 
-static void callbackMacroDefault(void *self, void *nullparam) {
+static void cb_macro_default(void *self, void *nullparam) {
     UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
     player->fightEmbed();
-    Event::add(getDelay(player), callbackMacroDefault, self, nullptr);
+    Event::add(getDelay(player), cb_macro_default, self, nullptr);
 }
 
-static void callbackMacroCustomLua(void *self, void *nullparam) {
+static void cb_macro_customlua(void *self, void *nullparam) {
     UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
     if (player->macroIdx >= static_cast<int>(player->customLua->macroRuntime.size())) {
@@ -111,11 +111,11 @@ static void callbackMacroCustomLua(void *self, void *nullparam) {
         return;
     }
     player->customLua->macroRuntime.at(player->macroIdx)(player);
-    Event::add(getDelay(player), callbackMacroCustomLua, self, nullptr);
+    Event::add(getDelay(player), cb_macro_customlua, self, nullptr);
 }
 
-static void callbackWeaponAttack(void *self, void *nullparam) {
+static void cb_weapon_attack(void *self, void *nullparam) {
     UNREFERENCED_PARAMETER(nullparam);
     Player *player = static_cast<Player *>(self);
-    Event::add(player->fightWeaponAttack() + getDelayAdd(player), callbackWeaponAttack, self, nullptr);
+    Event::add(player->fightWeaponAttack() + getDelayAdd(player), cb_weapon_attack, self, nullptr);
 }
