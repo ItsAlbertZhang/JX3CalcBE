@@ -97,7 +97,7 @@ public:
     void skillrecipeAdd(int recipeID, int recipeLevel);
     void skillrecipeRemove(int recipeID, int recipeLevel);
     // skillevent
-    auto skilleventGet(ref::SkillEvent::EventType type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2) -> std::set<const SkillEvent *>;
+    auto skilleventGet(ref::SkillEvent::EventType type, int eventskillID, uint32_t eventmask1, uint32_t eventmask2) -> std::vector<const SkillEvent *>;
     void skilleventAdd(int eventID);
     void skilleventRemove(int eventID);
     bool skilleventExist(int eventID);
