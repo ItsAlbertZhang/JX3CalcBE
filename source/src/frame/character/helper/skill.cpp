@@ -13,7 +13,7 @@
 using namespace jx3calc;
 using namespace frame;
 
-static inline void s_trigger_skillevent(Character *self, const std::set<const SkillEvent *> &skillevent);
+static inline void s_trigger_skillevent(Character *self, const std::vector<const SkillEvent *> &skillevent);
 
 HelperSkill::HelperSkill(
     Character *self, Character *target, HelperSkill *ancestor, const Skill &skill,
@@ -59,6 +59,8 @@ HelperSkill::~HelperSkill() {
         self->chDamage.emplace_back(std::move(damage));
     }
     if (this->ancestor == this) {
+        // #33 SkillEvent 的先后顺序与添加的顺序有关, 目前已确定 CriticalStrike 位于 Hit 之后.
+        // 其余 SkillEvent 的先后顺序暂未确定.
         s_trigger_skillevent(self, this->eventsCast);
         s_trigger_skillevent(self, this->eventsHit);
         if (isCritical) {
@@ -67,12 +69,17 @@ HelperSkill::~HelperSkill() {
     }
 }
 
-static inline void s_trigger_skillevent(Character *self, const std::set<const SkillEvent *> &skillevent) {
+static inline void s_trigger_skillevent(Character *self, const std::vector<const SkillEvent *> &skillevent) {
     for (const auto &it : skillevent) {
-        std::random_device              rd;
-        std::mt19937                    gen(rd());
-        std::uniform_int_distribution<> dis(0, 1023);
-        if (dis(gen) < it->Odds) {
+        // #29 在 SkillEvent 中, 若事件为 100% 概率触发, 则不生成随机数.
+        bool flag = it->Odds >= 1024;
+        if (!flag) {
+            std::random_device              rd;
+            std::mt19937                    gen(rd());
+            std::uniform_int_distribution<> dis(0, 1023);
+            flag = dis(gen) < it->Odds;
+        }
+        if (flag) {
             Character *caster = it->SkillCaster == ref::SkillEvent::CasterTarget::EventTarget ? self->targetCurr : self;
             Character *target = it->SkillTarget == ref::SkillEvent::CasterTarget::EventCaster ? self : self->targetCurr;
             if (caster != nullptr) {

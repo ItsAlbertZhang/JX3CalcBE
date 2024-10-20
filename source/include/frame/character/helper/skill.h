@@ -4,7 +4,6 @@
 #include "frame/global/skill.h"
 #include "frame/global/skillevent.h"
 #include <queue>
-#include <set>
 
 namespace jx3calc {
 namespace frame {
@@ -72,10 +71,10 @@ private:
     Damage                                    damage;
     std::queue<std::tuple<int, int>>          skillQueue;
     std::vector<std::unique_ptr<HelperSkill>> recipesActive;
-    std::set<const SkillEvent *>              eventsPreCast;
-    std::set<const SkillEvent *>              eventsCast;
-    std::set<const SkillEvent *>              eventsHit;
-    std::set<const SkillEvent *>              eventsCriticalStrike;
+    std::vector<const SkillEvent *>           eventsPreCast;
+    std::vector<const SkillEvent *>           eventsCast;
+    std::vector<const SkillEvent *>           eventsHit;
+    std::vector<const SkillEvent *>           eventsCriticalStrike;
 
     void handle(bool isRollback);
     void recipeLoad();
