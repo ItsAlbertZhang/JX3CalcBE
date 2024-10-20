@@ -1,5 +1,6 @@
 #include "frame/global/skillevent.h"
 #include "frame/character/character.h"
+#include <algorithm>
 #include <ranges>
 
 using namespace jx3calc;
@@ -70,11 +71,11 @@ std::vector<const SkillEvent *> Character::skilleventGet(
         if (std::ranges::find(ret, skillevent) != ret.end()) {
             return false;
         }
-        auto ret =
+        auto isMatched =
             (eventskillID != 0 && skillevent->EventSkillID == eventskillID) ||
             (eventmask1 != 0 && (skillevent->EventMask1 & eventmask1) != 0) ||
             (eventmask2 != 0 && (skillevent->EventMask2 & eventmask2) != 0);
-        return ret;
+        return isMatched;
     };
 
     if (reverse)
