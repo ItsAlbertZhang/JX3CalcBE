@@ -50,6 +50,8 @@ private:
     void fight_简单_一键();
     void fight_简单_崇光两键();
     void fight_简单_崇光洞若();
+
+    void useTrinket();
 };
 } // namespace
 
@@ -287,6 +289,12 @@ auto MjFysjExp::fightWeaponAttack() -> frame::event_tick_t {
     return frame * 64; // 64 = 1024/16
 }
 
+void MjFysjExp::useTrinket() {
+    itemUse(frame::ItemType::Trinket, 41362); // 寻幽径
+    itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
+    itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+}
+
 extern const std::vector<int> queue崇光月日;
 extern const std::vector<int> queue齐光错劫;
 extern const std::vector<int> queue崇光双驱三满;
@@ -315,8 +323,7 @@ void MjFysjExp::fight_严格(const std::vector<int> &queue) {
     while (queue[nFight] < 0) {
         switch (queue[nFight]) {
         case 腰坠: {
-            itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
-            itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+            useTrinket();
         } break;
         case 特00: {
             const auto cd = skillCooldownLeftTick(技能_降灵尊);
@@ -358,8 +365,7 @@ void MjFysjExp::fight_简单_一键() {
             cast(技能_降灵尊);
         const auto buff降灵尊 = buffGet(25731, 1);
         if (buff降灵尊 && buff降灵尊->isValid) {
-            itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
-            itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
+            useTrinket();
             cast(技能_悬象著明);
         }
         cast(技能_生死劫);
@@ -673,8 +679,7 @@ void MjFysjExp::fightCW() {
     const auto time非侠   = buff非侠 && buff非侠->isValid ? buff非侠->nLeftFrame * 1024 / 16 : 0;
 
     // 开特效腰坠
-    itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
-    itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+    useTrinket();
 
     // 悬象. 可以提前放.
     if (time橙武CD > 27 * 1024 && cd降灵尊 < 1024)
@@ -776,8 +781,7 @@ void MjFysjExp::fight_上限_崇光69() {
         //         return;
         // }
         // 开特效腰坠
-        itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
-        itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+        useTrinket();
         // 崇光
         if (cast(技能_崇光斩恶))
             return;
@@ -806,8 +810,7 @@ void MjFysjExp::fight_上限_崇光69() {
         ) {
             if (stacknum崇光 >= 5) {
                 // 开特效腰坠
-                itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
-                itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+                useTrinket();
             }
             if (cast(技能_诛邪镇魔))
                 return;
@@ -819,8 +822,7 @@ void MjFysjExp::fight_上限_崇光69() {
             (nSunPowerValue || nMoonPowerValue)) {
             if (stacknum崇光 >= 5) {
                 // 开特效腰坠
-                itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
-                itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
+                useTrinket();
             }
             if (cast(技能_崇光斩恶))
                 return;
