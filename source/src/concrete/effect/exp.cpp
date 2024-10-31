@@ -26,21 +26,14 @@ const typeMap effect_map_exp {
             default: break;
     } }},
     {"大附魔·腰", tSkillevent {2623}},
-    {"大附魔·腕", anyMap {{"万灵当歌", tSkillevent {2554}}, {"雾海寻龙", tSkillevent {2624}}, {"风语-低品", tSkillevent {2663}}, {"风语-高品", tSkillevent {2673}}}},
-    {"大附魔·鞋", anyMap {{"万灵当歌", tSkillevent {2555}}, {"雾海寻龙", tSkillevent {2625}}, {"风语-低品", tSkillevent {2664}}, {"风语-高品", tSkillevent {2674}}}},
-    {"腰坠·特效",
-     anyMap {
-         {"寻幽径", tItem {frame::ItemType::Trinket, 41362}},
-         {"梧桐影", tItem {frame::ItemType::Trinket, 39853}},
-         {"吹香雪", tItem {frame::ItemType::Trinket, 38789}},
-     }},
+    {"大附魔·腕", anyMap {{"风语-低品", tSkillevent {2663}}, {"风语-高品", tSkillevent {2673}}}},
+    {"大附魔·鞋", anyMap {{"风语-低品", tSkillevent {2664}}, {"风语-高品", tSkillevent {2674}}}},
+    {"腰坠·特效", anyMap {{"寻幽径", tItem {frame::ItemType::Trinket, 41362}}}},
     {"武器·特效",
      anyMap {
          {"大橙武", anyMultiple {tSkillrecipe {1542, 1}, tSkillrecipe {1543, 1}, tSkillevent {2421}, tSkillevent {1938}}},
          {"小橙武", anyMultiple {tSkillrecipe {1148, 1}, tSkillrecipe {1149, 1}}},
          {"阅世悲", tBuff {4761, 71, 1024, 10}},
-         {"无尽沙海", tBuff {4761, 67, 1024, 10}},
-         {"冰焰玉", tBuff {4761, 63, 1024, 10}},
      }},
     {"家园·酿造",
      anyMap {
@@ -127,10 +120,10 @@ const typeMap effect_map_exp {
     {"左旋右转", tBuff {20938, 1}}, // {stacknum: int, covrate: double}
     {"仙王蛊鼎", tBuff {24742, 1}}, // {stacknum: int, covrate: double}
     {"庄周梦", tBuff {23543, 1}},   // {stacknum: int, covrate: double}
-    {"飘黄", tBuff {20854, 1}},     // {covrate: double}
-    {"配伍", tBuff {20877, 1}},     // {stacknum: int, covrate: double}
-    {"破苍穹", tBuff {375, 5}},     // {covrate: double}
-    {"疏狂", tBuff {11456, 1}},     // {covrate: double}
+    // {"飘黄", tBuff {20854, 1}},     // {covrate: double}
+    {"配伍", tBuff {20877, 1}}, // {stacknum: int, covrate: double}
+    {"破苍穹", tBuff {375, 5}}, // {covrate: double}
+    {"疏狂", tBuff {11456, 1}}, // {covrate: double}
     {"小队阵法",
      anyMap {
          {"易筋经·天鼓雷音阵", anyMultiple {tBuff {919, 6, 1024}, tBuff {920, 1, 1, 5, 1.0}}},
