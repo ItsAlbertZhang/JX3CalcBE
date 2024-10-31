@@ -120,10 +120,10 @@ const typeMap effect_map_hd {
     {"左旋右转", tBuff {20938, 1}}, // {stacknum: int, covrate: double}
     {"仙王蛊鼎", tBuff {24742, 1}}, // {stacknum: int, covrate: double}
     {"庄周梦", tBuff {23543, 1}},   // {stacknum: int, covrate: double}
-    {"飘黄", tBuff {20854, 1}},     // {covrate: double}
-    {"配伍", tBuff {20877, 1}},     // {stacknum: int, covrate: double}
-    {"破苍穹", tBuff {375, 5}},     // {covrate: double}
-    {"疏狂", tBuff {11456, 1}},     // {covrate: double}
+    // {"飘黄", tBuff {20854, 1}},     // {covrate: double}
+    {"配伍", tBuff {20877, 1}}, // {stacknum: int, covrate: double}
+    {"破苍穹", tBuff {375, 5}}, // {covrate: double}
+    {"疏狂", tBuff {11456, 1}}, // {covrate: double}
     {"小队阵法",
      anyMap {
          {"易筋经·天鼓雷音阵", anyMultiple {tBuff {919, 6, 1024}, tBuff {920, 1, 1, 5, 1.0}}},
