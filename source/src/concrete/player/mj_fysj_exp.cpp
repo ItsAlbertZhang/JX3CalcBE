@@ -289,10 +289,8 @@ auto MjFysjExp::fightWeaponAttack() -> frame::event_tick_t {
     return frame * 64; // 64 = 1024/16
 }
 
-void MjFysjExp::useTrinket() {
+inline void MjFysjExp::useTrinket() {
     itemUse(frame::ItemType::Trinket, 41362); // 寻幽径
-    itemUse(frame::ItemType::Trinket, 39853); // 梧桐影
-    itemUse(frame::ItemType::Trinket, 38789); // 吹香雪
 }
 
 extern const std::vector<int> queue崇光月日;
