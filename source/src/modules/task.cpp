@@ -78,28 +78,28 @@ static Task::Data createTaskData(const std::string &jsonstr) {
     }
     try {
         data.delayNetwork = j.at("delayNetwork").get<int>();
-        if (data.delayNetwork < 0 || data.delayNetwork > modules::config::taskdata::maxDelayNetwork)
+        if (data.delayNetwork <= 0 || data.delayNetwork > modules::config::taskdata::maxDelayNetwork)
             throw std::runtime_error("");
     } catch (...) {
         throw std::runtime_error("字段非法: delayNetwork.");
     }
     try {
         data.delayKeyboard = j.at("delayKeyboard").get<int>();
-        if (data.delayKeyboard < 0 || data.delayKeyboard > modules::config::taskdata::maxDelayKeyboard)
+        if (data.delayKeyboard <= 0 || data.delayKeyboard > modules::config::taskdata::maxDelayKeyboard)
             throw std::runtime_error("");
     } catch (...) {
         throw std::runtime_error("字段非法: delayKeyboard.");
     }
     try {
         data.fightTime = j.at("fightTime").get<int>();
-        if (data.fightTime < 0 || data.fightTime > modules::config::taskdata::maxFightTime)
+        if (data.fightTime <= 0 || data.fightTime > modules::config::taskdata::maxFightTime)
             throw std::runtime_error("");
     } catch (...) {
         throw std::runtime_error("字段非法: fightTime.");
     }
     try {
         data.fightCount = j.at("fightCount").get<int>();
-        if (data.fightCount < 0 || data.fightCount > modules::config::taskdata::maxFightCount)
+        if (data.fightCount <= 0 || data.fightCount > modules::config::taskdata::maxFightCount)
             throw std::runtime_error("");
     } catch (...) {
         throw std::runtime_error("字段非法: fightCount.");
