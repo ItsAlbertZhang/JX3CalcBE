@@ -135,20 +135,50 @@ void HelperSkill::handle(bool isRollback) {
             self->skill.IsFrost
         );
     };
-    const auto executeScript = [](HelperSkill *self, bool isDest, const std::string &param1Str, std::optional<int> param2, bool isRollback) -> void {
+    enum class ExecuteType {
+        Apply,
+        UnApply,
+        ApplySetup,
+        UnApplySetup,
+    };
+    const auto executeScript = [](HelperSkill *self, bool isDest, const std::string &param1Str, std::optional<int> param2, ExecuteType t) -> void {
         if (isDest && self->target == nullptr) [[unlikely]]
             return;
+        lua::interface::FuncType type;
+        std::string              name;
+        sol::protected_function (*func)(std::string &);
+        switch (t) {
+        case ExecuteType::Apply:
+            type = lua::interface::FuncType::Apply;
+            name = "Apply";
+            func = lua::interface::getApply;
+            break;
+        case ExecuteType::UnApply:
+            type = lua::interface::FuncType::UnApply;
+            name = "UnApply";
+            func = lua::interface::getUnApply;
+            break;
+        case ExecuteType::ApplySetup:
+            type = lua::interface::FuncType::ApplySetup;
+            name = "ApplySetup";
+            func = lua::interface::getApplySetup;
+            break;
+        case ExecuteType::UnApplySetup:
+            type = lua::interface::FuncType::UnApplySetup;
+            name = "UnApplySetup";
+            func = lua::interface::getUnApplySetup;
+            break;
+        }
         auto target        = isDest ? self->target : self->self;
-        auto filename      = "scripts/" + param1Str;
-        auto luaFunc       = isRollback ? lua::interface::getUnApply : lua::interface::getApply;
+        auto file          = "scripts/" + param1Str;
         auto dwCharacterID = Character::characterGetID(target);
         auto dwSkillSrcID  = Character::characterGetID(self->self);
         auto res =
             param2.has_value()
-                ? luaFunc(filename)(dwCharacterID, param2.value(), dwSkillSrcID)
-                : luaFunc(filename)(dwCharacterID, dwSkillSrcID);
-        if (!lua::interface::analysis(std::move(res), filename, lua::interface::FuncType::Apply))
-            CONSTEXPR_LOG_ERROR("LuaFunc::getApply(\"{}\") failed.", filename);
+                ? func(file)(dwCharacterID, param2.value(), dwSkillSrcID)
+                : func(file)(dwCharacterID, dwSkillSrcID);
+        if (!lua::interface::analysis(std::move(res), file, type))
+            CONSTEXPR_LOG_ERROR("LuaFunc::{}(\"{}\") failed.", name, file);
     };
 
 #define INT(x) static_cast<int>(x)
@@ -197,8 +227,9 @@ void HelperSkill::handle(bool isRollback) {
             case INT(Type::POISON_CRITICAL_STRIKE_BASE_RATE):              self->chAttr.atPoisonCriticalStrikeBaseRate += it.param1Int * c; break;
             case INT(Type::MAGIC_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE): self->chAttr.atMagicCriticalDamagePowerBaseKiloNumRate += it.param1Int * c; break;
             case INT(Type::SOLAR_CRITICAL_DAMAGE_POWER_BASE_KILONUM_RATE): self->chAttr.atSolarCriticalDamagePowerBaseKiloNumRate += it.param1Int * c; break;
-            case INT(Type::EXECUTE_SCRIPT):                                executeScript(this, false, it.param1Str, std::nullopt, isRollback); break;
-            case INT(Type::EXECUTE_SCRIPT_WITH_PARAM):                     executeScript(this, false, it.param1Str, it.param2, isRollback); break;
+            case INT(Type::EXECUTE_SCRIPT):                                executeScript(this, false, it.param1Str, std::nullopt, isRollback ? ExecuteType::UnApply : ExecuteType::Apply); break;
+            case INT(Type::EXECUTE_SCRIPT_WITH_PARAM):                     executeScript(this, false, it.param1Str, it.param2, isRollback ? ExecuteType::UnApply : ExecuteType::Apply); break;
+            case INT(Type::EXECUTE_SCRIPT_SETUP):                          executeScript(this, false, it.param1Str, std::nullopt, isRollback ? ExecuteType::UnApplySetup : ExecuteType::ApplySetup); break;
             case INT(Type::SET_ADAPTIVE_SKILL_TYPE):
                 if (isRollback)
                     self->atAdaptiveSkillType = static_cast<ref::lua::SKILL_KIND_TYPE>(it.param1Int);
@@ -252,8 +283,8 @@ void HelperSkill::handle(bool isRollback) {
             switch (it.type) {
             case INT(Type::CAST_SKILL):                           this->ancestor->skillQueue.emplace(std::make_tuple(it.param1Int, it.param2)); break;
             case INT(Type::CAST_SKILL_TARGET_DST):                this->ancestor->skillQueue.emplace(std::make_tuple(it.param1Int, it.param2)); break;
-            case INT(Type::EXECUTE_SCRIPT):                       executeScript(this, false, it.param1Str, std::nullopt, false); break;
-            case INT(Type::EXECUTE_SCRIPT_WITH_PARAM):            executeScript(this, false, it.param1Str, it.param2, false); break;
+            case INT(Type::EXECUTE_SCRIPT):                       executeScript(this, false, it.param1Str, std::nullopt, ExecuteType::Apply); break;
+            case INT(Type::EXECUTE_SCRIPT_WITH_PARAM):            executeScript(this, false, it.param1Str, it.param2, ExecuteType::Apply); break;
             case INT(Type::CURRENT_SUN_ENERGY):                   self->nCurrentSunEnergy += it.param1Int; break;
             case INT(Type::CURRENT_MOON_ENERGY):                  self->nCurrentMoonEnergy += it.param1Int; break;
             case INT(Type::SUN_POWER_VALUE):                      self->nSunPowerValue = it.param1Int; break;
@@ -296,8 +327,8 @@ void HelperSkill::handle(bool isRollback) {
             case INT(Type::CALL_SURPLUS_NEUTRAL_DAMAGE): proxyRecipe(callDamage, this, true, DamageType::Neutral, 0, 0, true); break;
             case INT(Type::CALL_SURPLUS_LUNAR_DAMAGE):   proxyRecipe(callDamage, this, true, DamageType::Lunar, 0, 0, true); break;
             case INT(Type::CALL_SURPLUS_POISON_DAMAGE):  proxyRecipe(callDamage, this, true, DamageType::Poison, 0, 0, true); break;
-            case INT(Type::EXECUTE_SCRIPT):              executeScript(this, true, it.param1Str, std::nullopt, false); break;
-            case INT(Type::EXECUTE_SCRIPT_WITH_PARAM):   executeScript(this, true, it.param1Str, it.param2, false); break;
+            case INT(Type::EXECUTE_SCRIPT):              executeScript(this, true, it.param1Str, std::nullopt, ExecuteType::Apply); break;
+            case INT(Type::EXECUTE_SCRIPT_WITH_PARAM):   executeScript(this, true, it.param1Str, it.param2, ExecuteType::Apply); break;
             case INT(Type::CALL_BUFF):                   target->buffAdd(self->dwID, self->chAttr.atLevel, it.param1Int, it.param2); break;
             case INT(Type::DASH):                        break; // 未做相关实现, 推测为冲刺
             default:

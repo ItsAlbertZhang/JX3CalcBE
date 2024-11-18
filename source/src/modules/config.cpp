@@ -11,7 +11,7 @@ using namespace modules;
 using json   = nlohmann::json;
 namespace fs = std::filesystem;
 
-const std::string version = "v1.3.4";
+const std::string version = "v1.3.5";
 
 static bool initFromJson(const json &j) {
     using namespace config;
