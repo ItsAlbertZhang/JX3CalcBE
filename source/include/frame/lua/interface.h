@@ -19,6 +19,8 @@ enum class FuncType {
     UnApply,
     OnRemove,
     OnTimer,
+    ApplySetup,
+    UnApplySetup,
     COUNT, // 计数用
 };
 
@@ -36,6 +38,8 @@ sol::protected_function getApply(std::string &filename);
 sol::protected_function getUnApply(std::string &filename);
 sol::protected_function getOnRemove(std::string &filename);
 sol::protected_function getOnTimer(int idx);
+sol::protected_function getApplySetup(std::string &filename);
+sol::protected_function getUnApplySetup(std::string &filename);
 
 void include(const std::string &filename);
 

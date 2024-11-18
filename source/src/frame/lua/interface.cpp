@@ -17,6 +17,8 @@ static const std::string names[] {
     "UnApply",
     "OnRemove",
     "OnTimer",
+    "ApplySetup",
+    "UnApplySetup",
 };
 static thread_local sol::state                                        luaState;
 static thread_local std::vector<std::string>                          filenameList;
@@ -146,4 +148,16 @@ void lua::interface::include(const std::string &filename) {
         std::string fn = convFilename(filename);
         gdi::luaExecuteFile(fn.c_str());
     }
+}
+
+sol::protected_function lua::interface::getApplySetup(std::string &filename) {
+    std::replace(filename.begin(), filename.end(), '\\', '/');
+    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
+    return filefuncList[idx][static_cast<int>(FuncType::ApplySetup)];
+}
+
+sol::protected_function lua::interface::getUnApplySetup(std::string &filename) {
+    std::replace(filename.begin(), filename.end(), '\\', '/');
+    int idx = getIndex(filename); // 执行 getIndex 后, 一定存在
+    return filefuncList[idx][static_cast<int>(FuncType::UnApplySetup)];
 }
